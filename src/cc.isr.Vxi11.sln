@@ -1,0 +1,117 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "~items", "~items", "{D245DFF2-72CA-4541-A96E-895D97687E65}"
+	ProjectSection(SolutionItems) = preProject
+		cc.isr.Vxi11.sln.vsspell = cc.isr.Vxi11.sln.vsspell
+		..\CHANGELOG.md = ..\CHANGELOG.md
+		..\LICENSE-CODE = ..\LICENSE-CODE
+		..\README.md = ..\README.md
+		items\readme.md = items\readme.md
+		..\VXI-11.md = ..\VXI-11.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vxi", "vxi", "{B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rpc", "rpc", "{335AEC84-3DED-4726-8022-30E175D3769A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ieee488", "ieee488", "{017BDF05-9FF6-45D6-86F3-327FE5F00CB4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11", "vxi\vxi\cc.isr.VXI11.csproj", "{64C7D3CD-2617-4B4A-AFBA-7F71762D92AD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.IEEE488Client.Helper", "ieee488\ieee488Client.helper\cc.isr.VXI11.IEEE488Client.Helper.csproj", "{A7E48261-B14C-41F0-8E70-CABA9D4DA7E0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.IEEE488.Cli", "ieee488\ieee488.cli\cc.isr.VXI11.IEEE488.Cli.csproj", "{CE43CCA6-5FC8-4EF4-8067-CB52199352A8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.IEEE488.TestClient", "ieee488\ieee488.TestClient\cc.isr.VXI11.IEEE488.TestClient.csproj", "{D56DFDD3-63C9-45CA-8296-C8A8F6F72619}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.IEEE488.TestServer", "ieee488\ieee488.TestServer\cc.isr.VXI11.IEEE488.TestServer.csproj", "{6BD90751-197D-4AE7-94BA-3DA73BA5AA9C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.ONC.RPC", "..\..\oncrpc\src\rpc\oncrpc\cc.isr.ONC.RPC.csproj", "{BD1B215F-2602-4240-8E64-D504D804188A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.IEEE488.MSTest", "ieee488\ieee488.MSTest\cc.isr.VXI11.IEEE488.MSTest.csproj", "{65F53844-6687-434D-9FB8-C02110C4D28D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.XDR", "..\..\xdr\src\xdr\xdr\cc.isr.XDR.csproj", "{65445109-2895-4C85-93A5-9C510285B4AD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.XDR.MSTest", "..\..\xdr\src\xdr\xdr.MSTest\cc.isr.XDR.MSTest.csproj", "{05887A3A-2F4B-4C49-B72F-B416B2430A2C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xdr", "xdr", "{3BC97BEF-E1EA-47DC-9B51-30E570546C68}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.ONC.RPC.MSTest", "..\..\oncrpc\src\rpc\oncrpc.mstest\cc.isr.ONC.RPC.MSTest.csproj", "{5868BF4C-64EF-4334-BA1A-764F33FCF4D2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "~build", "~build", "{F92F2C4E-9126-45AD-89F4-6104551ADEDA}"
+	ProjectSection(SolutionItems) = preProject
+		directory.build.props = directory.build.props
+		items\version.build.bat = items\version.build.bat
+		items\version.build.props = items\version.build.props
+		items\version.build.tt = items\version.build.tt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{64C7D3CD-2617-4B4A-AFBA-7F71762D92AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64C7D3CD-2617-4B4A-AFBA-7F71762D92AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64C7D3CD-2617-4B4A-AFBA-7F71762D92AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64C7D3CD-2617-4B4A-AFBA-7F71762D92AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7E48261-B14C-41F0-8E70-CABA9D4DA7E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7E48261-B14C-41F0-8E70-CABA9D4DA7E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7E48261-B14C-41F0-8E70-CABA9D4DA7E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7E48261-B14C-41F0-8E70-CABA9D4DA7E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE43CCA6-5FC8-4EF4-8067-CB52199352A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE43CCA6-5FC8-4EF4-8067-CB52199352A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE43CCA6-5FC8-4EF4-8067-CB52199352A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE43CCA6-5FC8-4EF4-8067-CB52199352A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D56DFDD3-63C9-45CA-8296-C8A8F6F72619}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D56DFDD3-63C9-45CA-8296-C8A8F6F72619}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D56DFDD3-63C9-45CA-8296-C8A8F6F72619}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D56DFDD3-63C9-45CA-8296-C8A8F6F72619}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BD90751-197D-4AE7-94BA-3DA73BA5AA9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BD90751-197D-4AE7-94BA-3DA73BA5AA9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BD90751-197D-4AE7-94BA-3DA73BA5AA9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BD90751-197D-4AE7-94BA-3DA73BA5AA9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD1B215F-2602-4240-8E64-D504D804188A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD1B215F-2602-4240-8E64-D504D804188A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD1B215F-2602-4240-8E64-D504D804188A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD1B215F-2602-4240-8E64-D504D804188A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65F53844-6687-434D-9FB8-C02110C4D28D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65F53844-6687-434D-9FB8-C02110C4D28D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65F53844-6687-434D-9FB8-C02110C4D28D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65F53844-6687-434D-9FB8-C02110C4D28D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65445109-2895-4C85-93A5-9C510285B4AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65445109-2895-4C85-93A5-9C510285B4AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65445109-2895-4C85-93A5-9C510285B4AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65445109-2895-4C85-93A5-9C510285B4AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05887A3A-2F4B-4C49-B72F-B416B2430A2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05887A3A-2F4B-4C49-B72F-B416B2430A2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05887A3A-2F4B-4C49-B72F-B416B2430A2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05887A3A-2F4B-4C49-B72F-B416B2430A2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5868BF4C-64EF-4334-BA1A-764F33FCF4D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5868BF4C-64EF-4334-BA1A-764F33FCF4D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5868BF4C-64EF-4334-BA1A-764F33FCF4D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5868BF4C-64EF-4334-BA1A-764F33FCF4D2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{64C7D3CD-2617-4B4A-AFBA-7F71762D92AD} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
+		{A7E48261-B14C-41F0-8E70-CABA9D4DA7E0} = {017BDF05-9FF6-45D6-86F3-327FE5F00CB4}
+		{CE43CCA6-5FC8-4EF4-8067-CB52199352A8} = {017BDF05-9FF6-45D6-86F3-327FE5F00CB4}
+		{D56DFDD3-63C9-45CA-8296-C8A8F6F72619} = {017BDF05-9FF6-45D6-86F3-327FE5F00CB4}
+		{6BD90751-197D-4AE7-94BA-3DA73BA5AA9C} = {017BDF05-9FF6-45D6-86F3-327FE5F00CB4}
+		{BD1B215F-2602-4240-8E64-D504D804188A} = {335AEC84-3DED-4726-8022-30E175D3769A}
+		{65F53844-6687-434D-9FB8-C02110C4D28D} = {017BDF05-9FF6-45D6-86F3-327FE5F00CB4}
+		{65445109-2895-4C85-93A5-9C510285B4AD} = {3BC97BEF-E1EA-47DC-9B51-30E570546C68}
+		{05887A3A-2F4B-4C49-B72F-B416B2430A2C} = {3BC97BEF-E1EA-47DC-9B51-30E570546C68}
+		{5868BF4C-64EF-4334-BA1A-764F33FCF4D2} = {335AEC84-3DED-4726-8022-30E175D3769A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A0429F81-8254-4C93-A727-249FEAC06071}
+	EndGlobalSection
+EndGlobal

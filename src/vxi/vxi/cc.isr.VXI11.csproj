@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>cc.isr</RootNamespace>
+    <AssemblyName>cc.isr.VXI11</AssemblyName>
+    <LangVersion>latest</LangVersion>
+
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputType>Library</OutputType>
+    <NoWarn>1591</NoWarn>
+
+    <!-- Display name -->
+    <ApplicationTitle>cc.isr.VXI11</ApplicationTitle>
+
+    <!-- App Identifier -->
+    <ApplicationId>cc.isr.vxi11</ApplicationId>
+
+    <!-- NuGet -->
+    <IsPackable>true</IsPackable>
+    <PackageId>cc.isr.VXI11</PackageId>
+    <Description>A pure C# implementation of the VXI-11 protocol.</Description>
+    <PackageTags>VXI-11</PackageTags>
+
+    <!-- Documentation -->
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\oncrpc\src\rpc\oncrpc\cc.isr.ONC.RPC.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\items\readme.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>
