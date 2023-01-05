@@ -1,11 +1,6 @@
-using cc.isr.ONC.RPC;
-
-using System;
-using System.Data;
 using System.Net;
-using System.Text;
 
-using VXI11;
+using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.IEEE488;
 
@@ -17,8 +12,8 @@ public class Ieee488Client : IDisposable
 
     #region " Construction and Cleanup "
 
-    private vxi11_DEVICE_CORE_Client _coreClient;
-    private Device_Link _link;
+    private DeviceCoreClient _coreClient;
+    private DeviceLink _link;
 
     /// <summary>
     /// Connect
@@ -27,13 +22,13 @@ public class Ieee488Client : IDisposable
     /// <param name="device">Device name, e.g., inst0 or gpib0,8</param>
     public void Connect( string ipv4Address, string device )
     {
-        this._coreClient = new vxi11_DEVICE_CORE_Client( IPAddress.Parse( ipv4Address ), OncRpcProtocols.OncRpcTcp );
-        Create_LinkParms createLinkParam = new() {
-            device = device
+        this._coreClient = new DeviceCoreClient( IPAddress.Parse( ipv4Address ), OncRpcProtocols.OncRpcTcp );
+        CreateLinkParms createLinkParam = new() {
+            Device = device
         };
-        Create_LinkResp linkResp = this._coreClient.create_link_1( createLinkParam );
-        this._link = linkResp.lid;
-        this.MaxRecvSize = linkResp.maxRecvSize;
+        CreateLinkResp linkResp = this._coreClient.CreateLink( createLinkParam );
+        this._link = linkResp.DeviceLinkId;
+        this.MaxRecvSize = linkResp.MaxReceiveSize;
         this.Connected = true;
     }
 
@@ -73,14 +68,14 @@ public class Ieee488Client : IDisposable
 
     /// <summary>   Closes this object. </summary>
     /// <remarks>   2022-12-02. </remarks>
-    public Device_Error Close()
+    public DeviceError Close()
     {
         this.Connected = false;
-        Device_Error deviceError = new();
+        DeviceError deviceError = new();
         if ( this._link != null )
             try
             {
-                deviceError = this._coreClient?.destroy_link_1( this._link );
+                deviceError = this._coreClient?.DestroyLink( this._link );
             }
             catch
             {
@@ -102,7 +97,7 @@ public class Ieee488Client : IDisposable
         {
             this._coreClient = null;
         }
-        return deviceError ?? new Device_Error();
+        return deviceError ?? new DeviceError();
     }
 
     #endregion
@@ -192,20 +187,20 @@ public class Ieee488Client : IDisposable
     /// <summary>   Send this message. </summary>
     /// <remarks>   2022-12-02. </remarks>
     /// <param name="data"> . </param>
-    /// <returns>   A <see cref="Device_WriteResp">device write response</see> . </returns>
-    public Device_WriteResp Send( byte[] data )
+    /// <returns>   A <see cref="DeviceWriteResp">device write response</see> . </returns>
+    public DeviceWriteResp Send( byte[] data )
     {
-        Device_WriteResp resp = new();
+        DeviceWriteResp resp = new();
         if ( this._link is not null && this._coreClient is not null )
         {
-            Device_WriteParms writeParam = new() {
-                lid = this._link,
-                io_timeout = this.WriteTimeout, // in ms
-                lock_timeout = this.LockTimeout, // in ms
-                flags = new Device_Flags( this.Eoi ? 0x8 : 0 ),
-                data = data
+            DeviceWriteParms writeParam = new() {
+                DeviceLinkId = this._link,
+                IOTimeout = this.WriteTimeout, // in ms
+                LockTimeout = this.LockTimeout, // in ms
+                Flags = new DeviceFlags( this.Eoi ? 0x8 : 0 ),
+                Data = data
             };
-            resp = this._coreClient.device_write_1( writeParam );
+            resp = this._coreClient.DeviceWrite( writeParam );
         }
         return resp;
     }
@@ -213,29 +208,29 @@ public class Ieee488Client : IDisposable
     /// <summary>   Send this message to the VXI-11 server. </summary>
     /// <remarks>   2022-12-13. </remarks>
     /// <param name="message">  The message. </param>
-    /// <returns>   A <see cref="Device_WriteResp">device write response</see> . </returns>
-    public Device_WriteResp Send( string message )
+    /// <returns>   A <see cref="DeviceWriteResp">device write response</see> . </returns>
+    public DeviceWriteResp Send( string message )
     {
         return this.Send( Encoding.Default.GetBytes( message ) );
     }
 
     /// <summary>   Receives a reply from the VXI-11 server. </summary>
     /// <remarks>   2022-12-02. </remarks>
-    /// <returns>   A <see cref="Device_ReadResp">device read response</see> . </returns>
-    public Device_ReadResp Receive()
+    /// <returns>   A <see cref="DeviceReadResp">device read response</see> . </returns>
+    public DeviceReadResp Receive()
     {
-        Device_ReadResp resp = new();
+        DeviceReadResp resp = new();
         if ( this._link is not null && this._coreClient is not null )
         {
-            Device_ReadParms readParam = new() {
-                lid = _link,
-                requestSize = this.MaxRecvSize, // response.Length,
-                io_timeout = this.ReadTimeout,
-                lock_timeout = this.LockTimeout,
-                flags = new Device_Flags(),
-                termChar = this.ReadTermination
+            DeviceReadParms readParam = new() {
+                DeviceLinkId = _link,
+                RequestSize = this.MaxRecvSize, // response.Length,
+                IOTimeout = this.ReadTimeout,
+                LockTimeout = this.LockTimeout,
+                Flags = new DeviceFlags(),
+                TermChar = this.ReadTermination
             };
-            resp = this._coreClient.device_read_1( readParam );
+            resp = this._coreClient.DeviceRead( readParam );
         }
         return resp;
     }
@@ -243,21 +238,21 @@ public class Ieee488Client : IDisposable
     /// <summary>   Receives a reply from the VXI-11 server. </summary>
     /// <remarks>   2022-12-13. </remarks>
     /// <param name="byteCount">    Number of bytes. </param>
-    /// <returns>   A <see cref="Device_ReadResp">device read response</see> . </returns>
-    public Device_ReadResp Receive( int byteCount )
+    /// <returns>   A <see cref="DeviceReadResp">device read response</see> . </returns>
+    public DeviceReadResp Receive( int byteCount )
     {
-        Device_ReadResp resp = new();
+        DeviceReadResp resp = new();
         if ( this._link is not null && this._coreClient is not null )
         {
-            Device_ReadParms readParam = new() {
-                lid = _link,
-                requestSize = byteCount,
-                io_timeout = this.ReadTimeout,
-                lock_timeout = this.LockTimeout,
-                flags = new Device_Flags(),
-                termChar = this.ReadTermination
+            DeviceReadParms readParam = new() {
+                DeviceLinkId = _link,
+                RequestSize = byteCount,
+                IOTimeout = this.ReadTimeout,
+                LockTimeout = this.LockTimeout,
+                Flags = new DeviceFlags(),
+                TermChar = this.ReadTermination
             };
-            resp = this._coreClient.device_read_1( readParam );
+            resp = this._coreClient.DeviceRead( readParam );
         }
         return resp;
     }
@@ -267,21 +262,21 @@ public class Ieee488Client : IDisposable
     /// <param name="data">                     . </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay. </param>
     /// <returns>   A Tuple. </returns>
-    public (Device_WriteResp writeResponse, Device_ReadResp readResponse) SendReceive( byte[] data, int millisecondsReadDelay = 3 )
+    public (DeviceWriteResp writeResponse, DeviceReadResp readResponse) SendReceive( byte[] data, int millisecondsReadDelay = 3 )
     {
-        Device_WriteResp writeResponse = this.Send( data );
-        if ( writeResponse.error.value == OncRpcException.OncRpcSuccess )
+        DeviceWriteResp writeResponse = this.Send( data );
+        if ( writeResponse.Error.value == OncRpcException.OncRpcSuccess )
             if ( this.IsQuery( data ) )
             {
                 Thread.Sleep( millisecondsReadDelay );
-                Device_ReadResp readResponse = this.Receive();
+                DeviceReadResp readResponse = this.Receive();
                 return (writeResponse, readResponse);
             }
             else
-                return (writeResponse, new Device_ReadResp());
+                return (writeResponse, new DeviceReadResp());
         else
             // RPC error
-            return (writeResponse, new Device_ReadResp());
+            return (writeResponse, new DeviceReadResp());
     }
 
     /// <summary>
@@ -291,7 +286,7 @@ public class Ieee488Client : IDisposable
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay. </param>
     /// <returns>   A Tuple. </returns>
-    public (Device_WriteResp writeResponse, Device_ReadResp readResponse) SendReceive( string message, int millisecondsReadDelay = 3 )
+    public (DeviceWriteResp writeResponse, DeviceReadResp readResponse) SendReceive( string message, int millisecondsReadDelay = 3 )
     {
         return this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
     }
@@ -308,11 +303,11 @@ public class Ieee488Client : IDisposable
     public int Write( string message )
     {
         if ( string.IsNullOrEmpty( message ) ) return 0;
-        (Device_WriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
-        if ( writeResponse.error.value != OncRpcException.OncRpcSuccess )
-            throw new OncRpcException( writeResponse.error.value );
+        (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
+        if ( writeResponse.Error.value != OncRpcException.OncRpcSuccess )
+            throw new OncRpcException( writeResponse.Error.value );
         else
-            return writeResponse.size;
+            return writeResponse.Size;
     }
 
     /// <summary>   Sends a message with termination to the VXI-11 server. </summary>
@@ -333,14 +328,14 @@ public class Ieee488Client : IDisposable
     public (bool success, string response) TryWrite( string message )
     {
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
-        (Device_WriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
-        if ( writeResponse.error.value != OncRpcException.OncRpcSuccess )
+        (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
+        if ( writeResponse.Error.value != OncRpcException.OncRpcSuccess )
         {
-            var ex = new OncRpcException( writeResponse.error.value );
+            var ex = new OncRpcException( writeResponse.Error.value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, sending {message} to {this._coreClient.Client.Host}:{this._coreClient.Client.Port}");
         }
         else
-            return (true, $"{writeResponse.size}");
+            return (true, $"{writeResponse.Size}");
     }
 
     /// <summary>
@@ -366,14 +361,14 @@ public class Ieee488Client : IDisposable
     /// <returns>   A string. </returns>
     public string Read( bool trimEnd = false )
     {
-        Device_ReadResp readResponse = this.Receive();
-        if ( (readResponse.error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
-            throw new OncRpcException( readResponse.error.value );
+        DeviceReadResp readResponse = this.Receive();
+        if ( (readResponse.Error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
+            throw new OncRpcException( readResponse.Error.value );
         else
         {
-            int length = (readResponse.data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
+            int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
             return length > 0
-                ? Encoding.Default.GetString( readResponse.data, 0, length )
+                ? Encoding.Default.GetString( readResponse.Data, 0, length )
                 : string.Empty;
         }
     }
@@ -384,17 +379,17 @@ public class Ieee488Client : IDisposable
     /// <returns>   A Tuple. </returns>
     public (bool success, string response) TryRead( bool trimEnd = false )
     {
-        Device_ReadResp readResponse = this.Receive();
-        if ( (readResponse.error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
+        DeviceReadResp readResponse = this.Receive();
+        if ( (readResponse.Error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
         {
-            var ex = new OncRpcException( readResponse.error.value );
+            var ex = new OncRpcException( readResponse.Error.value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, reading from {this._coreClient.Client.Host}:{this._coreClient.Client.Port}");
         }
         else
         {
-            int length = (readResponse.data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
+            int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
             return length > 0
-                ? (true, Encoding.Default.GetString( readResponse.data, 0, length ))
+                ? (true, Encoding.Default.GetString( readResponse.Data, 0, length ))
                 : (true, string.Empty);
         }
     }
@@ -407,10 +402,10 @@ public class Ieee488Client : IDisposable
     /// <returns>   The number of received bytes. </returns>
     public int Read( int offset, int count, ref float[] values )
     {
-        Device_ReadResp readResponse = this.Receive( count * 4 + offset + 1 );
+        DeviceReadResp readResponse = this.Receive( count * 4 + offset + 1 );
         // Need to convert to the byte array into single
-        Buffer.BlockCopy( readResponse.data, offset, values, 0, values.Length * 4 );
-        return readResponse.data.Length;
+        Buffer.BlockCopy( readResponse.Data, offset, values, 0, values.Length * 4 );
+        return readResponse.Data.Length;
     }
 
     #endregion
@@ -427,16 +422,16 @@ public class Ieee488Client : IDisposable
     public (bool success, string response) Query( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
-        (Device_WriteResp writeResponse, Device_ReadResp readResponse) = this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
-        if ( writeResponse.error.value != OncRpcException.OncRpcSuccess )
-            throw new OncRpcException( writeResponse.error.value );
-        else if ( (readResponse.error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
-            throw new OncRpcException( readResponse.error.value );
+        (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
+        if ( writeResponse.Error.value != OncRpcException.OncRpcSuccess )
+            throw new OncRpcException( writeResponse.Error.value );
+        else if ( (readResponse.Error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
+            throw new OncRpcException( readResponse.Error.value );
         else
         {
-            int length = (readResponse.data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
+            int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
             return length > 0
-                ? (true, Encoding.Default.GetString( readResponse.data, 0, length ))
+                ? (true, Encoding.Default.GetString( readResponse.Data, 0, length ))
                 : (true, string.Empty);
         }
     }
@@ -466,22 +461,22 @@ public class Ieee488Client : IDisposable
     {
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
 
-        (Device_WriteResp writeResponse, Device_ReadResp readResponse) = this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
-        if ( writeResponse.error.value != OncRpcException.OncRpcSuccess )
+        (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
+        if ( writeResponse.Error.value != OncRpcException.OncRpcSuccess )
         {
-            var ex = new OncRpcException( writeResponse.error.value );
+            var ex = new OncRpcException( writeResponse.Error.value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, sending {message} to {this._coreClient.Client.Host} : {this._coreClient.Client.Port}");
         }
-        else if ( (readResponse.error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
+        else if ( (readResponse.Error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
         {
-            var ex = new OncRpcException( readResponse.error.value );
+            var ex = new OncRpcException( readResponse.Error.value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, querying {message} from {this._coreClient.Client.Host} : {this._coreClient.Client.Port}");
         }
         else
         {
-            int length = (readResponse.data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
+            int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
             return length > 0
-                ? (true, Encoding.Default.GetString( readResponse.data, 0, length ))
+                ? (true, Encoding.Default.GetString( readResponse.Data, 0, length ))
                 : (true, string.Empty);
         }
     }

@@ -1,208 +1,278 @@
 using cc.isr.ONC.RPC.Server;
+using cc.isr.VXI11.Codecs;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace VXI11
+namespace cc.isr.VXI11;
+
+/// <summary>
+/// The abstract VXI-11 <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/> <see cref="DeviceCoreServerStubBase"/> class is the base class upon which
+/// to build VXI-11 <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/> TCP servers.
+/// </summary>
+public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
 {
-    /// <summary>
-    /// The abstract VXI-11 <see cref="vxi11.DEVICE_CORE"/> <see cref="DeviceCoreServerStubBase"/> class is the base class upon which
-    /// to build VXI-11 <see cref="vxi11.DEVICE_CORE"/> TCP servers.
-    /// </summary>
-    public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
+
+    /// <summary>   Default constructor. </summary>
+    public DeviceCoreServerStubBase() : this( 0 )
     {
-
-        public DeviceCoreServerStubBase() : this(0)
-        {
-        }
-
-        public DeviceCoreServerStubBase(int port) : this(null, port)
-        {
-        }
-
-        public DeviceCoreServerStubBase(IPAddress bindAddr, int port)
-        {
-            OncRpcServerTransportRegistrationInfo[]  info = new OncRpcServerTransportRegistrationInfo[] {
-                new OncRpcServerTransportRegistrationInfo(vxi11.DEVICE_CORE, vxi11.DEVICE_CORE_VERSION),
-            };
-            this.SetTransportRegistrationInfo(info);
-
-            OncRpcServerTransportBase[] transports = new OncRpcServerTransportBase[] {
-                // new OncRpcUdpServerTransport(this, bindAddr, port+2, info, 32768),
-                new OncRpcTcpServerTransport(this, bindAddr, port, info, OncRpcServerTransportBase.DefaultBufferSize)
-            };
-            this.SetTransports(transports);
-        }
-
-        public void DispatchOncRpcCall(OncRpcCallInformation call, int program, int version, int procedure)
-        {
-            if (version == 1)
-            {
-                switch (procedure)
-                {
-                    case 10:
-                        {
-                            Create_LinkParms args = new Create_LinkParms();
-                            call.RetrieveCall(args);
-                            Create_LinkResp result = create_link_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 11:
-                        {
-                            Device_WriteParms args = new Device_WriteParms();
-                            call.RetrieveCall(args);
-                            Device_WriteResp result = device_write_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 12:
-                        {
-                            Device_ReadParms args = new Device_ReadParms();
-                            call.RetrieveCall(args);
-                            Device_ReadResp result = device_read_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 13:
-                        {
-                            Device_GenericParms args = new Device_GenericParms();
-                            call.RetrieveCall(args);
-                            Device_ReadStbResp result = device_readstb_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 14:
-                        {
-                            Device_GenericParms args = new Device_GenericParms();
-                            call.RetrieveCall(args);
-                            Device_Error result = device_trigger_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 15:
-                        {
-                            Device_GenericParms args = new Device_GenericParms();
-                            call.RetrieveCall(args);
-                            Device_Error result = device_clear_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 16:
-                        {
-                            Device_GenericParms args = new Device_GenericParms();
-                            call.RetrieveCall(args);
-                            Device_Error result = device_remote_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 17:
-                        {
-                            Device_GenericParms args = new Device_GenericParms();
-                            call.RetrieveCall(args);
-                            Device_Error result = device_local_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 18:
-                        {
-                            Device_LockParms args = new Device_LockParms();
-                            call.RetrieveCall(args);
-                            Device_Error result = device_lock_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 19:
-                        {
-                            Device_Link args = new Device_Link();
-                            call.RetrieveCall(args);
-                            Device_Error result = device_unlock_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 20:
-                        {
-                            Device_EnableSrqParms args = new Device_EnableSrqParms();
-                            call.RetrieveCall(args);
-                            Device_Error result = device_enable_srq_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 22:
-                        {
-                            Device_DocmdParms args = new Device_DocmdParms();
-                            call.RetrieveCall(args);
-                            Device_DocmdResp result = device_docmd_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 23:
-                        {
-                            Device_Link args = new Device_Link();
-                            call.RetrieveCall(args);
-                            Device_Error result = destroy_link_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 25:
-                        {
-                            Device_RemoteFunc args = new Device_RemoteFunc();
-                            call.RetrieveCall(args);
-                            Device_Error result = create_intr_chan_1(args);
-                            call.Reply(result);
-                            break;
-                        }
-                    case 26:
-                        {
-                            call.RetrieveCall(VoidXdrCodec.VoidXdrCodecInstance);
-                            Device_Error result = destroy_intr_chan_1();
-                            call.Reply(result);
-                            break;
-                        }
-                    default:
-                        call.ReplyProcedureNotAvailable();
-                        break;
-                }
-            }
-            else
-            {
-                call.ReplyProgramNotAvailable();
-            }
-        }
-
-        public abstract Create_LinkResp create_link_1(Create_LinkParms arg1);
-
-        public abstract Device_WriteResp device_write_1(Device_WriteParms arg1);
-
-        public abstract Device_ReadResp device_read_1(Device_ReadParms arg1);
-
-        public abstract Device_ReadStbResp device_readstb_1(Device_GenericParms arg1);
-
-        public abstract Device_Error device_trigger_1(Device_GenericParms arg1);
-
-        public abstract Device_Error device_clear_1(Device_GenericParms arg1);
-
-        public abstract Device_Error device_remote_1(Device_GenericParms arg1);
-
-        public abstract Device_Error device_local_1(Device_GenericParms arg1);
-
-        public abstract Device_Error device_lock_1(Device_LockParms arg1);
-
-        public abstract Device_Error device_unlock_1(Device_Link arg1);
-
-        public abstract Device_Error device_enable_srq_1(Device_EnableSrqParms arg1);
-
-        public abstract Device_DocmdResp device_docmd_1(Device_DocmdParms arg1);
-
-        public abstract Device_Error destroy_link_1(Device_Link arg1);
-
-        public abstract Device_Error create_intr_chan_1(Device_RemoteFunc arg1);
-
-        public abstract Device_Error destroy_intr_chan_1();
-
     }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="port"> The port. </param>
+    public DeviceCoreServerStubBase( int port ) : this( null, port )
+    {
+    }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="bindAddr"> The bind address. </param>
+    /// <param name="port">     The port. </param>
+    public DeviceCoreServerStubBase( IPAddress bindAddr, int port )
+    {
+        OncRpcServerTransportRegistrationInfo[] info = new OncRpcServerTransportRegistrationInfo[] {
+            new OncRpcServerTransportRegistrationInfo(Vxi11ProgramConstants.DeviceCoreProgram, Vxi11ProgramConstants.DeviceCoreVersion),
+        };
+        this.SetTransportRegistrationInfo( info );
+
+        OncRpcServerTransportBase[] transports = new OncRpcServerTransportBase[] {
+            // new OncRpcUdpServerTransport(this, bindAddr, port+2, info, 32768),
+            new OncRpcTcpServerTransport(this, bindAddr, port, info, OncRpcServerTransportBase.DefaultBufferSize)
+        };
+        this.SetTransports( transports );
+    }
+
+    /// <summary>   Dispatch (handle) an ONC/RPC request from a client. </summary>
+    /// <remarks>
+    /// This interface has some fairly deep semantics, so please read the description above for how
+    /// to use it properly. For background information about fairly deep semantics, please also refer
+    /// to <i>Gigzales</i>, <i>J</i>.: Semantics considered harmful. Addison-Reilly, 1992, ISBN 0-542-
+    /// 10815-X. <para>
+    /// See the introduction to this class for examples of how to use this interface properly.</para>
+    /// </remarks>
+    /// <param name="call">         <see cref="T:cc.isr.ONC.RPC.Server.OncRpcCallInformation" />
+    ///                             about the call to handle, like the caller's Internet address, the ONC/RPC
+    ///                             call header, etc. </param>
+    /// <param name="program">      Program number requested by client. </param>
+    /// <param name="version">      Version number requested. </param>
+    /// <param name="procedure">    Procedure number requested. </param>
+    public void DispatchOncRpcCall( OncRpcCallInformation call, int program, int version, int procedure )
+    {
+        if ( version == Vxi11ProgramConstants.DeviceCoreVersion )
+            switch ( procedure )
+            {
+                case Vxi11MessageConstants.CreateLinkProcedure: 
+                    {
+                        CreateLinkParms args = new();
+                        call.RetrieveCall( args );
+                        CreateLinkResp result = this.CreateLink( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceWriteProcedure:
+                    {
+                        DeviceWriteParms args = new();
+                        call.RetrieveCall( args );
+                        DeviceWriteResp result = this.DeviceWrite( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceReadProcedure:
+                    {
+                        DeviceReadParms args = new();
+                        call.RetrieveCall( args );
+                        DeviceReadResp result = this.DeviceRead( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceReadStbProcedure:
+                    {
+                        DeviceGenericParms args = new();
+                        call.RetrieveCall( args );
+                        DeviceReadStbResp result = this.DeviceReadStb( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceTriggerProcedure:
+                    {
+                        DeviceGenericParms args = new();
+                        call.RetrieveCall( args );
+                        DeviceError result = this.DeviceTrigger( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceClearProcedure:
+                    {
+                        DeviceGenericParms args = new();
+                        call.RetrieveCall( args );
+                        DeviceError result = this.DeviceClear( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceRemoteProcedure:
+                    {
+                        DeviceGenericParms args = new();
+                        call.RetrieveCall( args );
+                        DeviceError result = this.DeviceRemote( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceLocalProcedure:
+                    {
+                        DeviceGenericParms args = new();
+                        call.RetrieveCall( args );
+                        DeviceError result = this.DeviceLocal( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceLockProcedure:
+                    {
+                        DeviceLockParms args = new();
+                        call.RetrieveCall( args );
+                        DeviceError result = this.DeviceLock( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceUnlockProcedure:
+                    {
+                        DeviceLink args = new();
+                        call.RetrieveCall( args );
+                        DeviceError result = this.DeviceUnlock( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceEnableSrqProcedure:
+                    {
+                        DeviceEnableSrqParms args = new();
+                        call.RetrieveCall( args );
+                        DeviceError result = this.DeviceEnableSrq( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DeviceDoCommandProcedure:
+                    {
+                        DeviceDoCmdParms args = new();
+                        call.RetrieveCall( args );
+                        DeviceDoCmdResp result = this.DeviceDoCmd( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DestroyLinkProcedure:
+                    {
+                        DeviceLink args = new();
+                        call.RetrieveCall( args );
+                        DeviceError result = this.DestroyLink( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.CreateInterruptChannelProcedure:
+                    {
+                        DeviceRemoteFunc args = new();
+                        call.RetrieveCall( args );
+                        DeviceError result = this.CreateIntrChan( args );
+                        call.Reply( result );
+                        break;
+                    }
+                case Vxi11MessageConstants.DestroyInterruptChannelProcedure:
+                    {
+                        call.RetrieveCall( VoidXdrCodec.VoidXdrCodecInstance );
+                        DeviceError result = this.DestroyIntrChan();
+                        call.Reply( result );
+                        break;
+                    }
+                default:
+                    call.ReplyProcedureNotAvailable();
+                    break;
+            }
+        else
+            call.ReplyProgramNotAvailable();
+    }
+
+    /// <summary>  Opens a link to a device. </summary>
+    /// <remarks> Renamed from <c>create_link_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.CreateLinkParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract CreateLinkResp CreateLink( CreateLinkParms arg1 );
+
+    /// <summary>  Device receives a message. </summary>
+    /// <remarks> Renamed from <c>device_write_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceWriteParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceWriteResp"/>. </returns>
+    public abstract DeviceWriteResp DeviceWrite( DeviceWriteParms arg1 );
+
+    /// <summary>  Device returns a result. </summary>
+    /// <remarks> Renamed from <c>device_read_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceReadParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceReadResp"/>. </returns>
+    public abstract DeviceReadResp DeviceRead( DeviceReadParms arg1 );
+
+    /// <summary>  Device returns its status byte. </summary>
+    /// <remarks> Renamed from <c>device_readstb_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceReadStbResp"/>. </returns>
+    public abstract DeviceReadStbResp DeviceReadStb( DeviceGenericParms arg1 );
+
+    /// <summary>  Device executes a trigger. </summary>
+    /// <remarks> Renamed from <c>device_trigger_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract DeviceError DeviceTrigger( DeviceGenericParms arg1 );
+
+    /// <summary>  Device clears itself. </summary>
+    /// <remarks> Renamed from <c>device_clear_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract DeviceError DeviceClear( DeviceGenericParms arg1 );
+
+    /// <summary>  Device disables its front panel. </summary>
+    /// <remarks> Renamed from <c>device_remote_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract DeviceError DeviceRemote( DeviceGenericParms arg1 );
+
+    /// <summary>  Device enables its front panel. </summary>
+    /// <remarks> Renamed from <c>device_local_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract DeviceError DeviceLocal( DeviceGenericParms arg1 );
+
+    /// <summary>  Device is locked. </summary>
+    /// <remarks> Renamed from <c>device_lock_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLockParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract DeviceError DeviceLock( DeviceLockParms arg1 );
+
+    /// <summary>  Device is unlocked. </summary>
+    /// <remarks> Renamed from <c>device_unlock_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLink"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract DeviceError DeviceUnlock( DeviceLink arg1 );
+
+    /// <summary>  Device enables/disables sending of service requests. </summary>
+    /// <remarks> Renamed from <c>device_enable_srq_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceEnableSrqParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract DeviceError DeviceEnableSrq( DeviceEnableSrqParms arg1 );
+
+    /// <summary>  Device executes a command. </summary>
+    /// <remarks> Renamed from <c>device_docmd_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceDoCmdParms"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>. </returns>
+    public abstract DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms arg1 );
+
+    /// <summary>  Closes a link to a device. </summary>
+    /// <remarks> Renamed from <c>destroy_link_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLink"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract DeviceError DestroyLink( DeviceLink arg1 );
+
+    /// <summary>  Device creates interrupt channel. </summary>
+    /// <remarks> Renamed from <c>create_intr_chan_1</c> </remarks>
+    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceRemoteFunc"/>) to the remote procedure call.. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract DeviceError CreateIntrChan( DeviceRemoteFunc arg1 );
+
+    /// <summary>  Device destroys interrupt channel. </summary>
+    /// <remarks> Renamed from <c>destroy_intr_chan_1</c> </remarks>
+    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
+    public abstract DeviceError DestroyIntrChan();
+
 }

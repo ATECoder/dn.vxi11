@@ -17,6 +17,7 @@ Portmap
 portmapper
 rethrow
 rpcgen
+struct
 Tegam
 unregistration
 upcast
