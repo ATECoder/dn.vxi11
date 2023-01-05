@@ -35,6 +35,7 @@ public class Ieee488ServerTests
         }
         catch ( Exception ex )
         {
+            Console.WriteLine( "Failed initializing fixture: " );
             Console.WriteLine( ex.ToString() );
             CleanupFixture();
         }

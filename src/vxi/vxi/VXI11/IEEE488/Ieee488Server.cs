@@ -69,54 +69,54 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     public Ieee488Server( Ieee488Device device, IPAddress? bindAddr, int port ) : base( bindAddr, port )
     {
         this._device = device;
-        this._InterfaceDeviceString = string.Empty;
-        this._IPv4Address = bindAddr is null ? string.Empty : bindAddr.ToString();
-        this._ReadMessage = string.Empty;
-        this._WriteMessage= string.Empty;   
+        this._interfaceDeviceString = string.Empty;
+        this._ipv4Address = bindAddr is null ? string.Empty : bindAddr.ToString();
+        this._readMessage = string.Empty;
+        this._writeMessage= string.Empty;   
     }
 
     #endregion
 
     #region " Server Properties "
 
-    private int _PortNumber;
+    private int _portNumber;
     /// <summary>   Gets or sets the port number. </summary>
     /// <value> The port number. </value>
     public int PortNumber
     {
-        get => this._PortNumber;
-        set => _ = this.SetProperty( ref this._PortNumber, value );
+        get => this._portNumber;
+        set => _ = this.SetProperty( ref this._portNumber, value );
     }
 
-    private string _IPv4Address;
+    private string _ipv4Address;
     /// <summary>   Gets or sets the IPv4 address. </summary>
     /// <value> The IPv4 address. </value>
     public string IPv4Address
     {
-        get => this._IPv4Address;
-        set => _ = this.SetProperty( ref this._IPv4Address, value );
+        get => this._ipv4Address;
+        set => _ = this.SetProperty( ref this._ipv4Address, value );
     }
 
     #endregion
 
     #region " I/O messages "
 
-    private string _WriteMessage;
+    private string _writeMessage;
     /// <summary>   Gets or sets a message that was sent to the device. </summary>
     /// <value> The message that was sent to the device. </value>
     public string WriteMessage
     {
-        get => this._WriteMessage;
-        set => _ = this.SetProperty( ref this._WriteMessage, value );
+        get => this._writeMessage;
+        set => _ = this.SetProperty( ref this._writeMessage, value );
     }
 
-    private string _ReadMessage;
+    private string _readMessage;
     /// <summary>   Gets or sets a message that was received from the device. </summary>
     /// <value> A message that was received from the device. </value>
     public string ReadMessage
     {
-        get => this._ReadMessage;
-        set => _ = this.SetProperty( ref this._ReadMessage, value );
+        get => this._readMessage;
+        set => _ = this.SetProperty( ref this._readMessage, value );
     }
 
     #endregion
@@ -132,38 +132,38 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         set => _ = this.SetProperty( ref this._encodingRule , value );
     }
 
-    private int _WaitOnOutTime = 1000;
+    private int _waitOnOutTime = 1000;
     /// <summary>   Timeout wait time ms. </summary>
     /// <value> The wait on out time. </value>
     public int WaitOnOutTime
     {
-        get => this._WaitOnOutTime;
-        set => _ = this.SetProperty( ref this._WaitOnOutTime, value );
+        get => this._waitOnOutTime;
+        set => _ = this.SetProperty( ref this._waitOnOutTime, value );
     }
 
     /// <summary>   The current operation instruction type. </summary>
     /// <value> The type of the current operation. </value>
     public Ieee488OperationType CurrentOperationType { get; private set; } = Ieee488OperationType.None;
 
-    private string _InterfaceDeviceString;
+    private string _interfaceDeviceString;
     /// <summary>   Gets or sets the interface device string. </summary>
     /// <value> The interface device string. </value>
     public string InterfaceDeviceString
     {
-        get => this._InterfaceDeviceString;
-        private set => _ = this.SetProperty( ref this._InterfaceDeviceString, value );
+        get => this._interfaceDeviceString;
+        private set => _ = this.SetProperty( ref this._interfaceDeviceString, value );
     }
 
-    private Ieee488InterfaceDevice _InterfaceDevice;
+    private Ieee488InterfaceDevice _interfaceDevice;
     /// <summary>   Gets or sets the interface device. </summary>
     /// <value> The interface device. </value>
     public Ieee488InterfaceDevice InterfaceDevice
     {
-        get => this._InterfaceDevice;
+        get => this._interfaceDevice;
         set
         {
-            _ = this.SetProperty( ref this._InterfaceDevice, value );
-            this.InterfaceDeviceString = this._InterfaceDevice.InterfaceDeviceString;
+            _ = this.SetProperty( ref this._interfaceDevice, value );
+            this.InterfaceDeviceString = this._interfaceDevice.InterfaceDeviceString;
         }
     }
 
@@ -490,13 +490,13 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
 
     #region " START / STOP "
 
-    private bool _Listening;
+    private bool _listening;
     /// <summary>   Gets or sets a value indicating whether the listening. </summary>
     /// <value> True if listening, false if not. </value>
     public bool Listening
     {
-        get => this._Listening;
-        set => _ = this.SetProperty( ref this._Listening, value );
+        get => this._listening;
+        set => _ = this.SetProperty( ref this._listening, value );
     }
 
     /// <summary>
@@ -523,8 +523,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     /// <remarks>
     /// Notify the RPC server to stop processing of remote procedure call requests as soon as
     /// possible. Note that each transport has its own thread, so processing will not stop before the
-    /// transports have been closed by calling the 
-    /// <see cref="cc.isr.ONC.RPC.Server.OncRpcServerStubBase.Close(ONC.RPC.Server.OncRpcServerTransportBase[])"/>
+    /// transports have been closed by calling the <see cref="cc.isr.ONC.RPC.Server.OncRpcServerStubBase.Close()"/>
     /// method of the server.
     /// </remarks>
     public override void StopRpcProcessing()
