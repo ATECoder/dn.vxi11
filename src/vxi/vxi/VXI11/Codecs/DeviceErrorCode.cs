@@ -30,28 +30,28 @@ public class DeviceErrorCode : IXdrCodec
     }
 
     /// <summary>   Constructor. </summary>
-    /// <param name="xdr">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceErrorCode( XdrDecodingStreamBase xdr )
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public DeviceErrorCode( XdrDecodingStreamBase decoder )
     {
-        this.Decode( xdr );
+        this.Decode( decoder );
     }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
     /// </summary>
-    /// <param name="xdr">  XDR stream to which information is sent for encoding. </param>
-    public void Encode( XdrEncodingStreamBase xdr )
+    /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
+    public void Encode( XdrEncodingStreamBase encoder )
     {
-        xdr.EncodeInt( this.value );
+        encoder.EncodeInt( this.value );
     }
 
     /// <summary>
     /// Decodes -- that is: deserializes -- an object from an XDR stream in compliance to RFC 1832.
     /// </summary>
-    /// <param name="xdr">  XDR stream from which decoded information is retrieved. </param>
-    public void Decode( XdrDecodingStreamBase xdr )
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.value = xdr.DecodeInt();
+        this.value = decoder.DecodeInt();
     }
 }
 

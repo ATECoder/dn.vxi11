@@ -52,34 +52,34 @@ namespace cc.isr.VXI11.Codecs
         }
 
         /// <summary>   Constructor. </summary>
-        /// <param name="xdr">  XDR stream from which decoded information is retrieved. </param>
-        public DeviceGenericParms( XdrDecodingStreamBase xdr )
+        /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+        public DeviceGenericParms( XdrDecodingStreamBase decoder )
         {
-            this.Decode( xdr );
+            this.Decode( decoder );
         }
 
         /// <summary>
         /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
         /// </summary>
-        /// <param name="xdr">  XDR stream to which information is sent for encoding. </param>
-        public void Encode( XdrEncodingStreamBase xdr )
+        /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
+        public void Encode( XdrEncodingStreamBase encoder )
         {
-            this.DeviceLinkId.Encode( xdr );
-            this.Flags.Encode( xdr );
-            xdr.EncodeInt( this.LockTimeout );
-            xdr.EncodeInt( this.IOTimeout );
+            this.DeviceLinkId.Encode( encoder );
+            this.Flags.Encode( encoder );
+            encoder.EncodeInt( this.LockTimeout );
+            encoder.EncodeInt( this.IOTimeout );
         }
 
         /// <summary>
         /// Decodes -- that is: deserializes -- an object from an XDR stream in compliance to RFC 1832.
         /// </summary>
-        /// <param name="xdr">  XDR stream from which decoded information is retrieved. </param>
-        public void Decode( XdrDecodingStreamBase xdr )
+        /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+        public void Decode( XdrDecodingStreamBase decoder )
         {
-            this.DeviceLinkId = new DeviceLink( xdr );
-            this.Flags = new DeviceFlags( xdr );
-            this.LockTimeout = xdr.DecodeInt();
-            this.IOTimeout = xdr.DecodeInt();
+            this.DeviceLinkId = new DeviceLink( decoder );
+            this.Flags = new DeviceFlags( decoder );
+            this.LockTimeout = decoder.DecodeInt();
+            this.IOTimeout = decoder.DecodeInt();
         }
 
     }

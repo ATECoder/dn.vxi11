@@ -39,35 +39,35 @@ public class CreateLinkParms : IXdrCodec
     }
 
     /// <summary>   Constructor. </summary>
-    /// <param name="xdr">  The XDR Decoding stream </param>
-    public CreateLinkParms( XdrDecodingStreamBase xdr )
+    /// <param name="decoder">  The XDR Decoding stream </param>
+    public CreateLinkParms( XdrDecodingStreamBase decoder )
     {
-        this.Decode( xdr );
+        this.Decode( decoder );
     }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
     /// </summary>
-    /// <param name="xdr">  XDR stream to which information is sent for encoding. </param>
-    public void Encode( XdrEncodingStreamBase xdr )
+    /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
+    public void Encode( XdrEncodingStreamBase encoder )
     {
-        xdr.EncodeInt( this.ClientId );
-        xdr.EcodeBoolean( this.LockDevice );
-        xdr.EncodeInt( this.LockTimeout );
-        xdr.EncodeString( this.Device );
+        encoder.EncodeInt( this.ClientId );
+        encoder.EcodeBoolean( this.LockDevice );
+        encoder.EncodeInt( this.LockTimeout );
+        encoder.EncodeString( this.Device );
     }
 
     /// <summary>
     /// Decodes -- that is: deserializes -- an object from an XDR stream in compliance to RFC 1832.
     /// </summary>
     /// <remarks>   2023-01-04. </remarks>
-    /// <param name="xdr">  XDR stream from which decoded information is retrieved. </param>
-    public void Decode( XdrDecodingStreamBase xdr )
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.ClientId = xdr.DecodeInt();
-        this.LockDevice = xdr.DecodeBoolean();
-        this.LockTimeout = xdr.DecodeInt();
-        this.Device = xdr.DecodeString();
+        this.ClientId = decoder.DecodeInt();
+        this.LockDevice = decoder.DecodeBoolean();
+        this.LockTimeout = decoder.DecodeInt();
+        this.Device = decoder.DecodeString();
     }
 
 }

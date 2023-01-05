@@ -45,42 +45,56 @@ public class DeviceReadParms : IXdrCodec
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
 
-    /// <summary>   Gets or sets the flags with options. </summary>
+    /// <summary>   Gets or sets the flags with <see cref="DeviceOperationFlag"/> options. </summary>
     /// <value> The flags. </value>
     public DeviceFlags Flags { get; set; }
 
-    /// <summary>   Gets or sets the term character; valid if flags and 'Term Char Set' </summary>
+    /// <summary>
+    /// Gets or sets the termination character; valid if flags <see cref="DeviceOperationFlag.TerminationCharacterSet"/>
+    /// is set.
+    /// </summary>
     /// <value> The term character. </value>
     public byte TermChar { get; set; }
 
 
+    /// <summary>   Default constructor. </summary>
     public DeviceReadParms()
     {
     }
 
-    public DeviceReadParms( XdrDecodingStreamBase xdr )
+    /// <summary>   Constructor. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public DeviceReadParms( XdrDecodingStreamBase decoder )
     {
-        this.Decode( xdr );
+        this.Decode( decoder );
     }
 
-    public void Encode( XdrEncodingStreamBase xdr )
+    /// <summary>
+    /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
+    /// </summary>
+    /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
+    public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.DeviceLinkId.Encode( xdr );
-        xdr.EncodeInt( this.RequestSize );
-        xdr.EncodeInt( this.IOTimeout );
-        xdr.EncodeInt( this.LockTimeout );
-        this.Flags.Encode( xdr );
-        xdr.EncodeByte( this.TermChar );
+        this.DeviceLinkId.Encode( encoder );
+        encoder.EncodeInt( this.RequestSize );
+        encoder.EncodeInt( this.IOTimeout );
+        encoder.EncodeInt( this.LockTimeout );
+        this.Flags.Encode( encoder );
+        encoder.EncodeByte( this.TermChar );
     }
 
-    public void Decode( XdrDecodingStreamBase xdr )
+    /// <summary>
+    /// Decodes -- that is: deserializes -- an object from an XDR stream in compliance to RFC 1832.
+    /// </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.DeviceLinkId = new DeviceLink( xdr );
-        this.RequestSize = xdr.DecodeInt();
-        this.IOTimeout = xdr.DecodeInt();
-        this.LockTimeout = xdr.DecodeInt();
-        this.Flags = new DeviceFlags( xdr );
-        this.TermChar = xdr.DecodeByte();
+        this.DeviceLinkId = new DeviceLink( decoder );
+        this.RequestSize = decoder.DecodeInt();
+        this.IOTimeout = decoder.DecodeInt();
+        this.LockTimeout = decoder.DecodeInt();
+        this.Flags = new DeviceFlags( decoder );
+        this.TermChar = decoder.DecodeByte();
     }
 
 }

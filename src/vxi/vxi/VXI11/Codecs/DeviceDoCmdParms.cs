@@ -72,43 +72,43 @@ public class DeviceDoCmdParms : IXdrCodec
     }
 
     /// <summary>   Constructor. </summary>
-    /// <param name="xdr">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceDoCmdParms( XdrDecodingStreamBase xdr )
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public DeviceDoCmdParms( XdrDecodingStreamBase decoder )
     {
-        this.Decode( xdr );
+        this.Decode( decoder );
     }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
     /// </summary>
-    /// <param name="xdr">  XDR stream to which information is sent for encoding. </param>
-    public void Encode( XdrEncodingStreamBase xdr )
+    /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
+    public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.DeviceLinkId.Encode( xdr );
-        this.Flags.Encode( xdr );
-        xdr.EncodeInt( this.IOTimeout );
-        xdr.EncodeInt( this.LockTimeout );
-        xdr.EncodeInt( this.cmd );
-        xdr.EcodeBoolean( this.NetworkOrder );
-        xdr.EncodeInt( this.DataSize );
-        xdr.EncodeDynamicOpaque( this.DataIn );
+        this.DeviceLinkId.Encode( encoder );
+        this.Flags.Encode( encoder );
+        encoder.EncodeInt( this.IOTimeout );
+        encoder.EncodeInt( this.LockTimeout );
+        encoder.EncodeInt( this.cmd );
+        encoder.EcodeBoolean( this.NetworkOrder );
+        encoder.EncodeInt( this.DataSize );
+        encoder.EncodeDynamicOpaque( this.DataIn );
     }
 
     /// <summary>
     /// Decodes -- that is: deserializes -- an object from an XDR stream in compliance to RFC 1832.
     /// </summary>
     /// <remarks>   2023-01-04. </remarks>
-    /// <param name="xdr">  XDR stream from which decoded information is retrieved. </param>
-    public void Decode( XdrDecodingStreamBase xdr )
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.DeviceLinkId = new DeviceLink( xdr );
-        this.Flags = new DeviceFlags( xdr );
-        this.IOTimeout = xdr.DecodeInt();
-        this.LockTimeout = xdr.DecodeInt();
-        this.cmd = xdr.DecodeInt();
-        this.NetworkOrder = xdr.DecodeBoolean();
-        this.DataSize = xdr.DecodeInt();
-        this.DataIn = xdr.DecodeDynamicOpaque();
+        this.DeviceLinkId = new DeviceLink( decoder );
+        this.Flags = new DeviceFlags( decoder );
+        this.IOTimeout = decoder.DecodeInt();
+        this.LockTimeout = decoder.DecodeInt();
+        this.cmd = decoder.DecodeInt();
+        this.NetworkOrder = decoder.DecodeBoolean();
+        this.DataSize = decoder.DecodeInt();
+        this.DataIn = decoder.DecodeDynamicOpaque();
     }
 
 }

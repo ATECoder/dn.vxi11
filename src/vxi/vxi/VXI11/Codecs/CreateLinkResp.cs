@@ -39,33 +39,33 @@ public class CreateLinkResp : IXdrCodec
     }
 
     /// <summary>   Constructor. </summary>
-    /// <param name="xdr">  The XDR decoding stream. </param>
-    public CreateLinkResp( XdrDecodingStreamBase xdr )
+    /// <param name="decoder">  The XDR decoding stream. </param>
+    public CreateLinkResp( XdrDecodingStreamBase decoder )
     {
-        this.Decode( xdr );
+        this.Decode( decoder );
     }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
     /// </summary>
-    /// <param name="xdr">  XDR stream to which information is sent for encoding. </param>
-    public void Encode( XdrEncodingStreamBase xdr )
+    /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
+    public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.ErrorCode.Encode( xdr );
-        this.DeviceLinkId.Encode( xdr );
-        xdr.EncodeShort( this.AbortPort );
-        xdr.EncodeInt( this.MaxReceiveSize );
+        this.ErrorCode.Encode( encoder );
+        this.DeviceLinkId.Encode( encoder );
+        encoder.EncodeShort( this.AbortPort );
+        encoder.EncodeInt( this.MaxReceiveSize );
     }
 
     /// <summary>
     /// Decodes -- that is: deserializes -- an object from an XDR stream in compliance to RFC 1832.
     /// </summary>
-    /// <param name="xdr">  XDR stream from which decoded information is retrieved. </param>
-    public void Decode( XdrDecodingStreamBase xdr )
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.ErrorCode = new DeviceErrorCode( xdr );
-        this.DeviceLinkId = new DeviceLink( xdr );
-        this.AbortPort = xdr.DecodeShort();
-        this.MaxReceiveSize = xdr.DecodeInt();
+        this.ErrorCode = new DeviceErrorCode( decoder );
+        this.DeviceLinkId = new DeviceLink( decoder );
+        this.AbortPort = decoder.DecodeShort();
+        this.MaxReceiveSize = decoder.DecodeInt();
     }
 }
