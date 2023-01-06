@@ -9,16 +9,16 @@ namespace cc.isr.VXI11.Codecs;
 /// <code>
 /// typedef long Device_Link;
 /// </code>
+/// The network instrument server returns an identifier of type <see cref="DeviceLink"/> as a
+/// result of the <see cref="Vxi11MessageConstants.CreateLinkProcedure"/> call. This identifier
+/// is handed back to the network instrument server by the network instrument client on each
+/// subsequent call. The network instrument server verifies the validity of the identifier on
+/// each call. The <see cref="DeviceLink"/> data is not modified by the controller.
 /// </remarks>
 public class DeviceLink : IXdrCodec
 {
-    /// <summary>   The device link id. </summary>
+    /// <summary>   The device link identifier value. </summary>
     /// <remarks>
-    /// The network instrument server returns an identifier of type Device_Link as a result of the
-    /// create_link call. This identifier is handed back to the network instrument server by the
-    /// network instrument client on each subsequent call. The network instrument server verifies the
-    /// validity of the identifier on each call. The <see cref="DeviceLink"/>
-    /// data is not modified by the controller.
     /// </remarks>
     /// <value> The value. </value>
     public int Value { get; set; }

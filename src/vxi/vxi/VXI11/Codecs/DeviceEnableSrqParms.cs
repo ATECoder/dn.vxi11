@@ -25,6 +25,8 @@ public class DeviceEnableSrqParms : IXdrCodec
     public bool Enable { get; set; }
 
     /// <summary>   Gets or sets the handle. Host specific data. </summary>
+    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParms.Handle"/> 
+    /// when a service request occurs. </remarks>
     /// <value> The handle. </value>
     public byte[] Handle { get; set; }
 

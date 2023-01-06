@@ -35,7 +35,8 @@ public class DeviceReadResp : IXdrCodec
     /// the XDR opaque type is used by the network instrument protocol not because the data being represented is truly opaque, 
     /// but to avoid the overhead associated with character data (8 bits being promoted to 32 bits). Since the data parameters for
     /// <see cref="Vxi11MessageConstants.DeviceWriteProcedure"/> and <see cref="Vxi11MessageConstants.DeviceReadProcedure"/> are arrays, 
-    /// a structure is passed which contains a pointer to the data, data.data_val, and the number of elements, data.data_len.
+    /// a structure is passed which contains a pointer to the data, data.data_val, and the number of elements, data.data_len. <para>
+    /// A 'RESPONSE MESSAGE TERMINATOR' is send by putting a newline as the last character in data and setting the end flag in reason. </para>
     /// </remarks>
     /// <value> The data. </value>
     public byte[] Data { get; set; }

@@ -265,7 +265,7 @@ public class Ieee488Client : IDisposable
     public (DeviceWriteResp writeResponse, DeviceReadResp readResponse) SendReceive( byte[] data, int millisecondsReadDelay = 3 )
     {
         DeviceWriteResp writeResponse = this.Send( data );
-        if ( writeResponse.Error.value == OncRpcException.OncRpcSuccess )
+        if ( writeResponse.Error.Value == OncRpcException.OncRpcSuccess )
             if ( this.IsQuery( data ) )
             {
                 Thread.Sleep( millisecondsReadDelay );
@@ -304,8 +304,8 @@ public class Ieee488Client : IDisposable
     {
         if ( string.IsNullOrEmpty( message ) ) return 0;
         (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
-        if ( writeResponse.Error.value != OncRpcException.OncRpcSuccess )
-            throw new OncRpcException( writeResponse.Error.value );
+        if ( writeResponse.Error.Value != OncRpcException.OncRpcSuccess )
+            throw new OncRpcException( writeResponse.Error.Value );
         else
             return writeResponse.Size;
     }
@@ -329,9 +329,9 @@ public class Ieee488Client : IDisposable
     {
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
         (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
-        if ( writeResponse.Error.value != OncRpcException.OncRpcSuccess )
+        if ( writeResponse.Error.Value != OncRpcException.OncRpcSuccess )
         {
-            var ex = new OncRpcException( writeResponse.Error.value );
+            var ex = new OncRpcException( writeResponse.Error.Value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, sending {message} to {this._coreClient.Client.Host}:{this._coreClient.Client.Port}");
         }
         else
@@ -362,8 +362,8 @@ public class Ieee488Client : IDisposable
     public string Read( bool trimEnd = false )
     {
         DeviceReadResp readResponse = this.Receive();
-        if ( (readResponse.Error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
-            throw new OncRpcException( readResponse.Error.value );
+        if ( (readResponse.Error?.Value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
+            throw new OncRpcException( readResponse.Error.Value );
         else
         {
             int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
@@ -380,9 +380,9 @@ public class Ieee488Client : IDisposable
     public (bool success, string response) TryRead( bool trimEnd = false )
     {
         DeviceReadResp readResponse = this.Receive();
-        if ( (readResponse.Error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
+        if ( (readResponse.Error?.Value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
         {
-            var ex = new OncRpcException( readResponse.Error.value );
+            var ex = new OncRpcException( readResponse.Error.Value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, reading from {this._coreClient.Client.Host}:{this._coreClient.Client.Port}");
         }
         else
@@ -423,10 +423,10 @@ public class Ieee488Client : IDisposable
     {
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
         (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
-        if ( writeResponse.Error.value != OncRpcException.OncRpcSuccess )
-            throw new OncRpcException( writeResponse.Error.value );
-        else if ( (readResponse.Error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
-            throw new OncRpcException( readResponse.Error.value );
+        if ( writeResponse.Error.Value != OncRpcException.OncRpcSuccess )
+            throw new OncRpcException( writeResponse.Error.Value );
+        else if ( (readResponse.Error?.Value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
+            throw new OncRpcException( readResponse.Error.Value );
         else
         {
             int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
@@ -462,14 +462,14 @@ public class Ieee488Client : IDisposable
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
 
         (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
-        if ( writeResponse.Error.value != OncRpcException.OncRpcSuccess )
+        if ( writeResponse.Error.Value != OncRpcException.OncRpcSuccess )
         {
-            var ex = new OncRpcException( writeResponse.Error.value );
+            var ex = new OncRpcException( writeResponse.Error.Value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, sending {message} to {this._coreClient.Client.Host} : {this._coreClient.Client.Port}");
         }
-        else if ( (readResponse.Error?.value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
+        else if ( (readResponse.Error?.Value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
         {
-            var ex = new OncRpcException( readResponse.Error.value );
+            var ex = new OncRpcException( readResponse.Error.Value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, querying {message} from {this._coreClient.Client.Host} : {this._coreClient.Client.Port}");
         }
         else

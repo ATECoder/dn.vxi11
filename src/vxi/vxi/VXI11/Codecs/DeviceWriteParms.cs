@@ -1,10 +1,11 @@
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
-/// The <see cref="DeviceWriteParms"/> class defines the request XDR
-/// codec for the <see cref="Vxi11MessageConstants.DeviceWriteProcedure"/> RPC message.
+/// The <see cref="DeviceWriteParms"/> class defines the request XDR codec for the <see cref="Vxi11MessageConstants.DeviceWriteProcedure"/>
+/// RPC message.
 /// </summary>
-/// <remarks>   Renamed from <c>Device_WriteParms</c>. <para>
+/// <remarks>
+/// Renamed from <c>Device_WriteParms</c>. <para>
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_WriteParms {
@@ -15,6 +16,14 @@ namespace cc.isr.VXI11.Codecs;
 ///    opaque data; /* the data length and the data itself */
 /// };
 /// </code>
+/// The network instrument server has indirect control over the maximum size of data through the
+/// value of
+/// <see cref="CreateLinkResp.MaxReceiveSize"/> returned in <see cref="Vxi11MessageConstants.CreateLinkProcedure"/>
+/// .
+/// If a controller needs to send greater than <see cref="CreateLinkResp.MaxReceiveSize"/> bytes
+/// to the device at one time, then the network instrument client makes multiple calls to <see cref="Vxi11MessageConstants.DeviceWriteProcedure"/>
+/// to accomplish the complete transaction. A network instrument server accepts at least 1024
+/// bytes in a single <see cref="Vxi11MessageConstants.DeviceWriteProcedure"/> call. 
 /// </remarks>
 public class DeviceWriteParms : IXdrCodec
 {
@@ -35,6 +44,9 @@ public class DeviceWriteParms : IXdrCodec
     public DeviceFlags Flags { get; set; }
 
     /// <summary>   Gets or sets the data. </summary>
+    /// <remarks> 
+    /// Associate an END message (?EOI) with the last byte in data when the end flag in flags is set.
+    /// </remarks>
     /// <value> The data. </value>
     public byte[] Data { get; set; }
 

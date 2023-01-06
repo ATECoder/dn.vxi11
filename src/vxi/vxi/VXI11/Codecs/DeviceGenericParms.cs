@@ -20,6 +20,8 @@ namespace cc.isr.VXI11.Codecs
     ///    unsigned long io_timeout;    /* time to wait for I/O */
     /// };
     /// </code>
+    /// The generic parameter is used by several of the RPCs to pass the link ID, the operation flags, and the
+    /// timeout value to the device.
     /// </remarks>
     public class DeviceGenericParms : IXdrCodec
     {

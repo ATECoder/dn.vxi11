@@ -187,8 +187,8 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
 
         this.InterfaceDevice = new Ieee488InterfaceDevice( linkInfo.Device );
         result.ErrorCode = this.InterfaceDevice.IsValid()
-            ? new DeviceErrorCode() { value = OncRpcException.OncRpcSuccess }
-            : new DeviceErrorCode() { value = OncRpcException.OncRpcSystemError };
+            ? new DeviceErrorCode() { Value = OncRpcException.OncRpcSuccess }
+            : new DeviceErrorCode() { Value = OncRpcException.OncRpcSystemError };
         return result;
     }
 
@@ -315,7 +315,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         if ( !this._asyncLocker.WaitOne( this.WaitOnOutTime ) )
         {
             readRes.Data = this._readBuffer;
-            readRes.Error = new DeviceErrorCode() { value = OncRpcException.OncRpcProgramNotAvailable }; // timeout
+            readRes.Error = new DeviceErrorCode() { Value = OncRpcException.OncRpcProgramNotAvailable }; // timeout
             readRes.Reason = 3;
             return readRes;
         }
@@ -323,7 +323,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         if ( this.CurrentOperationType == Ieee488OperationType.Read )
         {
             readRes.Data = this._readBuffer;
-            readRes.Error = new DeviceErrorCode() { value = OncRpcException.OncRpcSuccess }; 
+            readRes.Error = new DeviceErrorCode() { Value = OncRpcException.OncRpcSuccess }; 
             readRes.Reason = 3;
         }
         this.CurrentOperationType = Ieee488OperationType.None; //Reset the action type

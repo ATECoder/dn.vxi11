@@ -23,7 +23,9 @@ internal static class Vxi11MessageConstants
     /// Renamed from <c>device_abort_1 = 1</c>. </para> </summary>
     public const int DeviceAbortProcedure = 1;
 
-    /// <summary>  Core channel: opens a link to a device. <para>
+    /// <summary>  Core channel: opens a link to a device and returns a <see cref="Codecs.DeviceLink"/>. <para>
+    /// <para> This link is identified on subsequent RPCs by the a <see cref="Codecs.DeviceLink"/> value
+    /// that is returned from the network instrument server.</para> <para>
     /// Renamed from <c>create_link_1 = 10</c>. </para> </summary>
     public const int CreateLinkProcedure = 10;
 
@@ -72,6 +74,8 @@ internal static class Vxi11MessageConstants
     public const int DeviceDoCommandProcedure = 22;
 
     /// <summary>  Core channel: closes a link to a device. <para>
+    /// This call closes the identified link. The network instrument server recovers resources
+    /// associated with the link. </para> <para>
     /// Renamed from <c>destroy_link_1 = 23</c>. </para> </summary>
     public const int DestroyLinkProcedure = 23;
 

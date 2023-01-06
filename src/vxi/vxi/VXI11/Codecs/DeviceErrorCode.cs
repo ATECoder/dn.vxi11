@@ -3,19 +3,25 @@ using System.ComponentModel;
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
-/// The <see cref="DeviceErrorCode"/> class defines the XDR
-/// codec used with the <see cref="DeviceErrorCode"/> XDR Codec.
+/// The <see cref="DeviceErrorCode"/> class defines the XDR codec used with the <see cref="DeviceErrorCode"/>
+/// XDR Codec.
 /// </summary>
-/// <remarks>   Renamed from <c>Device_ErrorCode</c>. <para>
+/// <remarks>
+/// Renamed from <c>Device_ErrorCode</c>. <para>
 /// VXI-11 Specifications: </para>
 /// <code>
 /// typedef long Device_ErrorCode;
 /// </code>
+/// The result of any remote procedure call is a data structure whose first element has the type
+/// of <see cref="DeviceErrorCode"/>. A value of <see cref="DeviceErrorCodeValue.NoError"/> (0)
+/// indicates that the call was successfully completed and the results are valid. Any other value
+/// indicates that during the execution of the call, the network instrument server detected an
+/// error. All other error codes are reserved.
 /// </remarks>
 public class DeviceErrorCode : IXdrCodec
 {
     /// <summary>   The <see cref="DeviceErrorCodeValue"/>. </summary>
-    public int value {  get; set; }
+    public int Value {  get; set; }
 
     /// <summary>   Default constructor. </summary>
     public DeviceErrorCode()
@@ -26,7 +32,7 @@ public class DeviceErrorCode : IXdrCodec
     /// <param name="value">    The value. </param>
     public DeviceErrorCode( int value )
     {
-        this.value = value;
+        this.Value = value;
     }
 
     /// <summary>   Constructor. </summary>
@@ -42,7 +48,7 @@ public class DeviceErrorCode : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        encoder.EncodeInt( this.value );
+        encoder.EncodeInt( this.Value );
     }
 
     /// <summary>
@@ -51,7 +57,7 @@ public class DeviceErrorCode : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.value = decoder.DecodeInt();
+        this.Value = decoder.DecodeInt();
     }
 }
 

@@ -35,6 +35,11 @@ public class DeviceRemoteFunc : IXdrCodec
     public int ProgVers { get; set; }
 
     /// <summary>   Gets or sets the <see cref="DeviceAddrFamily"/> program family . </summary>
+    /// <remarks>
+    /// Using UDP for the interrupt channel generally provides higher performance, but with the risks
+    /// that some <see cref="Vxi11MessageConstants.DeviceInterruptSrqProcedure"/> RPCs might not
+    /// arrive at all or that they might arrive out of order.
+    /// </remarks>
     /// <value> The <see cref="DeviceAddrFamily"/> program family. </value>
     public int ProgFamily { get; set; }
 

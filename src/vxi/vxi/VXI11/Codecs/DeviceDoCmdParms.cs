@@ -45,8 +45,13 @@ public class DeviceDoCmdParms : IXdrCodec
     public int LockTimeout { get; set; }
 
     /// <summary>   Gets or sets the command; which command to execute. </summary>
+    /// <remarks>
+    /// The value of <see cref="Cmd"/> is compared against the values supported by the network
+    /// instrument server. If the particular value is not supported, the server returns error code
+    /// <see cref="DeviceErrorCodeValue.OperationNotSupported"/> (8).
+    /// </remarks>
     /// <value> The command. </value>
-    public int cmd { get; set; }
+    public int Cmd { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the network order; client's byte order. Network order
@@ -88,7 +93,7 @@ public class DeviceDoCmdParms : IXdrCodec
         this.Flags.Encode( encoder );
         encoder.EncodeInt( this.IOTimeout );
         encoder.EncodeInt( this.LockTimeout );
-        encoder.EncodeInt( this.cmd );
+        encoder.EncodeInt( this.Cmd );
         encoder.EcodeBoolean( this.NetworkOrder );
         encoder.EncodeInt( this.DataSize );
         encoder.EncodeDynamicOpaque( this.DataIn );
@@ -105,7 +110,7 @@ public class DeviceDoCmdParms : IXdrCodec
         this.Flags = new DeviceFlags( decoder );
         this.IOTimeout = decoder.DecodeInt();
         this.LockTimeout = decoder.DecodeInt();
-        this.cmd = decoder.DecodeInt();
+        this.Cmd = decoder.DecodeInt();
         this.NetworkOrder = decoder.DecodeBoolean();
         this.DataSize = decoder.DecodeInt();
         this.DataIn = decoder.DecodeDynamicOpaque();

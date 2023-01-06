@@ -8,10 +8,10 @@ namespace cc.isr.VXI11.Codecs;
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Create_LinkParms {
-///   long clientId;   /* implementation specific value */
-///   bool lockDevice; /* attempt to lock the device */
+///   long clientId;              /* implementation specific value */
+///   bool lockDevice;            /* attempt to lock the device */
 ///   unsigned long lock_timeout; /* time to wait on a lock */
-///   string device; /* name of device */
+///   string device;              /* name of device */
 /// };
 /// </code>
 /// </remarks>
