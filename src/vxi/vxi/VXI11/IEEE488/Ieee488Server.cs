@@ -383,7 +383,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                 return String.Equals( scpiAtt.Content, spciCommand, StringComparison.OrdinalIgnoreCase );
             } );
 
-            if ( method != null )
+            if ( method is not null )
             {
                 Ieee488Attribute scpiAtt = ( Ieee488Attribute ) method.GetCustomAttribute( typeof( Ieee488Attribute ) )!;
                 try
@@ -403,7 +403,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                         case Ieee488OperationType.Read://Query instructions
                             this.WriteMessage = scpiCommands[n];
                             res = method.Invoke( this._device, scpiArgs );
-                            if ( res != null )
+                            if ( res is not null )
                             {
                                 this.ReadMessage = res.ToString();
                                 this._readBuffer = this.EncodingRule.GetBytes( res.ToString()! );

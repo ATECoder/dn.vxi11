@@ -72,7 +72,7 @@ public class Ieee488Client : IDisposable
     {
         this.Connected = false;
         DeviceError deviceError = new();
-        if ( this._link != null )
+        if ( this._link is not null )
             try
             {
                 deviceError = this._coreClient?.DestroyLink( this._link );

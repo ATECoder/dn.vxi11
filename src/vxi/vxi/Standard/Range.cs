@@ -318,7 +318,7 @@ internal static class RuntimeHelpers
 
         (int offset, int length) = range.GetOffsetAndLength( array.Length );
 
-        if ( default( T ) != null || typeof( T[] ) == array.GetType() )
+        if ( default( T ) is not null || typeof( T[] ) == array.GetType() )
         {
             // We know the type of the array to be exactly T[].
 
