@@ -412,6 +412,14 @@ public class Ieee488Client : IDisposable
 
     #region " Query "
 
+
+    /// <summary>   Gets or sets the default encoding. </summary>
+    /// <remarks>
+    /// The default encoding for VXI-11 is <see cref="Encoding.ASCII"/>, which is a subset of <see cref="Encoding.UTF8"/>
+    /// </remarks>
+    /// <value> The default encoding. </value>
+    public static Encoding DefaultEncoding { get; set; } = Encoding.UTF8;
+
     /// <summary>   Sends a query message to and receives a message from the VXI-11 server. </summary>
     /// <remarks>   2022-12-13. </remarks>
     /// <exception cref="OncRpcException">  Thrown when an OncRpc error condition occurs. </exception>
@@ -422,7 +430,7 @@ public class Ieee488Client : IDisposable
     public (bool success, string response) Query( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
-        (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
+        (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( DefaultEncoding.GetBytes( message ), millisecondsReadDelay );
         if ( writeResponse.Error.Value != OncRpcException.OncRpcSuccess )
             throw new OncRpcException( writeResponse.Error.Value );
         else if ( (readResponse.Error?.Value).GetValueOrDefault( OncRpcException.OncRpcSuccess ) != OncRpcException.OncRpcSuccess )
@@ -431,7 +439,7 @@ public class Ieee488Client : IDisposable
         {
             int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
             return length > 0
-                ? (true, Encoding.Default.GetString( readResponse.Data, 0, length ))
+                ? (true, DefaultEncoding.GetString( readResponse.Data, 0, length ))
                 : (true, string.Empty);
         }
     }

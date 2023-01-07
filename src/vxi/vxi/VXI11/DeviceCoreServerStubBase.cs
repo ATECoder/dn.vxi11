@@ -24,6 +24,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
     }
 
     /// <summary>   Constructor. </summary>
+    /// <remarks>   2023-01-06. </remarks>
     /// <param name="bindAddr"> The bind address. </param>
     /// <param name="port">     The port. </param>
     public DeviceCoreServerStubBase( IPAddress bindAddr, int port )
@@ -38,6 +39,8 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
             new OncRpcTcpServerTransport(this, bindAddr, port, info, OncRpcServerTransportBase.DefaultBufferSize)
         };
         this.SetTransports( transports );
+
+        this.CharacterEncoding = DeviceCoreClient.DefaultEncoding;
     }
 
     /// <summary>   Dispatch (handle) an ONC/RPC request from a client. </summary>

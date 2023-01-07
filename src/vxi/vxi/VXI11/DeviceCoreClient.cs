@@ -88,6 +88,13 @@ public class DeviceCoreClient : OncRpcClientStubBase
     {
     }
 
+    /// <summary>   Gets or sets the default encoding. </summary>
+    /// <remarks>
+    /// The default encoding for VXI-11 is <see cref="Encoding.ASCII"/>, which is a subset of <see cref="Encoding.UTF8"/>
+    /// </remarks>
+    /// <value> The default encoding. </value>
+    public static Encoding DefaultEncoding { get; set; } = Encoding.UTF8;
+
     /// <summary>
     /// Calls remote procedure <see cref="Vxi11MessageConstants.CreateLinkProcedure"/>; Opens a link
     /// to a device.
