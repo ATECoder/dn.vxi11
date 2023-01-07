@@ -23,7 +23,7 @@ namespace cc.isr.VXI11.IEEE488;
 public partial class Ieee488Server : DeviceCoreServerStubBase
 {
 
-    #region " Construction and Cleanup "
+    #region " construction and cleanup "
 
     /// <summary>
     /// current device

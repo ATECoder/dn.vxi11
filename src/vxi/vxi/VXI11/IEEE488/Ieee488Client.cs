@@ -10,7 +10,7 @@ namespace cc.isr.VXI11.IEEE488;
 public class Ieee488Client : IDisposable
 {
 
-    #region " Construction and Cleanup "
+    #region " construction and cleanup "
 
     private DeviceCoreClient _coreClient;
     private DeviceLink _link;

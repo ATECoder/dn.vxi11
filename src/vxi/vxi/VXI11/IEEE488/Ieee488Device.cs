@@ -7,7 +7,7 @@ namespace cc.isr.VXI11.IEEE488;
 public partial class Ieee488Device : IIeee488Device
 {
 
-    #region " Construction and Cleanup "
+    #region " construction and cleanup "
 
     /// <summary>   Constructor. </summary>
     /// <remarks>   2022-12-13. </remarks>
