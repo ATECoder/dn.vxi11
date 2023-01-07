@@ -1,5 +1,6 @@
 using System.Net;
 
+using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11;
