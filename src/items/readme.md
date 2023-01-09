@@ -31,6 +31,10 @@ For information on using [ISR's VXI11] see the repository [ISR's VXI11 IEEE488] 
 * the xdrAble interface was renamed to IXdrCodec;
 * The xdr prefixes were removed from the codec methods;
 * Uppercase constant names were converted to Pascal casing while retaining the original constant names in the code documentation;
+* The namespace of the ONC/REPC client classes was changed fro isr.cc.ONC.RPC.Clients;
+* Getters and setters, such as Get and Set Character Encoding, where changed to properties where possible.
+* Static constant classes where converted to Enum constructs.
+
 
 ## Feedback
 

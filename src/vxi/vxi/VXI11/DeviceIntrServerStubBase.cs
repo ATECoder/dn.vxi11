@@ -80,7 +80,7 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
     /// </summary>
     /// <remarks>   <para>
     /// Renamed from <c>device_intr_srq_1</c> </para>. </remarks>
-    /// <exception cref="OncRpcException">          Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <exception cref="DeviceException">          Thrown when an ONC/RPC error condition occurs. </exception>
     /// <exception cref="System.IO.IOException">    Thrown when an I/O error condition occurs. </exception>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceSrqParms"/>) to the remote procedure call.. </param>
     public abstract void DeviceIntrSrq( DeviceSrqParms arg1 );

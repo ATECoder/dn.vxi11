@@ -11,13 +11,7 @@ using cc.isr.VXI11.Codecs;
 namespace cc.isr.VXI11.IEEE488;
 
 /// <summary>   An IEEE488 server. </summary>
-/// <remarks>   2022-12-15. 
-/// <list type="bullet">Mapped error codes:<item>
-/// <see cref="OncRpcException.OncRpcSuccess"/> -- Visa32.VISA.VI_SUCCESS</item><item>
-/// <see cref="OncRpcException.OncRpcSystemError"/> -- Visa32.VISA.VI_ERROR_SYSTEM_ERROR</item><item>
-/// <see cref="OncRpcException.OncRpcProgramNotAvailable"/> -- Visa32.VISA.VI_ERROR_INV_EXPR</item><item>
-/// </item>
-/// </list>
+/// <remarks>   
 /// Closing a client connected to the Mock local server no longer throws an exception when destroying the link.
 /// </remarks>
 public partial class Ieee488Server : DeviceCoreServerStubBase
@@ -123,13 +117,15 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
 
     #region " IEEE488 properties "
 
-    private Encoding _encodingRule = Encoding.ASCII;
-    /// <summary>   Encoding rules Default ASCII. </summary>
-    /// <value> The encoding rule. </value>
-    public Encoding EncodingRule
+    /// <summary>
+    /// Gets or sets the encoding to use when serializing strings. If <see langword="null" />, the
+    /// system's default encoding is to be used.
+    /// </summary>
+    /// <value> The character encoding. </value>
+    public override Encoding CharacterEncoding
     {
-        get => this._encodingRule;
-        set => _ = this.SetProperty( ref this._encodingRule , value );
+        get => base.CharacterEncoding;
+        set => _ = this.SetProperty( base.CharacterEncoding!, value, () => base.CharacterEncoding = value );
     }
 
     private int _waitOnOutTime = 1000;
@@ -171,7 +167,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
 
     #region " LXI-11 ONC/RPC Calls "
 
-    private int _lidID = 0;
+    private int _linkId = 0;
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>   2022-12-15. </remarks>
@@ -180,15 +176,15 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     public override CreateLinkResp CreateLink( CreateLinkParms linkInfo )
     {
         CreateLinkResp result = new();
-        this._lidID++;
-        result.DeviceLinkId = new DeviceLink() { Value = _lidID };
+        this._linkId++;
+        result.DeviceLinkId = new DeviceLink() { Value = _linkId };
 
         Logger.Writer.ConsoleWriteMessage( $"creating link to {linkInfo.Device}" );
 
         this.InterfaceDevice = new Ieee488InterfaceDevice( linkInfo.Device );
         result.ErrorCode = this.InterfaceDevice.IsValid()
-            ? new DeviceErrorCode() { Value = OncRpcException.OncRpcSuccess }
-            : new DeviceErrorCode() { Value = OncRpcException.OncRpcSystemError };
+            ? new DeviceErrorCode() { Value = DeviceErrorCodeValue.NoError }
+            : new DeviceErrorCode() { Value = DeviceErrorCodeValue.InvalidLinkIdentifier };
         return result;
     }
 
@@ -207,7 +203,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     /// <returns>   The new interrupt channel 1. </returns>
     public override DeviceError CreateIntrChan( DeviceRemoteFunc deviceRemoteFunction )
     {
-        DeviceError result = new() { Error = new DeviceErrorCode( OncRpcException.OncRpcSuccess ) };
+        DeviceError result = new() { Error = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
         return result;
     }
 
@@ -315,16 +311,16 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         if ( !this._asyncLocker.WaitOne( this.WaitOnOutTime ) )
         {
             readRes.Data = this._readBuffer;
-            readRes.Error = new DeviceErrorCode() { Value = OncRpcException.OncRpcProgramNotAvailable }; // timeout
-            readRes.Reason = 3;
+            readRes.Error = new DeviceErrorCode() { Value = DeviceErrorCodeValue.IOError }; // timeout
+            readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
             return readRes;
         }
 
         if ( this.CurrentOperationType == Ieee488OperationType.Read )
         {
             readRes.Data = this._readBuffer;
-            readRes.Error = new DeviceErrorCode() { Value = OncRpcException.OncRpcSuccess }; 
-            readRes.Reason = 3;
+            readRes.Error = new DeviceErrorCode() { Value = DeviceErrorCodeValue.NoError }; 
+            readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
         }
         this.CurrentOperationType = Ieee488OperationType.None; //Reset the action type
         return readRes;
@@ -337,9 +333,9 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     public override DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters )
     {
         // get the write command.
-        string cmd = this.EncodingRule.GetString( deviceWriteParameters.Data );
+        string cmd = this.CharacterEncoding.GetString( deviceWriteParameters.Data );
         Logger.Writer.ConsoleWriteMessage( $"link ID: {deviceWriteParameters.DeviceLinkId.Value} -> Received：{cmd}" );
-        DeviceWriteResp result = new() { Error = new DeviceErrorCode( OncRpcException.OncRpcSuccess ) };
+        DeviceWriteResp result = new() { Error = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
 
         // holds one or more SCPI commands each with its arguments
         string[] scpiCommands = cmd.Split( new char[] { '\n', '\r', ';' }, StringSplitOptions.RemoveEmptyEntries );
@@ -347,7 +343,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         if ( scpiCommands.Length == 0 )
         {
             // The instruction is incorrect or undefined
-            result.Error = new DeviceErrorCode( OncRpcException.OncRpcProgramNotAvailable ); 
+            result.Error = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError ); 
             return result;
         }
 
@@ -398,7 +394,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                             this.WriteMessage = scpiCommands[n];
                             // invoke the corresponding method
                             res = method.Invoke( this._device, scpiArgs );
-                            result.Error = new DeviceErrorCode( OncRpcException.OncRpcSuccess ); 
+                            result.Error = new DeviceErrorCode( DeviceErrorCodeValue.NoError ); 
                             break;
                         case Ieee488OperationType.Read://Query instructions
                             this.WriteMessage = scpiCommands[n];
@@ -406,14 +402,14 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                             if ( res is not null )
                             {
                                 this.ReadMessage = res.ToString();
-                                this._readBuffer = this.EncodingRule.GetBytes( res.ToString()! );
+                                this._readBuffer = this.CharacterEncoding.GetBytes( res.ToString()! );
                                 Logger.Writer.ConsoleWriteMessage( $"Query results： {res}。" );
                             }
                             else
                             {
                                 this.ReadMessage = "null";
                                 Logger.Writer.ConsoleWriteMessage( "Query results：NULL。" );
-                                result.Error = new DeviceErrorCode( OncRpcException.OncRpcSuccess );
+                                result.Error = new DeviceErrorCode( DeviceErrorCodeValue.NoError );
                             }
                             break;
                     }
@@ -421,14 +417,14 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                 catch ( Exception ex )
                 {
                     Logger.Writer.ConsoleWriteException( $"An error occurred when the method was called：{method}",ex );
-                    //Parameter error
-                    result.Error = new DeviceErrorCode( OncRpcException.OncRpcProgramNotAvailable ); 
+                    // Parameter error
+                    result.Error = new DeviceErrorCode( DeviceErrorCodeValue.ParameterError ); 
                 }
             }
             else
             {
                 Logger.Writer.ConsoleWriteMessage( $"No method found： {spciCommand}", ConsoleColor.DarkYellow );
-                result.Error = new DeviceErrorCode( OncRpcException.OncRpcProcedureNotAvailable ); // The instruction is incorrect or undefined
+                result.Error = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError ); // The instruction is incorrect or undefined
                 this.CurrentOperationType = Ieee488OperationType.None;
             }
             _ = this._asyncLocker.Set();//Reset block
@@ -478,7 +474,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         {
             Logger.Writer.ConsoleWriteException( "ERROR: failed:", e );
         }
-        catch ( OncRpcException e )
+        catch ( DeviceException e )
         {
             Logger.Writer.ConsoleWriteException( "ERROR: failed:", e );
         }

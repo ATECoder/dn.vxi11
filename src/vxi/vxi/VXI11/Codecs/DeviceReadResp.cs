@@ -27,7 +27,7 @@ public class DeviceReadResp : IXdrCodec
     /// conditions is encountered.
     /// </remarks>
     /// <value> The reason(s) read completed. </value>
-    public int Reason { get; set; }
+    public DeviceReadReasons Reason { get; set; }
 
     /// <summary>   Gets or sets the data. </summary>
     /// <remarks>
@@ -60,7 +60,7 @@ public class DeviceReadResp : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.Error.Encode( encoder );
-        encoder.EncodeInt( this.Reason );
+        encoder.EncodeInt( ( int ) this.Reason );
         encoder.EncodeDynamicOpaque( this.Data );
     }
 
@@ -71,7 +71,7 @@ public class DeviceReadResp : IXdrCodec
     public void Decode( XdrDecodingStreamBase decoder )
     {
         this.Error = new DeviceErrorCode( decoder );
-        this.Reason = decoder.DecodeInt();
+        this.Reason = (DeviceReadReasons ) decoder.DecodeInt();
         this.Data = decoder.DecodeDynamicOpaque();
     }
 
@@ -86,7 +86,7 @@ public class DeviceReadResp : IXdrCodec
 /// a. If an END indicator is read. The END bit in reason is set. </item><item>
 /// b. If <see cref="DeviceReadParms.RequestSize"/> bytes are transferred. The <see cref="DeviceReadReasons.RequestCountIndicator"/>   
 /// (<c>REQCNT</c>) bit in reason is set. This termination condition is be used if <see cref="DeviceReadParms.RequestSize"/> is zero. </item><item>
-/// c. If <see cref="DeviceOperationFlag.TerminationCharacterSet"/> is set in <see cref="DeviceReadParms.Flags"/> and a   
+/// c. If <see cref="DeviceOperationFlags.TerminationCharacterSet"/> is set in <see cref="DeviceReadParms.Flags"/> and a   
 /// character which matches <see cref="DeviceReadParms.TermChar"/> is transferred. 
 /// The <see cref="DeviceReadReasons.TermCharIndicator"/> (<c>CHR</c>) bit in reason is set. </item><item>
 /// d. If the buffer used to return the response is full. No bits in reason are set.</item></list></item><item>
@@ -99,12 +99,17 @@ public enum DeviceReadReasons
 {
     Unknown = 0,
 
-    /// <summary>   A binary constant representing the request count indicator flag. </summary>
+    /// <summary>   A binary constant representing the request count indicator flag.
+    /// This bit is set if <see cref="DeviceReadParms.RequestSize"/> bytes are transferred </summary>
     RequestCountIndicator = 1,
 
-    /// <summary>   A binary constant representing the term Character indicator flag. </summary>
+    /// <summary>   A binary constant representing the termination Character indicator flag. 
+    /// this bit is set if <see cref="DeviceOperationFlags.TerminationCharacterSet"/> is set in
+    /// <see cref="DeviceReadParms.Flags"/> and a character which matches <see cref="DeviceReadParms.TermChar"/> is transferred
+    ///  </summary>
     TermCharIndicator = 2,
 
-    /// <summary>   A binary constant representing the end indicator flag. </summary>
+    /// <summary>   A binary constant representing the end indicator flag.
+    /// This bit is set if an END indicator is read. </summary>
     EndIndicator = 4,
 }

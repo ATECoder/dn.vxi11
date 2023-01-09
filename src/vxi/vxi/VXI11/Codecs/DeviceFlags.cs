@@ -16,9 +16,9 @@ namespace cc.isr.VXI11.Codecs;
 public class DeviceFlags : IXdrCodec
 {
 
-    /// <summary>   Gets or sets the <see cref="DeviceOperationFlag"/> value. </summary>
+    /// <summary>   Gets or sets the <see cref="DeviceOperationFlags"/> value. </summary>
     /// <value> The value. </value>
-    public int value { get; set; }
+    public DeviceOperationFlags Value { get; set; }
 
     /// <summary>   Default constructor. </summary>
     public DeviceFlags()
@@ -26,10 +26,10 @@ public class DeviceFlags : IXdrCodec
     }
 
     /// <summary>   Constructor. </summary>
-    /// <param name="value">    The value. </param>
-    public DeviceFlags( int value )
+    /// <param name="value">    The <see cref="DeviceOperationFlags"/> value. </param>
+    public DeviceFlags( DeviceOperationFlags value )
     {
-        this.value = value;
+        this.Value = value;
     }
 
     /// <summary>   Constructor. </summary>
@@ -45,7 +45,7 @@ public class DeviceFlags : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        encoder.EncodeInt( this.value );
+        encoder.EncodeInt( ( int ) this.Value );
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ public class DeviceFlags : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.value = decoder.DecodeInt();
+        this.Value = ( DeviceOperationFlags ) decoder.DecodeInt();
     }
 
 }
@@ -66,7 +66,8 @@ public class DeviceFlags : IXdrCodec
 /// use.Controllers send undefined bits as zero (0). These flags are sent from the network
 /// instrument client to the network instrument server as parameters to several of the RPCs.
 /// </remarks>
-public enum DeviceOperationFlag
+[Flags]
+public enum DeviceOperationFlags
 {
     None = 0,
 

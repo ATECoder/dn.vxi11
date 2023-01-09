@@ -45,12 +45,12 @@ public class DeviceReadParms : IXdrCodec
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
 
-    /// <summary>   Gets or sets the flags with <see cref="DeviceOperationFlag"/> options. </summary>
+    /// <summary>   Gets or sets the flags with <see cref="DeviceOperationFlags"/> options. </summary>
     /// <value> The flags. </value>
     public DeviceFlags Flags { get; set; }
 
     /// <summary>
-    /// Gets or sets the termination character; valid if flags <see cref="DeviceOperationFlag.TerminationCharacterSet"/>
+    /// Gets or sets the termination character; valid if flags <see cref="DeviceOperationFlags.TerminationCharacterSet"/>
     /// is set.
     /// </summary>
     /// <value> The term character. </value>

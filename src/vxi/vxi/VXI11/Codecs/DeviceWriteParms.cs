@@ -39,7 +39,7 @@ public class DeviceWriteParms : IXdrCodec
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
 
-    /// <summary>   Gets or sets the option <see cref="DeviceOperationFlag"/> flags. </summary>
+    /// <summary>   Gets or sets the option <see cref="DeviceOperationFlags"/> flags. </summary>
     /// <value> The flags. </value>
     public DeviceFlags Flags { get; set; }
 

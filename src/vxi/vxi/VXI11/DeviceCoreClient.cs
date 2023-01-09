@@ -21,7 +21,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
     /// remote program can be accessed.
     /// </summary>
-    /// <exception cref="OncRpcException">          Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <exception cref="DeviceException">          Thrown when an ONC/RPC error condition occurs. </exception>
     /// <exception cref="System.IO.IOException">    Thrown when an I/O error condition occurs. </exception>
     /// <param name="host">     The Internet address of host where to contact the remote program.. </param>
     /// <param name="protocol"> The <see cref="OncRpcProtocols"/> protocol to be used for ONC/RPC calls. </param>
@@ -34,7 +34,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/> 
     /// remote program can be accessed. 
     /// </summary>
-    /// <exception cref="OncRpcException">          Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <exception cref="DeviceException">          Thrown when an ONC/RPC error condition occurs. </exception>
     /// <exception cref="System.IO.IOException">    Thrown when an I/O error condition occurs. </exception>
     /// <param name="host">     The Internet address of host where to contact the remote program. </param>
     /// <param name="port">     The Port number at host where the remote program can be reached. </param>
@@ -49,7 +49,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
     /// remote program can be accessed.
     /// </summary>
-    /// <exception cref="OncRpcException">          Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <exception cref="DeviceException">          Thrown when an ONC/RPC error condition occurs. </exception>
     /// <exception cref="System.IO.IOException">    Thrown when an I/O error condition occurs. </exception>
     /// <param name="client">   The ONC/RPC client connection object implementing a particular protocol. </param>
     public DeviceCoreClient( OncRpcClientBase client ) : base( client )
@@ -60,7 +60,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
     /// remote program can be accessed.
     /// </summary>
-    /// <exception cref="OncRpcException">          Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <exception cref="DeviceException">          Thrown when an ONC/RPC error condition occurs. </exception>
     /// <exception cref="System.IO.IOException">    Thrown when an I/O error condition occurs. </exception>
     /// <param name="host">     The Internet address of host where to contact the remote program. </param>
     /// <param name="program">  The Remote program number. </param>
@@ -75,7 +75,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
     /// remote program can be accessed.
     /// </summary>
-    /// <exception cref="OncRpcException">          Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <exception cref="DeviceException">          Thrown when an ONC/RPC error condition occurs. </exception>
     /// <exception cref="System.IO.IOException">    Thrown when an I/O error condition occurs. </exception>
     /// <remarks>   2023-01-04. </remarks>
     /// <param name="host">     The Internet address of host where to contact the remote program. </param>
