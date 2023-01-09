@@ -80,8 +80,7 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     /// </summary>
     /// <remarks>   <para>
     /// Renamed from <c>device_abort_1</c> </para>. </remarks>
-    /// <exception cref="DeviceException">          Thrown when an ONC/RPC error condition occurs. </exception>
-    /// <exception cref="System.IO.IOException">    Thrown when an I/O error condition occurs. </exception>
+    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLink"/>) to the remote procedure call.. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
     public abstract DeviceError DeviceAbort( DeviceLink arg1 );
