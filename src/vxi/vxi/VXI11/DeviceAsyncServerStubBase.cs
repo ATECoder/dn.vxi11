@@ -28,14 +28,14 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     /// <param name="port">     The port. </param>
     public DeviceAsyncServerStubBase( IPAddress bindAddr, int port )
     {
-        OncRpcServerTransportRegistrationInfo[] info = new OncRpcServerTransportRegistrationInfo[] {
-            new OncRpcServerTransportRegistrationInfo(Vxi11ProgramConstants.DeviceAsyncProgram, Vxi11ProgramConstants.DeviceAsyncVersion),
+        OncRpcProgramInfo[] info = new OncRpcProgramInfo[] {
+            new OncRpcProgramInfo(Vxi11ProgramConstants.DeviceAsyncProgram, Vxi11ProgramConstants.DeviceAsyncVersion),
         };
         this.SetTransportRegistrationInfo( info );
 
-        OncRpcServerTransportBase[] transports = new OncRpcServerTransportBase[] {
-        new OncRpcUdpServerTransport(this, bindAddr, port, info, OncRpcServerTransportBase.DefaultBufferSize),
-        new OncRpcTcpServerTransport(this, bindAddr, port, info, OncRpcServerTransportBase.DefaultBufferSize)
+        OncRpcTransportBase[] transports = new OncRpcTransportBase[] {
+        new OncRpcUdpTransport(this, bindAddr, port, info, OncRpcTransportBase.DefaultBufferSize),
+        new OncRpcTcpTransport(this, bindAddr, port, info, OncRpcTransportBase.DefaultBufferSize)
         };
         this.SetTransports( transports );
     }
@@ -54,7 +54,7 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     /// <param name="program">      Program number requested by client. </param>
     /// <param name="version">      Version number requested. </param>
     /// <param name="procedure">    <see cref="Vxi11MessageConstants">procedure</see>/> number requested. </param>
-    public void DispatchOncRpcCall( OncRpcCallInformation call, int program, int version, int procedure )
+    public void DispatchOncRpcCall( OncRpcCallHandler call, int program, int version, int procedure )
     {
         if ( version == Vxi11ProgramConstants.DeviceInterruptVersion )
             switch ( procedure )

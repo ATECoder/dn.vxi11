@@ -29,14 +29,14 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
     /// <param name="port">     The port. </param>
     public DeviceCoreServerStubBase( IPAddress bindAddr, int port )
     {
-        OncRpcServerTransportRegistrationInfo[] info = new OncRpcServerTransportRegistrationInfo[] {
-            new OncRpcServerTransportRegistrationInfo(Vxi11ProgramConstants.DeviceCoreProgram, Vxi11ProgramConstants.DeviceCoreVersion),
+        OncRpcProgramInfo[] info = new OncRpcProgramInfo[] {
+            new OncRpcProgramInfo(Vxi11ProgramConstants.DeviceCoreProgram, Vxi11ProgramConstants.DeviceCoreVersion),
         };
         this.SetTransportRegistrationInfo( info );
 
-        OncRpcServerTransportBase[] transports = new OncRpcServerTransportBase[] {
+        OncRpcTransportBase[] transports = new OncRpcTransportBase[] {
             // new OncRpcUdpServerTransport(this, bindAddr, port+2, info, 32768),
-            new OncRpcTcpServerTransport(this, bindAddr, port, info, OncRpcServerTransportBase.DefaultBufferSize)
+            new OncRpcTcpTransport(this, bindAddr, port, info, OncRpcTransportBase.DefaultBufferSize)
         };
         this.SetTransports( transports );
 
@@ -57,7 +57,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
     /// <param name="program">      Program number requested by client. </param>
     /// <param name="version">      Version number requested. </param>
     /// <param name="procedure">    Procedure number requested. </param>
-    public void DispatchOncRpcCall( OncRpcCallInformation call, int program, int version, int procedure )
+    public void DispatchOncRpcCall( OncRpcCallHandler call, int program, int version, int procedure )
     {
         if ( version == Vxi11ProgramConstants.DeviceCoreVersion )
             switch ( ( Vxi11MessageConstants ) procedure )

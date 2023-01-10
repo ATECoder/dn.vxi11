@@ -16,6 +16,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vxi", "vxi", "{B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rpc", "rpc", "{335AEC84-3DED-4726-8022-30E175D3769A}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\oncrpc\onc.rpc.md = ..\..\oncrpc\onc.rpc.md
+		..\..\oncrpc\src\items\readme.md = ..\..\oncrpc\src\items\readme.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ieee488", "ieee488", "{017BDF05-9FF6-45D6-86F3-327FE5F00CB4}"
 EndProject
