@@ -20,10 +20,9 @@ public class DeviceException : Exception
     /// </summary>
     /// <param name="reason">  The detail reason. </param>
     /// <param name="message"> The detail message. </param>
-    public DeviceException( DeviceErrorCodeValue reason, string message ) : base()
+    public DeviceException( DeviceErrorCodeValue reason, string message ) : base( message )
     {
         this.Reason = reason;
-        this._message = message;
     }
 
     /// <summary>
@@ -32,20 +31,45 @@ public class DeviceException : Exception
     /// <remarks>   The detail message is derived automatically from the <paramref name="reason"/>. </remarks>
     /// <param name="reason">   The reason. This can be one of the constants -- oops, that should be
     ///                         "public final static integers" -- defined in this interface. </param>
-    public DeviceException( DeviceErrorCodeValue reason ) : base()
+    public DeviceException( DeviceErrorCodeValue reason ) : base( Support.GetDescription( reason ) )
     {
         this.Reason = reason;
-        this._message = Support.GetDescription( reason );
     }
 
-    private readonly string _message;
+    /// <summary>
+    /// Constructs an <see cref="DeviceException"/> with the specified detail reason and inner exception.
+    /// </summary>
+    /// <remarks>   2023-01-09. </remarks>
+    /// <param name="reason">           The detail reason. </param>
+    /// <param name="innerException">   The inner exception. </param>
+    public DeviceException( DeviceErrorCodeValue reason, Exception innerException ) : base( Support.GetDescription( reason ), innerException )
+    {
+        this.Reason = reason;
+    }
 
-    /// <summary>   Returns the error message string of this ONC/RPC object. </summary>
-    /// <value>
-    /// The error message string of this <see cref="DeviceException"/>
-    /// object if it was created either with an error message string or an ONC/RPC error code.
-    /// </value>
-    public override string Message => this._message;
+    /// <summary>
+    /// Constructs an <see cref="DeviceException"/> with the specified detail reason, suffix message and inner exception.
+    /// </summary>
+    /// <remarks>   2023-01-09. </remarks>
+    /// <param name="suffixMessage">    Message describing the suffix. </param>
+    /// <param name="reason">           The detail reason. </param>
+    /// <param name="innerException">   The inner exception. </param>
+    public DeviceException( string suffixMessage, DeviceErrorCodeValue reason,
+                            Exception innerException ) : base( Support.GetDescription( reason ) + suffixMessage, innerException )
+    {
+        this.Reason = reason;
+    }
+
+    /// <summary>
+    /// Constructs an <see cref="DeviceException"/> with the specified detail reason and a suffix message.
+    /// </summary>
+    /// <remarks>   2023-01-09. </remarks>
+    /// <param name="suffixMessage">    Message describing the suffix. </param>
+    /// <param name="reason">           The detail reason. </param>
+    public DeviceException( string suffixMessage, DeviceErrorCodeValue reason ) : base( Support.GetDescription( reason ) + suffixMessage )
+    {
+        this.Reason = reason;
+    }
 
     /// <summary>
     /// Specific (reason) for this <see cref="DeviceException"/> <see cref="DeviceException"/>, like

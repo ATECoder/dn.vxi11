@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace cc.isr.VXI11;
 
 /// <summary>   A device address family; used by interrupts. </summary>
@@ -9,13 +11,13 @@ namespace cc.isr.VXI11;
 /// DEVICE_UDP
 /// };
 /// </code> </remarks>
-public class DeviceAddrFamily
+public enum DeviceAddrFamily
 {
     /// <summary>   The device TCP Address family. <para>
     /// Renamed from <c>DEVICE_TCP = 0</c>. </para></summary>
-    public static int DeviceTcpAddressFamily = 0;
+    [Description( "The device TCP Address family." )] DeviceTcpAddressFamily = 0,
 
-    /// <summary>   The device UDP address family <para>
+    /// <summary>   The device UDP address family. <para>
     /// Renamed from <c>DEVICE_UDP = 1</c>. </para>. </summary>
-    public static int DeviceUdpAddressFamily = 1;
+    [Description( "The device UDP address family." )] DeviceUdpAddressFamily = 1,
 }

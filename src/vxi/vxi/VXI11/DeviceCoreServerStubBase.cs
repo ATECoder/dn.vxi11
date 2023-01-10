@@ -60,7 +60,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
     public void DispatchOncRpcCall( OncRpcCallInformation call, int program, int version, int procedure )
     {
         if ( version == Vxi11ProgramConstants.DeviceCoreVersion )
-            switch ( procedure )
+            switch ( ( Vxi11MessageConstants )  procedure )
             {
                 case Vxi11MessageConstants.CreateLinkProcedure: 
                     {

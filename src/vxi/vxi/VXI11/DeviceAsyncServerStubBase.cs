@@ -53,13 +53,13 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     ///                             call header, etc. </param>
     /// <param name="program">      Program number requested by client. </param>
     /// <param name="version">      Version number requested. </param>
-    /// <param name="procedure">    Procedure number requested. </param>
+    /// <param name="procedure">    <see cref="Vxi11MessageConstants">procedure</see>/> number requested. </param>
     public void DispatchOncRpcCall( OncRpcCallInformation call, int program, int version, int procedure )
     {
         if ( version == Vxi11ProgramConstants.DeviceInterruptVersion )
             switch ( procedure )
             {
-                case Vxi11MessageConstants.DeviceAbortProcedure:
+                case ( int ) Vxi11MessageConstants.DeviceAbortProcedure:
                     {
                         DeviceLink args = new();
                         call.RetrieveCall( args );

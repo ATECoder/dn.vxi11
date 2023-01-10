@@ -102,7 +102,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public CreateLinkResp CreateLink( CreateLinkParms arg1 )
     {
         CreateLinkResp result = new();
-        this.Client.Call( Vxi11MessageConstants.CreateLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.CreateLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -115,7 +115,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceWriteResp DeviceWrite( DeviceWriteParms arg1 )
     {
         DeviceWriteResp result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceWriteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceWriteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -127,7 +127,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceReadResp DeviceRead( DeviceReadParms arg1 )
     {
         DeviceReadResp result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceReadProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceReadProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -139,7 +139,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceReadStbResp DeviceReadStb( DeviceGenericParms arg1 )
     {
         DeviceReadStbResp result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceReadStbProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceReadStbProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -156,7 +156,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceTrigger( DeviceGenericParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceTriggerProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceTriggerProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -173,7 +173,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceClear( DeviceGenericParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceClearProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceClearProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -190,7 +190,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceRemote( DeviceGenericParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceRemoteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceRemoteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -207,7 +207,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceLocal( DeviceGenericParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceLocalProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceLocalProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -224,7 +224,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceLock( DeviceLockParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceLockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceLockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -241,7 +241,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceUnlock( DeviceLink arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceUnlockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceUnlockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -258,7 +258,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceEnableSrq( DeviceEnableSrqParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceEnableSrqProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceEnableSrqProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -275,7 +275,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms arg1 )
     {
         DeviceDoCmdResp result = new();
-        this.Client.Call( Vxi11MessageConstants.DeviceDoCommandProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceDoCommandProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -292,7 +292,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DestroyLink( DeviceLink arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( Vxi11MessageConstants.DestroyLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DestroyLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -309,7 +309,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError CreateIntrChan( DeviceRemoteFunc arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( Vxi11MessageConstants.CreateInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.CreateInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
@@ -325,7 +325,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     {
         VoidXdrCodec args = VoidXdrCodec.VoidXdrCodecInstance;
         DeviceError result = new();
-        this.Client.Call( Vxi11MessageConstants.DestroyInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, args, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DestroyInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, args, result );
         return result;
     }
 

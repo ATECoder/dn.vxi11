@@ -94,7 +94,7 @@ public class DeviceIntrClient : OncRpcClientStubBase
     public void DeviceIntrSrq( DeviceSrqParms arg1 )
     {
         VoidXdrCodec result = VoidXdrCodec.VoidXdrCodecInstance;
-        this.Client.Call( Vxi11MessageConstants.DeviceInterruptSrqProcedure, Vxi11ProgramConstants.DeviceInterruptVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceInterruptSrqProcedure, Vxi11ProgramConstants.DeviceInterruptVersion, arg1, result );
     }
 
 }

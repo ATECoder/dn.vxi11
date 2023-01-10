@@ -304,10 +304,9 @@ public class Ieee488Client : IDisposable
     {
         if ( string.IsNullOrEmpty( message ) ) return 0;
         (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
-        if ( writeResponse.Error.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( ( DeviceErrorCodeValue ) writeResponse.Error.Value );
-        else
-            return writeResponse.Size;
+        return writeResponse.Error.Value != DeviceErrorCodeValue.NoError
+            ? throw new DeviceException( $"; {nameof(Write)}({nameof(message)}: {message}) failed.", ( DeviceErrorCodeValue ) writeResponse.Error.Value )
+            : writeResponse.Size;
     }
 
     /// <summary>   Sends a message with termination to the VXI-11 server. </summary>
@@ -331,7 +330,8 @@ public class Ieee488Client : IDisposable
         (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
         if ( writeResponse.Error.Value != DeviceErrorCodeValue.NoError )
         {
-            var ex = new DeviceException( ( DeviceErrorCodeValue ) writeResponse.Error.Value );
+            var ex = new DeviceException( $"; {nameof(TryWrite)}({nameof( message )}: {message}) failed.",
+                                                       ( DeviceErrorCodeValue ) writeResponse.Error.Value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, sending {message} to {this._coreClient.Client.Host}:{this._coreClient.Client.Port}");
         }
         else
@@ -363,7 +363,7 @@ public class Ieee488Client : IDisposable
     {
         DeviceReadResp readResponse = this.Receive();
         if ( (readResponse.Error?.Value).GetValueOrDefault(  DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( readResponse.Error.Value );
+            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed.", readResponse.Error.Value );
         else
         {
             int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
@@ -382,7 +382,7 @@ public class Ieee488Client : IDisposable
         DeviceReadResp readResponse = this.Receive();
         if ( (readResponse.Error?.Value).GetValueOrDefault( DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
         {
-            var ex = new DeviceException( readResponse.Error.Value );
+            var ex = new DeviceException( $"; {nameof( TryRead )}({nameof( System.Boolean )}) failed.", readResponse.Error.Value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, reading from {this._coreClient.Client.Host}:{this._coreClient.Client.Port}");
         }
         else
@@ -424,9 +424,9 @@ public class Ieee488Client : IDisposable
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
         (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( DeviceCoreClient.DefaultEncoding.GetBytes( message ), millisecondsReadDelay );
         if ( writeResponse.Error.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( writeResponse.Error.Value );
+            throw new DeviceException( $"; {nameof( Query)}({nameof( message )}: {message}write ) failed.", writeResponse.Error.Value );
         else if ( (readResponse.Error?.Value).GetValueOrDefault( DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( readResponse.Error.Value );
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed.", readResponse.Error.Value );
         else
         {
             int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
@@ -464,12 +464,12 @@ public class Ieee488Client : IDisposable
         (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
         if ( writeResponse.Error.Value != DeviceErrorCodeValue.NoError )
         {
-            var ex = new DeviceException( writeResponse.Error.Value );
+            var ex = new DeviceException( $"; {nameof( TryQuery )}({nameof( message )}: {message}) write failed.", writeResponse.Error.Value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, sending {message} to {this._coreClient.Client.Host} : {this._coreClient.Client.Port}");
         }
         else if ( (readResponse.Error?.Value).GetValueOrDefault( DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
         {
-            var ex = new DeviceException( readResponse.Error.Value );
+            var ex = new DeviceException( $"; {nameof( TryQuery )}({nameof( message )}: {message}) read failed.", readResponse.Error.Value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, querying {message} from {this._coreClient.Client.Host} : {this._coreClient.Client.Port}");
         }
         else

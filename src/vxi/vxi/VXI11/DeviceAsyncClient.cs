@@ -97,7 +97,7 @@ public class DeviceAsyncClient : OncRpcClientStubBase
     public DeviceError DeviceAbort( DeviceLink arg1 )
     {
         DeviceError result = new ();
-        this.Client.Call( Vxi11MessageConstants.DeviceAbortProcedure, Vxi11ProgramConstants.DeviceAsyncVersion, arg1, result );
+        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceAbortProcedure, Vxi11ProgramConstants.DeviceAsyncVersion, arg1, result );
         return result;
     }
 

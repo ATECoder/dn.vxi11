@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace cc.isr.VXI11;
 
 /// <summary>   A collection of VXI-11 message constants. </summary>
@@ -16,79 +18,79 @@ namespace cc.isr.VXI11;
 /// secondary abort channel (for aborting core channel operations), and an interrupt channel.
 /// </para>
 /// </remarks>
-internal static class Vxi11MessageConstants
+internal enum Vxi11MessageConstants
 {
 
     /// <summary>  Abort Channel: device aborts an in-progress call. <para>
     /// Renamed from <c>device_abort_1 = 1</c>. </para> </summary>
-    public const int DeviceAbortProcedure = 1;
+    [Description( "Abort Channel: device aborts an in-progress call." )] DeviceAbortProcedure = 1,
 
     /// <summary>  Core channel: opens a link to a device and returns a <see cref="Codecs.DeviceLink"/>. <para>
     /// This link is identified on subsequent RPCs by the a <see cref="Codecs.DeviceLink"/> value
     /// that is returned from the network instrument server.</para> <para>
     /// Renamed from <c>create_link_1 = 10</c>. </para> </summary>
-    public const int CreateLinkProcedure = 10;
+    [Description( "Core channel: opens a link to a device and returns a Device Link codec" )] CreateLinkProcedure = 10,
 
     /// <summary>  Core channel: device receives a message; Send a message to the device. <para>
     /// Renamed from <c>device_write_1 = 11</c>. </para> </summary>
-    public const int DeviceWriteProcedure = 11;
+    [Description( "Core channel: device receives a message, i.e., send a message to the device." )] DeviceWriteProcedure = 11,
 
-    /// <summary>  Core channel: device returns a result; Receive a message from the device. <para>
+    /// <summary>  Core channel: device returns a result, Receive a message from the device. <para>
     /// Renamed from <c>device_read_1 = 12</c>. </para> </summary>
-    public const int DeviceReadProcedure = 12;
+    [Description("")] DeviceReadProcedure = 12,
 
     /// <summary>  Core channel: device returns its status byte. <para>
     /// Renamed from <c>device_readstb_1 = 13</c>. </para> </summary>
-    public const int DeviceReadStbProcedure = 13;
+    [Description( "Core channel: device returns its status byte." )] DeviceReadStbProcedure = 13,
 
     /// <summary>  Core channel: device executes a trigger. <para>
     /// Renamed from <c>device_trigger_1 = 14</c>. </para> </summary>
-    public const int DeviceTriggerProcedure = 14;
+    [Description( "Core channel: device executes a trigger." )] DeviceTriggerProcedure = 14,
 
     /// <summary>  Core channel: device clears itself. <para>
     /// Renamed from <c>device_clear_1 = 15</c>. </para> </summary>
-    public const int DeviceClearProcedure = 15;
+    [Description( "Core channel: device clears itself." )] DeviceClearProcedure = 15,
 
     /// <summary>  Core channel: device disables its front panel. <para>
     /// Renamed from <c>device_remote_1 = 16</c>. </para> </summary>
-    public const int DeviceRemoteProcedure = 16;
+    [Description( "Core channel: device disables its front panel." )] DeviceRemoteProcedure = 16,
 
     /// <summary>  Core channel: device enables its front panel. <para>
     /// Renamed from <c>device_local_1 = 17</c>. </para> </summary>
-    public const int DeviceLocalProcedure = 17;
+    [Description( "Core channel: device enables its front panel." )] DeviceLocalProcedure = 17,
 
     /// <summary>  Core channel: device is locked. <para>
     /// Renamed from <c>device_lock_1 = 18</c>. </para> </summary>
-    public const int DeviceLockProcedure = 18;
+    [Description( "Core channel: device is locked." )] DeviceLockProcedure = 18,
 
     /// <summary>  Core channel: device is unlocked. <para>
     /// Renamed from <c>device_unlock_1 = 19</c>. </para> </summary>
-    public const int DeviceUnlockProcedure = 19;
+    [Description( "Core channel: device is unlocked." )] DeviceUnlockProcedure = 19,
 
     /// <summary>  Core channel: device enables/disables sending of service requests. <para>
     /// Renamed from <c>device_enable_srq_1 = 20</c>. </para> </summary>
-    public const int DeviceEnableSrqProcedure = 20;
+    [Description( "Core channel: device enables/disables sending of service requests." )] DeviceEnableSrqProcedure = 20,
 
     /// <summary>  Core channel: device executes a command. <para>
     /// Renamed from <c>device_docmd_1 = 22</c>. </para> </summary>
-    public const int DeviceDoCommandProcedure = 22;
+    [Description( "Core channel: device executes a command." )] DeviceDoCommandProcedure = 22,
 
     /// <summary>  Core channel: closes a link to a device. <para>
     /// This call closes the identified link. The network instrument server recovers resources
     /// associated with the link. </para> <para>
     /// Renamed from <c>destroy_link_1 = 23</c>. </para> </summary>
-    public const int DestroyLinkProcedure = 23;
+    [Description( "Core channel: closes a link to a device." )] DestroyLinkProcedure = 23,
 
     /// <summary>  Core channel: device creates interrupt channel. <para>
     /// Renamed from <c>create_intr_chan_1 = 25</c>. </para> </summary>
-    public const int CreateInterruptChannelProcedure = 25;
+    [Description( "Core channel: device creates interrupt channel." )] CreateInterruptChannelProcedure = 25,
 
     /// <summary>  Core channel: device destroys interrupt channel. <para>
     /// Renamed from <c>destroy_intr_chan_1 = 26</c>. </para> </summary>
-    public const int DestroyInterruptChannelProcedure = 26;
+    [Description( "Core channel: device destroys interrupt channel." )] DestroyInterruptChannelProcedure = 26,
 
     /// <summary>  Interrupt Channel: used by device to send a service request. <para>
     /// Renamed from <c>device_intr_srq_1 = 30</c>. </para> </summary>
-    public const int DeviceInterruptSrqProcedure = 30;
+    [Description( "Interrupt Channel: used by device to send a service request." )] DeviceInterruptSrqProcedure = 30,
 
 }
