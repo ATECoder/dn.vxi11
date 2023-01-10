@@ -71,7 +71,7 @@ public class DeviceReadResp : IXdrCodec
     public void Decode( XdrDecodingStreamBase decoder )
     {
         this.Error = new DeviceErrorCode( decoder );
-        this.Reason = (DeviceReadReasons ) decoder.DecodeInt();
+        this.Reason = ( DeviceReadReasons ) decoder.DecodeInt();
         this.Data = decoder.DecodeDynamicOpaque();
     }
 

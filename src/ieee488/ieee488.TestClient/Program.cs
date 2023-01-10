@@ -6,7 +6,7 @@ string ipv4Address = "127.0.0.1";
 ipv4Address = "192.168.0.144";
 
 bool ready = false;
-while ( !ready)
+while ( !ready )
 {
     Console.Write( $"Enter IP Address, e.g., '127.0.0.1' [{ipv4Address}]: " );
     string? enteredIp = Console.ReadLine();
@@ -64,7 +64,7 @@ void SendCommand( string command )
     Console.ReadKey();
     (bool success, string response) = ieee488Client.Query( $"{command}\n", 0 );
     if ( success )
-        Console.WriteLine( $"{command} sent{( string.IsNullOrEmpty(response) ? string.Empty : $"; received: {response}")}" );
+        Console.WriteLine( $"{command} sent{(string.IsNullOrEmpty( response ) ? string.Empty : $"; received: {response}")}" );
     else
         Console.WriteLine( response );
 }

@@ -18,7 +18,7 @@ public class DeviceEnableSrqParms : IXdrCodec
 {
     /// <summary>   Gets or sets the identifier of the device link from the connect call. </summary>
     /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId {  get; set; }
+    public DeviceLink DeviceLinkId { get; set; }
 
     /// <summary>   Gets or sets a value indicating whether to enable or disable interrupts. </summary>
     /// <value> True if enable, false if not. </value>

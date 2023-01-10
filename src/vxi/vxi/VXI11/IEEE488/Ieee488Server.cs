@@ -66,7 +66,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         this._interfaceDeviceString = string.Empty;
         this._ipv4Address = bindAddr is null ? string.Empty : bindAddr.ToString();
         this._readMessage = string.Empty;
-        this._writeMessage= string.Empty;   
+        this._writeMessage = string.Empty;
     }
 
     #endregion
@@ -156,8 +156,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     public Ieee488InterfaceDevice InterfaceDevice
     {
         get => this._interfaceDevice;
-        set
-        {
+        set {
             _ = this.SetProperty( ref this._interfaceDevice, value );
             this.InterfaceDeviceString = this._interfaceDevice.InterfaceDeviceString;
         }
@@ -319,7 +318,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         if ( this.CurrentOperationType == Ieee488OperationType.Read )
         {
             readRes.Data = this._readBuffer;
-            readRes.Error = new DeviceErrorCode() { Value = DeviceErrorCodeValue.NoError }; 
+            readRes.Error = new DeviceErrorCode() { Value = DeviceErrorCodeValue.NoError };
             readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
         }
         this.CurrentOperationType = Ieee488OperationType.None; //Reset the action type
@@ -343,7 +342,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         if ( scpiCommands.Length == 0 )
         {
             // The instruction is incorrect or undefined
-            result.Error = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError ); 
+            result.Error = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError );
             return result;
         }
 
@@ -369,8 +368,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                 scpiArgs = scpiCmdElements[1].Split( new char[] { '，' }, StringSplitOptions.RemoveEmptyEntries );
 
             // find the mock server method that corresponds to the SCPI command.
-            MethodInfo? method = this._device!.GetType().GetMethods().ToList().Find( p =>
-            {
+            MethodInfo? method = this._device!.GetType().GetMethods().ToList().Find( p => {
                 var att = p.GetCustomAttribute( typeof( Ieee488Attribute ) );
                 if ( att == null || att is not Ieee488Attribute ) return false;
                 Ieee488Attribute scpiAtt = ( Ieee488Attribute ) att;
@@ -394,7 +392,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                             this.WriteMessage = scpiCommands[n];
                             // invoke the corresponding method
                             res = method.Invoke( this._device, scpiArgs );
-                            result.Error = new DeviceErrorCode( DeviceErrorCodeValue.NoError ); 
+                            result.Error = new DeviceErrorCode( DeviceErrorCodeValue.NoError );
                             break;
                         case Ieee488OperationType.Read://Query instructions
                             this.WriteMessage = scpiCommands[n];
@@ -416,9 +414,9 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                 }
                 catch ( Exception ex )
                 {
-                    Logger.Writer.ConsoleWriteException( $"An error occurred when the method was called：{method}",ex );
+                    Logger.Writer.ConsoleWriteException( $"An error occurred when the method was called：{method}", ex );
                     // Parameter error
-                    result.Error = new DeviceErrorCode( DeviceErrorCodeValue.ParameterError ); 
+                    result.Error = new DeviceErrorCode( DeviceErrorCodeValue.ParameterError );
                 }
             }
             else
@@ -442,7 +440,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     {
 
         // Ignore all problems during unregistration.
-        
+
         OncRpcEmbeddedPortmapService epm;
 
         Logger.Writer.ConsoleWriteMessage( "Checking for portmap service: " );
@@ -452,7 +450,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         else
             Logger.Writer.ConsoleWriteMessage( "No portmap service available." );
 
-	    // Create embedded portmap service and check whether is has sprung
+        // Create embedded portmap service and check whether is has sprung
         // into action.
 
         Logger.Writer.ConsoleWriteMessage( "Creating embedded portmap instance: " );
@@ -528,6 +526,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         base.StopRpcProcessing();
     }
 
-#endregion
+    #endregion
 
 }

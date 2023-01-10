@@ -21,7 +21,7 @@ namespace cc.isr.VXI11.Codecs;
 public class DeviceErrorCode : IXdrCodec
 {
     /// <summary>   The <see cref="DeviceErrorCodeValue"/>. </summary>
-    public DeviceErrorCodeValue Value {  get; set; }
+    public DeviceErrorCodeValue Value { get; set; }
 
     /// <summary>   Default constructor. </summary>
     public DeviceErrorCode()
@@ -66,58 +66,58 @@ public class DeviceErrorCode : IXdrCodec
 public enum DeviceErrorCodeValue
 {
     /// <summary>   An enum constant representing the no error option. </summary>
-    [Description("No error.")] NoError = 0,
+    [Description( "No error." )] NoError = 0,
 
     /// <summary>   An enum constant representing the syntax error option. </summary>
-    [Description("Syntax error.")]
+    [Description( "Syntax error." )]
     SyntaxError = 1,
 
     /// <summary>   An enum constant representing the device not accessible option. </summary>
-    [Description("Device not accessible.")]
+    [Description( "Device not accessible." )]
     DeviceNotAccessible = 3,
 
     /// <summary>   An enum constant representing the invalid link identifier option. </summary>
-    [Description("Invalid link identifier.")]
+    [Description( "Invalid link identifier." )]
     InvalidLinkIdentifier = 4,
 
     /// <summary>   An enum constant representing the parameter error option. </summary>
-    [Description("Parameter error.")]
+    [Description( "Parameter error." )]
     ParameterError = 5,
 
     /// <summary>   An enum constant representing the channel not established option. </summary>
-    [Description("Channel not Established.")]
+    [Description( "Channel not Established." )]
     ChannelNotEstablished = 6,
 
     /// <summary>   An enum constant representing the operation not supported option. </summary>
-    [Description("Operation not supported.")]
+    [Description( "Operation not supported." )]
     OperationNotSupported = 8,
 
     /// <summary>   An enum constant representing the out of resources option. </summary>
-    [Description("Out of resources.")]
+    [Description( "Out of resources." )]
     OutOfResources = 9,
 
     /// <summary>   An enum constant representing the device locked by another link option. </summary>
-    [Description("Device locked by another link,.")]
+    [Description( "Device locked by another link,." )]
     DeviceLockedByAnotherLink = 11,
 
     /// <summary>   An enum constant representing the no lock held by this link option. </summary>
-    [Description("No lock held by this link.")]
+    [Description( "No lock held by this link." )]
     NoLockHeldByThisLink = 12,
 
     /// <summary>   An enum constant representing the I/O timeout option. </summary>
-    [Description("I/O timeout.")]
+    [Description( "I/O timeout." )]
     IOTimeout = 15,
 
     /// <summary>   An enum constant representing the I/O error option. </summary>
-    [Description("I/O error.")]
+    [Description( "I/O error." )]
     IOError = 17,
 
     /// <summary>   An enum constant representing the invalid address option. </summary>
-    [Description("Invalid address.")]
+    [Description( "Invalid address." )]
     InvalidAddress = 21,
 
     /// <summary>   An enum constant representing the abort option. </summary>
-    [Description("Abort.")]
+    [Description( "Abort." )]
     Abort = 23,
 
     /// <summary>   An enum constant representing the channel already established option. </summary>

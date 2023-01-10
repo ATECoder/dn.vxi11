@@ -14,7 +14,7 @@ public class Ieee488ServerTests
             System.Diagnostics.Debug.WriteLine( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name} Tester" );
             _classTestContext = context;
             System.Diagnostics.Debug.WriteLine( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name} Tester" );
-            _device = new( Ieee488ServerTests._identity);
+            _device = new( Ieee488ServerTests._identity );
             _server = new( _device ) {
                 Listening = false
             };
@@ -50,7 +50,7 @@ public class Ieee488ServerTests
     {
         if ( _server is not null )
         {
-            if ( _server.Listening)
+            if ( _server.Listening )
             {
                 _server.StopRpcProcessing();
             }
@@ -124,6 +124,6 @@ public class Ieee488ServerTests
     public void IdentityShouldQuery()
     {
         int count = 1;
-        AssertIdentityShouldQuery(_ipv4Address!, count );
+        AssertIdentityShouldQuery( _ipv4Address!, count );
     }
 }

@@ -57,7 +57,7 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
     public void DispatchOncRpcCall( OncRpcCallInformation call, int program, int version, int procedure )
     {
         if ( version == Vxi11ProgramConstants.DeviceInterruptVersion )
-            switch ( (Vxi11MessageConstants ) procedure)
+            switch ( ( Vxi11MessageConstants ) procedure )
             {
                 case Vxi11MessageConstants.DeviceInterruptSrqProcedure:
                     {

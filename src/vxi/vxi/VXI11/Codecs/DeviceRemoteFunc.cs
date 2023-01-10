@@ -20,7 +20,7 @@ public class DeviceRemoteFunc : IXdrCodec
 {
     /// <summary>   Gets or sets the host address. </summary>
     /// <value> The host address. </value>
-    public int HostAddr {  get; set; }
+    public int HostAddr { get; set; }
 
     /// <summary>   Gets or sets the host port. </summary>
     /// <value> The host port. </value>

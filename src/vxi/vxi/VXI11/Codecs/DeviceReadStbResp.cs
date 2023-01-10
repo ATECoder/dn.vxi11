@@ -18,7 +18,7 @@ public class DeviceReadStbResp : IXdrCodec
 {
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> error. </summary>
     /// <value> The error. </value>
-    public DeviceErrorCode Error {  get; set; }
+    public DeviceErrorCode Error { get; set; }
 
     /// <summary>   Gets or sets the status byte. </summary>
     /// <value> The status byte. </value>

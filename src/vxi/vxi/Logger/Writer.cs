@@ -30,10 +30,10 @@ namespace cc.isr.Logger
         /// <param name="sourceFilePath">   Full pathname of the source file. </param>
         /// <param name="sourceLineNumber"> Source line number. </param>
         /// <returns>   A string. </returns>
-        public static string BuildExceptionMessage( string message, Exception ex, string memberName, string sourceFilePath, int sourceLineNumber)
+        public static string BuildExceptionMessage( string message, Exception ex, string memberName, string sourceFilePath, int sourceLineNumber )
         {
             int indent = 4;
-            StringBuilder builder = new ();
+            StringBuilder builder = new();
             _ = builder.Append( $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff},{memberName}({sourceLineNumber})" );
             if ( !string.IsNullOrEmpty( message ) ) _ = builder.AppendLine( $"{new string( ' ', indent )}{message}" );
             _ = builder.AppendLine( $"{new string( ' ', indent )}{ex.Message}" );

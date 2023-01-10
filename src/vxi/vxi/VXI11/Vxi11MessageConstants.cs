@@ -37,7 +37,7 @@ internal enum Vxi11MessageConstants
 
     /// <summary>  Core channel: device returns a result, Receive a message from the device. <para>
     /// Renamed from <c>device_read_1 = 12</c>. </para> </summary>
-    [Description("")] DeviceReadProcedure = 12,
+    [Description( "" )] DeviceReadProcedure = 12,
 
     /// <summary>  Core channel: device returns its status byte. <para>
     /// Renamed from <c>device_readstb_1 = 13</c>. </para> </summary>

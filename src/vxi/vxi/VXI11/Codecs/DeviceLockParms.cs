@@ -22,7 +22,7 @@ public class DeviceLockParms : IXdrCodec
     /// (from the <see cref="Vxi11MessageConstants.CreateLinkProcedure"/>).
     /// </summary>
     /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId { get; set;  }
+    public DeviceLink DeviceLinkId { get; set; }
 
     /// <summary>   Gets or sets the flags; Contains the wait lock <see cref="DeviceFlags"/> flag </summary>
     /// <value> The flags. </value>

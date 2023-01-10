@@ -23,7 +23,7 @@ public class DeviceDoCmdParms : IXdrCodec
 {
     /// <summary>   Gets or sets the identifier of the device link from the connect call. </summary>
     /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId {  get; set; }
+    public DeviceLink DeviceLinkId { get; set; }
 
     /// <summary>   Gets or sets the flags specifying various options. </summary>
     /// <value> The flags. </value>

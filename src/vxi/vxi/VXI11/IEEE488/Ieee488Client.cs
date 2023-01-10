@@ -305,7 +305,7 @@ public class Ieee488Client : IDisposable
         if ( string.IsNullOrEmpty( message ) ) return 0;
         (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
         return writeResponse.Error.Value != DeviceErrorCodeValue.NoError
-            ? throw new DeviceException( $"; {nameof(Write)}({nameof(message)}: {message}) failed.", ( DeviceErrorCodeValue ) writeResponse.Error.Value )
+            ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) failed.", ( DeviceErrorCodeValue ) writeResponse.Error.Value )
             : writeResponse.Size;
     }
 
@@ -330,7 +330,7 @@ public class Ieee488Client : IDisposable
         (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
         if ( writeResponse.Error.Value != DeviceErrorCodeValue.NoError )
         {
-            var ex = new DeviceException( $"; {nameof(TryWrite)}({nameof( message )}: {message}) failed.",
+            var ex = new DeviceException( $"; {nameof( TryWrite )}({nameof( message )}: {message}) failed.",
                                                        ( DeviceErrorCodeValue ) writeResponse.Error.Value );
             return (false, $"RPC error #{ex.Reason}), {ex.Message}, sending {message} to {this._coreClient.Client.Host}:{this._coreClient.Client.Port}");
         }
@@ -362,7 +362,7 @@ public class Ieee488Client : IDisposable
     public string Read( bool trimEnd = false )
     {
         DeviceReadResp readResponse = this.Receive();
-        if ( (readResponse.Error?.Value).GetValueOrDefault(  DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
+        if ( (readResponse.Error?.Value).GetValueOrDefault( DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
             throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed.", readResponse.Error.Value );
         else
         {
@@ -424,7 +424,7 @@ public class Ieee488Client : IDisposable
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
         (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( DeviceCoreClient.DefaultEncoding.GetBytes( message ), millisecondsReadDelay );
         if ( writeResponse.Error.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Query)}({nameof( message )}: {message}write ) failed.", writeResponse.Error.Value );
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}write ) failed.", writeResponse.Error.Value );
         else if ( (readResponse.Error?.Value).GetValueOrDefault( DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
             throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed.", readResponse.Error.Value );
         else

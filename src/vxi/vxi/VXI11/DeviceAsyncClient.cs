@@ -96,7 +96,7 @@ public class DeviceAsyncClient : OncRpcClientStubBase
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
     public DeviceError DeviceAbort( DeviceLink arg1 )
     {
-        DeviceError result = new ();
+        DeviceError result = new();
         this.Client.Call( ( int ) Vxi11MessageConstants.DeviceAbortProcedure, Vxi11ProgramConstants.DeviceAsyncVersion, arg1, result );
         return result;
     }

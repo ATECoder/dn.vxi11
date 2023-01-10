@@ -150,7 +150,7 @@ public static class IEEE488InstrumentTestInfo
     {
         try
         {
-           (bool success, string reply ) = vxi11Client.Query( $"{command}\n", 0, trimEnd);
+            (bool success, string reply) = vxi11Client.Query( $"{command}\n", 0, trimEnd );
             return reply;
         }
         catch ( ApplicationException ex )
