@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="CreateLinkResp"/> class defines the response XDR
-/// codec for the <see cref="Vxi11MessageConstants.CreateLinkProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.CreateLinkProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Create_LinkResp</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -17,33 +17,38 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class CreateLinkResp : IXdrCodec
 {
-    /// <summary>   Gets or sets the error code. </summary>
-    /// <value> The error code. </value>
-    public DeviceErrorCode ErrorCode { get; set; }
 
-    /// <summary>   Gets or sets the identifier of the device link. </summary>
+    /// <summary>   Default constructor. </summary>
+    public CreateLinkResp()
+    {
+        this._errorCode = new();
+        this._deviceLinkId= new();
+    }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="decoder">  The XDR decoding stream. </param>
+    public CreateLinkResp( XdrDecodingStreamBase decoder ) : this()
+    {
+        this.Decode( decoder );
+    }
+
+    private DeviceErrorCode _errorCode;
+    /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
+    /// <value> The error. </value>
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
+
+    private DeviceLink _deviceLinkId;
+    /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
     /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId { get; set; }
+    public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
 
     /// <summary>   Gets or sets the abort port for the <see cref="DeviceAsyncClient.DeviceAbort(DeviceLink)"/> Device Abort RPC. </summary>
     /// <value> The abort port. </value>
     public short AbortPort { get; set; }
 
     /// <summary>   Gets or sets the max data size in bytes device will accept on a write. </summary>
-    /// <value> The maximum <see cref="Vxi11MessageConstants.DeviceWriteProcedure"/> data size. </value>
+    /// <value> The maximum <see cref="Vxi11Message.DeviceWriteProcedure"/> data size. </value>
     public int MaxReceiveSize { get; set; }
-
-    /// <summary>   Default constructor. </summary>
-    public CreateLinkResp()
-    {
-    }
-
-    /// <summary>   Constructor. </summary>
-    /// <param name="decoder">  The XDR decoding stream. </param>
-    public CreateLinkResp( XdrDecodingStreamBase decoder )
-    {
-        this.Decode( decoder );
-    }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.

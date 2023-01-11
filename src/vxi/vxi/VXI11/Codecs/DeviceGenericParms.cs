@@ -3,12 +3,12 @@ namespace cc.isr.VXI11.Codecs
 
     /// <summary>
     /// The <see cref="DeviceGenericParms"/> class defines the request XDR
-    /// codec for the <see cref="Vxi11MessageConstants.DeviceReadStbProcedure"/>,
-    /// <see cref="Vxi11MessageConstants.DeviceReadStbProcedure"/>,
-    /// <see cref="Vxi11MessageConstants.DeviceTriggerProcedure"/>,
-    /// <see cref="Vxi11MessageConstants.DeviceClearProcedure"/>,
-    /// <see cref="Vxi11MessageConstants.DeviceRemoteProcedure"/>, and
-    /// <see cref="Vxi11MessageConstants.DeviceLocalProcedure"/>
+    /// codec for the <see cref="Vxi11Message.DeviceReadStbProcedure"/>,
+    /// <see cref="Vxi11Message.DeviceReadStbProcedure"/>,
+    /// <see cref="Vxi11Message.DeviceTriggerProcedure"/>,
+    /// <see cref="Vxi11Message.DeviceClearProcedure"/>,
+    /// <see cref="Vxi11Message.DeviceRemoteProcedure"/>, and
+    /// <see cref="Vxi11Message.DeviceLocalProcedure"/>
     /// RPC messages.</summary>
     /// <remarks>   Renamed from <c>Device_GenericParms</c>. <para>
     /// VXI-11 Specifications: </para>
@@ -25,13 +25,30 @@ namespace cc.isr.VXI11.Codecs
     /// </remarks>
     public class DeviceGenericParms : IXdrCodec
     {
-        /// <summary>   Gets or sets the identifier of the device link from the connect call. </summary>
-        /// <value> The identifier of the device link. </value>
-        public DeviceLink DeviceLinkId { get; set; }
 
-        /// <summary>   Gets or sets the flags with options. </summary>
+        /// <summary>   Default constructor. </summary>
+        public DeviceGenericParms()
+        {
+            this._deviceLinkId = new();
+            this._flags = new();
+        }
+
+        /// <summary>   Constructor. </summary>
+        /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+        public DeviceGenericParms( XdrDecodingStreamBase decoder ) : this()
+        {
+            this.Decode( decoder );
+        }
+
+        private DeviceLink _deviceLinkId;
+        /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
+        /// <value> The identifier of the device link. </value>
+        public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
+
+        private DeviceFlags _flags;
+        /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
         /// <value> The flags. </value>
-        public DeviceFlags Flags { get; set; }
+        public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
 
         /// <summary>   Gets or sets the lock timeout. </summary>
         /// <remarks>
@@ -47,18 +64,6 @@ namespace cc.isr.VXI11.Codecs
         /// </remarks>
         /// <value> The i/o timeout. </value>
         public int IOTimeout { get; set; }
-
-        /// <summary>   Default constructor. </summary>
-        public DeviceGenericParms()
-        {
-        }
-
-        /// <summary>   Constructor. </summary>
-        /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-        public DeviceGenericParms( XdrDecodingStreamBase decoder )
-        {
-            this.Decode( decoder );
-        }
 
         /// <summary>
         /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.

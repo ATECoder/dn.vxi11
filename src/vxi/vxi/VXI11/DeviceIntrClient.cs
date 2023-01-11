@@ -85,7 +85,7 @@ public class DeviceIntrClient : OncRpcClientStubBase
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceInterruptSrqProcedure"/>.
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
     /// </summary>
     /// <remarks>   <para>
     /// Renamed from <c>device_intr_srq_1</c> </para>. </remarks>
@@ -94,7 +94,7 @@ public class DeviceIntrClient : OncRpcClientStubBase
     public void DeviceIntrSrq( DeviceSrqParms arg1 )
     {
         VoidXdrCodec result = VoidXdrCodec.VoidXdrCodecInstance;
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceInterruptSrqProcedure, Vxi11ProgramConstants.DeviceInterruptVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceInterruptSrqProcedure, Vxi11ProgramConstants.DeviceInterruptVersion, arg1, result );
     }
 
 }

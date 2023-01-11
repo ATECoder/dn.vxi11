@@ -4,11 +4,9 @@ using System.Runtime.CompilerServices;
 namespace cc.isr.Logger
 {
     /// <summary>   A writer. </summary>
-    /// <remarks>   2022-12-16. </remarks>
     internal static class Writer
     {
         /// <summary>   Trace message. </summary>
-        /// <remarks>   2022-12-16. </remarks>
         /// <param name="message">          The message. </param>
         public static void TraceMessage( string message )
         {
@@ -23,7 +21,6 @@ namespace cc.isr.Logger
         }
 
         /// <summary>   Builds exception message. </summary>
-        /// <remarks>   2022-12-16. </remarks>
         /// <param name="message">          The message. </param>
         /// <param name="ex">               The exception. </param>
         /// <param name="memberName">       Name of the member. </param>
@@ -43,7 +40,6 @@ namespace cc.isr.Logger
         }
 
         /// <summary>   Trace exception. </summary>
-        /// <remarks>   2022-12-16. </remarks>
         /// <param name="message">          The message. </param>
         /// <param name="ex">               The exception. </param>
         /// <param name="memberName">       (Optional) Name of the member. </param>
@@ -58,7 +54,6 @@ namespace cc.isr.Logger
         }
 
         /// <summary>   Console write exception. </summary>
-        /// <remarks>   2022-12-16. </remarks>
         /// <param name="message">          The message. </param>
         /// <param name="ex">               The exception. </param>
         /// <param name="memberName">       (Optional) Name of the member. </param>

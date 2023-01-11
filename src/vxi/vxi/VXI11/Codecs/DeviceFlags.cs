@@ -16,14 +16,14 @@ namespace cc.isr.VXI11.Codecs;
 public class DeviceFlags : IXdrCodec
 {
 
-    /// <summary>   Gets or sets the <see cref="DeviceOperationFlags"/> value. </summary>
-    /// <value> The value. </value>
-    public DeviceOperationFlags Value { get; set; }
-
     /// <summary>   Default constructor. </summary>
     public DeviceFlags()
     {
     }
+
+    /// <summary>   Gets or sets the <see cref="DeviceOperationFlags"/> value. </summary>
+    /// <value> The value. </value>
+    public DeviceOperationFlags Value { get; set; }
 
     /// <summary>   Constructor. </summary>
     /// <param name="value">    The <see cref="DeviceOperationFlags"/> value. </param>
@@ -81,13 +81,13 @@ public enum DeviceOperationFlags
 
     /// <summary>   An enum constant representing the end indicator option. 
     /// <b>EOI Enabled (bit 3)</b> If the flag is set to one (1) then the last byte in the buffer is sent with an END indicator.
-    /// This flag is only valid for <see cref="Vxi11MessageConstants.DeviceWriteProcedure"/>. </summary>
+    /// This flag is only valid for <see cref="Vxi11Message.DeviceWriteProcedure"/>. </summary>
     EndIndicator = 8,
 
     /// <summary>   An enum constant representing the termination character set option. 
     /// <b>Term Char Set ( bit 7):</b> This flag is set to one (1) if a termination character is specified on a read.
     /// The actual termination character itself is passed in the <see cref="DeviceReadParms.TermChar"/> parameter. 
-    /// This flag is only valid for <see cref="Vxi11MessageConstants.DeviceReadProcedure"/>.
+    /// This flag is only valid for <see cref="Vxi11Message.DeviceReadProcedure"/>.
     /// </summary>
     TerminationCharacterSet = 80
 }

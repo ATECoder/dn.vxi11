@@ -19,7 +19,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
 
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
-    public DeviceCoreServerStubBase( int port ) : this( null, port )
+    public DeviceCoreServerStubBase( int port ) : this( IPAddress.Any, port )
     {
     }
 
@@ -60,9 +60,9 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
     public void DispatchOncRpcCall( OncRpcCallHandler call, int program, int version, int procedure )
     {
         if ( version == Vxi11ProgramConstants.DeviceCoreVersion )
-            switch ( ( Vxi11MessageConstants ) procedure )
+            switch ( ( Vxi11Message ) procedure )
             {
-                case Vxi11MessageConstants.CreateLinkProcedure:
+                case Vxi11Message.CreateLinkProcedure:
                     {
                         CreateLinkParms args = new();
                         call.RetrieveCall( args );
@@ -70,7 +70,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceWriteProcedure:
+                case Vxi11Message.DeviceWriteProcedure:
                     {
                         DeviceWriteParms args = new();
                         call.RetrieveCall( args );
@@ -78,7 +78,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceReadProcedure:
+                case Vxi11Message.DeviceReadProcedure:
                     {
                         DeviceReadParms args = new();
                         call.RetrieveCall( args );
@@ -86,7 +86,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceReadStbProcedure:
+                case Vxi11Message.DeviceReadStbProcedure:
                     {
                         DeviceGenericParms args = new();
                         call.RetrieveCall( args );
@@ -94,7 +94,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceTriggerProcedure:
+                case Vxi11Message.DeviceTriggerProcedure:
                     {
                         DeviceGenericParms args = new();
                         call.RetrieveCall( args );
@@ -102,7 +102,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceClearProcedure:
+                case Vxi11Message.DeviceClearProcedure:
                     {
                         DeviceGenericParms args = new();
                         call.RetrieveCall( args );
@@ -110,7 +110,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceRemoteProcedure:
+                case Vxi11Message.DeviceRemoteProcedure:
                     {
                         DeviceGenericParms args = new();
                         call.RetrieveCall( args );
@@ -118,7 +118,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceLocalProcedure:
+                case Vxi11Message.DeviceLocalProcedure:
                     {
                         DeviceGenericParms args = new();
                         call.RetrieveCall( args );
@@ -126,7 +126,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceLockProcedure:
+                case Vxi11Message.DeviceLockProcedure:
                     {
                         DeviceLockParms args = new();
                         call.RetrieveCall( args );
@@ -134,7 +134,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceUnlockProcedure:
+                case Vxi11Message.DeviceUnlockProcedure:
                     {
                         DeviceLink args = new();
                         call.RetrieveCall( args );
@@ -142,7 +142,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceEnableSrqProcedure:
+                case Vxi11Message.DeviceEnableSrqProcedure:
                     {
                         DeviceEnableSrqParms args = new();
                         call.RetrieveCall( args );
@@ -150,7 +150,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DeviceDoCommandProcedure:
+                case Vxi11Message.DeviceDoCommandProcedure:
                     {
                         DeviceDoCmdParms args = new();
                         call.RetrieveCall( args );
@@ -158,7 +158,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DestroyLinkProcedure:
+                case Vxi11Message.DestroyLinkProcedure:
                     {
                         DeviceLink args = new();
                         call.RetrieveCall( args );
@@ -166,7 +166,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.CreateInterruptChannelProcedure:
+                case Vxi11Message.CreateInterruptChannelProcedure:
                     {
                         DeviceRemoteFunc args = new();
                         call.RetrieveCall( args );
@@ -174,7 +174,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
                         call.Reply( result );
                         break;
                     }
-                case Vxi11MessageConstants.DestroyInterruptChannelProcedure:
+                case Vxi11Message.DestroyInterruptChannelProcedure:
                     {
                         call.RetrieveCall( VoidXdrCodec.VoidXdrCodecInstance );
                         DeviceError result = this.DestroyIntrChan();

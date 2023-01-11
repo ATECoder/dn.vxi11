@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="DeviceRemoteFunc"/> class defines the request XDR
-/// codec for the <see cref="Vxi11MessageConstants.CreateInterruptChannelProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.CreateInterruptChannelProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_RemoteFunc</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -37,7 +37,7 @@ public class DeviceRemoteFunc : IXdrCodec
     /// <summary>   Gets or sets the <see cref="DeviceAddrFamily"/> program family . </summary>
     /// <remarks>
     /// Using UDP for the interrupt channel generally provides higher performance, but with the risks
-    /// that some <see cref="Vxi11MessageConstants.DeviceInterruptSrqProcedure"/> RPCs might not
+    /// that some <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPCs might not
     /// arrive at all or that they might arrive out of order.
     /// </remarks>
     /// <value> The <see cref="DeviceAddrFamily"/> program family. </value>

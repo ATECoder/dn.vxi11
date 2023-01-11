@@ -4,16 +4,14 @@ using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.IEEE488;
 
-
 /// <summary>   A VXI-11 client. </summary>
-/// <remarks>   2022-12-02. </remarks>
 public class Ieee488Client : IDisposable
 {
 
     #region " construction and cleanup "
 
-    private DeviceCoreClient _coreClient;
-    private DeviceLink _link;
+    private DeviceCoreClient? _coreClient;
+    private DeviceLink? _link;
 
     /// <summary>
     /// Connect
@@ -33,7 +31,6 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Query if this object is disposed. </summary>
-    /// <remarks>   2022-12-02. </remarks>
     /// <returns>   True if disposed, false if not. </returns>
     public bool IsDisposed()
     {
@@ -44,7 +41,6 @@ public class Ieee488Client : IDisposable
     /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
     /// resources.
     /// </summary>
-    /// <remarks>   2022-12-02. </remarks>
     void IDisposable.Dispose()
     {
         this.Dispose( true );
@@ -57,7 +53,6 @@ public class Ieee488Client : IDisposable
     /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
     /// resources.
     /// </summary>
-    /// <remarks>   2022-12-02. </remarks>
     /// <param name="disposing">    True to release both managed and unmanaged resources; false to
     ///                             release only unmanaged resources. </param>
     private void Dispose( bool disposing )
@@ -67,11 +62,10 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Closes this object. </summary>
-    /// <remarks>   2022-12-02. </remarks>
     public DeviceError Close()
     {
         this.Connected = false;
-        DeviceError deviceError = new();
+        DeviceError? deviceError = new();
         if ( this._link is not null )
             try
             {
@@ -153,7 +147,6 @@ public class Ieee488Client : IDisposable
     #region " Send and Receive "
 
     /// <summary>   Query if 'data' is write terminated. </summary>
-    /// <remarks>   2022-12-02. </remarks>
     /// <param name="data">         . </param>
     /// <param name="termination">  The termination. </param>
     /// <returns>   True if write terminated, false if not. </returns>
@@ -167,7 +160,6 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Query if 'data' is write terminated. </summary>
-    /// <remarks>   2022-12-02. </remarks>
     /// <param name="data"> . </param>
     /// <returns>   True if write terminated, false if not. </returns>
     private bool IsWriteTerminated( byte[] data )
@@ -176,7 +168,6 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Query if 'data' is query. </summary>
-    /// <remarks>   2022-12-02. </remarks>
     /// <param name="data"> . </param>
     /// <returns>   True if query, false if not. </returns>
     private bool IsQuery( byte[] data )
@@ -185,7 +176,6 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Send this message. </summary>
-    /// <remarks>   2022-12-02. </remarks>
     /// <param name="data"> . </param>
     /// <returns>   A <see cref="DeviceWriteResp">device write response</see> . </returns>
     public DeviceWriteResp Send( byte[] data )
@@ -198,15 +188,14 @@ public class Ieee488Client : IDisposable
                 IOTimeout = this.WriteTimeout, // in ms
                 LockTimeout = this.LockTimeout, // in ms
                 Flags = new DeviceFlags( this.Eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None ),
-                Data = data
             };
+            writeParam.SetData( data );
             resp = this._coreClient.DeviceWrite( writeParam );
         }
         return resp;
     }
 
     /// <summary>   Send this message to the VXI-11 server. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="message">  The message. </param>
     /// <returns>   A <see cref="DeviceWriteResp">device write response</see> . </returns>
     public DeviceWriteResp Send( string message )
@@ -215,7 +204,6 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Receives a reply from the VXI-11 server. </summary>
-    /// <remarks>   2022-12-02. </remarks>
     /// <returns>   A <see cref="DeviceReadResp">device read response</see> . </returns>
     public DeviceReadResp Receive()
     {
@@ -236,7 +224,6 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Receives a reply from the VXI-11 server. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="byteCount">    Number of bytes. </param>
     /// <returns>   A <see cref="DeviceReadResp">device read response</see> . </returns>
     public DeviceReadResp Receive( int byteCount )
@@ -258,14 +245,13 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Send and receive if query. </summary>
-    /// <remarks>   2022-12-12. </remarks>
     /// <param name="data">                     . </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay. </param>
     /// <returns>   A Tuple. </returns>
     public (DeviceWriteResp writeResponse, DeviceReadResp readResponse) SendReceive( byte[] data, int millisecondsReadDelay = 3 )
     {
         DeviceWriteResp writeResponse = this.Send( data );
-        if ( writeResponse.Error.Value == DeviceErrorCodeValue.NoError )
+        if ( writeResponse.ErrorCode.Value == DeviceErrorCodeValue.NoError )
             if ( this.IsQuery( data ) )
             {
                 Thread.Sleep( millisecondsReadDelay );
@@ -282,7 +268,6 @@ public class Ieee488Client : IDisposable
     /// <summary>
     /// Send a message to and receives a replay from the VXI-11 server if sending a query message.
     /// </summary>
-    /// <remarks>   2022-12-12. </remarks>
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay. </param>
     /// <returns>   A Tuple. </returns>
@@ -296,21 +281,27 @@ public class Ieee488Client : IDisposable
     #region " Write "
 
     /// <summary>   Sends a message to the VXI-11 server. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
     /// <param name="message">  The message. </param>
     /// <returns>   An int. </returns>
     public int Write( string message )
     {
         if ( string.IsNullOrEmpty( message ) ) return 0;
+
         (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
-        return writeResponse.Error.Value != DeviceErrorCodeValue.NoError
-            ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) failed.", ( DeviceErrorCodeValue ) writeResponse.Error.Value )
-            : writeResponse.Size;
+
+        return writeResponse is null
+            ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )} is null.",
+                                       DeviceErrorCodeValue.IOError )
+            : writeResponse.ErrorCode is null
+                ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )}.{nameof( DeviceWriteResp.ErrorCode )} is null.",
+                                       DeviceErrorCodeValue.IOError )
+                : writeResponse.ErrorCode.Value != DeviceErrorCodeValue.NoError
+                    ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode.Value )
+                    : writeResponse.Size;
     }
 
     /// <summary>   Sends a message with termination to the VXI-11 server. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="message">  The message. </param>
     /// <returns>   An int. </returns>
     public int WriteLine( string message )
@@ -321,31 +312,27 @@ public class Ieee488Client : IDisposable
     /// <summary>
     /// Sends a message to the VXI-11 server and returns an exception message or the message length.
     /// </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="message">  The message. </param>
     /// <returns>   A Tuple. </returns>
-    public (bool success, string response) TryWrite( string message )
+    public (bool success, int length, string response) TryWrite( string message )
     {
-        if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
-        (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
-        if ( writeResponse.Error.Value != DeviceErrorCodeValue.NoError )
+        try
         {
-            var ex = new DeviceException( $"; {nameof( TryWrite )}({nameof( message )}: {message}) failed.",
-                                                       ( DeviceErrorCodeValue ) writeResponse.Error.Value );
-            return (false, $"RPC error #{ex.Reason}), {ex.Message}, sending {message} to {this._coreClient.Client.Host}:{this._coreClient.Client.Port}");
+            return (true, this.Write( message ), string.Empty);
         }
-        else
-            return (true, $"{writeResponse.Size}");
+        catch ( Exception ex )
+        {
+            return (false, 0, ex.Message);
+        }
     }
 
     /// <summary>
     /// Sends a message with termination to the VXI-11 server and returns an exception message or the
     /// message length.
     /// </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="message">  The message. </param>
     /// <returns>   A Tuple. </returns>
-    public (bool success, string response) TryWriteLine( string message )
+    public (bool success, int length, string response) TryWriteLine( string message )
     {
         return this.TryWrite( $"{message}{this.WriteTermination}" );
     }
@@ -355,47 +342,46 @@ public class Ieee488Client : IDisposable
     #region " Read "
 
     /// <summary>   Receives a message from the VXI-11 server. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
     /// <param name="trimEnd">  (Optional) True to trim end. </param>
     /// <returns>   A string. </returns>
     public string Read( bool trimEnd = false )
     {
         DeviceReadResp readResponse = this.Receive();
-        if ( (readResponse.Error?.Value).GetValueOrDefault( DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed.", readResponse.Error.Value );
+
+        if ( readResponse is null )
+            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed; {nameof(DeviceReadResp)} is null.",
+                                       DeviceErrorCodeValue.IOError );
+        else if ( readResponse.ErrorCode is null )
+            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed; {nameof( DeviceReadResp )}.{nameof( DeviceReadResp.ErrorCode )} is null.",
+                                       DeviceErrorCodeValue.IOError );
+        else if ( readResponse.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed.", readResponse.ErrorCode.Value );
         else
         {
-            int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
+            int length = readResponse.GetData().Length - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
             return length > 0
-                ? Encoding.Default.GetString( readResponse.Data, 0, length )
+                ? Encoding.Default.GetString( readResponse.GetData(), 0, length )
                 : string.Empty;
         }
     }
 
     /// <summary>   Tries to receive a message from the VXI-11 server. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="trimEnd">  (Optional) True to trim end. </param>
     /// <returns>   A Tuple. </returns>
     public (bool success, string response) TryRead( bool trimEnd = false )
     {
-        DeviceReadResp readResponse = this.Receive();
-        if ( (readResponse.Error?.Value).GetValueOrDefault( DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
+        try
         {
-            var ex = new DeviceException( $"; {nameof( TryRead )}({nameof( System.Boolean )}) failed.", readResponse.Error.Value );
-            return (false, $"RPC error #{ex.Reason}), {ex.Message}, reading from {this._coreClient.Client.Host}:{this._coreClient.Client.Port}");
+            return (true, this.Read( trimEnd ));
         }
-        else
+        catch ( Exception ex )
         {
-            int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
-            return length > 0
-                ? (true, Encoding.Default.GetString( readResponse.Data, 0, length ))
-                : (true, string.Empty);
+            return (false, ex.Message);
         }
     }
 
     /// <summary>   Receives single-precision values from the VXI-11 server. </summary>
-    /// <remarks>   2022-11-14. </remarks>
     /// <param name="offset">   The offset into the received bytes. </param>
     /// <param name="count">    Number of single precision values. </param>
     /// <param name="values">   [in,out] the single precision values. </param>
@@ -404,8 +390,8 @@ public class Ieee488Client : IDisposable
     {
         DeviceReadResp readResponse = this.Receive( count * 4 + offset + 1 );
         // Need to convert to the byte array into single
-        Buffer.BlockCopy( readResponse.Data, offset, values, 0, values.Length * 4 );
-        return readResponse.Data.Length;
+        Buffer.BlockCopy( readResponse.GetData(), offset, values, 0, values.Length * 4 );
+        return readResponse.GetData().Length;
     }
 
     #endregion
@@ -413,7 +399,6 @@ public class Ieee488Client : IDisposable
     #region " Query "
 
     /// <summary>   Sends a query message to and receives a message from the VXI-11 server. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay . </param>
@@ -422,22 +407,34 @@ public class Ieee488Client : IDisposable
     public (bool success, string response) Query( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
+
         (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( DeviceCoreClient.DefaultEncoding.GetBytes( message ), millisecondsReadDelay );
-        if ( writeResponse.Error.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}write ) failed.", writeResponse.Error.Value );
-        else if ( (readResponse.Error?.Value).GetValueOrDefault( DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed.", readResponse.Error.Value );
+        if ( writeResponse is null )
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )} is null.",
+                                       DeviceErrorCodeValue.IOError );
+        else if ( writeResponse.ErrorCode is null )
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )}.{nameof( DeviceWriteResp.ErrorCode )} is null.",
+                                       DeviceErrorCodeValue.IOError );
+        else if ( writeResponse.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode.Value );
+        else if ( readResponse is null )
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed; {nameof( DeviceReadResp )} is null.",
+                                       DeviceErrorCodeValue.IOError );
+        else if ( readResponse.ErrorCode is null )
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed; {nameof( DeviceReadResp )}.{nameof( DeviceReadResp.ErrorCode )} is null.",
+                                       DeviceErrorCodeValue.IOError );
+        else if ( readResponse.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed.", readResponse.ErrorCode.Value );
         else
         {
-            int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
+            int length = readResponse.GetData().Length - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
             return length > 0
-                ? (true, DeviceCoreClient.DefaultEncoding.GetString( readResponse.Data, 0, length ))
+                ? (true, DeviceCoreClient.DefaultEncoding.GetString( readResponse.GetData(), 0, length ))
                 : (true, string.Empty);
         }
     }
 
     /// <summary>   Sends a query message with termination to the VXI-11 server and returns the reply message. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay . </param>
     /// <param name="trimEnd">                  (Optional) True to trim end. </param>
@@ -452,32 +449,19 @@ public class Ieee488Client : IDisposable
     /// Sends a query message to the VXI-11 server and returns the replay message or an exception
     /// message.
     /// </summary>
-    /// <remarks>   2022-12-12. </remarks>
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay . </param>
     /// <param name="trimEnd">                  (Optional) True to trim end. </param>
     /// <returns>   A Tuple. </returns>
     public (bool success, string response) TryQuery( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
-        if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
-
-        (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
-        if ( writeResponse.Error.Value != DeviceErrorCodeValue.NoError )
+        try
         {
-            var ex = new DeviceException( $"; {nameof( TryQuery )}({nameof( message )}: {message}) write failed.", writeResponse.Error.Value );
-            return (false, $"RPC error #{ex.Reason}), {ex.Message}, sending {message} to {this._coreClient.Client.Host} : {this._coreClient.Client.Port}");
+            return this.Query( message, millisecondsReadDelay, trimEnd );
         }
-        else if ( (readResponse.Error?.Value).GetValueOrDefault( DeviceErrorCodeValue.NoError ) != DeviceErrorCodeValue.NoError )
+        catch ( Exception ex )
         {
-            var ex = new DeviceException( $"; {nameof( TryQuery )}({nameof( message )}: {message}) read failed.", readResponse.Error.Value );
-            return (false, $"RPC error #{ex.Reason}), {ex.Message}, querying {message} from {this._coreClient.Client.Host} : {this._coreClient.Client.Port}");
-        }
-        else
-        {
-            int length = (readResponse.Data?.Length).GetValueOrDefault( 0 ) - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
-            return length > 0
-                ? (true, Encoding.Default.GetString( readResponse.Data, 0, length ))
-                : (true, string.Empty);
+            return (false, ex.Message);
         }
     }
 
@@ -485,7 +469,6 @@ public class Ieee488Client : IDisposable
     /// Sends a query message with termination to the VXI-11 server and returns the replay message or
     /// an exception message.
     /// </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay . </param>
     /// <param name="trimEnd">                  (Optional) True to trim end. </param>
@@ -496,7 +479,6 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Sends a query message and reads the reply as a single-precision values. </summary>
-    /// <remarks>   2022-11-14. </remarks>
     /// <param name="message">  The message. </param>
     /// <param name="offset">   The offset into the received bytes. </param>
     /// <param name="count">    Number of single precision values. </param>
@@ -510,7 +492,6 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Sends a query message with termination and reads the reply as a single-precision values. </summary>
-    /// <remarks>   2022-11-14. </remarks>
     /// <param name="message">  The message. </param>
     /// <param name="offset">   The offset into the received bytes. </param>
     /// <param name="count">    Number of single precision values. </param>

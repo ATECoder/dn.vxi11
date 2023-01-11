@@ -90,7 +90,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public static Encoding DefaultEncoding { get; set; } = Encoding.UTF8;
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.CreateLinkProcedure"/>; Opens a link
+    /// Calls remote procedure <see cref="Vxi11Message.CreateLinkProcedure"/>; Opens a link
     /// to a device.
     /// </summary>
     /// <remarks> Renamed from <c>create_link_1</c> </remarks>
@@ -102,12 +102,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public CreateLinkResp CreateLink( CreateLinkParms arg1 )
     {
         CreateLinkResp result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.CreateLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.CreateLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>  
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceWriteProcedure"/>; 
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceWriteProcedure"/>; 
     /// Device receives a message. </summary>
     /// <remarks> Renamed from <c>device_write_1</c> </remarks>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceWriteParms"/>) to the remote procedure call.. </param>
@@ -115,11 +115,11 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceWriteResp DeviceWrite( DeviceWriteParms arg1 )
     {
         DeviceWriteResp result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceWriteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceWriteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
-    /// <summary> Calls remote procedure <see cref="Vxi11MessageConstants.DeviceReadProcedure"/>;
+    /// <summary> Calls remote procedure <see cref="Vxi11Message.DeviceReadProcedure"/>;
     /// Device returns a result. </summary>
     /// <remarks> Renamed from <c>device_read_1</c> </remarks>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceReadParms"/>) to the remote procedure call.. </param>
@@ -127,11 +127,11 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceReadResp DeviceRead( DeviceReadParms arg1 )
     {
         DeviceReadResp result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceReadProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceReadProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
-    /// <summary>  Calls remote procedure <see cref="Vxi11MessageConstants.DeviceReadStbProcedure"/>;
+    /// <summary>  Calls remote procedure <see cref="Vxi11Message.DeviceReadStbProcedure"/>;
     /// Device returns its status byte. </summary>
     /// <remarks> Renamed from <c>device_readstb_1</c> </remarks>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
@@ -139,12 +139,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceReadStbResp DeviceReadStb( DeviceGenericParms arg1 )
     {
         DeviceReadStbResp result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceReadStbProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceReadStbProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceTriggerProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceTriggerProcedure"/>;
     /// Device executes a trigger.
     /// </summary>
     /// <remarks>   Renamed from <c>device_trigger_1</c> </remarks>
@@ -156,12 +156,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceTrigger( DeviceGenericParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceTriggerProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceTriggerProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceClearProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceClearProcedure"/>;
     /// Device clears itself.
     /// </summary>
     /// <remarks>   Renamed from <c>device_clear_1</c> </remarks>
@@ -173,12 +173,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceClear( DeviceGenericParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceClearProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceClearProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceRemoteProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceRemoteProcedure"/>;
     /// Device disables its front panel.
     /// </summary>
     /// <remarks>   Renamed from <c>device_remote_1</c> </remarks>
@@ -190,12 +190,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceRemote( DeviceGenericParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceRemoteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceRemoteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceLocalProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceLocalProcedure"/>;
     /// Device enables its front panel.
     /// </summary>
     /// <remarks>   Renamed from <c>device_local_1</c> </remarks>
@@ -207,12 +207,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceLocal( DeviceGenericParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceLocalProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceLocalProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceLockProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceLockProcedure"/>;
     /// Device is locked.
     /// </summary>
     /// <remarks>   Renamed from <c>device_lock_1</c> </remarks>
@@ -224,12 +224,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceLock( DeviceLockParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceLockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceLockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceUnlockProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceUnlockProcedure"/>;
     /// Device is unlocked.
     /// </summary>
     /// <remarks>   Renamed from <c>device_unlock_1</c> </remarks>
@@ -241,12 +241,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceUnlock( DeviceLink arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceUnlockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceUnlockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceEnableSrqProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceEnableSrqProcedure"/>;
     /// Device enables/disables sending of service requests.
     /// </summary>
     /// <remarks>   Renamed from <c>device_enable_srq_1</c> </remarks>
@@ -258,12 +258,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DeviceEnableSrq( DeviceEnableSrqParms arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceEnableSrqProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceEnableSrqProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceDoCommandProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
     /// Device executes a command.
     /// </summary>
     /// <remarks>   Renamed from <c>device_docmd_1</c> </remarks>
@@ -275,12 +275,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms arg1 )
     {
         DeviceDoCmdResp result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceDoCommandProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceDoCommandProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DestroyLinkProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.DestroyLinkProcedure"/>;
     /// Closes a link to a device.
     /// </summary>
     /// <remarks>   Renamed from <c>destroy_link_1</c> </remarks>
@@ -292,12 +292,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError DestroyLink( DeviceLink arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DestroyLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DestroyLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.CreateInterruptChannelProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.CreateInterruptChannelProcedure"/>;
     /// Device creates interrupt channel.
     /// </summary>
     /// <remarks>   Renamed from <c>create_intr_chan_1</c> </remarks>
@@ -309,12 +309,12 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceError CreateIntrChan( DeviceRemoteFunc arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.CreateInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.CreateInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DestroyInterruptChannelProcedure"/>;
+    /// Calls remote procedure <see cref="Vxi11Message.DestroyInterruptChannelProcedure"/>;
     /// Device destroys interrupt channel.
     /// </summary>
     /// <remarks>   Renamed from <c>destroy_intr_chan_1</c> </remarks>
@@ -325,7 +325,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     {
         VoidXdrCodec args = VoidXdrCodec.VoidXdrCodecInstance;
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DestroyInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, args, result );
+        this.Client?.Call( ( int ) Vxi11Message.DestroyInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, args, result );
         return result;
     }
 

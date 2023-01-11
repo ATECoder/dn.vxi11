@@ -1,12 +1,8 @@
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.VXI11.Codecs;
-
-#nullable enable
 
 namespace cc.isr.VXI11.IEEE488;
 
@@ -35,13 +31,11 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     private byte[] _readBuffer = Array.Empty<byte>();
 
     /// <summary>   Default constructor. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     public Ieee488Server() : this( null, 0 )
     {
     }
 
     /// <summary>   Constructor. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="port"> The port number where the server will wait for incoming calls. </param>
     public Ieee488Server( int port ) : this( null, port )
     {
@@ -56,11 +50,10 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Constructor. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="device">   current device. </param>
     /// <param name="bindAddr"> The local Internet Address the server will bind to. </param>
     /// <param name="port">     The port number where the server will wait for incoming calls. </param>
-    public Ieee488Server( Ieee488Device device, IPAddress? bindAddr, int port ) : base( bindAddr, port )
+    public Ieee488Server( Ieee488Device device, IPAddress? bindAddr, int port ) : base( bindAddr ?? IPAddress.Any, port )
     {
         this._device = device;
         this._interfaceDeviceString = string.Empty;
@@ -169,7 +162,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     private int _linkId = 0;
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="linkInfo"> Information describing the link. </param>
     /// <returns>   The new link to a device. </returns>
     public override CreateLinkResp CreateLink( CreateLinkParms linkInfo )
@@ -188,7 +180,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Destroy a connection. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceLink">   The device link. </param>
     /// <returns>   A Device_Error. </returns>
     public override DeviceError DestroyLink( DeviceLink deviceLink )
@@ -197,17 +188,15 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Create an interrupt channel. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceRemoteFunction"> The device remote function. </param>
     /// <returns>   The new interrupt channel 1. </returns>
     public override DeviceError CreateIntrChan( DeviceRemoteFunc deviceRemoteFunction )
     {
-        DeviceError result = new() { Error = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
+        DeviceError result = new() { ErrorCode = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
         return result;
     }
 
     /// <summary>   Destroy an interrupt channel. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <returns>   A Device_Error. </returns>
     public override DeviceError DestroyIntrChan()
     {
@@ -215,7 +204,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Device clear. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceGenericParameters">  device generic parameters. </param>
     /// <returns>   A Device_Error. </returns>
     public override DeviceError DeviceClear( DeviceGenericParms deviceGenericParameters )
@@ -224,7 +212,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   The device executes a command. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceCommandParameters">  device command parameters. </param>
     /// <returns>   A Device_DocmdResp. </returns>
     public override DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms deviceCommandParameters )
@@ -233,7 +220,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   The device enables or does not enable the Send Request service. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceEnableSrqParameters">    Device enable SRQ parameters. </param>
     /// <returns>   A Device_Error. </returns>
     public override DeviceError DeviceEnableSrq( DeviceEnableSrqParms deviceEnableSrqParameters )
@@ -242,7 +228,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Enables device local control. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceGenericParameters">  device generic parameters. </param>
     /// <returns>   A Device_Error. </returns>
     public override DeviceError DeviceLocal( DeviceGenericParms deviceGenericParameters )
@@ -251,7 +236,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Enables device remote control. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceGenericParameters">  device generic parameters. </param>
     /// <returns>   A Device_Error. </returns>
     public override DeviceError DeviceRemote( DeviceGenericParms deviceGenericParameters )
@@ -260,7 +244,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Returns the device status byte. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceGenericParameters">  device generic parameters. </param>
     /// <returns>   A Device_ReadStbResp. </returns>
     public override DeviceReadStbResp DeviceReadStb( DeviceGenericParms deviceGenericParameters )
@@ -269,7 +252,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Performs a trigger. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceGenericParameters">  device generic parameters. </param>
     /// <returns>   A Device_Error. </returns>
     public override DeviceError DeviceTrigger( DeviceGenericParms deviceGenericParameters )
@@ -278,7 +260,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Lock the device. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceLockParameters"> Device lock parameters. </param>
     /// <returns>   A Device_Error. </returns>
     public override DeviceError DeviceLock( DeviceLockParms deviceLockParameters )
@@ -287,7 +268,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Unlock the device. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceLink">   The device link parameters. </param>
     /// <returns>   A Device_Error. </returns>
     public override DeviceError DeviceUnlock( DeviceLink deviceLink )
@@ -296,7 +276,6 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Read a message. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceReadParameters"> Device read parameters. </param>
     /// <returns>   A Device_ReadResp. </returns>
     public override DeviceReadResp DeviceRead( DeviceReadParms deviceReadParameters )
@@ -309,16 +288,16 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         }
         if ( !this._asyncLocker.WaitOne( this.WaitOnOutTime ) )
         {
-            readRes.Data = this._readBuffer;
-            readRes.Error = new DeviceErrorCode() { Value = DeviceErrorCodeValue.IOError }; // timeout
+            readRes.SetData( this._readBuffer );
+            readRes.ErrorCode = new DeviceErrorCode() { Value = DeviceErrorCodeValue.IOError }; // timeout
             readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
             return readRes;
         }
 
         if ( this.CurrentOperationType == Ieee488OperationType.Read )
         {
-            readRes.Data = this._readBuffer;
-            readRes.Error = new DeviceErrorCode() { Value = DeviceErrorCodeValue.NoError };
+            readRes.SetData( this._readBuffer );
+            readRes.ErrorCode = new DeviceErrorCode() { Value = DeviceErrorCodeValue.NoError };
             readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
         }
         this.CurrentOperationType = Ieee488OperationType.None; //Reset the action type
@@ -326,15 +305,14 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     /// <summary>   Process the device write procedure. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="deviceWriteParameters"> Device write parameters. </param>
     /// <returns>   A Device_WriteResp. </returns>
     public override DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters )
     {
         // get the write command.
-        string cmd = this.CharacterEncoding.GetString( deviceWriteParameters.Data );
+        string cmd = this.CharacterEncoding.GetString( deviceWriteParameters.GetData() );
         Logger.Writer.ConsoleWriteMessage( $"link ID: {deviceWriteParameters.DeviceLinkId.Value} -> Received：{cmd}" );
-        DeviceWriteResp result = new() { Error = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
+        DeviceWriteResp result = new() { ErrorCode = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
 
         // holds one or more SCPI commands each with its arguments
         string[] scpiCommands = cmd.Split( new char[] { '\n', '\r', ';' }, StringSplitOptions.RemoveEmptyEntries );
@@ -342,7 +320,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         if ( scpiCommands.Length == 0 )
         {
             // The instruction is incorrect or undefined
-            result.Error = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError );
+            result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError );
             return result;
         }
 
@@ -392,7 +370,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                             this.WriteMessage = scpiCommands[n];
                             // invoke the corresponding method
                             res = method.Invoke( this._device, scpiArgs );
-                            result.Error = new DeviceErrorCode( DeviceErrorCodeValue.NoError );
+                            result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.NoError );
                             break;
                         case Ieee488OperationType.Read://Query instructions
                             this.WriteMessage = scpiCommands[n];
@@ -407,7 +385,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                             {
                                 this.ReadMessage = "null";
                                 Logger.Writer.ConsoleWriteMessage( "Query results：NULL。" );
-                                result.Error = new DeviceErrorCode( DeviceErrorCodeValue.NoError );
+                                result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.NoError );
                             }
                             break;
                     }
@@ -416,13 +394,13 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                 {
                     Logger.Writer.ConsoleWriteException( $"An error occurred when the method was called：{method}", ex );
                     // Parameter error
-                    result.Error = new DeviceErrorCode( DeviceErrorCodeValue.ParameterError );
+                    result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.ParameterError );
                 }
             }
             else
             {
                 Logger.Writer.ConsoleWriteMessage( $"No method found： {spciCommand}", ConsoleColor.DarkYellow );
-                result.Error = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError ); // The instruction is incorrect or undefined
+                result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError ); // The instruction is incorrect or undefined
                 this.CurrentOperationType = Ieee488OperationType.None;
             }
             _ = this._asyncLocker.Set();//Reset block

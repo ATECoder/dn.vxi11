@@ -87,7 +87,6 @@ public class Ieee488ServerTests
     }
 
     /// <summary>   (Unit Test Method) server should listen. </summary>
-    /// <remarks>   2022-12-24. </remarks>
     [TestMethod]
     public void ServerShouldListen()
     {
@@ -95,7 +94,6 @@ public class Ieee488ServerTests
     }
 
     /// <summary>   Assert identity should query. </summary>
-    /// <remarks>   2022-11-16. </remarks>
     /// <param name="ipv4Address">  The IPv4 address. </param>
     /// <param name="repeatCount">  Number of repeats. </param>
     private static void AssertIdentityShouldQuery( string ipv4Address, int repeatCount )
@@ -119,7 +117,6 @@ public class Ieee488ServerTests
     }
 
     /// <summary>   (Unit Test Method) identity should query. </summary>
-    /// <remarks>   2022-11-16. </remarks>
     [TestMethod]
     public void IdentityShouldQuery()
     {

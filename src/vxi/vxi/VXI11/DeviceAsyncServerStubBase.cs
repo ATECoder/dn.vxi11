@@ -19,7 +19,7 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
 
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
-    public DeviceAsyncServerStubBase( int port ) : this( null, port )
+    public DeviceAsyncServerStubBase( int port ) : this( IPAddress.Any, port )
     {
     }
 
@@ -53,13 +53,13 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     ///                             call header, etc. </param>
     /// <param name="program">      Program number requested by client. </param>
     /// <param name="version">      Version number requested. </param>
-    /// <param name="procedure">    <see cref="Vxi11MessageConstants">procedure</see>/> number requested. </param>
+    /// <param name="procedure">    <see cref="Vxi11Message">procedure</see>/> number requested. </param>
     public void DispatchOncRpcCall( OncRpcCallHandler call, int program, int version, int procedure )
     {
         if ( version == Vxi11ProgramConstants.DeviceInterruptVersion )
             switch ( procedure )
             {
-                case ( int ) Vxi11MessageConstants.DeviceAbortProcedure:
+                case ( int ) Vxi11Message.DeviceAbortProcedure:
                     {
                         DeviceLink args = new();
                         call.RetrieveCall( args );
@@ -76,7 +76,7 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceAbortProcedure"/>.
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceAbortProcedure"/>.
     /// </summary>
     /// <remarks>   <para>
     /// Renamed from <c>device_abort_1</c> </para>. </remarks>

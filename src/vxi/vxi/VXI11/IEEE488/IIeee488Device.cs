@@ -2,7 +2,6 @@
 namespace cc.isr.VXI11.IEEE488;
 
 /// <summary>   Interface for a base IEEE488 device. </summary>
-/// <remarks>   2022-12-13. </remarks>
 public interface IIeee488Device
 {
 

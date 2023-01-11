@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="DeviceReadResp"/> class defines the response XDR
-/// codec for the <see cref="Vxi11MessageConstants.DeviceReadProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.DeviceReadProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_ReadResp</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -16,41 +16,65 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceReadResp : IXdrCodec
 {
-    /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> error. </summary>
+
+    /// <summary>   Default constructor. </summary>
+    public DeviceReadResp()
+    {
+        this._data = Array.Empty<byte>();
+        this._errorCode = new();
+    }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public DeviceReadResp( XdrDecodingStreamBase decoder ) : this()
+    {
+        this.Decode( decoder );
+    }
+
+    private DeviceErrorCode _errorCode;
+    /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>
-    public DeviceErrorCode Error { get; set; }
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
 
     /// <summary>   Gets or sets the reason(s) read completed as defined in <see cref="DeviceReadReasons"/>. </summary>
     /// <remarks>
     /// If reason is not set (value of 0) and error is zero, then the network instrument client could issue
-    /// <see cref="Vxi11MessageConstants.DeviceReadProcedure"/> calls until one of the other three termination
+    /// <see cref="Vxi11Message.DeviceReadProcedure"/> calls until one of the other three termination
     /// conditions is encountered.
     /// </remarks>
     /// <value> The reason(s) read completed. </value>
     public DeviceReadReasons Reason { get; set; }
 
-    /// <summary>   Gets or sets the data. </summary>
+    private byte[] _data;
+
+    /// <summary>   Gets the data. </summary>
     /// <remarks>
-    /// In the case of <see cref="Vxi11MessageConstants.DeviceWriteProcedure"/> and <see cref="Vxi11MessageConstants.DeviceReadProcedure"/> 
+    /// In the case of <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> 
     /// the XDR opaque type is used by the network instrument protocol not because the data being represented is truly opaque, 
     /// but to avoid the overhead associated with character data (8 bits being promoted to 32 bits). Since the data parameters for
-    /// <see cref="Vxi11MessageConstants.DeviceWriteProcedure"/> and <see cref="Vxi11MessageConstants.DeviceReadProcedure"/> are arrays, 
+    /// <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> are arrays, 
     /// a structure is passed which contains a pointer to the data, data.data_val, and the number of elements, data.data_len. <para>
     /// A 'RESPONSE MESSAGE TERMINATOR' is send by putting a newline as the last character in data and setting the end flag in reason. </para>
     /// </remarks>
-    /// <value> The data. </value>
-    public byte[] Data { get; set; }
-
-    /// <summary>   Default constructor. </summary>
-    public DeviceReadResp()
+    /// <returns>   An array of byte. </returns>
+    public byte[] GetData()
     {
+        return this._data;
     }
 
-    /// <summary>   Constructor. </summary>
-    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceReadResp( XdrDecodingStreamBase decoder )
+    /// <summary>   Sets a data. </summary>
+    /// <remarks>
+    /// In the case of <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> 
+    /// the XDR opaque type is used by the network instrument protocol not because the data being represented is truly opaque, 
+    /// but to avoid the overhead associated with character data (8 bits being promoted to 32 bits). Since the data parameters for
+    /// <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> are arrays, 
+    /// a structure is passed which contains a pointer to the data, data.data_val, and the number of elements, data.data_len. <para>
+    /// A 'RESPONSE MESSAGE TERMINATOR' is send by putting a newline as the last character in data and setting the end flag in reason. </para>
+    /// </remarks>
+    /// <param name="data"> Gets or sets the data. </param>
+    public void SetData( byte[] data)
     {
-        this.Decode( decoder );
+        this._data = data ?? Array.Empty<byte>();
     }
 
     /// <summary>
@@ -59,9 +83,9 @@ public class DeviceReadResp : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.Error.Encode( encoder );
+        this.ErrorCode.Encode( encoder );
         encoder.EncodeInt( ( int ) this.Reason );
-        encoder.EncodeDynamicOpaque( this.Data );
+        encoder.EncodeDynamicOpaque( this._data );
     }
 
     /// <summary>
@@ -70,16 +94,16 @@ public class DeviceReadResp : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.Error = new DeviceErrorCode( decoder );
+        this.ErrorCode = new DeviceErrorCode( decoder );
         this.Reason = ( DeviceReadReasons ) decoder.DecodeInt();
-        this.Data = decoder.DecodeDynamicOpaque();
+        this._data = decoder.DecodeDynamicOpaque();
     }
 
 }
 
 /// <summary>   Values that represent device read reasons. </summary>
 /// <remarks>   
-/// Upon successfully completing a <see cref="Vxi11MessageConstants.DeviceReadProcedure"/> RPC, a network instrument server:
+/// Upon successfully completing a <see cref="Vxi11Message.DeviceReadProcedure"/> RPC, a network instrument server:
 /// <list type="number"><item>
 /// Transfer bytes into the data parameter until one of the following termination conditions are met:  
 /// <list type="number"><item>

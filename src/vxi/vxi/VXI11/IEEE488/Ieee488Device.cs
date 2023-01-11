@@ -1,16 +1,14 @@
 namespace cc.isr.VXI11.IEEE488;
 
-#nullable enable
 
-/// <summary>   A demo device. </summary>
-/// <remarks>   2022-12-13. </remarks>
+
+/// <summary>   An IEEE 488 device. </summary>
 public partial class Ieee488Device : IIeee488Device
 {
 
     #region " construction and cleanup "
 
     /// <summary>   Constructor. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="identity"> (Optional) Device identification string. </param>
     public Ieee488Device( string identity = "PhaseLock Technology,EXXX0A" )
     {
@@ -77,7 +75,6 @@ public partial class Ieee488Device : IIeee488Device
     }
 
     /// <summary>   Reads the device identity string: *IDN? </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <returns>   A string. </returns>
     [Ieee488( "*IDN?", Ieee488OperationType.Read )]
     public string IDNRead()
@@ -156,7 +153,6 @@ public partial class Ieee488Device : IIeee488Device
     }
 
     /// <summary>   Reads the service request enabled status: *SER? </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <returns>   A string. </returns>
     [Ieee488( "*SRE?", Ieee488OperationType.Read )]
     public string SRERead()

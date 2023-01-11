@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="DeviceLockParms"/> class defines the request XDR
-/// codec for the <see cref="Vxi11MessageConstants.DeviceLockProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.DeviceLockProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_LockParms</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -17,33 +17,33 @@ namespace cc.isr.VXI11.Codecs;
 public class DeviceLockParms : IXdrCodec
 {
 
-    /// <summary>
-    /// Gets or sets the identifier of the device link 
-    /// (from the <see cref="Vxi11MessageConstants.CreateLinkProcedure"/>).
-    /// </summary>
-    /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId { get; set; }
-
-    /// <summary>   Gets or sets the flags; Contains the wait lock <see cref="DeviceFlags"/> flag </summary>
-    /// <value> The flags. </value>
-    public DeviceFlags Flags { get; set; }
-
-    /// <summary>   Gets or sets the lock timeout; time to wait to acquire lock </summary>
-    /// <value> The lock timeout. </value>
-    public int LockTimeout { get; set; }
-
-
     /// <summary>   Default constructor. </summary>
     public DeviceLockParms()
     {
+        this._deviceLinkId = new();
+        this._flags = new();
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceLockParms( XdrDecodingStreamBase decoder )
+    public DeviceLockParms( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
     }
+
+    private DeviceLink _deviceLinkId;
+    /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
+    /// <value> The identifier of the device link. </value>
+    public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
+
+    private DeviceFlags _flags;
+    /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
+    /// <value> The flags. </value>
+    public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
+
+    /// <summary>   Gets or sets the lock timeout; time to wait to acquire lock </summary>
+    /// <value> The lock timeout. </value>
+    public int LockTimeout { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.

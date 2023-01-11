@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="DeviceDoCmdResp"/> class defines the response XDR
-/// codec for the <see cref="Vxi11MessageConstants.DeviceDoCommandProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.DeviceDoCommandProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_DocmdResp</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -15,24 +15,40 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceDoCmdResp : IXdrCodec
 {
-    /// <summary>   Gets or sets the error (return status). </summary>
-    /// <value> The error. </value>
-    public DeviceErrorCode Error { get; set; }
-
-    /// <summary>   Gets or sets the data out. Returned data parameters. </summary>
-    /// <value> The data out. </value>
-    public byte[] DataOut { get; set; }
 
     /// <summary>   Default constructor. </summary>
     public DeviceDoCmdResp()
     {
+        this._errorCode = new();
+        this._dataOut = Array.Empty<byte>();
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceDoCmdResp( XdrDecodingStreamBase decoder )
+    public DeviceDoCmdResp( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
+    }
+
+    private DeviceErrorCode _errorCode;
+    /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
+    /// <value> The error. </value>
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
+
+    private byte[] _dataOut;
+
+    /// <summary>   Gets data out. </summary>
+    /// <returns>   An array of byte. </returns>
+    public byte[] GetDataOut()
+    {
+        return this._dataOut;
+    }
+
+    /// <summary>   Sets data out. </summary>
+    /// <param name="dataOut">  The data out. </param>
+    public void SetDataOut( byte[] dataOut )
+    {
+        this._dataOut = dataOut;
     }
 
     /// <summary>
@@ -41,8 +57,8 @@ public class DeviceDoCmdResp : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.Error.Encode( encoder );
-        encoder.EncodeDynamicOpaque( this.DataOut );
+        this.ErrorCode.Encode( encoder );
+        encoder.EncodeDynamicOpaque( this._dataOut );
     }
 
     /// <summary>
@@ -51,8 +67,8 @@ public class DeviceDoCmdResp : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.Error = new DeviceErrorCode( decoder );
-        this.DataOut = decoder.DecodeDynamicOpaque();
+        this.ErrorCode = new DeviceErrorCode( decoder );
+        this._dataOut = decoder.DecodeDynamicOpaque();
     }
 
 }

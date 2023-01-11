@@ -87,7 +87,7 @@ public class DeviceAsyncClient : OncRpcClientStubBase
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceAbortProcedure"/>.
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceAbortProcedure"/>.
     /// </summary>
     /// <remarks>   <para>
     /// Renamed from <c>device_abort_1</c> </para>. </remarks>
@@ -97,7 +97,7 @@ public class DeviceAsyncClient : OncRpcClientStubBase
     public DeviceError DeviceAbort( DeviceLink arg1 )
     {
         DeviceError result = new();
-        this.Client.Call( ( int ) Vxi11MessageConstants.DeviceAbortProcedure, Vxi11ProgramConstants.DeviceAsyncVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceAbortProcedure, Vxi11ProgramConstants.DeviceAsyncVersion, arg1, result );
         return result;
     }
 

@@ -2,16 +2,16 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="DeviceError"/> class defines the response XDR
-/// codec for the <see cref="Vxi11MessageConstants.DeviceTriggerProcedure"/>,
-/// <see cref="Vxi11MessageConstants.DeviceClearProcedure"/>,
-/// <see cref="Vxi11MessageConstants.DeviceRemoteProcedure"/>,
-/// <see cref="Vxi11MessageConstants.DeviceLocalProcedure"/>,
-/// <see cref="Vxi11MessageConstants.DeviceLockProcedure"/>,
-/// <see cref="Vxi11MessageConstants.DeviceUnlockProcedure"/>,
-/// <see cref="Vxi11MessageConstants.DeviceEnableSrqProcedure"/>,
-/// <see cref="Vxi11MessageConstants.DestroyLinkProcedure"/>,
-/// <see cref="Vxi11MessageConstants.CreateInterruptChannelProcedure"/>, and
-/// <see cref="Vxi11MessageConstants.DestroyInterruptChannelProcedure"/> RPC messages.
+/// codec for the <see cref="Vxi11Message.DeviceTriggerProcedure"/>,
+/// <see cref="Vxi11Message.DeviceClearProcedure"/>,
+/// <see cref="Vxi11Message.DeviceRemoteProcedure"/>,
+/// <see cref="Vxi11Message.DeviceLocalProcedure"/>,
+/// <see cref="Vxi11Message.DeviceLockProcedure"/>,
+/// <see cref="Vxi11Message.DeviceUnlockProcedure"/>,
+/// <see cref="Vxi11Message.DeviceEnableSrqProcedure"/>,
+/// <see cref="Vxi11Message.DestroyLinkProcedure"/>,
+/// <see cref="Vxi11Message.CreateInterruptChannelProcedure"/>, and
+/// <see cref="Vxi11Message.DestroyInterruptChannelProcedure"/> RPC messages.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_Error</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -24,22 +24,25 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceError : IXdrCodec
 {
-    /// <summary>   Gets or sets the error (return status). </summary>
-    /// <value> The error. </value>
-    public DeviceErrorCode Error { get; set; }
 
     /// <summary>   Default constructor. </summary>
     /// <remarks>   2023-01-04. </remarks>
     public DeviceError()
     {
+        this._errorCode = new();
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceError( XdrDecodingStreamBase decoder )
+    public DeviceError( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
     }
+
+    private DeviceErrorCode _errorCode;
+    /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
+    /// <value> The error. </value>
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
@@ -47,7 +50,7 @@ public class DeviceError : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.Error.Encode( encoder );
+        this.ErrorCode.Encode( encoder );
     }
 
     /// <summary>
@@ -56,6 +59,6 @@ public class DeviceError : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.Error = new DeviceErrorCode( decoder );
+        this.ErrorCode = new DeviceErrorCode( decoder );
     }
 }

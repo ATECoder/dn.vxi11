@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="DeviceSrqParms"/> class defines the request XDR
-/// codec for the <see cref="Vxi11MessageConstants.DeviceInterruptSrqProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_SrqParms</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -15,29 +15,43 @@ namespace cc.isr.VXI11.Codecs;
 public class DeviceSrqParms : IXdrCodec
 {
 
-    /// <summary>   Gets or sets the handle. </summary>
-    /// <value> The handle. </value>
-    public byte[] Handle { get; set; }
-
     /// <summary>   Default constructor. </summary>
     public DeviceSrqParms()
     {
+        this._handle = Array.Empty<byte>();
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceSrqParms( XdrDecodingStreamBase decoder )
+    public DeviceSrqParms( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
     }
 
-    /// <summary>
-    /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
-    /// </summary>
-    /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
-    public void Encode( XdrEncodingStreamBase encoder )
+    private byte[] _handle;
+
+    /// <summary>   Gets the handle. </summary>
+    /// <returns>   An array of byte. </returns>
+    public byte[] GetHandle()
     {
-        encoder.EncodeDynamicOpaque( this.Handle );
+        return this._handle;
+    }
+
+    /// <summary>   Sets a handle. </summary>
+    /// <param name="handle">   The handle. </param>
+    public void SetHandle( byte[]  handle ) 
+    {
+        this._handle = handle ?? Array.Empty<byte>();  
+    }
+
+
+/// <summary>
+/// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
+/// </summary>
+/// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
+public void Encode( XdrEncodingStreamBase encoder )
+    {
+        encoder.EncodeDynamicOpaque( this._handle );
     }
 
     /// <summary>
@@ -46,7 +60,7 @@ public class DeviceSrqParms : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.Handle = decoder.DecodeDynamicOpaque();
+        this._handle = decoder.DecodeDynamicOpaque();
     }
 
 }

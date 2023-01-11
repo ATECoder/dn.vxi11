@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="DeviceEnableSrqParms "/> class defines the request XDR
-/// codec for the <see cref="Vxi11MessageConstants.DeviceEnableSrqProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.DeviceEnableSrqProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_EnableSrqParms </c>. <para>
 /// VXI-11 Specifications: </para>
@@ -16,31 +16,53 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceEnableSrqParms : IXdrCodec
 {
-    /// <summary>   Gets or sets the identifier of the device link from the connect call. </summary>
+
+    /// <summary>   Default constructor. </summary>
+    /// <remarks>   2023-01-04. </remarks>
+    public DeviceEnableSrqParms()
+    {
+        this._deviceLinkId = new();
+        this._handle = Array.Empty<byte>();
+    }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public DeviceEnableSrqParms( XdrDecodingStreamBase decoder ) : this()
+    {
+        this.Decode( decoder );
+    }
+
+    private DeviceLink _deviceLinkId;
+    /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
     /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId { get; set; }
+    public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
 
     /// <summary>   Gets or sets a value indicating whether to enable or disable interrupts. </summary>
     /// <value> True if enable, false if not. </value>
     public bool Enable { get; set; }
 
     /// <summary>   Gets or sets the handle. Host specific data. </summary>
-    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParms.Handle"/> 
+    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParms.GetHandle()"/> 
     /// when a service request occurs. </remarks>
     /// <value> The handle. </value>
-    public byte[] Handle { get; set; }
+    private byte[] _handle;
 
-    /// <summary>   Default constructor. </summary>
-    /// <remarks>   2023-01-04. </remarks>
-    public DeviceEnableSrqParms()
+    /// <summary>   Gets the handle. </summary>
+    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParms.GetHandle()"/> 
+    /// when a service request occurs. </remarks>
+    /// <returns>   An array of byte. </returns>
+    public byte[] GetHandle()
     {
+        return this._handle;
     }
 
-    /// <summary>   Constructor. </summary>
-    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceEnableSrqParms( XdrDecodingStreamBase decoder )
+    /// <summary>   Sets a handle. </summary>
+    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParms.GetHandle()"/> 
+    /// when a service request occurs. </remarks>
+    /// <param name="handle">   The handle. </param>
+    public void SetHandle( byte[] handle )
     {
-        this.Decode( decoder );
+        this._handle = handle ?? Array.Empty<byte>();
     }
 
     /// <summary>
@@ -51,7 +73,7 @@ public class DeviceEnableSrqParms : IXdrCodec
     {
         this.DeviceLinkId.Encode( encoder );
         encoder.EcodeBoolean( this.Enable );
-        encoder.EncodeDynamicOpaque( this.Handle );
+        encoder.EncodeDynamicOpaque( this._handle );
     }
 
     /// <summary>
@@ -62,7 +84,7 @@ public class DeviceEnableSrqParms : IXdrCodec
     {
         this.DeviceLinkId = new DeviceLink( decoder );
         this.Enable = decoder.DecodeBoolean();
-        this.Handle = decoder.DecodeDynamicOpaque();
+        this._handle = decoder.DecodeDynamicOpaque();
     }
 
 }

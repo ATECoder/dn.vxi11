@@ -8,8 +8,8 @@ namespace cc.isr.VXI11;
 /// application might want to catch.
 /// </summary>
 /// <remarks>
-/// The class <see cref="DeviceException"/> also defines a set of VXI-11 error codes as
-/// defined by VXI-11 Specifications.
+/// The class <see cref="DeviceException"/> also defines a set of VXI-11 error codes as defined
+/// by VXI-11 Specifications.
 /// </remarks>
 [Serializable]
 public class DeviceException : Exception

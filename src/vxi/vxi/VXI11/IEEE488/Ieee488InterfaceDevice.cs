@@ -5,7 +5,6 @@ public struct Ieee488InterfaceDevice
 {
 
     /// <summary>   Constructor. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="interfaceDeviceString">  The interface devices string, e.g., <c>gpib0,12,8</c>. </param>
     public Ieee488InterfaceDevice( string interfaceDeviceString )
     {
@@ -33,7 +32,6 @@ public struct Ieee488InterfaceDevice
     private readonly string[] _interfaceFamilies;
 
     /// <summary>   Interface families. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <returns>   A string[]. </returns>
     public string[] InterfaceFamilies()
     {
@@ -69,7 +67,6 @@ public struct Ieee488InterfaceDevice
     public int? SecondaryAddress { get; set; }
 
     /// <summary>   Parse device information. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <param name="interfaceDeviceString">    Information describing the device. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     public bool ParseDeviceInfo( string interfaceDeviceString )
@@ -97,7 +94,6 @@ public struct Ieee488InterfaceDevice
     }
 
     /// <summary>   Query if this interface device is a generic instrument device. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <returns>   True if a generic instrument device, false if not. </returns>
     public bool IsGenericInstrumentDevice()
     {
@@ -105,7 +101,6 @@ public struct Ieee488InterfaceDevice
     }
 
     /// <summary>   Query if this interface device is a GPIB instrument device. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <returns>   True if a GPIB instrument device, false if not. </returns>
     public bool IsGpibInstrumentDevice()
     {
@@ -113,7 +108,6 @@ public struct Ieee488InterfaceDevice
     }
 
     /// <summary>   Query if interface device is valid. </summary>
-    /// <remarks>   2022-12-15. </remarks>
     /// <returns>   True if valid, false if not. </returns>
     public bool IsValid()
     {

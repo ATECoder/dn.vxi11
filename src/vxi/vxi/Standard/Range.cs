@@ -123,7 +123,7 @@ internal readonly struct Index : IEquatable<Index>
         return offset;
     }
 
-#nullable enable
+
     /// <summary>
     /// Indicates whether the current Index object is equal to another object of the same type.
     /// </summary>
@@ -135,7 +135,7 @@ internal readonly struct Index : IEquatable<Index>
     /// </returns>
     [Diagnostics.CodeAnalysis.SuppressMessage( "Style", "IDE0038:Use pattern matching", Justification = "<Pending>" )]
     public override bool Equals( object? value ) => value is Index && this._value == (( Index ) value)._value;
-#nullable disable
+
 
     /// <summary>
     /// Indicates whether the current Index object is equal to another Index object.
@@ -199,7 +199,7 @@ internal readonly struct Range : IEquatable<Range>
         this.End = end;
     }
 
-#nullable enable
+
     /// <summary>
     /// Indicates whether the current Range object is equal to another object of the same type.
     /// </summary>
@@ -213,7 +213,7 @@ internal readonly struct Range : IEquatable<Range>
         value is Range r &&
         r.Start.Equals( this.Start ) &&
         r.End.Equals( this.End );
-#nullable disable
+
 
     /// <summary>
     /// Indicates whether the current Range object is equal to another Range object.

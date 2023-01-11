@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="DeviceReadStbResp"/> class defines the response XDR
-/// codec for the <see cref="Vxi11MessageConstants.DeviceReadStbProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.DeviceReadStbProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_ReadStbResp</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -16,25 +16,28 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceReadStbResp : IXdrCodec
 {
-    /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> error. </summary>
-    /// <value> The error. </value>
-    public DeviceErrorCode Error { get; set; }
-
-    /// <summary>   Gets or sets the status byte. </summary>
-    /// <value> The status byte. </value>
-    public byte Stb { get; set; }
 
     /// <summary>   Default constructor. </summary>
     public DeviceReadStbResp()
     {
+        this._errorCode = new DeviceErrorCode();
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceReadStbResp( XdrDecodingStreamBase decoder )
+    public DeviceReadStbResp( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
     }
+
+    private DeviceErrorCode _errorCode;
+    /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
+    /// <value> The error. </value>
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
+
+    /// <summary>   Gets or sets the status byte. </summary>
+    /// <value> The status byte. </value>
+    public byte Stb { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
@@ -42,7 +45,7 @@ public class DeviceReadStbResp : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.Error.Encode( encoder );
+        this.ErrorCode.Encode( encoder );
         encoder.EncodeByte( this.Stb );
     }
 
@@ -52,7 +55,7 @@ public class DeviceReadStbResp : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.Error = new DeviceErrorCode( decoder );
+        this.ErrorCode = new DeviceErrorCode( decoder );
         this.Stb = decoder.DecodeByte();
     }
 

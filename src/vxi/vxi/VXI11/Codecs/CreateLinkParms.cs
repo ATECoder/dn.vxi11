@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="CreateLinkParms"/> class defines the request XDR
-/// codec for the <see cref="Vxi11MessageConstants.CreateLinkProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.CreateLinkProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Create_LinkParms</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -17,6 +17,19 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class CreateLinkParms : IXdrCodec
 {
+
+    /// <summary>   Default constructor. </summary>
+    public CreateLinkParms()
+    {
+        this.Device = string.Empty;
+    }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="decoder">  The XDR Decoding stream </param>
+    public CreateLinkParms( XdrDecodingStreamBase decoder ) : this() 
+    { 
+        this.Decode( decoder );
+    }
 
     /// <summary>   Gets or sets the identifier of the client. </summary>
     /// <value> The identifier of the client. </value>
@@ -33,17 +46,6 @@ public class CreateLinkParms : IXdrCodec
     /// <summary>   Gets or sets the device name. </summary>
     /// <value> The device name. </value>
     public string Device { get; set; }
-
-    public CreateLinkParms()
-    {
-    }
-
-    /// <summary>   Constructor. </summary>
-    /// <param name="decoder">  The XDR Decoding stream </param>
-    public CreateLinkParms( XdrDecodingStreamBase decoder )
-    {
-        this.Decode( decoder );
-    }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.

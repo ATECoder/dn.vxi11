@@ -7,14 +7,12 @@ using System.Threading;
 namespace cc.isr.VXI11.IEEE488Client.Helper;
 
 /// <summary>   Values that represent instrument Identifiers. </summary>
-/// <remarks>   2022-12-13. </remarks>
 public enum InstrumentId
 {
     None, K2450 = 2450, K2600 = 2600, K6510 = 6510, K7510 = 7510
 }
 
 /// <summary>   Information about the IEEE488 instrument test. </summary>
-/// <remarks>   2022-12-13. </remarks>
 public static class IEEE488InstrumentTestInfo
 {
 
@@ -37,7 +35,6 @@ public static class IEEE488InstrumentTestInfo
     }
 
     /// <summary>   Attempts to TCP connection a TimeSpan from the given InstrumentId. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="instrumentId">         Identifier for the instrument. </param>
     /// <param name="connectionTimeout">    The connection timeout. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
@@ -57,7 +54,6 @@ public static class IEEE488InstrumentTestInfo
 
 
     /// <summary>   Resets the clear device. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="instrumentId">         Identifier for the instrument. </param>
     /// <param name="connectionTimeout">    The connection timeout. </param>
     /// <returns>   A string. </returns>
@@ -103,7 +99,6 @@ public static class IEEE488InstrumentTestInfo
     public static string QueryInfo { get; set; }
 
     /// <summary>   Queries the identity. </summary>
-    /// <remarks>   2022-11-19. </remarks>
     /// <param name="instrumentId">         Identifier for the instrument. </param>
     /// <param name="connectionTimeout">    The connection timeout. </param>
     /// <returns>   The identity. </returns>
@@ -141,7 +136,6 @@ public static class IEEE488InstrumentTestInfo
     }
 
     /// <summary>   Queries a device. </summary>
-    /// <remarks>   2022-11-19. </remarks>
     /// <param name="vxi11Client">  The VXI-11 client. </param>
     /// <param name="command">      The command. </param>
     /// <param name="trimEnd">      True to trim end. </param>
@@ -161,7 +155,6 @@ public static class IEEE488InstrumentTestInfo
     }
 
     /// <summary>   Writes a messages to the device. </summary>
-    /// <remarks>   2022-12-13. </remarks>
     /// <param name="vxi11Client">  The VXI-11 client. </param>
     /// <param name="command">      The command. </param>
     /// <returns>   A string. </returns>
@@ -180,7 +173,6 @@ public static class IEEE488InstrumentTestInfo
     }
 
     /// <summary>   Pings port. </summary>
-    /// <remarks>   2022-11-19. </remarks>
     /// <param name="ipv4Address">          The IPv4 address. </param>
     /// <param name="portNumber">           (Optional) The port number. </param>
     /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds. </param>
@@ -215,7 +207,6 @@ public static class IEEE488InstrumentTestInfo
     }
 
     /// <summary>   Ping host. </summary>
-    /// <remarks>   2022-11-04. </remarks>
     /// <param name="nameOrAddress">    The name or address. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     public static bool PingHost( string nameOrAddress )

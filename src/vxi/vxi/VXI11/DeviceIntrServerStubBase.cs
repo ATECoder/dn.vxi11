@@ -19,7 +19,7 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
 
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
-    public DeviceIntrServerStubBase( int port ) : this( null, port )
+    public DeviceIntrServerStubBase( int port ) : this( IPAddress.Any, port )
     {
     }
 
@@ -57,9 +57,9 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
     public void DispatchOncRpcCall( OncRpcCallHandler call, int program, int version, int procedure )
     {
         if ( version == Vxi11ProgramConstants.DeviceInterruptVersion )
-            switch ( ( Vxi11MessageConstants ) procedure )
+            switch ( ( Vxi11Message ) procedure )
             {
-                case Vxi11MessageConstants.DeviceInterruptSrqProcedure:
+                case Vxi11Message.DeviceInterruptSrqProcedure:
                     {
                         DeviceSrqParms args = new();
                         call.RetrieveCall( args );
@@ -76,7 +76,7 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
     }
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11MessageConstants.DeviceInterruptSrqProcedure"/>.
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
     /// </summary>
     /// <remarks>   <para>
     /// Renamed from <c>device_intr_srq_1</c> </para>. </remarks>

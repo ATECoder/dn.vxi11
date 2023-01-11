@@ -2,9 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>cc.isr</RootNamespace>
-    <AssemblyName>cc.isr.VXI11</AssemblyName>
     <LangVersion>latest</LangVersion>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <AssemblyName>cc.isr.VXI11</AssemblyName>
+    <RootNamespace>cc.isr</RootNamespace>
 
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <OutputType>Library</OutputType>

@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="DeviceDoCmdParms"/> class defines the request XDR
-/// codec for the <see cref="Vxi11MessageConstants.DeviceDoCommandProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.DeviceDoCommandProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_DocmdParms</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -21,13 +21,31 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceDoCmdParms : IXdrCodec
 {
-    /// <summary>   Gets or sets the identifier of the device link from the connect call. </summary>
-    /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId { get; set; }
 
-    /// <summary>   Gets or sets the flags specifying various options. </summary>
+    /// <summary>   Default constructor. </summary>
+    public DeviceDoCmdParms()
+    {
+        this._deviceLinkId = new();
+        this._flags = new(); 
+        this._dataIn= Array.Empty<byte>();
+    }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public DeviceDoCmdParms( XdrDecodingStreamBase decoder ) : this () 
+    {
+        this.Decode( decoder );
+    }
+
+    private DeviceLink _deviceLinkId;
+    /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
+    /// <value> The identifier of the device link. </value>
+    public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
+
+    private DeviceFlags _flags;
+    /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
     /// <value> The flags. </value>
-    public DeviceFlags Flags { get; set; }
+    public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
 
     /// <summary>   Gets or sets the i/o timeout. </summary>
     /// <remarks>
@@ -69,18 +87,20 @@ public class DeviceDoCmdParms : IXdrCodec
 
     /// <summary>   Gets or sets the data in; do cmd data parameters. </summary>
     /// <value> The data in. </value>
-    public byte[] DataIn { get; set; }
+    private byte[] _dataIn;
 
-    /// <summary>   Default constructor. </summary>
-    public DeviceDoCmdParms()
+    /// <summary>   Gets data in. </summary>
+    /// <returns>   An array of byte. </returns>
+    public byte[] GetDataIn()
     {
+        return this._dataIn ?? Array.Empty<byte>();
     }
 
-    /// <summary>   Constructor. </summary>
-    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceDoCmdParms( XdrDecodingStreamBase decoder )
+    /// <summary>   Sets data in. </summary>
+    /// <param name="dataIn">   Gets or sets the data in; do cmd data parameters. </param>
+    public void SetDataIn( byte[] dataIn )
     {
-        this.Decode( decoder );
+        this._dataIn = dataIn?? Array.Empty<byte>();
     }
 
     /// <summary>
@@ -96,7 +116,7 @@ public class DeviceDoCmdParms : IXdrCodec
         encoder.EncodeInt( this.Cmd );
         encoder.EcodeBoolean( this.NetworkOrder );
         encoder.EncodeInt( this.DataSize );
-        encoder.EncodeDynamicOpaque( this.DataIn );
+        encoder.EncodeDynamicOpaque( this._dataIn );
     }
 
     /// <summary>
@@ -113,7 +133,7 @@ public class DeviceDoCmdParms : IXdrCodec
         this.Cmd = decoder.DecodeInt();
         this.NetworkOrder = decoder.DecodeBoolean();
         this.DataSize = decoder.DecodeInt();
-        this.DataIn = decoder.DecodeDynamicOpaque();
+        this._dataIn = decoder.DecodeDynamicOpaque();
     }
 
 }

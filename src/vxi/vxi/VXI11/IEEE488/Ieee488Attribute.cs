@@ -1,7 +1,6 @@
 namespace cc.isr.VXI11.IEEE488;
 
 /// <summary>   Values that represent IEEE488 operation types. </summary>
-/// <remarks>   2022-12-13. </remarks>
 public enum Ieee488OperationType
 {
     None = 0,

@@ -2,7 +2,7 @@ namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
 /// The <see cref="DeviceReadParms"/> class defines the request XDR
-/// codec for the <see cref="Vxi11MessageConstants.DeviceReadProcedure"/> RPC message.
+/// codec for the <see cref="Vxi11Message.DeviceReadProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_ReadParms</c>. <para>
 /// VXI-11 Specifications: </para>
@@ -19,12 +19,25 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceReadParms : IXdrCodec
 {
-    /// <summary>
-    /// Gets or sets the identifier of the device link 
-    /// (from the <see cref="Vxi11MessageConstants.CreateLinkProcedure"/>).
-    /// </summary>
+
+    /// <summary>   Default constructor. </summary>
+    public DeviceReadParms()
+    {
+        this._deviceLinkId = new();
+        this._flags = new();
+    }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public DeviceReadParms( XdrDecodingStreamBase decoder ) : this()
+    {
+        this.Decode( decoder );
+    }
+
+    private DeviceLink _deviceLinkId;
+    /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
     /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId { get; set; }
+    public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
 
     /// <summary>   Gets or sets the request size (number of bytes). </summary>
     /// <value> The size of the request. </value>
@@ -45,9 +58,10 @@ public class DeviceReadParms : IXdrCodec
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
 
-    /// <summary>   Gets or sets the flags with <see cref="DeviceOperationFlags"/> options. </summary>
+    private DeviceFlags _flags;
+    /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
     /// <value> The flags. </value>
-    public DeviceFlags Flags { get; set; }
+    public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
 
     /// <summary>
     /// Gets or sets the termination character; valid if flags <see cref="DeviceOperationFlags.TerminationCharacterSet"/>
@@ -55,19 +69,6 @@ public class DeviceReadParms : IXdrCodec
     /// </summary>
     /// <value> The term character. </value>
     public byte TermChar { get; set; }
-
-
-    /// <summary>   Default constructor. </summary>
-    public DeviceReadParms()
-    {
-    }
-
-    /// <summary>   Constructor. </summary>
-    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceReadParms( XdrDecodingStreamBase decoder )
-    {
-        this.Decode( decoder );
-    }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
