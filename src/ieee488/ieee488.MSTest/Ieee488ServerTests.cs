@@ -114,7 +114,7 @@ public class Ieee488ServerTests
             Assert.AreEqual( identity, response, $"@count = {count - repeatCount}" );
         }
 
-        // presently, the IEEE488 Client throws an exception when closing against the Mock server 
+        // presently, the mock serve does not support the destroy link RPC. 
         // ieee488Client.Close();
     }
 

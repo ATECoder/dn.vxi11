@@ -450,8 +450,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         else
             Logger.Writer.ConsoleWriteMessage( "No portmap service available." );
 
-        // Create embedded portmap service and check whether is has sprung
-        // into action.
+        // Create embedded portmap service and check whether is has sprung into action.
 
         Logger.Writer.ConsoleWriteMessage( "Creating embedded portmap instance: " );
         try
@@ -476,8 +475,8 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         {
             Logger.Writer.ConsoleWriteException( "ERROR: failed:", e );
         }
-
-        Logger.Writer.ConsoleWriteMessage( "Passed." );
+        externalPortmap = OncRpcEmbeddedPortmapService.IsPortmapRunning();
+        Logger.Writer.ConsoleWriteMessage( $"Port map service is {(externalPortmap ? "running" : "idle")}." );
     }
 
     #endregion

@@ -28,14 +28,14 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
     /// <param name="port">     The port. </param>
     public DeviceIntrServerStubBase( IPAddress bindAddr, int port )
     {
-        OncRpcProgramInfo[] info = new OncRpcProgramInfo[] {
+        OncRpcProgramInfo[] registeredPrograms = new OncRpcProgramInfo[] {
             new OncRpcProgramInfo(Vxi11ProgramConstants.DeviceInterruptProgram, Vxi11ProgramConstants.DeviceInterruptVersion),
         };
-        this.SetTransportRegistrationInfo( info );
+        this.SetRegisteredPrograms( registeredPrograms );
 
         OncRpcTransportBase[] transports = new OncRpcTransportBase[] {
-            new OncRpcUdpTransport(this, bindAddr, port, info, OncRpcTransportBase.DefaultBufferSize),
-            new OncRpcTcpTransport(this, bindAddr, port, info, OncRpcTransportBase.DefaultBufferSize)
+            new OncRpcUdpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.DefaultBufferSize),
+            new OncRpcTcpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.DefaultBufferSize)
         };
         this.SetTransports( transports );
     }
