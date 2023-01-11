@@ -64,7 +64,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
 
     #endregion
 
-    #region " Server Properties "
+    #region " server properties "
 
     private int _portNumber;
     /// <summary>   Gets or sets the port number. </summary>
@@ -412,7 +412,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
 
     #endregion
 
-    #region " Port mapper "
+    #region " port mapper "
 
     private static void EstablishPortmapService()
     {
@@ -459,7 +459,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
 
     #endregion
 
-    #region " START / STOP "
+    #region " start / stop "
 
     private bool _listening;
     /// <summary>   Gets or sets a value indicating whether the listening. </summary>

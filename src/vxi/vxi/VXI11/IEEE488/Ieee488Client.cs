@@ -30,37 +30,6 @@ public class Ieee488Client : IDisposable
         this.Connected = true;
     }
 
-    /// <summary>   Query if this object is disposed. </summary>
-    /// <returns>   True if disposed, false if not. </returns>
-    public bool IsDisposed()
-    {
-        return this._coreClient is null;
-    }
-
-    /// <summary>
-    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
-    /// resources.
-    /// </summary>
-    void IDisposable.Dispose()
-    {
-        this.Dispose( true );
-        // Take this object off the finalization(Queue) and prevent finalization code 
-        // from executing a second time.
-        GC.SuppressFinalize( this );
-    }
-
-    /// <summary>
-    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
-    /// resources.
-    /// </summary>
-    /// <param name="disposing">    True to release both managed and unmanaged resources; false to
-    ///                             release only unmanaged resources. </param>
-    private void Dispose( bool disposing )
-    {
-        if ( !this.IsDisposed() && disposing )
-            _ = this.Close();
-    }
-
     /// <summary>   Closes this object. </summary>
     public DeviceError Close()
     {
@@ -94,6 +63,61 @@ public class Ieee488Client : IDisposable
         return deviceError ?? new DeviceError();
     }
 
+    #region " disposable implementation "
+
+    /// <summary>   Query if this object is disposed. </summary>
+    /// <returns>   True if disposed, false if not. </returns>
+    public bool IsDisposed => this._link is null || this._coreClient is null;
+
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
+    /// resources.
+    /// </summary>
+    void IDisposable.Dispose()
+    {
+        if ( this.IsDisposed ) { return; }
+        try
+        {
+            // Do not change this code.  Put cleanup code in Dispose(disposing As Boolean) above.
+            this.Dispose( true );
+
+            // uncomment the following line if Finalize() is overridden above.
+            GC.SuppressFinalize( this );
+        }
+        catch ( Exception ex ) { Console.WriteLine( ex.ToString() ); }
+        finally
+        {
+        }
+    }
+
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
+    /// resources.
+    /// </summary>
+    /// <param name="disposing">    True to release both managed and unmanaged resources; false to
+    ///                             release only unmanaged resources. </param>
+    private void Dispose( bool disposing )
+    {
+        if ( disposing )
+        {
+            // dispose managed state (managed objects)
+        }
+
+        // free unmanaged resources and override finalizer
+        // I am assuming that the socket used in the derived classes include unmanaged resources.
+        _ = this.Close();
+
+        // set large fields to null
+    }
+
+    /// <summary>   Finalizer. </summary>
+    ~Ieee488Client()
+    {
+        if ( this.IsDisposed ) { return; }
+        this.Dispose( false );
+    }
+
+    #endregion
     #endregion
 
     #region " Properties "
