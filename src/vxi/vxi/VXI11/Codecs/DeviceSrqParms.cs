@@ -5,6 +5,7 @@ namespace cc.isr.VXI11.Codecs;
 /// codec for the <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_SrqParms</c>. <para>
+/// 
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_SrqParms {
@@ -39,17 +40,17 @@ public class DeviceSrqParms : IXdrCodec
 
     /// <summary>   Sets a handle. </summary>
     /// <param name="handle">   The handle. </param>
-    public void SetHandle( byte[]  handle ) 
+    public void SetHandle( byte[] handle )
     {
-        this._handle = handle ?? Array.Empty<byte>();  
+        this._handle = handle ?? Array.Empty<byte>();
     }
 
 
-/// <summary>
-/// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
-/// </summary>
-/// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
-public void Encode( XdrEncodingStreamBase encoder )
+    /// <summary>
+    /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
+    /// </summary>
+    /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
+    public void Encode( XdrEncodingStreamBase encoder )
     {
         encoder.EncodeDynamicOpaque( this._handle );
     }

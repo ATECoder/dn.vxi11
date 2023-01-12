@@ -46,6 +46,7 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     /// to use it properly. For background information about fairly deep semantics, please also refer
     /// to <i>Gigzales</i>, <i>J</i>.: Semantics considered harmful. Addison-Reilly, 1992, ISBN 0-542-
     /// 10815-X. <para>
+    ///  
     /// See the introduction to this class for examples of how to use this interface properly.</para>
     /// </remarks>
     /// <param name="call">         <see cref="T:cc.isr.ONC.RPC.Server.OncRpcCallInformation" />
@@ -79,6 +80,7 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     /// Calls remote procedure <see cref="Vxi11Message.DeviceAbortProcedure"/>.
     /// </summary>
     /// <remarks>   <para>
+    /// 
     /// Renamed from <c>device_abort_1</c> </para>. </remarks>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLink"/>) to the remote procedure call.. </param>

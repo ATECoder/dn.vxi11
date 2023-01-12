@@ -5,6 +5,7 @@ namespace cc.isr.VXI11.Codecs;
 /// codec for the <see cref="Vxi11Message.CreateLinkProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Create_LinkParms</c>. <para>
+/// 
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Create_LinkParms {
@@ -26,8 +27,8 @@ public class CreateLinkParms : IXdrCodec
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  The XDR Decoding stream </param>
-    public CreateLinkParms( XdrDecodingStreamBase decoder ) : this() 
-    { 
+    public CreateLinkParms( XdrDecodingStreamBase decoder ) : this()
+    {
         this.Decode( decoder );
     }
 

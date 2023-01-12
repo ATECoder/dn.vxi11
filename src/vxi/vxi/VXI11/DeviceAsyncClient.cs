@@ -12,6 +12,7 @@ namespace cc.isr.VXI11;
 /// </summary>
 /// <remarks>
 /// <para>
+/// 
 /// Renamed from <c>vxi11_DEVICE_ASYNC_Client</c> </para>
 /// </remarks>
 public class DeviceAsyncClient : OncRpcClientStubBase
@@ -90,6 +91,7 @@ public class DeviceAsyncClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceAbortProcedure"/>.
     /// </summary>
     /// <remarks>   <para>
+    /// 
     /// Renamed from <c>device_abort_1</c> </para>. </remarks>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLink"/>) to the remote procedure call.. </param>

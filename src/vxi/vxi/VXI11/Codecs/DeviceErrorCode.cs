@@ -8,6 +8,7 @@ namespace cc.isr.VXI11.Codecs;
 /// </summary>
 /// <remarks>
 /// Renamed from <c>Device_ErrorCode</c>. <para>
+///  
 /// VXI-11 Specifications: </para>
 /// <code>
 /// typedef long Device_ErrorCode;

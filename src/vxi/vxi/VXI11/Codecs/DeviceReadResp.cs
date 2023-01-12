@@ -5,6 +5,7 @@ namespace cc.isr.VXI11.Codecs;
 /// codec for the <see cref="Vxi11Message.DeviceReadProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_ReadResp</c>. <para>
+///  
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_ReadResp {
@@ -34,7 +35,7 @@ public class DeviceReadResp : IXdrCodec
     private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>
-    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
 
     /// <summary>   Gets or sets the reason(s) read completed as defined in <see cref="DeviceReadReasons"/>. </summary>
     /// <remarks>
@@ -54,6 +55,7 @@ public class DeviceReadResp : IXdrCodec
     /// but to avoid the overhead associated with character data (8 bits being promoted to 32 bits). Since the data parameters for
     /// <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> are arrays, 
     /// a structure is passed which contains a pointer to the data, data.data_val, and the number of elements, data.data_len. <para>
+    /// 
     /// A 'RESPONSE MESSAGE TERMINATOR' is send by putting a newline as the last character in data and setting the end flag in reason. </para>
     /// </remarks>
     /// <returns>   An array of byte. </returns>
@@ -69,10 +71,11 @@ public class DeviceReadResp : IXdrCodec
     /// but to avoid the overhead associated with character data (8 bits being promoted to 32 bits). Since the data parameters for
     /// <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> are arrays, 
     /// a structure is passed which contains a pointer to the data, data.data_val, and the number of elements, data.data_len. <para>
+    /// 
     /// A 'RESPONSE MESSAGE TERMINATOR' is send by putting a newline as the last character in data and setting the end flag in reason. </para>
     /// </remarks>
     /// <param name="data"> Gets or sets the data. </param>
-    public void SetData( byte[] data)
+    public void SetData( byte[] data )
     {
         this._data = data ?? Array.Empty<byte>();
     }

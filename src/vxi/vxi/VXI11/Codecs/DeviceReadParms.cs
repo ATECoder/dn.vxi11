@@ -5,6 +5,7 @@ namespace cc.isr.VXI11.Codecs;
 /// codec for the <see cref="Vxi11Message.DeviceReadProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_ReadParms</c>. <para>
+/// 
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_ReadParms {

@@ -8,6 +8,7 @@ namespace cc.isr.VXI11.Codecs;
 /// </summary>
 /// <remarks>
 /// Renamed from <c>Device_Flags</c>. <para>
+/// 
 /// VXI-11 Specifications: </para>
 /// <code>
 /// typedef long Device_Flags;
@@ -72,6 +73,7 @@ public enum DeviceOperationFlags
     None = 0,
 
     /// <summary>   An enum constant representing the wait lock option. <para>
+    /// 
     /// <b>Wait Lock (bit 0):</b> If the flag is set to one (1), then the network instrument server suspends (blocks) the
     /// requested operation if it cannot be performed due to a lock held by another link for at least
     /// lock_timeout milliseconds. If the flag is reset to zero (0), then the network instrument server sets the

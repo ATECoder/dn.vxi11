@@ -5,6 +5,7 @@ namespace cc.isr.VXI11.Codecs;
 /// codec for the <see cref="Vxi11Message.DeviceDoCommandProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_DocmdParms</c>. <para>
+/// 
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_DocmdParms {
@@ -26,13 +27,13 @@ public class DeviceDoCmdParms : IXdrCodec
     public DeviceDoCmdParms()
     {
         this._deviceLinkId = new();
-        this._flags = new(); 
-        this._dataIn= Array.Empty<byte>();
+        this._flags = new();
+        this._dataIn = Array.Empty<byte>();
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceDoCmdParms( XdrDecodingStreamBase decoder ) : this () 
+    public DeviceDoCmdParms( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
     }
@@ -100,7 +101,7 @@ public class DeviceDoCmdParms : IXdrCodec
     /// <param name="dataIn">   Gets or sets the data in; do cmd data parameters. </param>
     public void SetDataIn( byte[] dataIn )
     {
-        this._dataIn = dataIn?? Array.Empty<byte>();
+        this._dataIn = dataIn ?? Array.Empty<byte>();
     }
 
     /// <summary>

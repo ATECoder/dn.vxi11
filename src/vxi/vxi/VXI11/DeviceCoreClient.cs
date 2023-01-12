@@ -12,6 +12,7 @@ namespace cc.isr.VXI11;
 /// </summary>
 /// <remarks>
 /// <para>
+///  
 /// Renamed from <c>vxi11_DEVICE_CORE_Client</c> </para>
 /// </remarks>
 public class DeviceCoreClient : OncRpcClientStubBase

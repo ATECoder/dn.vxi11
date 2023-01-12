@@ -5,6 +5,7 @@ namespace cc.isr.VXI11.Codecs;
 /// codec for the <see cref="Vxi11Message.DeviceWriteProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_WriteResp</c>. <para>
+/// 
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_WriteResp {
@@ -24,7 +25,7 @@ public class DeviceWriteResp : IXdrCodec
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceWriteResp( XdrDecodingStreamBase decoder ) : this() 
+    public DeviceWriteResp( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
     }
@@ -32,7 +33,7 @@ public class DeviceWriteResp : IXdrCodec
     private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>
-    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
 
     /// <summary>   Gets or sets the size; the number of bytes written. </summary>
     /// <value> The number of bytes written. </value>

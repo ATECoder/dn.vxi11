@@ -374,7 +374,7 @@ public class Ieee488Client : IDisposable
         DeviceReadResp readResponse = this.Receive();
 
         if ( readResponse is null )
-            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed; {nameof(DeviceReadResp)} is null.",
+            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed; {nameof( DeviceReadResp )} is null.",
                                        DeviceErrorCodeValue.IOError );
         else if ( readResponse.ErrorCode is null )
             throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed; {nameof( DeviceReadResp )}.{nameof( DeviceReadResp.ErrorCode )} is null.",

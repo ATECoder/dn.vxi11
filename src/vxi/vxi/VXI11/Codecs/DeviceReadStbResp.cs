@@ -5,6 +5,7 @@ namespace cc.isr.VXI11.Codecs;
 /// codec for the <see cref="Vxi11Message.DeviceReadStbProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_ReadStbResp</c>. <para>
+///  
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_ReadStbResp
@@ -33,7 +34,7 @@ public class DeviceReadStbResp : IXdrCodec
     private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>
-    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
 
     /// <summary>   Gets or sets the status byte. </summary>
     /// <value> The status byte. </value>

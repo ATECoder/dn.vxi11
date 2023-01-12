@@ -14,6 +14,7 @@ namespace cc.isr.VXI11.Codecs;
 /// <see cref="Vxi11Message.DestroyInterruptChannelProcedure"/> RPC messages.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_Error</c>. <para>
+/// 
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_Error
@@ -42,7 +43,7 @@ public class DeviceError : IXdrCodec
     private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>
-    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.

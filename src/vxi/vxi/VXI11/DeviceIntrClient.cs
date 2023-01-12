@@ -10,8 +10,8 @@ namespace cc.isr.VXI11;
 /// <see cref="Vxi11ProgramConstants.DeviceInterruptProgram"/> remote program. It provides method
 /// stubs which, when called, in turn call the appropriate remote method (procedure).
 /// </summary>
-/// <remarks>
-/// <para>
+/// <remarks> <para>
+/// 
 /// Renamed from <c>vxi11_DEVICE_INTR_Client</c> </para>.
 /// </remarks>
 public class DeviceIntrClient : OncRpcClientStubBase
@@ -88,6 +88,7 @@ public class DeviceIntrClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
     /// </summary>
     /// <remarks>   <para>
+    /// 
     /// Renamed from <c>device_intr_srq_1</c> </para>. </remarks>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceSrqParms"/>) to the remote procedure call.. </param>

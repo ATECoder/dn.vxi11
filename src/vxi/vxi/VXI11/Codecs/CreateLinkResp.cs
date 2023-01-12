@@ -5,6 +5,7 @@ namespace cc.isr.VXI11.Codecs;
 /// codec for the <see cref="Vxi11Message.CreateLinkProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Create_LinkResp</c>. <para>
+///  
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Create_LinkResp {
@@ -22,7 +23,7 @@ public class CreateLinkResp : IXdrCodec
     public CreateLinkResp()
     {
         this._errorCode = new();
-        this._deviceLinkId= new();
+        this._deviceLinkId = new();
     }
 
     /// <summary>   Constructor. </summary>
@@ -35,7 +36,7 @@ public class CreateLinkResp : IXdrCodec
     private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>
-    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
 
     private DeviceLink _deviceLinkId;
     /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>

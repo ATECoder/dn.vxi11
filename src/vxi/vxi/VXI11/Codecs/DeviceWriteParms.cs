@@ -6,6 +6,7 @@ namespace cc.isr.VXI11.Codecs;
 /// </summary>
 /// <remarks>
 /// Renamed from <c>Device_WriteParms</c>. <para>
+/// 
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_WriteParms {
@@ -64,7 +65,7 @@ public class DeviceWriteParms : IXdrCodec
 
     /// <summary>   Gets the data. </summary>
     /// <returns>   An array of byte. </returns>
-    public byte[] GetData() { return this._data;  }
+    public byte[] GetData() { return this._data; }
 
     /// <summary>   Sets a data. </summary>
     /// <remarks> 

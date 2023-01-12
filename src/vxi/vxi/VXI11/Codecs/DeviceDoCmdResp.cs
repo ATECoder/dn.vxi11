@@ -5,6 +5,7 @@ namespace cc.isr.VXI11.Codecs;
 /// codec for the <see cref="Vxi11Message.DeviceDoCommandProcedure"/> RPC message.
 /// </summary>
 /// <remarks>   Renamed from <c>Device_DocmdResp</c>. <para>
+///  
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_DocmdResp {
@@ -33,7 +34,7 @@ public class DeviceDoCmdResp : IXdrCodec
     private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>
-    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new (); }
+    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
 
     private byte[] _dataOut;
 
