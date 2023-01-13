@@ -8,3 +8,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage( "Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "namespace", Target = "~N:cc.isr.VXI11" )]
 [assembly: SuppressMessage( "Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "namespace", Target = "~N:cc.isr.VXI11.IEEE488" )]
 [assembly: SuppressMessage( "Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "namespace", Target = "~N:cc.isr.VXI11.Codecs" )]
+[assembly: SuppressMessage( "Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "namespace", Target = "~N:cc.isr.VXI11.Visa" )]

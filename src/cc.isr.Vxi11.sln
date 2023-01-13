@@ -53,6 +53,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "~build", "~build", "{F92F2C
 		items\version.build.tt = items\version.build.tt
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.Visa.MSTest", "visa\visa.MSTest\cc.isr.VXI11.Visa.MSTest.csproj", "{19ED6765-2643-4F29-8C9E-1C295DF6320D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{5868BF4C-64EF-4334-BA1A-764F33FCF4D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5868BF4C-64EF-4334-BA1A-764F33FCF4D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5868BF4C-64EF-4334-BA1A-764F33FCF4D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19ED6765-2643-4F29-8C9E-1C295DF6320D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19ED6765-2643-4F29-8C9E-1C295DF6320D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19ED6765-2643-4F29-8C9E-1C295DF6320D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19ED6765-2643-4F29-8C9E-1C295DF6320D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -114,6 +120,7 @@ Global
 		{65445109-2895-4C85-93A5-9C510285B4AD} = {3BC97BEF-E1EA-47DC-9B51-30E570546C68}
 		{05887A3A-2F4B-4C49-B72F-B416B2430A2C} = {3BC97BEF-E1EA-47DC-9B51-30E570546C68}
 		{5868BF4C-64EF-4334-BA1A-764F33FCF4D2} = {335AEC84-3DED-4726-8022-30E175D3769A}
+		{19ED6765-2643-4F29-8C9E-1C295DF6320D} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A0429F81-8254-4C93-A727-249FEAC06071}

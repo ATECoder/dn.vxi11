@@ -3,6 +3,7 @@ using System.Reflection;
 
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.VXI11.Codecs;
+using cc.isr.VXI11.Visa;
 
 namespace cc.isr.VXI11.IEEE488;
 
@@ -143,15 +144,15 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         private set => _ = this.SetProperty( ref this._interfaceDeviceString, value );
     }
 
-    private Ieee488InterfaceDevice _interfaceDevice;
+    private DeviceAddress _interfaceDevice;
     /// <summary>   Gets or sets the interface device. </summary>
     /// <value> The interface device. </value>
-    public Ieee488InterfaceDevice InterfaceDevice
+    public DeviceAddress InterfaceDevice
     {
         get => this._interfaceDevice;
         set {
             _ = this.SetProperty( ref this._interfaceDevice, value );
-            this.InterfaceDeviceString = this._interfaceDevice.InterfaceDeviceString;
+            this.InterfaceDeviceString = this._interfaceDevice.InterfaceDeviceAddress;
         }
     }
 
@@ -172,7 +173,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
 
         Logger.Writer.ConsoleWriteMessage( $"creating link to {linkInfo.Device}" );
 
-        this.InterfaceDevice = new Ieee488InterfaceDevice( linkInfo.Device );
+        this.InterfaceDevice = new DeviceAddress( linkInfo.Device );
         result.ErrorCode = this.InterfaceDevice.IsValid()
             ? new DeviceErrorCode() { Value = DeviceErrorCodeValue.NoError }
             : new DeviceErrorCode() { Value = DeviceErrorCodeValue.InvalidLinkIdentifier };
