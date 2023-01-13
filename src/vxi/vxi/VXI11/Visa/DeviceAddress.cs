@@ -108,19 +108,12 @@ public struct DeviceAddress
             {
                 this.InterfaceFamily = interfaceFamily;
                 if ( this.InterfaceName.Length > this.InterfaceFamily.Length )
-                    if ( int.TryParse( this.InterfaceName.Substring( this.InterfaceFamily.Length - 1 ), out int interfaceNumber ) )
+                    if ( int.TryParse( this.InterfaceName[(this.InterfaceFamily.Length - 1)..], out int interfaceNumber ) )
                         this.InterfaceNumber = interfaceNumber;
             }
         this.PrimaryAddress = info.Length > 1 ? Convert.ToInt16( info[1] ) : new int?();
         this.SecondaryAddress = info.Length > 2 ? Convert.ToInt16( info[2] ) : new int?();
         return this.IsValid();
-    }
-
-    private int ConvertToInt32( string value  )
-    {
-        if ( string.IsNullOrEmpty( value ) ) return 0;
-        if ( value.StartsWith( "0x") ) { return Convert.ToInt32( value.Substring( 2 ), 16 ); }
-        return Convert.ToInt32( value );
     }
 
     /// <summary>   Parse the USB device address. </summary>
@@ -142,17 +135,14 @@ public struct DeviceAddress
         this.InterfaceName = info[0];
         this.InterfaceFamily = UsbInterfaceFamily;
         if ( this.InterfaceName.Length > this.InterfaceFamily.Length )
-            if ( int.TryParse( this.InterfaceName.Substring( this.InterfaceFamily.Length - 1 ), out int interfaceNumber ) )
+            if ( int.TryParse( this.InterfaceName[(this.InterfaceFamily.Length - 1)..], out int interfaceNumber ) )
                 this.InterfaceNumber = interfaceNumber;
         if ( info.Length < 2 ) return true; // address is like 'usb0'
         info = info[1].Split( ':' );
-        this.ManufacturerId = ConvertToInt32( info[0] );
-        this.ModelCode = ConvertToInt32( info[2] ); 
+        this.ManufacturerId = Support.ConvertToInt32( info[0] );
+        this.ModelCode = Support.ConvertToInt32( info[2] ); 
         this.SerialNumber = info[4];
-        if ( info.Length > 6 )
-            this.UsbTmcInterfaceNumber = ConvertToInt32( info[6] );
-        else
-            this.UsbTmcInterfaceNumber = 0;
+        this.UsbTmcInterfaceNumber = info.Length > 6 ? Support.ConvertToInt32( info[6] ) : 0;
 
         return true;
     }

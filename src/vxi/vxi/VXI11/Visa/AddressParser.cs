@@ -48,7 +48,7 @@ namespace cc.isr.VXI11.Visa
         private void BuildRegexPattern()
         {
             StringBuilder builder = new ();
-            _ = builder.Append( @$"^(?<{nameof( Board )}>(?<{nameof( AddressBase.Protocol )}>{this.DefaultProtocol})\d*)" );
+            _ = builder.Append( @$"^(?<{nameof( this.Board )}>(?<{nameof( AddressBase.Protocol )}>{this.DefaultProtocol})\d*)" );
             _ = builder.Append( @$"(::(?<{nameof( AddressBase.Host )}>[^\s:]+))" );
             _ = builder.Append( @$"(::(?<{nameof( AddressBase.Device )}>[^\s:]+(\[.+\])?))" );
             _ = builder.Append( @$"?(::(?<{nameof( AddressBase.Suffix )}>{this.DefaultSuffix}))$" );
