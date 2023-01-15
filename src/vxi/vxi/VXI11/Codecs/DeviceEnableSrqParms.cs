@@ -33,6 +33,14 @@ public class DeviceEnableSrqParms : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="DeviceEnableSrqParms"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceEnableSrqParms"/>. </returns>
+    public static DeviceEnableSrqParms DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceEnableSrqParms( decoder );
+    }
+
     private DeviceLink _link;
     /// <summary>   Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
     /// <value> The identifier of the device link. </value>
@@ -73,8 +81,8 @@ public class DeviceEnableSrqParms : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.Link.Encode( encoder );
-        encoder.EncodeBoolean( this.Enable );
-        encoder.EncodeDynamicOpaque( this._handle );
+        this.Enable.Encode( encoder );
+        this._handle.EncodeDynamicOpaque( encoder );
     }
 
     /// <summary>

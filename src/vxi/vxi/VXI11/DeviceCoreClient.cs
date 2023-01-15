@@ -18,6 +18,8 @@ namespace cc.isr.VXI11;
 public class DeviceCoreClient : OncRpcClientStubBase
 {
 
+    #region " construction and cleanup "
+
     /// <summary>
     /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
     /// remote program can be accessed.
@@ -83,12 +85,20 @@ public class DeviceCoreClient : OncRpcClientStubBase
     {
     }
 
+    #endregion
+
+    #region " members "
+
     /// <summary>   Gets or sets the default encoding. </summary>
     /// <remarks>
     /// The default encoding for VXI-11 is <see cref="Encoding.ASCII"/>, which is a subset of <see cref="Encoding.UTF8"/>
     /// </remarks>
     /// <value> The default encoding. </value>
     public static Encoding DefaultEncoding { get; set; } = Encoding.UTF8;
+
+    #endregion
+
+    #region " remote procedure calls "
 
     /// <summary>
     /// Calls remote procedure <see cref="Vxi11Message.CreateLinkProcedure"/>; Opens a link
@@ -329,5 +339,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
         this.Client?.Call( ( int ) Vxi11Message.DestroyInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, args, result );
         return result;
     }
+
+    #endregion
 
 }

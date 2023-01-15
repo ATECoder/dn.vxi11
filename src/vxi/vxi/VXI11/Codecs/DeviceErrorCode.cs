@@ -21,19 +21,16 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceErrorCode : IXdrCodec
 {
-    /// <summary>   The <see cref="DeviceErrorCodeValue"/>. </summary>
-    public DeviceErrorCodeValue Value { get; set; }
-
     /// <summary>   Default constructor. </summary>
     public DeviceErrorCode()
     {
     }
 
     /// <summary>   Constructor. </summary>
-    /// <param name="value">    The value. </param>
-    public DeviceErrorCode( DeviceErrorCodeValue value )
+    /// <param name="errorCode">    The error code value. </param>
+    public DeviceErrorCode( DeviceErrorCodeValue errorCode )
     {
-        this.Value = value;
+        this.Value = errorCode;
     }
 
     /// <summary>   Constructor. </summary>
@@ -43,16 +40,17 @@ public class DeviceErrorCode : IXdrCodec
         this.Decode( decoder );
     }
 
-    /// <summary>
-    /// Decodes -- that is: deserializes -- an instance of the <see cref="DeviceErrorCode"/> from an 
-    /// XDR stream in compliance to RFC 1832.
-    /// </summary>
+    /// <summary>   Decodes an instance of a <see cref="DeviceErrorCode"/>. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    /// <returns>   A DeviceErrorCode. </returns>
+    /// <returns>   The <see cref="DeviceErrorCode"/>. </returns>
     public static DeviceErrorCode DecodeInstance( XdrDecodingStreamBase decoder )
     {
         return new DeviceErrorCode( decoder );
     }
+
+    /// <summary>   Gets or set the <see cref="DeviceErrorCodeValue"/>. </summary>
+    /// <value> The <see cref="DeviceErrorCodeValue"/>. </value>
+    public DeviceErrorCodeValue Value { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
@@ -60,7 +58,7 @@ public class DeviceErrorCode : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        encoder.EncodeInt( ( int ) this.Value );
+        (( int ) this.Value).Encode( encoder );
     }
 
     /// <summary>

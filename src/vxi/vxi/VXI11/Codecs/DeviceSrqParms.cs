@@ -29,6 +29,14 @@ public class DeviceSrqParms : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="DeviceSrqParms"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceSrqParms"/>. </returns>
+    public static DeviceSrqParms DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceSrqParms( decoder );
+    }
+
     private byte[] _handle;
 
     /// <summary>   Gets the handle. </summary>
@@ -45,14 +53,13 @@ public class DeviceSrqParms : IXdrCodec
         this._handle = handle ?? Array.Empty<byte>();
     }
 
-
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
     /// </summary>
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        encoder.EncodeDynamicOpaque( this._handle );
+        this._handle.EncodeDynamicOpaque( encoder );
     }
 
     /// <summary>

@@ -33,6 +33,14 @@ public class CreateLinkResp : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="CreateLinkResp"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="CreateLinkResp"/>. </returns>
+    public static CreateLinkResp DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new CreateLinkResp( decoder );
+    }
+
     private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>

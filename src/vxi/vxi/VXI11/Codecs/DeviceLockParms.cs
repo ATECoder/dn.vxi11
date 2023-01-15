@@ -32,6 +32,14 @@ public class DeviceLockParms : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="DeviceLockParms"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceLockParms"/>. </returns>
+    public static DeviceLockParms DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceLockParms( decoder );
+    }
+
     private DeviceLink _link;
     /// <summary>
     /// Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
@@ -47,8 +55,10 @@ public class DeviceLockParms : IXdrCodec
 
     /// <summary>   Gets or sets the lock timeout; time to wait to acquire lock. </summary>
     /// <remarks>
-    /// If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero, the network
-    /// instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be released.
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
+    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
+    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
+    /// released.
     /// </remarks>
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
@@ -61,7 +71,7 @@ public class DeviceLockParms : IXdrCodec
     {
         this.Link.Encode( encoder );
         this.Flags.Encode( encoder );
-        encoder.EncodeInt( this.LockTimeout );
+        this.LockTimeout.Encode( encoder );
     }
 
     /// <summary>

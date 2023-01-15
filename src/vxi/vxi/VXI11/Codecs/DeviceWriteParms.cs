@@ -44,6 +44,14 @@ public class DeviceWriteParms : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="DeviceWriteParms"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceWriteParms"/>. </returns>
+    public static DeviceWriteParms DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceWriteParms( decoder );
+    }
+
     private DeviceLink _link;
     /// <summary>
     /// Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
@@ -53,10 +61,22 @@ public class DeviceWriteParms : IXdrCodec
     public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }
 
     /// <summary>   Gets or sets the i/o timeout. </summary>
+    /// <remarks>
+    /// The <see cref="IOTimeout"/> determines how long a network instrument server allows an I/O operation 
+    /// to take. If the <see cref="IOTimeout"/> is non-zero, the network instrument server allows at least 
+    /// <see cref="IOTimeout"/> milliseconds before returning control to the client with a timeout error.
+    /// The time it takes for the I/O operation to complete does not include any time spent waiting for the lock.
+    /// </remarks>
     /// <value> The i/o timeout. </value>
     public int IOTimeout { get; set; }
 
     /// <summary>   Gets or sets the lock timeout. </summary>
+    /// <remarks>
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
+    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
+    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
+    /// released.
+    /// </remarks>
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
 
@@ -89,7 +109,7 @@ public class DeviceWriteParms : IXdrCodec
         this.IOTimeout.Encode( encoder  );
         this.LockTimeout.Encode( encoder );
         this.Flags.Encode( encoder );
-        encoder.EncodeDynamicOpaque( this._data );
+        this._data.EncodeDynamicOpaque( encoder );
     }
 
     /// <summary>

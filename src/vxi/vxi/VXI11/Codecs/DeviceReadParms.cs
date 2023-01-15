@@ -35,6 +35,14 @@ public class DeviceReadParms : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="DeviceReadParms"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceReadParms"/>. </returns>
+    public static DeviceReadParms DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceReadParms( decoder );
+    }
+
     private DeviceLink _link;
     /// <summary>   Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
     /// <value> The identifier of the device link. </value>
@@ -46,15 +54,20 @@ public class DeviceReadParms : IXdrCodec
 
     /// <summary>   Gets or sets the i/o timeout. </summary>
     /// <remarks>
-    /// The i/o timeout value determines how long a network instrument server allows an I/O operation to take.
+    /// The <see cref="IOTimeout"/> determines how long a network instrument server allows an I/O operation 
+    /// to take. If the <see cref="IOTimeout"/> is non-zero, the network instrument server allows at least 
+    /// <see cref="IOTimeout"/> milliseconds before returning control to the client with a timeout error.
+    /// The time it takes for the I/O operation to complete does not include any time spent waiting for the lock.
     /// </remarks>
     /// <value> The i/o timeout. </value>
     public int IOTimeout { get; set; }
 
     /// <summary>   Gets or sets the lock timeout. </summary>
     /// <remarks>
-    /// The lock timeout determines how long a network instrument server will wait for a lock to be released.
-    /// Units for both are in milliseconds.
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
+    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
+    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
+    /// released.
     /// </remarks>
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
@@ -78,11 +91,11 @@ public class DeviceReadParms : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.Link.Encode( encoder );
-        encoder.EncodeInt( this.RequestSize );
-        encoder.EncodeInt( this.IOTimeout );
-        encoder.EncodeInt( this.LockTimeout );
+        this.RequestSize.Encode( encoder  );
+        this.IOTimeout.Encode( encoder );
+        this.LockTimeout.Encode( encoder );
         this.Flags.Encode( encoder );
-        encoder.EncodeByte( this.TermChar );
+        this.TermChar.Encode( encoder  );
     }
 
     /// <summary>

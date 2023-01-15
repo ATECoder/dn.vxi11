@@ -40,13 +40,21 @@ public class DeviceFlags : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="DeviceFlags"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceFlags"/>. </returns>
+    public static DeviceFlags DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceFlags( decoder );
+    }
+
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
     /// </summary>
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        encoder.EncodeInt( ( int ) this.Value );
+        (( int ) this.Value).Encode( encoder );
     }
 
     /// <summary>

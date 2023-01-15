@@ -31,6 +31,14 @@ public class DeviceDoCmdResp : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="DeviceDoCmdResp"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceDoCmdResp"/>. </returns>
+    public static DeviceDoCmdResp DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceDoCmdResp( decoder );
+    }
+
     private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>
@@ -59,7 +67,7 @@ public class DeviceDoCmdResp : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.ErrorCode.Encode( encoder );
-        encoder.EncodeDynamicOpaque( this._dataOut );
+        this._dataOut.EncodeDynamicOpaque( encoder );
     }
 
     /// <summary>

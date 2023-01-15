@@ -1,3 +1,5 @@
+using cc.isr.XDR.EncodingExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -19,6 +21,27 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceRemoteFunc : IXdrCodec
 {
+
+    /// <summary>   Default constructor. </summary>
+    public DeviceRemoteFunc()
+    {
+    }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    public DeviceRemoteFunc( XdrDecodingStreamBase decoder )
+    {
+        this.Decode( decoder );
+    }
+
+    /// <summary>   Decodes an instance of a <see cref="DeviceRemoteFunc"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceRemoteFunc"/>. </returns>
+    public static DeviceRemoteFunc DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceRemoteFunc( decoder );
+    }
+
     /// <summary>   Gets or sets the host address. </summary>
     /// <value> The host address. </value>
     public int HostAddr { get; set; }
@@ -44,29 +67,17 @@ public class DeviceRemoteFunc : IXdrCodec
     /// <value> The <see cref="DeviceAddrFamily"/> program family. </value>
     public int ProgFamily { get; set; }
 
-    /// <summary>   Default constructor. </summary>
-    public DeviceRemoteFunc()
-    {
-    }
-
-    /// <summary>   Constructor. </summary>
-    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceRemoteFunc( XdrDecodingStreamBase decoder )
-    {
-        this.Decode( decoder );
-    }
-
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
     /// </summary>
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        encoder.EncodeInt( this.HostAddr );
-        encoder.EncodeInt( this.HostPort );
-        encoder.EncodeInt( this.ProgNum );
-        encoder.EncodeInt( this.ProgVers );
-        encoder.EncodeInt( this.ProgFamily );
+        this.HostAddr.Encode( encoder );
+        this.HostPort.Encode( encoder );
+        this.ProgNum.Encode( encoder );
+        this.ProgVers.Encode( encoder );
+        this.ProgFamily.Encode( encoder );
     }
 
     /// <summary>

@@ -1,3 +1,4 @@
+using System.Data;
 using System.Net;
 
 using cc.isr.VXI11.Codecs;
@@ -8,34 +9,90 @@ namespace cc.isr.VXI11.IEEE488;
 public class Ieee488Client : IDisposable
 {
 
-    #region " construction and cleanup "
+    #region " construction, connection and cleanup "
 
-    private DeviceCoreClient? _coreClient;
-    private DeviceLink? _link;
-
-    /// <summary>
-    /// Connect
-    /// </summary>
-    /// <param name="ipv4Address">Device IPv4 address</param>
-    /// <param name="device">Device name, e.g., inst0 or gpib0,8</param>
-    public void Connect( string ipv4Address, string device )
+    /// <summary>   Default constructor. </summary>
+    public Ieee488Client()
     {
-        this._coreClient = new DeviceCoreClient( IPAddress.Parse( ipv4Address ), OncRpcProtocols.OncRpcTcp );
+        // create a client id for this instance;
+        this.ClientId = ( int ) ( DateTime.Now.Subtract( DateTime.Parse( "2023-01-01" ) ).TotalMilliseconds % 0x7FFFFFFF);
+
+        // initialize some values 
+        this.MaxReadLen = 128 * 1024 * 1024;
+        this.MaxReceiveSize = 0;
+        this.LastDeviceError = new DeviceErrorCode();
+        this.Host = string.Empty;
+        this.InterfaceDeviceString = string.Empty;
+        this.Eoi = true;
+        this.LockTimeout = 1000;
+        this.LockEnabled = false;
+        this.ReadTermination = ( byte ) '\n';
+        this.ReadTimeout = 1000;
+        this.WriteTermination =  new byte[] { ( byte ) '\n' };
+        this.WriteTimeout = 1000;
+        this.AbortPort = 0;
+    }
+
+    /// <summary>   An internal method to process connecting the device by calling the <see cref="Vxi11Message.CreateLinkProcedure"/> 
+    /// RPC and returning the <see cref="DeviceErrorCode"/> codec. </summary>
+    /// <param name="hostAddress">              The host device IPv4 address. </param>
+    /// <param name="interfaceDeviceString">    The interface device string, e.g., inst0 or gpib0,8. </param>
+    /// <returns>   A DeviceErrorCode. </returns>
+    private DeviceErrorCode ConnectDevice( string hostAddress, string interfaceDeviceString )
+    {
+        // First destroy the link if not destroyed. 
+        if ( this.Connected ) { _ = this.Close(); }
+
+        this._link = null;
+        this.Host = string.Empty;
+        this.InterfaceDeviceString = string.Empty;
+
+        // instantiate the core client.
+        this._coreClient = new DeviceCoreClient( IPAddress.Parse( hostAddress ), OncRpcProtocols.OncRpcTcp );
         CreateLinkParms createLinkParam = new() {
-            Device = device
+            Device = interfaceDeviceString,
+            LockDevice = this.LockEnabled,
+            LockTimeout = this.LockTimeout,
         };
         CreateLinkResp linkResp = this._coreClient.CreateLink( createLinkParam );
-        this._link = linkResp.DeviceLink;
-        this.MaxRecvSize = linkResp.MaxReceiveSize;
-        this.Connected = true;
+        if ( linkResp.ErrorCode.Value == DeviceErrorCodeValue.NoError )
+        {
+            this._link = linkResp.DeviceLink;
+            this.MaxReceiveSize = linkResp.MaxReceiveSize;
+            this.LastDeviceError = linkResp.ErrorCode;
+            this.AbortPort = linkResp.AbortPort;
+
+            this.Host = hostAddress;
+            this.InterfaceDeviceString = interfaceDeviceString;
+        }
+        return linkResp.ErrorCode;
+
+    }
+
+    /// <summary>   Connects the device by calling the <see cref="Vxi11Message.CreateLinkProcedure"/> 
+    /// RPC and sets the <see cref="LastDeviceError"/> or throws an exception on failure. </summary>
+    /// <param name="hostAddress">              The host device IPv4 address. </param>
+    /// <param name="interfaceDeviceString">    The interface device string, e.g., inst0 or gpib0,8. </param>
+    public void Connect( string hostAddress, string interfaceDeviceString )
+    {
+        try
+        {
+            this.LastDeviceError = this.ConnectDevice( hostAddress, interfaceDeviceString );
+        }
+        catch 
+        {
+            throw;
+        }
+        finally
+        {
+        }
     }
 
     /// <summary>   Closes this object. </summary>
     public DeviceError Close()
     {
-        this.Connected = false;
         DeviceError? deviceError = new();
-        if ( this._link is not null )
+        if ( this.Connected && this._link is not null )
             try
             {
                 deviceError = this._coreClient?.DestroyLink( this._link );
@@ -118,13 +175,48 @@ public class Ieee488Client : IDisposable
     }
 
     #endregion
+
     #endregion
 
-    #region " Properties "
+    #region " VXI-11 members "
 
-    /// <summary>   Gets or sets the maximum size of the receive. </summary>
-    /// <value> The maximum size of the receive. </value>
-    public int MaxRecvSize { get; private set; }
+    /// <summary>   The core client. </summary>
+    private DeviceCoreClient? _coreClient;
+
+    /// <summary>   Gets or sets the identifier of the client. </summary>
+    /// <value> The identifier of the client. </value>
+    private int ClientId { get; set; }
+
+    /// <summary>   The link the was established to the device upon connection. </summary>
+    private DeviceLink? _link;
+
+    /// <summary>   Gets or sets the max data size in bytes device will accept on a write. </summary>
+    /// <remarks> This is the size of the largest data set the network instrument server can
+    /// accept in a <see cref="Vxi11Message.DeviceWriteProcedure"/> RPC. This value is at least 1024. </remarks>
+    /// <value> The maximum <see cref="Vxi11Message.DeviceWriteProcedure"/> data size. </value>
+    public int MaxReceiveSize { get; private set; }
+
+    /// <summary>   Gets or sets the last device error. </summary>
+    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
+    public DeviceErrorCode LastDeviceError { get; private set; } 
+
+    public int AbortPort { get; private set; }
+
+    public int MaxReadLen { get; private set; }
+
+    #endregion
+
+    #region " members "
+
+    /// <summary>   Gets or sets the host IPv4 Address. </summary>
+    /// <value> The host. </value>
+    public string Host { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the interface device string, .e.g, inst0, gpib0,5, or usb0[...].
+    /// </summary>
+    /// <value> The interface device string. </value>
+    public string InterfaceDeviceString { get; private set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the end-or-identify (EOI) terminator is enabled.
@@ -139,32 +231,41 @@ public class Ieee488Client : IDisposable
     /// termination will always reset the current SCPI message path to the root level.
     /// </remarks>
     /// <value> True if EOI is enabled, false if not. </value>
-    public bool Eoi { get; set; } = true;
+    public bool Eoi { get; set; }
 
     /// <summary>   Gets or sets the read termination. </summary>
     /// <value> The read termination. </value>
-    public byte ReadTermination { get; set; } = ( byte ) '\n';
+    public byte ReadTermination { get; set; }
 
     /// <summary>   Gets or sets the read timeout in milliseconds. </summary>
     /// <value> The read timeout in milliseconds. </value>
-    public int ReadTimeout { get; set; } = 1000;
+    public int ReadTimeout { get; set; }
 
     /// <summary>   Gets or sets the write timeout in milliseconds. </summary>
     /// <value> The write timeout in milliseconds. </value>
-    public int WriteTimeout { get; set; } = 1000;
+    public int WriteTimeout { get; set; }
 
     /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
     /// <remarks> </remarks>
-    /// <value> The lock timeout. </value>
-    public int LockTimeout { get; set; } = 1000;
+    /// <remarks>
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
+    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
+    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
+    /// released.
+    /// </remarks>
+    public int LockTimeout { get; set; } 
+
+    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
+    /// <value> True if lock enabled, false if not. </value>
+    public bool LockEnabled { get; set; }
 
     /// <summary>   Gets or sets the write termination. </summary>
     /// <value> The write termination. </value>
-    public byte[] WriteTermination { get; set; } = { ( byte ) '\n' };
+    public byte[] WriteTermination { get; set; } 
 
-    /// <summary>   Gets or sets a value indicating whether the VXI Core Client is connected. </summary>
+    /// <summary>   Gets a value indicating whether the VXI Core Client is connected. </summary>
     /// <value> True if connected, false if not. </value>
-    public bool Connected { get; private set; }
+    public bool Connected => this._link is not null;
 
     #endregion
 
@@ -236,7 +337,7 @@ public class Ieee488Client : IDisposable
         {
             DeviceReadParms readParam = new() {
                 Link = _link,
-                RequestSize = this.MaxRecvSize, // response.Length,
+                RequestSize = this.MaxReceiveSize, // response.Length,
                 IOTimeout = this.ReadTimeout,
                 LockTimeout = this.LockTimeout,
                 Flags = new DeviceFlags(),

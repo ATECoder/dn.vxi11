@@ -29,6 +29,7 @@ public class DeviceDoCmdParms : IXdrCodec
         this._link = new();
         this._flags = new();
         this._dataIn = Array.Empty<byte>();
+        this.NetworkOrder = true;
     }
 
     /// <summary>   Constructor. </summary>
@@ -36,6 +37,14 @@ public class DeviceDoCmdParms : IXdrCodec
     public DeviceDoCmdParms( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
+    }
+
+    /// <summary>   Decodes an instance of a <see cref="DeviceDoCmdParms"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceDoCmdParms"/>. </returns>
+    public static DeviceDoCmdParms DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceDoCmdParms( decoder );
     }
 
     private DeviceLink _link;
@@ -50,15 +59,20 @@ public class DeviceDoCmdParms : IXdrCodec
 
     /// <summary>   Gets or sets the i/o timeout. </summary>
     /// <remarks>
-    /// The i/o timeout value determines how long a network instrument server allows an I/O operation to take.
+    /// The <see cref="IOTimeout"/> determines how long a network instrument server allows an I/O operation 
+    /// to take. If the <see cref="IOTimeout"/> is non-zero, the network instrument server allows at least 
+    /// <see cref="IOTimeout"/> milliseconds before returning control to the client with a timeout error.
+    /// The time it takes for the I/O operation to complete does not include any time spent waiting for the lock.
     /// </remarks>
     /// <value> The i/o timeout. </value>
     public int IOTimeout { get; set; }
 
     /// <summary>   Gets or sets the lock timeout. </summary>
     /// <remarks>
-    /// The lock timeout determines how long a network instrument server will wait for a lock to be released.
-    /// Units for both are in milliseconds.
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
+    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
+    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
+    /// released.
     /// </remarks>
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
@@ -112,12 +126,12 @@ public class DeviceDoCmdParms : IXdrCodec
     {
         this.Link.Encode( encoder );
         this.Flags.Encode( encoder );
-        encoder.EncodeInt( this.IOTimeout );
-        encoder.EncodeInt( this.LockTimeout );
-        encoder.EncodeInt( this.Cmd );
-        encoder.EncodeBoolean( this.NetworkOrder );
-        encoder.EncodeInt( this.DataSize );
-        encoder.EncodeDynamicOpaque( this._dataIn );
+        this.IOTimeout.Encode( encoder );
+        this.LockTimeout.Encode( encoder );
+        this.Cmd .Encode( encoder );
+        this.NetworkOrder.Encode( encoder );
+        this.DataSize.Encode( encoder );
+        this._dataIn.EncodeDynamicOpaque( encoder );
     }
 
     /// <summary>

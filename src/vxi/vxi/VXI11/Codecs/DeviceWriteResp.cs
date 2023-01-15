@@ -30,6 +30,14 @@ public class DeviceWriteResp : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="DeviceWriteResp"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceWriteResp"/>. </returns>
+    public static DeviceWriteResp DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceWriteResp( decoder );
+    }
+
     private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>
@@ -46,7 +54,7 @@ public class DeviceWriteResp : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.ErrorCode.Encode( encoder );
-        encoder.EncodeInt( this.Size );
+        this.Size.Encode( encoder );
     }
 
     /// <summary>

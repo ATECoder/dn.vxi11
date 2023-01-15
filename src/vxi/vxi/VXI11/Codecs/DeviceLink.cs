@@ -38,12 +38,9 @@ public class DeviceLink : IXdrCodec
         this.Decode( decoder );
     }
 
-    /// <summary>
-    /// Decodes -- that is: deserializes -- an instance of <see cref="DeviceLink"/> object from 
-    /// an XDR stream in compliance to RFC 1832.
-    /// </summary>
+    /// <summary>   Decodes an instance of a <see cref="DeviceLink"/>. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    /// <returns>   A DeviceLink. </returns>
+    /// <returns>   The <see cref="DeviceLink"/>. </returns>
     public static DeviceLink DecodeInstance( XdrDecodingStreamBase decoder )
     {
         return new DeviceLink( decoder );
@@ -59,7 +56,7 @@ public class DeviceLink : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        encoder.EncodeInt( this.Value );
+        this.Value.Encode( encoder );
     }
 
     /// <summary>

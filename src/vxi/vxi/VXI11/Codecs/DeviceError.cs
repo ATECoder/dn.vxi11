@@ -40,6 +40,14 @@ public class DeviceError : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="DeviceError"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="DeviceError"/>. </returns>
+    public static DeviceError DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceError( decoder );
+    }
+
     private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
     /// <value> The error. </value>

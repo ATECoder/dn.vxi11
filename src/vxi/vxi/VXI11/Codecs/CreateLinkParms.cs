@@ -34,6 +34,14 @@ public class CreateLinkParms : IXdrCodec
         this.Decode( decoder );
     }
 
+    /// <summary>   Decodes an instance of a <see cref="CreateLinkParms"/>. </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   The <see cref="CreateLinkParms"/>. </returns>
+    public static CreateLinkParms DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new CreateLinkParms( decoder );
+    }
+
     /// <summary>   Gets or sets the identifier of the client. </summary>
     /// <value> The identifier of the client. </value>
     public int ClientId { get; set; }
@@ -44,8 +52,10 @@ public class CreateLinkParms : IXdrCodec
 
     /// <summary>   Gets or sets the lock timeout. </summary>
     /// <remarks>
-    /// If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero, the network
-    /// instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be released.
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
+    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
+    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
+    /// released.
     /// </remarks>
     /// <value> The time to wait on a lock. </value>
     public int LockTimeout { get; set; }
