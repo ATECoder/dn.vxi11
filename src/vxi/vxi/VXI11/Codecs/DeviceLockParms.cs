@@ -45,7 +45,11 @@ public class DeviceLockParms : IXdrCodec
     /// <value> The flags. </value>
     public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
 
-    /// <summary>   Gets or sets the lock timeout; time to wait to acquire lock </summary>
+    /// <summary>   Gets or sets the lock timeout; time to wait to acquire lock. </summary>
+    /// <remarks>
+    /// If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero, the network
+    /// instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be released.
+    /// </remarks>
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
 

@@ -4,7 +4,9 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="CreateLinkParms"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.CreateLinkProcedure"/> RPC message.
 /// </summary>
-/// <remarks>   Renamed from <c>Create_LinkParms</c>. <para>
+/// <remarks> <para>
+/// </para>
+///    Renamed from <c>Create_LinkParms</c>. <para>
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
@@ -41,6 +43,10 @@ public class CreateLinkParms : IXdrCodec
     public bool LockDevice { get; set; }
 
     /// <summary>   Gets or sets the lock timeout. </summary>
+    /// <remarks>
+    /// If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero, the network
+    /// instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be released.
+    /// </remarks>
     /// <value> The time to wait on a lock. </value>
     public int LockTimeout { get; set; }
 

@@ -44,6 +44,17 @@ public class DeviceErrorCode : IXdrCodec
     }
 
     /// <summary>
+    /// Decodes -- that is: deserializes -- an instance of the <see cref="DeviceErrorCode"/> from an 
+    /// XDR stream in compliance to RFC 1832.
+    /// </summary>
+    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
+    /// <returns>   A DeviceErrorCode. </returns>
+    public static DeviceErrorCode DecodeInstance( XdrDecodingStreamBase decoder )
+    {
+        return new DeviceErrorCode( decoder );
+    }
+
+    /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
     /// </summary>
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>

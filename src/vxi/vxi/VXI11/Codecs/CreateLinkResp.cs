@@ -44,37 +44,44 @@ public class CreateLinkResp : IXdrCodec
     /// call. This data structure is sent back to the client to identify the device for all
     /// subsequent Core calls.
     /// </summary>
+    /// <remarks>
+    /// The value of <see cref="DeviceLink"/> link is be unique for all currently active links within
+    /// a network instrument server.
+    /// </remarks>
     /// <value> The link to the device. </value>
     public DeviceLink DeviceLink { get => this._link; set => this._link = value ?? new(); }
 
-    /// <summary>   Gets or sets the abort port for the <see cref="DeviceAsyncClient.DeviceAbort(DeviceLink)"/> Device Abort RPC. </summary>
+    /// <summary>   Gets or sets the abort port for the <see cref="DeviceAsyncClient.DeviceAbort(DeviceLink)"/>
+    /// <see cref="Vxi11Message.DeviceAbortProcedure">Device Abort</see>/> RPC. </summary>
     /// <value> The abort port. </value>
     public short AbortPort { get; set; }
 
     /// <summary>   Gets or sets the max data size in bytes device will accept on a write. </summary>
+    /// <remarks> This is the size of the largest data set the network instrument server can
+    /// accept in a <see cref="Vxi11Message.DeviceWriteProcedure"/> RPC. This value is at least 1024. </remarks>
     /// <value> The maximum <see cref="Vxi11Message.DeviceWriteProcedure"/> data size. </value>
     public int MaxReceiveSize { get; set; }
 
     /// <summary>
-    /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
+    /// Encodes -- that is: serializes -- this <see cref="CreateLinkResp"/> into an XDR stream in compliance to RFC 1832.
     /// </summary>
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.ErrorCode.Encode( encoder );
         this.DeviceLink.Encode( encoder );
-        encoder.EncodeShort( this.AbortPort );
-        encoder.EncodeInt( this.MaxReceiveSize );
+        this.AbortPort.Encode( encoder );
+        this.MaxReceiveSize.Encode( encoder );
     }
 
     /// <summary>
-    /// Decodes -- that is: deserializes -- an object from an XDR stream in compliance to RFC 1832.
+    /// Decodes -- that is: deserializes -- this <see cref="CreateLinkResp"/> from an XDR stream in compliance to RFC 1832.
     /// </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.ErrorCode = new DeviceErrorCode( decoder );
-        this.DeviceLink = new DeviceLink( decoder );
+        this.ErrorCode = DeviceErrorCode.DecodeInstance( decoder );
+        this.DeviceLink = DeviceLink.DecodeInstance( decoder );
         this.AbortPort = decoder.DecodeShort();
         this.MaxReceiveSize = decoder.DecodeInt();
     }
