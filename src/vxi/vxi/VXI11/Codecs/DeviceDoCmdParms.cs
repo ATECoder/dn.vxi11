@@ -26,7 +26,7 @@ public class DeviceDoCmdParms : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public DeviceDoCmdParms()
     {
-        this._deviceLinkId = new();
+        this._link = new();
         this._flags = new();
         this._dataIn = Array.Empty<byte>();
     }
@@ -38,10 +38,10 @@ public class DeviceDoCmdParms : IXdrCodec
         this.Decode( decoder );
     }
 
-    private DeviceLink _deviceLinkId;
-    /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
+    private DeviceLink _link;
+    /// <summary>   Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
     /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
+    public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }
 
     private DeviceFlags _flags;
     /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
@@ -110,12 +110,12 @@ public class DeviceDoCmdParms : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.DeviceLinkId.Encode( encoder );
+        this.Link.Encode( encoder );
         this.Flags.Encode( encoder );
         encoder.EncodeInt( this.IOTimeout );
         encoder.EncodeInt( this.LockTimeout );
         encoder.EncodeInt( this.Cmd );
-        encoder.EcodeBoolean( this.NetworkOrder );
+        encoder.EncodeBoolean( this.NetworkOrder );
         encoder.EncodeInt( this.DataSize );
         encoder.EncodeDynamicOpaque( this._dataIn );
     }
@@ -127,7 +127,7 @@ public class DeviceDoCmdParms : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.DeviceLinkId = new DeviceLink( decoder );
+        this.Link = new DeviceLink( decoder );
         this.Flags = new DeviceFlags( decoder );
         this.IOTimeout = decoder.DecodeInt();
         this.LockTimeout = decoder.DecodeInt();

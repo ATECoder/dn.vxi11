@@ -25,7 +25,7 @@ public class Ieee488Client : IDisposable
             Device = device
         };
         CreateLinkResp linkResp = this._coreClient.CreateLink( createLinkParam );
-        this._link = linkResp.DeviceLinkId;
+        this._link = linkResp.DeviceLink;
         this.MaxRecvSize = linkResp.MaxReceiveSize;
         this.Connected = true;
     }
@@ -208,7 +208,7 @@ public class Ieee488Client : IDisposable
         if ( this._link is not null && this._coreClient is not null )
         {
             DeviceWriteParms writeParam = new() {
-                DeviceLinkId = this._link,
+                Link = this._link,
                 IOTimeout = this.WriteTimeout, // in ms
                 LockTimeout = this.LockTimeout, // in ms
                 Flags = new DeviceFlags( this.Eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None ),
@@ -235,7 +235,7 @@ public class Ieee488Client : IDisposable
         if ( this._link is not null && this._coreClient is not null )
         {
             DeviceReadParms readParam = new() {
-                DeviceLinkId = _link,
+                Link = _link,
                 RequestSize = this.MaxRecvSize, // response.Length,
                 IOTimeout = this.ReadTimeout,
                 LockTimeout = this.LockTimeout,
@@ -256,7 +256,7 @@ public class Ieee488Client : IDisposable
         if ( this._link is not null && this._coreClient is not null )
         {
             DeviceReadParms readParam = new() {
-                DeviceLinkId = _link,
+                Link = _link,
                 RequestSize = byteCount,
                 IOTimeout = this.ReadTimeout,
                 LockTimeout = this.LockTimeout,

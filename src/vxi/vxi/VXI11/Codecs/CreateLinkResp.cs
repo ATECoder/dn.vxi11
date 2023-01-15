@@ -23,7 +23,7 @@ public class CreateLinkResp : IXdrCodec
     public CreateLinkResp()
     {
         this._errorCode = new();
-        this._deviceLinkId = new();
+        this._link = new();
     }
 
     /// <summary>   Constructor. </summary>
@@ -38,10 +38,14 @@ public class CreateLinkResp : IXdrCodec
     /// <value> The error. </value>
     public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
 
-    private DeviceLink _deviceLinkId;
-    /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
-    /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
+    private DeviceLink _link;
+    /// <summary>
+    /// Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    /// call. This data structure is sent back to the client to identify the device for all
+    /// subsequent Core calls.
+    /// </summary>
+    /// <value> The link to the device. </value>
+    public DeviceLink DeviceLink { get => this._link; set => this._link = value ?? new(); }
 
     /// <summary>   Gets or sets the abort port for the <see cref="DeviceAsyncClient.DeviceAbort(DeviceLink)"/> Device Abort RPC. </summary>
     /// <value> The abort port. </value>
@@ -58,7 +62,7 @@ public class CreateLinkResp : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.ErrorCode.Encode( encoder );
-        this.DeviceLinkId.Encode( encoder );
+        this.DeviceLink.Encode( encoder );
         encoder.EncodeShort( this.AbortPort );
         encoder.EncodeInt( this.MaxReceiveSize );
     }
@@ -70,7 +74,7 @@ public class CreateLinkResp : IXdrCodec
     public void Decode( XdrDecodingStreamBase decoder )
     {
         this.ErrorCode = new DeviceErrorCode( decoder );
-        this.DeviceLinkId = new DeviceLink( decoder );
+        this.DeviceLink = new DeviceLink( decoder );
         this.AbortPort = decoder.DecodeShort();
         this.MaxReceiveSize = decoder.DecodeInt();
     }

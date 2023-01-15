@@ -10,28 +10,29 @@ namespace cc.isr.VXI11.Codecs;
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_WriteParms {
-///    Device_Link lid; /* link id from create_link */
-///    unsigned long io_timeout; /* time to wait for I/O */
-///    unsigned long lock_timeout; /* time to wait for lock */
+///    Device_Link lid;             /* link id from create_link */
+///    unsigned long io_timeout;    /* time to wait for I/O */
+///    unsigned long lock_timeout;  /* time to wait for lock */
 ///    Device_Flags flags;
-///    opaque data; /* the data length and the data itself */
+///    opaque data;                 /* the data length and the data itself */
 /// };
 /// </code>
 /// The network instrument server has indirect control over the maximum size of data through the
-/// value of
-/// <see cref="CreateLinkResp.MaxReceiveSize"/> returned in <see cref="Vxi11Message.CreateLinkProcedure"/>
-/// .
+/// value of <see cref="CreateLinkResp.MaxReceiveSize"/> returned in <see cref="Vxi11Message.CreateLinkProcedure"/>.
 /// If a controller needs to send greater than <see cref="CreateLinkResp.MaxReceiveSize"/> bytes
 /// to the device at one time, then the network instrument client makes multiple calls to <see cref="Vxi11Message.DeviceWriteProcedure"/>
 /// to accomplish the complete transaction. A network instrument server accepts at least 1024
-/// bytes in a single <see cref="Vxi11Message.DeviceWriteProcedure"/> call. 
+/// bytes in a single <see cref="Vxi11Message.DeviceWriteProcedure"/> call. <para>
+/// 
+/// The variable length data, which is sent to the server is encoded as 
+/// <see cref="XdrEncodingStreamBase.EncodeDynamicOpaque(byte[])"/> </para>
 /// </remarks>
 public class DeviceWriteParms : IXdrCodec
 {
     /// <summary>   Default constructor. </summary>
     public DeviceWriteParms()
     {
-        this._deviceLinkId = new DeviceLink();
+        this._link = new DeviceLink();
         this._flags = new DeviceFlags();
         this._data = Array.Empty<byte>();
     }
@@ -43,10 +44,13 @@ public class DeviceWriteParms : IXdrCodec
         this.Decode( decoder );
     }
 
-    private DeviceLink _deviceLinkId;
-    /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
+    private DeviceLink _link;
+    /// <summary>
+    /// Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    /// call.
+    /// </summary>
     /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
+    public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }
 
     /// <summary>   Gets or sets the i/o timeout. </summary>
     /// <value> The i/o timeout. </value>
@@ -68,8 +72,9 @@ public class DeviceWriteParms : IXdrCodec
     public byte[] GetData() { return this._data; }
 
     /// <summary>   Sets a data. </summary>
-    /// <remarks> 
-    /// Associate an END message (?EOI) with the last byte in data when the end flag in <see cref="Flags"/> is set.
+    /// <remarks>
+    /// Associate an END message (?EOI) with the last byte in data when the end flag in <see cref="Flags"/>
+    /// is set. 
     /// </remarks>
     /// <param name="data"> Gets or sets the data. </param>
     public void SetData( byte[] data ) { this._data = data ?? Array.Empty<byte>(); }
@@ -80,9 +85,9 @@ public class DeviceWriteParms : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.DeviceLinkId.Encode( encoder );
-        encoder.EncodeInt( this.IOTimeout );
-        encoder.EncodeInt( this.LockTimeout );
+        this.Link.Encode( encoder );
+        this.IOTimeout.Encode( encoder  );
+        this.LockTimeout.Encode( encoder );
         this.Flags.Encode( encoder );
         encoder.EncodeDynamicOpaque( this._data );
     }
@@ -93,7 +98,7 @@ public class DeviceWriteParms : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.DeviceLinkId = new DeviceLink( decoder );
+        this.Link = new DeviceLink( decoder );
         this.IOTimeout = decoder.DecodeInt();
         this.LockTimeout = decoder.DecodeInt();
         this.Flags = new DeviceFlags( decoder );

@@ -44,8 +44,8 @@ public class CreateLinkParms : IXdrCodec
     /// <value> The time to wait on a lock. </value>
     public int LockTimeout { get; set; }
 
-    /// <summary>   Gets or sets the device name. </summary>
-    /// <value> The device name. </value>
+    /// <summary>   Gets or sets the interface device string, e.g., inst0, gpib,5 or usb0[...]. </summary>
+    /// <value> The interface device string. </value>
     public string Device { get; set; }
 
     /// <summary>
@@ -55,7 +55,7 @@ public class CreateLinkParms : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         encoder.EncodeInt( this.ClientId );
-        encoder.EcodeBoolean( this.LockDevice );
+        encoder.EncodeBoolean( this.LockDevice );
         encoder.EncodeInt( this.LockTimeout );
         encoder.EncodeString( this.Device );
     }

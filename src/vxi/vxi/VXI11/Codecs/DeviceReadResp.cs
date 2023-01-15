@@ -128,15 +128,27 @@ public enum DeviceReadReasons
 
     /// <summary>   A binary constant representing the request count indicator flag.
     /// This bit is set if <see cref="DeviceReadParms.RequestSize"/> bytes are transferred </summary>
+    /// <remarks> <para> 
+    /// 
+    /// Renamed from <c>RX_REQCNT</c> (1) </para>
+    /// </remarks>
     RequestCountIndicator = 1,
 
     /// <summary>   A binary constant representing the termination Character indicator flag. 
     /// this bit is set if <see cref="DeviceOperationFlags.TerminationCharacterSet"/> is set in
     /// <see cref="DeviceReadParms.Flags"/> and a character which matches <see cref="DeviceReadParms.TermChar"/> is transferred
-    ///  </summary>
+    /// </summary>
+    /// <remarks> <para> 
+    /// 
+    /// Renamed from <c>RX_CHR</c> (2) </para>
+    /// </remarks>
     TermCharIndicator = 2,
 
     /// <summary>   A binary constant representing the end indicator flag.
     /// This bit is set if an END indicator is read. </summary>
+    /// <remarks> <para> 
+    /// 
+    /// Renamed from <c>RX_END</c> (3) </para>
+    /// </remarks>
     EndIndicator = 4,
 }

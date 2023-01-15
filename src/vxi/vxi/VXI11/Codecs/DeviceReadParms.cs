@@ -24,7 +24,7 @@ public class DeviceReadParms : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public DeviceReadParms()
     {
-        this._deviceLinkId = new();
+        this._link = new();
         this._flags = new();
     }
 
@@ -35,10 +35,10 @@ public class DeviceReadParms : IXdrCodec
         this.Decode( decoder );
     }
 
-    private DeviceLink _deviceLinkId;
-    /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
+    private DeviceLink _link;
+    /// <summary>   Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
     /// <value> The identifier of the device link. </value>
-    public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
+    public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }
 
     /// <summary>   Gets or sets the request size (number of bytes). </summary>
     /// <value> The size of the request. </value>
@@ -77,7 +77,7 @@ public class DeviceReadParms : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.DeviceLinkId.Encode( encoder );
+        this.Link.Encode( encoder );
         encoder.EncodeInt( this.RequestSize );
         encoder.EncodeInt( this.IOTimeout );
         encoder.EncodeInt( this.LockTimeout );
@@ -91,7 +91,7 @@ public class DeviceReadParms : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.DeviceLinkId = new DeviceLink( decoder );
+        this.Link = new DeviceLink( decoder );
         this.RequestSize = decoder.DecodeInt();
         this.IOTimeout = decoder.DecodeInt();
         this.LockTimeout = decoder.DecodeInt();

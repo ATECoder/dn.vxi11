@@ -18,14 +18,8 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceLink : IXdrCodec
 {
-    /// <summary>   The device link identifier value. </summary>
-    /// <remarks>
-    /// </remarks>
-    /// <value> The value. </value>
-    public int Value { get; set; }
 
     /// <summary>   Default constructor. </summary>
-    /// <remarks>   2023-01-04. </remarks>
     public DeviceLink()
     {
     }
@@ -43,6 +37,10 @@ public class DeviceLink : IXdrCodec
     {
         this.Decode( decoder );
     }
+
+    /// <summary>   The identifies of the Core device link between the client and the server. </summary>
+    /// <value> The value. </value>
+    public int Value { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.

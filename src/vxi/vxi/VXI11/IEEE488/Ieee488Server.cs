@@ -169,7 +169,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     {
         CreateLinkResp result = new();
         this._linkId++;
-        result.DeviceLinkId = new DeviceLink() { Value = _linkId };
+        result.DeviceLink = new DeviceLink() { Value = _linkId };
 
         Logger.Writer.ConsoleWriteMessage( $"creating link to {linkInfo.Device}" );
 
@@ -312,7 +312,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     {
         // get the write command.
         string cmd = this.CharacterEncoding.GetString( deviceWriteParameters.GetData() );
-        Logger.Writer.ConsoleWriteMessage( $"link ID: {deviceWriteParameters.DeviceLinkId.Value} -> Received：{cmd}" );
+        Logger.Writer.ConsoleWriteMessage( $"link ID: {deviceWriteParameters.Link.Value} -> Received：{cmd}" );
         DeviceWriteResp result = new() { ErrorCode = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
 
         // holds one or more SCPI commands each with its arguments

@@ -30,7 +30,7 @@ namespace cc.isr.VXI11.Codecs
         /// <summary>   Default constructor. </summary>
         public DeviceGenericParms()
         {
-            this._deviceLinkId = new();
+            this._link = new();
             this._flags = new();
         }
 
@@ -41,10 +41,10 @@ namespace cc.isr.VXI11.Codecs
             this.Decode( decoder );
         }
 
-        private DeviceLink _deviceLinkId;
-        /// <summary>   Gets or sets the identifier of the device link from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
+        private DeviceLink _link;
+        /// <summary>   Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
         /// <value> The identifier of the device link. </value>
-        public DeviceLink DeviceLinkId { get => this._deviceLinkId; set => this._deviceLinkId = value ?? new(); }
+        public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }
 
         private DeviceFlags _flags;
         /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
@@ -72,7 +72,7 @@ namespace cc.isr.VXI11.Codecs
         /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
         public void Encode( XdrEncodingStreamBase encoder )
         {
-            this.DeviceLinkId.Encode( encoder );
+            this.Link.Encode( encoder );
             this.Flags.Encode( encoder );
             encoder.EncodeInt( this.LockTimeout );
             encoder.EncodeInt( this.IOTimeout );
@@ -84,7 +84,7 @@ namespace cc.isr.VXI11.Codecs
         /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
         public void Decode( XdrDecodingStreamBase decoder )
         {
-            this.DeviceLinkId = new DeviceLink( decoder );
+            this.Link = new DeviceLink( decoder );
             this.Flags = new DeviceFlags( decoder );
             this.LockTimeout = decoder.DecodeInt();
             this.IOTimeout = decoder.DecodeInt();
