@@ -70,6 +70,7 @@ namespace cc.isr.VXI11.Visa
             this.Protocol = m.Groups[nameof( AddressBase.Protocol )].Value;
             this.Host = m.Groups[nameof( AddressBase.Host )].Value;
             this.Device = m.Groups[nameof( AddressBase.Device )].Value;
+            this.Device = string.IsNullOrEmpty( this.Device ) ? $"{DeviceAddress.GenericInterfaceFamily}0" : this.Device; 
             this.Suffix = m.Groups[nameof( AddressBase.Suffix )].Value;
             return true;
         }

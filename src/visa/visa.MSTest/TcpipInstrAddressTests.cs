@@ -42,7 +42,14 @@ namespace cc.isr.VXI11.Visa.MSTest
         {
             cc.isr.VXI11.Visa.TcpipInstrAddress instrAddress = new( address );
             string actual = instrAddress.BuildAddress();
-            Assert.AreEqual( address, actual );
+            cc.isr.VXI11.Visa.TcpipInstrAddress actualAddress = new( actual );
+            Assert.IsTrue( actualAddress.Equals( instrAddress ), $"{address} not equals {actual}" );
+            if ( !instrAddress.InterfaceDeviceAddress.IsValid() )
+            {
+                // instrAddress = new( address );
+                bool val = instrAddress.InterfaceDeviceAddress.IsValid();
+            }
+            Assert.IsTrue( instrAddress.InterfaceDeviceAddress.IsValid(), $"{instrAddress.Device} is invalid in {address}" );
             Console.WriteLine( $"device is {( string.IsNullOrEmpty( instrAddress.Device) ? "empty" : instrAddress.Device)} for {address} " );
         }
 

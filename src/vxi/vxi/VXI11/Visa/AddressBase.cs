@@ -1,7 +1,9 @@
+using System.Net;
+
 namespace cc.isr.VXI11.Visa
 {
     /// <summary>   A VISA resource address base class. </summary>
-    public abstract class AddressBase
+    public abstract class AddressBase : IEquatable<AddressBase>
     {
 
         /// <summary>   Specialized default constructor for use only by derived class. </summary>
@@ -73,6 +75,30 @@ namespace cc.isr.VXI11.Visa
             }
 
             return builder.ToString();
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">    An object to compare with this object. </param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other">other</paramref> parameter;
+        /// otherwise, false.
+        /// </returns>
+        public bool Equals( AddressBase other )
+        {
+            if ( other == null ) return false;
+            return string.Equals( this.Board, other.Board, StringComparison.OrdinalIgnoreCase ) &&
+                   (string.Equals( this.Device, other.Device, StringComparison.OrdinalIgnoreCase ) ||
+                     this.Device is null && other.Device is null ||
+                     this.Device is null && string.Equals( other.Device, $"{DeviceAddress.GenericInterfaceFamily}0", StringComparison.OrdinalIgnoreCase ) ||
+                     string.Equals( this.Device, $"{DeviceAddress.GenericInterfaceFamily}0", StringComparison.OrdinalIgnoreCase ) && other.Device is null) &&
+                   string.Equals( this.Host, other.Host, StringComparison.OrdinalIgnoreCase ) &&
+                   string.Equals( this.Protocol, other.Protocol, StringComparison.OrdinalIgnoreCase ) &&
+                   string.Equals( this.Suffix, other.Suffix, StringComparison.OrdinalIgnoreCase );
+
+
+            throw new NotImplementedException();
         }
 
         /// <summary>   Gets or sets the address of the VISA resource, which is also called resource name. </summary>

@@ -30,7 +30,7 @@ public struct DeviceAddress
     /// <summary>   (Immutable) the USB interface family. </summary>
     public const string UsbInterfaceFamily = "usb";
 
-    public const int MinimumInterfaceNumber = 1;
+    public const int MinimumInterfaceNumber = 0;
 
     /// <summary>   (Immutable) the minimum gpib address. </summary>
     public const int MinimumGpibAddress = 1;
@@ -97,6 +97,7 @@ public struct DeviceAddress
     public bool ParseDeviceAddress( string interfaceDeviceAddress )
     {
         if ( string.IsNullOrEmpty( interfaceDeviceAddress ) ) return false;
+        this.InterfaceNumber = 0;
         this.InterfaceDeviceAddress = interfaceDeviceAddress;
         string[] info = interfaceDeviceAddress.Split( ',' );
         this.InterfaceName = info[0];
@@ -106,8 +107,10 @@ public struct DeviceAddress
             {
                 this.InterfaceFamily = interfaceFamily;
                 if ( this.InterfaceName.Length > this.InterfaceFamily.Length )
-                    if ( int.TryParse( this.InterfaceName[(this.InterfaceFamily.Length - 1)..], out int interfaceNumber ) )
+                {
+                    if ( int.TryParse( this.InterfaceName[(this.InterfaceFamily.Length)..], out int interfaceNumber ) )
                         this.InterfaceNumber = interfaceNumber;
+                }
             }
         this.PrimaryAddress = info.Length > 1 ? Convert.ToInt16( info[1] ) : new int?();
         this.SecondaryAddress = info.Length > 2 ? Convert.ToInt16( info[2] ) : new int?();
@@ -129,11 +132,12 @@ public struct DeviceAddress
         this.SerialNumber = null;
         this.ModelCode = null;
         this.UsbTmcInterfaceNumber = null;
+        this.InterfaceNumber = 0;
         string[] info = interfaceDeviceAddress.TrimEnd(']').Split( '[' );
         this.InterfaceName = info[0];
         this.InterfaceFamily = UsbInterfaceFamily;
         if ( this.InterfaceName.Length > this.InterfaceFamily.Length )
-            if ( int.TryParse( this.InterfaceName[(this.InterfaceFamily.Length - 1)..], out int interfaceNumber ) )
+            if ( int.TryParse( this.InterfaceName[(this.InterfaceFamily.Length)..], out int interfaceNumber ) )
                 this.InterfaceNumber = interfaceNumber;
         if ( info.Length < 2 ) return true; // address is like 'usb0'
         info = info[1].Split( ':' );
@@ -159,6 +163,11 @@ public struct DeviceAddress
         return this.InterfaceFamily.Equals( GpibInterfaceFamily, StringComparison.OrdinalIgnoreCase );
     }
 
+    public bool IsUsbInstrumentDevice()
+    {
+        return this.InterfaceFamily.Equals( UsbInterfaceFamily, StringComparison.OrdinalIgnoreCase );
+    }
+
     /// <summary>   Query if interface device is valid. </summary>
     /// <returns>   True if valid, false if not. </returns>
     public bool IsValid()
@@ -167,6 +176,7 @@ public struct DeviceAddress
             && !string.IsNullOrEmpty( this.InterfaceName )
             && this.InterfaceNumber.HasValue && MinimumInterfaceNumber <= this.InterfaceNumber.Value
             && (this.IsGenericInstrumentDevice()
+                 || this.IsUsbInstrumentDevice()
                  || this.IsGpibInstrumentDevice()
                       && MinimumGpibAddress <= this.PrimaryAddress.GetValueOrDefault( 1 )
                       && MaximumGpibAddress >= this.PrimaryAddress.GetValueOrDefault( 1 )

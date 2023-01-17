@@ -1,4 +1,5 @@
 using System.Net;
+using System.Runtime.CompilerServices;
 
 using cc.isr.VXI11.Codecs;
 
@@ -30,9 +31,9 @@ public class Ieee488Client : IDisposable
         this.LockTimeout = 1000;
         this.LockEnabled = false;
         this.ReadTermination = ( byte ) '\n';
-        this.ReadTimeout = 1000;
+        this.ReceiveTimeout = 3000;
         this.WriteTermination =  new byte[] { ( byte ) '\n' };
-        this.WriteTimeout = 1000;
+        this.SendTimeout = 3000;
         this.AbortPort = 0;
     }
 
@@ -51,13 +52,16 @@ public class Ieee488Client : IDisposable
         this.InterfaceDeviceString = string.Empty;
 
         // instantiate the core client.
-        this._coreClient = new DeviceCoreClient( IPAddress.Parse( hostAddress ), OncRpcProtocols.OncRpcTcp );
+        this.CoreClient = new DeviceCoreClient( IPAddress.Parse( hostAddress ), OncRpcProtocols.OncRpcTcp );
+        this.ReceiveTimeout = this.ReceiveTimeout;
+        this.SendTimeout = this.SendTimeout;
+
         CreateLinkParms createLinkParam = new() {
             Device = interfaceDeviceString,
             LockDevice = this.LockEnabled,
             LockTimeout = this.LockTimeout,
         };
-        CreateLinkResp linkResp = this._coreClient.CreateLink( createLinkParam );
+        CreateLinkResp linkResp = this.CoreClient.CreateLink( createLinkParam );
         if ( linkResp.ErrorCode.Value == DeviceErrorCodeValue.NoError )
         {
             this._link = linkResp.DeviceLink;
@@ -69,7 +73,6 @@ public class Ieee488Client : IDisposable
             this.InterfaceDeviceString = interfaceDeviceString;
         }
         return linkResp.ErrorCode;
-
     }
 
     /// <summary>   Connects the device by calling the <see cref="Vxi11Message.CreateLinkProcedure"/> 
@@ -81,9 +84,22 @@ public class Ieee488Client : IDisposable
         try
         {
             this.LastDeviceError = this.ConnectDevice( hostAddress, interfaceDeviceString );
+
+            if ( this.LastDeviceError.Value != DeviceErrorCodeValue.NoError )
+            {
+                throw new VXI11.DeviceException( this.LastDeviceError.Value );
+            }
         }
-        catch 
+        catch
         {
+            try
+            {
+                _ = this.Close();
+            }
+            catch ( Exception )
+            {
+                throw;
+            }
             throw;
         }
         finally
@@ -95,30 +111,55 @@ public class Ieee488Client : IDisposable
     public DeviceError Close()
     {
         DeviceError? deviceError = new();
+        List<Exception> exceptions = new ();
         if ( this.Connected && this._link is not null )
+        {
             try
             {
-                deviceError = this._coreClient?.DestroyLink( this._link );
+                deviceError = this.CoreClient?.DestroyLink( this._link );
             }
-            catch
+            catch ( Exception ex )
             {
-                throw;
+
+                exceptions.Add( ex );
             }
             finally
             {
                 this._link = null;
+
             }
+        }
+
         try
         {
-            this._coreClient?.Close();
+            this.CoreClient?.Close();
         }
-        catch
+        catch ( Exception ex )
         {
-            throw;
+            exceptions.Add( ex );
         }
         finally
         {
-            this._coreClient = null;
+            this.CoreClient = null;
+        }
+
+        try
+        {
+            this.AbortClient?.Close();
+        }
+        catch ( Exception ex )
+        {
+            exceptions.Add( ex );
+        }
+        finally
+        {
+            this.AbortClient = null;
+        }
+
+        if ( exceptions.Any() )
+        {
+            AggregateException aggregateException = new(exceptions);
+            throw aggregateException;
         }
         return deviceError ?? new DeviceError();
     }
@@ -127,7 +168,7 @@ public class Ieee488Client : IDisposable
 
     /// <summary>   Query if this object is disposed. </summary>
     /// <returns>   True if disposed, false if not. </returns>
-    public bool IsDisposed => this._link is null || this._coreClient is null;
+    public bool IsDisposed => this._link is null || this.CoreClient is null;
 
     /// <summary>
     /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
@@ -167,6 +208,9 @@ public class Ieee488Client : IDisposable
         // I am assuming that the socket used in the derived classes include unmanaged resources.
         _ = this.Close();
 
+        this.CoreClient?.Dispose();
+        this.AbortClient?.Dispose();
+
         // set large fields to null
     }
 
@@ -183,8 +227,8 @@ public class Ieee488Client : IDisposable
 
     #region " VXI-11 members "
 
-    /// <summary>   The core client. </summary>
-    private DeviceCoreClient? _coreClient;
+    /// <summary>   Gets or sets the Core client. </summary>
+    private DeviceCoreClient? CoreClient { get; set; }
 
     /// <summary>   Gets or sets the identifier of the client. </summary>
     /// <value> The identifier of the client. </value>
@@ -203,9 +247,39 @@ public class Ieee488Client : IDisposable
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
     public DeviceErrorCode LastDeviceError { get; private set; } 
 
-    public int AbortPort { get; private set; }
+    #endregion
 
-    public int MaxReadLen { get; private set; }
+    #region " abort port and client "
+
+    /// <summary>   Gets or sets the abort port. </summary>
+    /// <value> The abort port. </value>
+    private int AbortPort { get; set; }
+
+    /// <summary>   Gets or sets the <see cref="DeviceAsyncClient"/> abort client. </summary>
+    /// <value> The abort client. </value>
+    private DeviceAsyncClient? AbortClient { get; set; }
+
+    /// <summary>   Asynchronous abort an in-progress call. </summary>
+    /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
+    public virtual void Abort()
+    {
+        if ( !this.Connected )
+        {
+            this.Connect( this.Host, this.InterfaceDeviceString );
+        }
+
+        if ( this.AbortClient is null )
+        {
+            this.AbortClient = new DeviceAsyncClient( IPAddress.Parse( this.Host ), this.AbortPort, OncRpcProtocols.OncRpcTcp );
+            this.AbortClient.Client!.SendTimeout = this.SendTimeout;
+            this.AbortClient.Client!.ReceiveTimeout = this.ReceiveTimeout;
+        }
+        DeviceError error = this.AbortClient.DeviceAbort( this._link! );
+        if ( error.ErrorCode.Value != DeviceErrorCodeValue.NoError  )
+        {
+            throw new DeviceException( $"; Abort failed.", error.ErrorCode.Value );
+        }
+    }
 
     #endregion
 
@@ -240,13 +314,35 @@ public class Ieee488Client : IDisposable
     /// <value> The read termination. </value>
     public byte ReadTermination { get; set; }
 
-    /// <summary>   Gets or sets the read timeout in milliseconds. </summary>
-    /// <value> The read timeout in milliseconds. </value>
-    public int ReadTimeout { get; set; }
+    private int _receiveTimeout;
+    /// <summary>   Gets or sets the Receive timeout. </summary>
+    /// <value> The Receive timeout. </value>
+    public int ReceiveTimeout
+    {
+        get => this._receiveTimeout;
+        set {
+            this._receiveTimeout = value;
+            if ( this.CoreClient?.Client is not null )
+                this.CoreClient.Client.ReceiveTimeout = value;
+            if ( this.AbortClient?.Client is not null )
+                this.AbortClient.Client.ReceiveTimeout = value;
+        }
+    }
 
-    /// <summary>   Gets or sets the write timeout in milliseconds. </summary>
-    /// <value> The write timeout in milliseconds. </value>
-    public int WriteTimeout { get; set; }
+    private int _sendTimeout;
+    /// <summary>   Gets or sets the send timeout in milliseconds. </summary>
+    /// <value> The send timeout. </value>
+    public int SendTimeout
+    {
+        get => this._sendTimeout;
+        set {
+            this._sendTimeout = value;
+            if ( this.CoreClient?.Client is not null )
+                this.CoreClient.Client.SendTimeout = value;
+            if ( this.AbortClient?.Client is not null )
+                this.AbortClient.Client.SendTimeout = value;
+        }
+    }
 
     /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
     /// <remarks> </remarks>
@@ -272,7 +368,7 @@ public class Ieee488Client : IDisposable
 
     #endregion
 
-    #region " Send and Receive "
+    #region " send and receive "
 
     /// <summary>   Query if 'data' is write terminated. </summary>
     /// <param name="data">         . </param>
@@ -309,16 +405,16 @@ public class Ieee488Client : IDisposable
     public DeviceWriteResp Send( byte[] data )
     {
         DeviceWriteResp resp = new();
-        if ( this._link is not null && this._coreClient is not null )
+        if ( this._link is not null && this.CoreClient is not null )
         {
             DeviceWriteParms writeParam = new() {
                 Link = this._link,
-                IOTimeout = this.WriteTimeout, // in ms
+                IOTimeout = this.SendTimeout, // in ms
                 LockTimeout = this.LockTimeout, // in ms
                 Flags = new DeviceFlags( this.Eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None ),
             };
             writeParam.SetData( data );
-            resp = this._coreClient.DeviceWrite( writeParam );
+            resp = this.CoreClient.DeviceWrite( writeParam );
         }
         return resp;
     }
@@ -336,17 +432,17 @@ public class Ieee488Client : IDisposable
     public DeviceReadResp Receive()
     {
         DeviceReadResp resp = new();
-        if ( this._link is not null && this._coreClient is not null )
+        if ( this._link is not null && this.CoreClient is not null )
         {
             DeviceReadParms readParam = new() {
                 Link = _link,
                 RequestSize = this.MaxReceiveSize, // response.Length,
-                IOTimeout = this.ReadTimeout,
+                IOTimeout = this.ReceiveTimeout,
                 LockTimeout = this.LockTimeout,
                 Flags = new DeviceFlags(),
                 TermChar = this.ReadTermination
             };
-            resp = this._coreClient.DeviceRead( readParam );
+            resp = this.CoreClient.DeviceRead( readParam );
         }
         return resp;
     }
@@ -357,17 +453,17 @@ public class Ieee488Client : IDisposable
     public DeviceReadResp Receive( int byteCount )
     {
         DeviceReadResp resp = new();
-        if ( this._link is not null && this._coreClient is not null )
+        if ( this._link is not null && this.CoreClient is not null )
         {
             DeviceReadParms readParam = new() {
                 Link = _link,
                 RequestSize = byteCount,
-                IOTimeout = this.ReadTimeout,
+                IOTimeout = this.ReceiveTimeout,
                 LockTimeout = this.LockTimeout,
                 Flags = new DeviceFlags(),
                 TermChar = this.ReadTermination
             };
-            resp = this._coreClient.DeviceRead( readParam );
+            resp = this.CoreClient.DeviceRead( readParam );
         }
         return resp;
     }
@@ -469,6 +565,15 @@ public class Ieee488Client : IDisposable
 
     #region " Read "
 
+    public int MaxReadLen { get; private set; }
+
+    /// <summary>   Reads until all data is read from the instrument. </summary>
+    /// <returns>   The data. </returns>
+    public string ReadRaw()
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>   Receives a message from the VXI-11 server. </summary>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
     /// <param name="trimEnd">  (Optional) True to trim end. </param>
@@ -521,6 +626,7 @@ public class Ieee488Client : IDisposable
         Buffer.BlockCopy( readResponse.GetData(), offset, values, 0, values.Length * 4 );
         return readResponse.GetData().Length;
     }
+
 
     #endregion
 
