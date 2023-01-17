@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace cc.isr.VXI11.IEEE488;
 
 public enum Ieee488InterfaceCommand
@@ -106,7 +102,6 @@ public enum Ieee488InterfaceCommandOption
 
 }
 
-
 /// <summary>   Values that represent gpib command arguments. </summary>
 /// <remarks>
 /// Quite often, a SAD is expressed as the secondary address plus 96, so (from the previous
@@ -120,7 +115,7 @@ public enum Ieee488InterfaceCommandOption
 /// (to indicate that it is a secondary address). As it happens, 96 decimal (60 hex) is the value
 /// of SAD 0 as expressed in this byte of information. All other secondary addresses are just 96
 /// plus the SAD, for a total range of 96 to 126 for the SAD.
-/// https://knowledge.ni.com/KnowledgeArticleDetails?id=kA03q000000x2XyCAI&l=en-US
+/// https://knowledge.ni.com/KnowledgeArticleDetails?id=kA03q000000x2XyCAI
 /// </remarks>
 public enum GpibCommandArgument
 {

@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace cc.isr.VXI11.Visa;
 
 /// <summary>   A VISA INSTR interface device address manager. </summary>

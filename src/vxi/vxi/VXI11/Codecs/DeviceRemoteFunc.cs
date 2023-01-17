@@ -1,5 +1,3 @@
-using cc.isr.XDR.EncodingExtensions;
-
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>

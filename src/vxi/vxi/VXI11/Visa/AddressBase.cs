@@ -44,7 +44,7 @@ namespace cc.isr.VXI11.Visa
         /// <returns>   A string. </returns>
         public virtual string BuildAddress()
         {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             if ( !string.IsNullOrEmpty( this.Board ) )
                 _ = builder.Append( this.Board );
 

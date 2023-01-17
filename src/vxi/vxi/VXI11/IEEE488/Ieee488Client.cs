@@ -1,4 +1,3 @@
-using System.Data;
 using System.Net;
 
 using cc.isr.VXI11.Codecs;
@@ -14,8 +13,12 @@ public class Ieee488Client : IDisposable
     /// <summary>   Default constructor. </summary>
     public Ieee488Client()
     {
+        // Initialize the client identifier with some more-or-less random value.
+        long seed = DateTime.Now.Ticks;
+        this.ClientId = ( int ) seed ^ ( int ) (seed >> (32 & 0x1f));
+
         // create a client id for this instance;
-        this.ClientId = ( int ) ( DateTime.Now.Subtract( DateTime.Parse( "2023-01-01" ) ).TotalMilliseconds % 0x7FFFFFFF);
+        // this.ClientId = ( int ) ( DateTime.Now.Subtract( DateTime.Parse( "2023-01-01" ) ).TotalMilliseconds % 0x7FFFFFFF);
 
         // initialize some values 
         this.MaxReadLen = 128 * 1024 * 1024;
