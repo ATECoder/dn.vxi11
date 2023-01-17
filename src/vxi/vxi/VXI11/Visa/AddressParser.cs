@@ -11,10 +11,10 @@ namespace cc.isr.VXI11.Visa
         /// <param name="defaultSuffix">    The default suffix. </param>
         public AddressParser(string defaultProtocol, string defaultSuffix )  : base()
         {
-            this.DefaultProtocol = defaultProtocol;
-            this.DefaultSuffix = defaultSuffix;
-            this.Suffix = this.DefaultSuffix;
-            this.Protocol = this.DefaultProtocol;
+            this.ProtocolDefault = defaultProtocol;
+            this.SuffixDefault = defaultSuffix;
+            this.Suffix = this.SuffixDefault;
+            this.Protocol = this.ProtocolDefault;
             this.RegexPattern = string.Empty;
             this.BuildRegexPattern();
         }
@@ -38,20 +38,20 @@ namespace cc.isr.VXI11.Visa
 
         /// <summary>   Gets or sets the default protocol. </summary>
         /// <value> The default protocol. </value>
-        public string DefaultProtocol { get; set; }
+        public string ProtocolDefault { get; set; }
 
         /// <summary>   Gets or sets the default suffix. </summary>
         /// <value> The default suffix. </value>
-        public string DefaultSuffix { get; set; }
+        public string SuffixDefault { get; set; }
 
         /// <summary>   Builds the RegEx pattern for parsing the VISA address. </summary>
         private void BuildRegexPattern()
         {
             StringBuilder builder = new ();
-            _ = builder.Append( @$"^(?<{nameof( this.Board )}>(?<{nameof( AddressBase.Protocol )}>{this.DefaultProtocol})\d*)" );
+            _ = builder.Append( @$"^(?<{nameof( this.Board )}>(?<{nameof( AddressBase.Protocol )}>{this.ProtocolDefault})\d*)" );
             _ = builder.Append( @$"(::(?<{nameof( AddressBase.Host )}>[^\s:]+))" );
             _ = builder.Append( @$"(::(?<{nameof( AddressBase.Device )}>[^\s:]+(\[.+\])?))" );
-            _ = builder.Append( @$"?(::(?<{nameof( AddressBase.Suffix )}>{this.DefaultSuffix}))$" );
+            _ = builder.Append( @$"?(::(?<{nameof( AddressBase.Suffix )}>{this.SuffixDefault}))$" );
             this.RegexPattern = builder.ToString();
             // this.RegexPattern = @$"^(?<Board>(?<Protocol>TCPIP)\d*)(::(?<Host>[^\s:]+))(::(?<Device>[^\s:]+(\[.+\])?))?(::(?<Suffix>INSTR))$";
             // this.RegexPattern = @$"^(?<{nameof( Board )}>(?<{nameof( AddressBase.Protocol )}>{DefaultProtocol})\d*)(::(?<{nameof( AddressBase.Host )}>)>[^\s:]+))(::(?<{nameof( AddressBase.Device )}>[^\s:]+(\[.+\])?))?(::(?<{nameof( AddressBase.Suffix )}>{DefaultSuffix}))$";

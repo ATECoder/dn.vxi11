@@ -87,14 +87,18 @@ public class DeviceCoreClient : OncRpcClientStubBase
 
     #endregion
 
-    #region " members "
+    #region " defaults "
 
     /// <summary>   Gets or sets the default encoding. </summary>
     /// <remarks>
     /// The default encoding for VXI-11 is <see cref="Encoding.ASCII"/>, which is a subset of <see cref="Encoding.UTF8"/>
     /// </remarks>
     /// <value> The default encoding. </value>
-    public static Encoding DefaultEncoding { get; set; } = Encoding.UTF8;
+    public static Encoding EncodingDefault { get; set; } = Encoding.UTF8;
+
+    #endregion
+
+    #region " members "
 
     #endregion
 
@@ -142,16 +146,67 @@ public class DeviceCoreClient : OncRpcClientStubBase
         return result;
     }
 
-    /// <summary>  Calls remote procedure <see cref="Vxi11Message.DeviceReadStbProcedure"/>;
-    /// Device returns its status byte. </summary>
-    /// <remarks> Renamed from <c>device_readstb_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
-    /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceReadStbResp"/>. </returns>
-    public DeviceReadStbResp DeviceReadStb( DeviceGenericParms arg1 )
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceReadStbProcedure"/>, the device is to
+    /// return its status byte encapsulated in the <see cref="DeviceReadStbResp"/> codec.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_readstb_1</c> </remarks>
+    /// <param name="link">         The link. </param>
+    /// <param name="flags">        The flags. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="IOTimeout">    The i/o timeout. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceReadStbResp"/>.
+    /// </returns>
+    public DeviceReadStbResp DeviceReadStb( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int IOTimeout )
+    {
+        DeviceGenericParms request = new() {
+            Link = link,
+            Flags = new DeviceFlags( flags ),
+            LockTimeout = lockTimeout,
+            IOTimeout = IOTimeout
+        };
+        return DeviceReadStb( request );
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceReadStbProcedure"/>, the device is to
+    /// return its status byte encapsulated in the <see cref="DeviceReadStbResp"/> codec.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_readstb_1</c> </remarks>
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
+    ///                         with the remote procedure call. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceReadStbResp"/>.
+    /// </returns>
+    public DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
     {
         DeviceReadStbResp result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceReadStbProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceReadStbProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceTriggerProcedure"/>;
+    /// Device executes a trigger.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_trigger_1</c> </remarks>
+    /// <param name="link">         The link. </param>
+    /// <param name="flags">        The flags. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="IOTimeout">    The i/o timeout. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public DeviceError DeviceTrigger( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int IOTimeout )
+    {
+        DeviceGenericParms request = new() {
+            Link = link,
+            Flags = new DeviceFlags( flags ),
+            LockTimeout = lockTimeout,
+            IOTimeout = IOTimeout
+        };
+        return DeviceTrigger( request );
     }
 
     /// <summary>
@@ -176,6 +231,29 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device clears itself.
     /// </summary>
     /// <remarks>   Renamed from <c>device_clear_1</c> </remarks>
+    /// <param name="link">         The link. </param>
+    /// <param name="flags">        The flags. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="IOTimeout">    The i/o timeout. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public DeviceError DeviceClear( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int IOTimeout )
+    {
+        DeviceGenericParms request = new() {
+            Link = link,
+            Flags = new DeviceFlags( flags ),
+            LockTimeout = lockTimeout,
+            IOTimeout = IOTimeout
+        };
+        return DeviceClear( request );
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceClearProcedure"/>;
+    /// Device clears itself.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_clear_1</c> </remarks>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the
     ///                     remote procedure call. </param>
     /// <returns>
@@ -193,6 +271,29 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device disables its front panel.
     /// </summary>
     /// <remarks>   Renamed from <c>device_remote_1</c> </remarks>
+    /// <param name="link">         The link. </param>
+    /// <param name="flags">        The flags. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="IOTimeout">    The i/o timeout. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public DeviceError DeviceRemote( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int IOTimeout )
+    {
+        DeviceGenericParms request = new() {
+            Link = link,
+            Flags = new DeviceFlags( flags ),
+            LockTimeout = lockTimeout,
+            IOTimeout = IOTimeout
+        };
+        return DeviceRemote( request );
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceRemoteProcedure"/>;
+    /// Device disables its front panel.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_remote_1</c> </remarks>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the
     ///                     remote procedure call. </param>
     /// <returns>
@@ -203,6 +304,29 @@ public class DeviceCoreClient : OncRpcClientStubBase
         DeviceError result = new();
         this.Client?.Call( ( int ) Vxi11Message.DeviceRemoteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
         return result;
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceLocalProcedure"/>;
+    /// Device enables its front panel.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_local_1</c> </remarks>
+    /// <param name="link">         The link. </param>
+    /// <param name="flags">        The flags. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="IOTimeout">    The i/o timeout. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public DeviceError DeviceLocal( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int IOTimeout )
+    {
+        DeviceGenericParms request = new() {
+            Link = link,
+            Flags = new DeviceFlags( flags ),
+            LockTimeout = lockTimeout,
+            IOTimeout = IOTimeout
+        };
+        return DeviceRemote( request );
     }
 
     /// <summary>

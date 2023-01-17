@@ -1,5 +1,3 @@
-using System.Net;
-
 namespace cc.isr.VXI11.Visa
 {
     /// <summary>   A VISA resource address base class. </summary>

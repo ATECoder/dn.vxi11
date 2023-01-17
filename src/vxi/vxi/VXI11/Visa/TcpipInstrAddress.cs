@@ -5,11 +5,10 @@ namespace cc.isr.VXI11.Visa
     {
 
         /// <summary>   (Immutable) the default protocol. </summary>
-        public const string DefaultProtocol = "TCPIP";
+        public const string ProtocolDefault = "TCPIP";
 
         /// <summary>   (Immutable) the default suffix. </summary>
-        public const string DefaultSuffix = "INSTR";
-
+        public const string SuffixDefault = "INSTR";
 
         /// <summary>   Constructor. </summary>
         /// <exception cref="InvalidOperationException">    Thrown when the requested operation is
@@ -28,7 +27,7 @@ namespace cc.isr.VXI11.Visa
         /// <returns>   True if it succeeds, false if it fails. </returns>
         public bool ParseAddress( string address )
         {
-            AddressParser parser = new (DefaultProtocol, DefaultSuffix);
+            AddressParser parser = new (ProtocolDefault, SuffixDefault);
             bool result = parser.ParseAddress( address );
             if ( result )
             {

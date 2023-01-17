@@ -36,11 +36,11 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
 
         OncRpcTransportBase[] transports = new OncRpcTransportBase[] {
             // new OncRpcUdpServerTransport(this, bindAddr, port+2, info, 32768),
-            new OncRpcTcpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.DefaultBufferSize)
+            new OncRpcTcpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault)
         };
         this.SetTransports( transports );
 
-        this.CharacterEncoding = DeviceCoreClient.DefaultEncoding;
+        this.CharacterEncoding = DeviceCoreClient.EncodingDefault;
     }
 
     /// <summary>   Dispatch (handle) an ONC/RPC request from a client. </summary>

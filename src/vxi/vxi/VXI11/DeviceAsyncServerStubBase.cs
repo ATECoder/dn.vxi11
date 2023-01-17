@@ -34,8 +34,8 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
         this.SetRegisteredPrograms( registeredPrograms );
 
         OncRpcTransportBase[] transports = new OncRpcTransportBase[] {
-        new OncRpcUdpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.DefaultBufferSize),
-        new OncRpcTcpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.DefaultBufferSize)
+        new OncRpcUdpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault),
+        new OncRpcTcpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault)
         };
         this.SetTransports( transports );
     }
