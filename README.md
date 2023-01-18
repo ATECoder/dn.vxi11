@@ -19,8 +19,18 @@ A control and communication library for LXI-based instruments.
 
 ## Description
 
-[ISR's VXI11] is a fork of [VXI11.CSharp], which uses [GB1.RemoteTea.Net], which is a pure C# implementation of ONC/RPC. 
-[RemoteTea.Net] is a port of the pure Java RemoteTea package. 
+[ISR's VXI-11] is a partial C# implementation of the [VXI Bus Specification].
+
+## History
+
+[ISR's VXI-11] is a is a fork of [VXI11.CSharp].
+
+[ISR's VXI-11] uses [ISR's ONC RPC], which is a C# implementation of the [Sun RPC] ported from the [Java ONC RPC] implementation termed Remote Tea.
+
+[ISR's ONC RPC] is a fork of [GB1.RemoteTea.Net], which was forked from [Wes Day's RemoteTea.Net], which is a fork of [Jay Walter's SourceForge repository], which is a port of [Java ONC RPC] as documented in [org.acplt.oncrpc package].
+
+[ISR's ONC RPC] uses [ISR's XDR], which is a C# implementation of the [XDR: External Data Representation Standard (May 2006)] as implemented in [Java ONC RPC] implementation called Remote Tea. [ISR's XDR] was split off from [GB1.RemoteTea.Net].
+
 
 ### On the agenda
 The following items has yet to be implemented:
@@ -152,14 +162,24 @@ Integrated Scientific Resources, Inc., and any contributors reserve all other ri
 
 [LXI]: https://www.lxistandard.org/About/AboutLXI.aspx
 
-[VXI11.CSharp]: https://github.com/Xanliang/VXI11.CSharp 
-
-[RemoteTea.Net]: https://github.com/wespday/RemoteTea.Net  
-
 [Python VXI-11]: https://github.com/alexforencich/python-vxi11.git 
 
-[GB1.RemoteTea.Net]: https://github.com/galenbancroft/RemoteTea.Net
-
-[ISR's VXI11]: https://github.com/ATECoder/dn.vxi11
-
 [VXI Bus Specification]: https://vxibus.org/specifications.html
+[Sun RPC]: https://en.wikipedia.org/wiki/Sun_RPC
+[XDR: External Data Representation Standard (May 2006)]: http://tools.ietf.org/html/rfc4506
+
+[VXI11.CSharp]: https://github.com/Xanliang/VXI11.CSharp 
+[Jay Walter's SourceForge repository]: https://sourceforge.net/p/remoteteanet
+[Wes Day's RemoteTea.Net]: https://github.com/wespday/RemoteTea.Net
+[GB1.RemoteTea.Net]: https://github.com/galenbancroft/RemoteTea.Net
+[org.acplt.oncrpc package]: https://people.eecs.berkeley.edu/~jonah/javadoc/org/acplt/oncrpc/package-summary.html
+[Java ONC RPC]: https://github.com/remotetea/remotetea/tree/master/src/tests/org/acplt/oncrpc
+
+[Jay Walter's SourceForge repository]: https://sourceforge.net/p/remoteteanet
+[Wes Day's RemoteTea.Net]: https://github.com/wespday/RemoteTea.Net
+[GB1.RemoteTea.Net]: https://github.com/galenbancroft/RemoteTea.Net
+[org.acplt.oncrpc package]: https://people.eecs.berkeley.edu/~jonah/javadoc/org/acplt/oncrpc/package-summary.html
+[Java ONC RPC]: https://github.com/remotetea/remotetea/tree/master/src/tests/org/acplt/oncrpc
+[VXI11.CSharp]: https://github.com/Xanliang/VXI11.CSharp 
+[VXI Bus Specification]: https://vxibus.org/specifications.html
+
