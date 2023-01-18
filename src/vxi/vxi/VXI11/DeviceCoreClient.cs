@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
@@ -105,20 +106,43 @@ public class DeviceCoreClient : OncRpcClientStubBase
     #region " remote procedure calls "
 
     /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.CreateLinkProcedure"/>; Opens a link to a
+    /// device.
+    /// </summary>
+    /// <remarks>   Renamed from <c>create_link_1</c> </remarks>
+    /// <param name="clientId">                 Identifier for the client. </param>
+    /// <param name="lockDevice">               True to lock, false to unlock the device. </param>
+    /// <param name="lockTimeout">              The lock timeout. </param>
+    /// <param name="interfaceDeviceString">    The interface device string. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public CreateLinkResp CreateLink( int clientId, bool lockDevice, int lockTimeout, string interfaceDeviceString )
+    {
+        CreateLinkParms request = new() {
+            ClientId = clientId,
+            LockDevice = lockDevice,
+            LockTimeout = lockTimeout,
+            Device = interfaceDeviceString
+        };
+        return this.CreateLink( request );
+    }
+
+    /// <summary>
     /// Calls remote procedure <see cref="Vxi11Message.CreateLinkProcedure"/>; Opens a link
     /// to a device.
     /// </summary>
     /// <remarks> Renamed from <c>create_link_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.CreateLinkParms"/>) to the
-    ///                     remote procedure call. </param>
+    /// <param name="request"> The request of type <see cref="Codecs.CreateLinkParms"/> to
+    ///                        send using the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public CreateLinkResp CreateLink( CreateLinkParms arg1 )
+    public CreateLinkResp CreateLink( CreateLinkParms request )
     {
-        CreateLinkResp result = new();
-        this.Client?.Call( ( int ) Vxi11Message.CreateLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
-        return result;
+        CreateLinkResp reply = new();
+        this.Client?.Call( ( int ) Vxi11Message.CreateLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, reply );
+        return reply;
     }
 
     /// <summary>  

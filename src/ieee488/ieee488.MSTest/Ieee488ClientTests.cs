@@ -2,12 +2,12 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
-namespace cc.isr.VXI11.MSTest;
+namespace cc.isr.VXI11.IEEE488.MSTest;
 
-/// <summary>   (Unit Test Class) a support tests. </summary>
+/// <summary>   (Unit Test Class) an ieee 488 client tests. </summary>
 /// <remarks>   2023-01-17. </remarks>
 [TestClass]
-public class SupportTests
+public class Ieee488ClientTests
 {
 
     #region " fixture construction and cleanup "
@@ -42,18 +42,18 @@ public class SupportTests
 
     #endregion
 
-    #region " support "
+    #region " client identities "
 
     /// <summary>   Assert unique client identifier should be generated. </summary>
     /// <remarks>   2023-01-17. </remarks>
     /// <returns>   An int. </returns>
     private static int AssertUniqueClientIdShouldBeGenerated()
     {
-        int clientId = Support.GenerateUniqueRandomClientIdentifier();
+        int clientId = IEEE488.Ieee488Client.GetNextClientId();
         Assert.IsTrue( clientId >= 0 );
-        Assert.IsTrue( clientId < Support.ClientIdentifierUpperBound );
         return clientId;
     }
+
 
     /// <summary>   (Unit Test Method) unique client identifier should be generated. </summary>
     /// <remarks>   2023-01-17. </remarks>
@@ -62,12 +62,7 @@ public class SupportTests
     {
         int clientId = AssertUniqueClientIdShouldBeGenerated();
         int nextClientId = AssertUniqueClientIdShouldBeGenerated();
-        Assert.AreNotEqual( clientId , nextClientId , "the client id should be unique" );
-        clientId = int.MaxValue - 2;
-        clientId = ++clientId == int.MaxValue ? 0 : clientId;
-        Assert.AreEqual( int.MaxValue - 1, clientId );
-        clientId = ++clientId == int.MaxValue ? 0 : clientId;
-        Assert.AreEqual( 0, clientId );
+        Assert.AreNotEqual( nextClientId, clientId, $"The next client id {nextClientId} should not be the same as the previous id {clientId}" );
     }
 
     #endregion

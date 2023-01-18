@@ -13,11 +13,9 @@ public class Ieee488Client : IDisposable
     /// <summary>   Default constructor. </summary>
     public Ieee488Client()
     {
-        // Initialize the client identifier with some more-or-less random value.
-        this.ClientId = Support.GenerateClientIdentifier();
 
-        // create a client id for this instance;
-        // this.ClientId = ( int ) ( DateTime.Now.Subtract( DateTime.Parse( "2023-01-01" ) ).TotalMilliseconds % 0x7FFFFFFF);
+        // get the next client identifier
+        this.ClientId = Ieee488Client.GetNextClientId();
 
         // initialize some values 
         this.MaxReadRawLength = Ieee488Client.MaxReadRawLengthDefault;
@@ -267,6 +265,19 @@ public class Ieee488Client : IDisposable
 
     #endregion
 
+    #region " client identifiers "
+
+    private static int _lastClientId = 0;
+
+    /// <summary>   Gets the next client identifier. </summary>
+    /// <remarks>   The client id is zeroed upon reaching <see cref="int.MaxValue"/> </remarks>
+    /// <returns>   The next client identifier. </returns>
+    public static int GetNextClientId()
+    {
+        return ++_lastClientId == int.MaxValue ? 0 : _lastClientId;
+    }
+
+    #endregion
 
     #endregion
 
