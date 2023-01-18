@@ -21,42 +21,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
 
     #region " construction and cleanup "
 
-    /// <summary>
-    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
-    /// remote program can be accessed.
-    /// </summary>
-    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    /// <param name="host">     The Internet address of host where to contact the remote program.. </param>
-    /// <param name="protocol"> The <see cref="OncRpcProtocols"/> protocol to be used for ONC/RPC calls. </param>
-    public DeviceCoreClient( IPAddress host, OncRpcProtocols protocol ) : base( host, Vxi11ProgramConstants.DeviceCoreProgram,
-                                                                                Vxi11ProgramConstants.DeviceCoreVersion, 0, protocol )
-    {
-    }
-
-    /// <summary>
-    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/> 
-    /// remote program can be accessed. 
-    /// </summary>
-    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    /// <param name="host">     The Internet address of host where to contact the remote program. </param>
-    /// <param name="port">     The Port number at host where the remote program can be reached. </param>
-    /// <param name="protocol"> The <see cref="OncRpcProtocols"/> protocol to be used for ONC/RPC
-    ///                         calls. </param>
-    public DeviceCoreClient( IPAddress host, int port, OncRpcProtocols protocol ) : base( host, Vxi11ProgramConstants.DeviceCoreProgram,
-                                                                                          Vxi11ProgramConstants.DeviceCoreVersion, port, protocol )
-    {
-    }
-
-    /// <summary>
-    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
-    /// remote program can be accessed.
-    /// </summary>
-    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    /// <param name="client">   The ONC/RPC client connection object implementing a particular protocol. </param>
-    public DeviceCoreClient( OncRpcClientBase client ) : base( client )
-    {
-    }
-
+#if false
     /// <summary>
     /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
     /// remote program can be accessed.
@@ -70,6 +35,49 @@ public class DeviceCoreClient : OncRpcClientStubBase
     public DeviceCoreClient( IPAddress host, int program, int version, OncRpcProtocols protocol ) : base( host, program, version, 0, protocol )
     {
     }
+#endif
+
+    /// <summary>
+    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
+    /// remote program can be accessed.
+    /// </summary>
+    /// <param name="client">   The ONC/RPC client connection object implementing the particular
+    ///                         protocol and program. </param>
+    public DeviceCoreClient( OncRpcClientBase client ) : base( client )
+    {
+    }
+
+    /// <summary>
+    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
+    /// remote program can be accessed.
+    /// </summary>
+    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
+    /// <param name="host">     The Internet address of host where to contact the remote program.. </param>
+    /// <param name="protocol"> The <see cref="OncRpcProtocols"/> protocol to be used for ONC/RPC calls. </param>
+    /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocols.OncRpcUdp"/>
+    ///                         or the connection timeout for <see cref="OncRpcProtocols.OncRpcTcp"/>. </param>
+    public DeviceCoreClient( IPAddress host, OncRpcProtocols protocol, int timeout ) : this( host, Vxi11ProgramConstants.DeviceCoreProgram,
+                                                                                                   Vxi11ProgramConstants.DeviceCoreVersion,
+                                                                                                   0, protocol, timeout )
+    {
+    }
+
+    /// <summary>
+    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/> 
+    /// remote program can be accessed. 
+    /// </summary>
+    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
+    /// <param name="host">     The Internet address of host where to contact the remote program. </param>
+    /// <param name="port">     The Port number at host where the remote program can be reached. </param>
+    /// <param name="protocol"> The <see cref="OncRpcProtocols"/> protocol to be used for ONC/RPC
+    ///                         calls. </param>
+    /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocols.OncRpcUdp"/>
+    ///                         or the connection timeout for <see cref="OncRpcProtocols.OncRpcTcp"/>. </param>
+    public DeviceCoreClient( IPAddress host, int port, OncRpcProtocols protocol, int timeout ) : this( host, Vxi11ProgramConstants.DeviceCoreProgram,
+                                                                                                       Vxi11ProgramConstants.DeviceCoreVersion, port,
+                                                                                                       protocol, timeout )
+    {
+    }
 
     /// <summary>
     /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
@@ -82,13 +90,16 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// <param name="port">     The Port number at host where the remote program can be reached. </param>
     /// <param name="protocol"> The <see cref="OncRpcProtocols"/> protocol to be used for ONC/RPC
     ///                         calls. </param>
-    public DeviceCoreClient( IPAddress host, int program, int version, int port, OncRpcProtocols protocol ) : base( host, program, version, port, protocol )
+    /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocols.OncRpcUdp"/>
+    ///                         or the connection timeout for <see cref="OncRpcProtocols.OncRpcTcp"/>. </param>
+    public DeviceCoreClient( IPAddress host, int program, int version, int port, OncRpcProtocols protocol,
+                                                                       int timeout ) : base( host, program, version, port, protocol, timeout )
     {
     }
 
-    #endregion
+#endregion
 
-    #region " defaults "
+#region " defaults "
 
     /// <summary>   Gets or sets the default encoding. </summary>
     /// <remarks>
@@ -97,13 +108,13 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// <value> The default encoding. </value>
     public static Encoding EncodingDefault { get; set; } = Encoding.UTF8;
 
-    #endregion
+#endregion
 
-    #region " members "
+#region " members "
 
-    #endregion
+#endregion
 
-    #region " remote procedure calls "
+#region " remote procedure calls "
 
     /// <summary>
     /// Calls remote procedure <see cref="Vxi11Message.CreateLinkProcedure"/>; Opens a link to a
@@ -488,6 +499,6 @@ public class DeviceCoreClient : OncRpcClientStubBase
         return result;
     }
 
-    #endregion
+#endregion
 
 }

@@ -24,33 +24,45 @@ public class Ieee488Client : IDisposable
         this.Host = string.Empty;
         this.InterfaceDeviceString = string.Empty;
         this.Eoi = Ieee488Client.EoiEnabledDefault;
+        this.IOTimeout = Ieee488Client.IOTimeoutDefault;
+        this.TransmitTimeout = Ieee488Client.TransmitTimeoutDefault;
         this.LockTimeout = Ieee488Client.LockTimeoutDefault;
         this.LockEnabled = Ieee488Client.LockEnabledDefault;
         this.ReadTermination = Ieee488Client.ReadTerminationDefault;
-        this.ReceiveTimeout = Ieee488Client.ReceiveTimeoutDefault;
         this.WriteTermination = Ieee488Client.WriteTerminationDefault;
-        this.SendTimeout = Ieee488Client.SendTimeoutDefault;
         this.AbortPort = 0;
     }
 
-    /// <summary>   An internal method to process connecting the device by calling the <see cref="Vxi11Message.CreateLinkProcedure"/> 
-    /// RPC and returning the <see cref="DeviceErrorCode"/> codec. </summary>
+    /// <summary>
+    /// An internal method to process connecting the device by calling the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    /// RPC and returning the <see cref="DeviceErrorCode"/> codec.
+    /// </summary>
+    /// <remarks>   2023-01-17. </remarks>
     /// <param name="hostAddress">              The host device IPv4 address. </param>
     /// <param name="interfaceDeviceString">    The interface device string, e.g., inst0 or gpib0,8. </param>
+    /// <param name="connectTimeout">           The connect timeout. This timeout overrides the 
+    ///                                         <see cref="ONC.RPC.Client.OncRpcClientBase.TransmitTimeout"/></param>
     /// <returns>   A DeviceErrorCode. </returns>
-    private DeviceErrorCode ConnectDevice( string hostAddress, string interfaceDeviceString )
+    private DeviceErrorCode ConnectDevice( string hostAddress, string interfaceDeviceString, int connectTimeout )
     {
         // First destroy the link if not destroyed. 
         if ( this.Connected ) { _ = this.Close(); }
 
+        this.ConnectTimeout = connectTimeout;
         this.DeviceLink = null;
         this.Host = string.Empty;
         this.InterfaceDeviceString = string.Empty;
 
         // instantiate the core client.
-        this.CoreClient = new DeviceCoreClient( IPAddress.Parse( hostAddress ), OncRpcProtocols.OncRpcTcp );
-        this.ReceiveTimeout = this.ReceiveTimeout;
-        this.SendTimeout = this.SendTimeout;
+        this.CoreClient = new DeviceCoreClient( IPAddress.Parse( hostAddress ), OncRpcProtocols.OncRpcTcp, connectTimeout );
+
+        // set the client timeouts.
+        this.IOTimeout = this.IOTimeout;
+        this.TransmitTimeout = this.TransmitTimeout;
+
+
+        // override the client transmit timeout during the connection to allow longer timeout periods.
+        this.CoreClient.Client!.TransmitTimeout = connectTimeout;
 
         CreateLinkParms createLinkParam = new() {
             Device = interfaceDeviceString,
@@ -75,11 +87,13 @@ public class Ieee488Client : IDisposable
     /// RPC and sets the <see cref="LastDeviceError"/> or throws an exception on failure. </summary>
     /// <param name="hostAddress">              The host device IPv4 address. </param>
     /// <param name="interfaceDeviceString">    The interface device string, e.g., inst0 or gpib0,8. </param>
-    public void Connect( string hostAddress, string interfaceDeviceString )
+    /// <param name="connectTimeout">           (Optional) The connect timeout [3000]. This timeouts overrides the 
+    ///                                         <see cref="ONC.RPC.Client.OncRpcClientBase.TransmitTimeout"/></param>
+    public void Connect( string hostAddress, string interfaceDeviceString, int connectTimeout = 3000 )
     {
         try
         {
-            this.LastDeviceError = this.ConnectDevice( hostAddress, interfaceDeviceString );
+            this.LastDeviceError = this.ConnectDevice( hostAddress, interfaceDeviceString, connectTimeout );
 
             if ( this.LastDeviceError.Value != DeviceErrorCodeValue.NoError )
             {
@@ -100,6 +114,8 @@ public class Ieee488Client : IDisposable
         }
         finally
         {
+            // restore the client transmit timeout following the connection.
+            this.TransmitTimeout = this.TransmitTimeout;
         }
     }
 
@@ -107,7 +123,7 @@ public class Ieee488Client : IDisposable
     /// <remarks>   2023-01-17. </remarks>
     public void Reconnect()
     {
-        this.Connect( this.Host, this.InterfaceDeviceString );
+        this.Connect( this.Host, this.InterfaceDeviceString, this.ConnectTimeout );
     }
 
     /// <summary>   Closes this object. </summary>
@@ -236,13 +252,13 @@ public class Ieee488Client : IDisposable
     /// <value> The lock timeout default. </value>
     public static int LockTimeoutDefault { get; set; } = 3000;
 
-    /// <summary>   Gets or sets the receive timeout default. </summary>
-    /// <value> The receive timeout default. </value>
-    public static int ReceiveTimeoutDefault { get; set; } = 3000;
+    /// <summary>   Gets or sets the IO Timeout default. </summary>
+    /// <value> The I/O timeout default. </value>
+    public static int IOTimeoutDefault { get; set; } = 3000;
 
-    /// <summary>   Gets or sets the send timeout default. </summary>
-    /// <value> The send timeout default. </value>
-    public static int SendTimeoutDefault { get; set; } = 3000;
+    /// <summary>   Gets or sets the transmit timeout default. </summary>
+    /// <value> The transmit timeout default. </value>
+    public static int TransmitTimeoutDefault { get; set; } = 1000;
 
     /// <summary>   Gets or sets the read termination default. </summary>
     /// <value> The read termination default. </value>
@@ -327,9 +343,10 @@ public class Ieee488Client : IDisposable
 
         if ( this.AbortClient is null )
         {
-            this.AbortClient = new DeviceAsyncClient( IPAddress.Parse( this.Host ), this.AbortPort, OncRpcProtocols.OncRpcTcp );
-            this.AbortClient.Client!.SendTimeout = this.SendTimeout;
-            this.AbortClient.Client!.ReceiveTimeout = this.ReceiveTimeout;
+            this.AbortClient = new DeviceAsyncClient( IPAddress.Parse( this.Host ), this.AbortPort, OncRpcProtocols.OncRpcTcp, this.ConnectTimeout );
+            // set the timeouts of the client.
+            this.TransmitTimeout = this.TransmitTimeout;
+            this.IOTimeout = this.IOTimeout;
         }
         DeviceError error = this.AbortClient.DeviceAbort( this.DeviceLink! );
         if ( error.ErrorCode.Value != DeviceErrorCodeValue.NoError  )
@@ -371,33 +388,42 @@ public class Ieee488Client : IDisposable
     /// <value> The read termination. </value>
     public byte ReadTermination { get; set; }
 
-    private int _receiveTimeout;
-    /// <summary>   Gets or sets the Receive timeout. </summary>
-    /// <value> The Receive timeout. </value>
-    public int ReceiveTimeout
+    /// <summary>   Gets or sets the connect timeout. </summary>
+    /// <value> The connect timeout. </value>
+    public int ConnectTimeout { get; set; }
+
+    private int _ioTimeout;
+    /// <summary>   Gets or sets the I/O timeout. </summary>
+    /// <value> The I/O timeout. </value>
+    public int IOTimeout
     {
-        get => this._receiveTimeout;
+        get => this._ioTimeout;
         set {
-            this._receiveTimeout = value;
+            this._ioTimeout = value;
             if ( this.CoreClient?.Client is not null )
-                this.CoreClient.Client.ReceiveTimeout = value;
+                this.CoreClient.Client.IOTimeout = value;
             if ( this.AbortClient?.Client is not null )
-                this.AbortClient.Client.ReceiveTimeout = value;
+                this.AbortClient.Client.IOTimeout = value;
         }
     }
 
-    private int _sendTimeout;
-    /// <summary>   Gets or sets the send timeout in milliseconds. </summary>
-    /// <value> The send timeout. </value>
-    public int SendTimeout
+    private int _transmitTimeout;
+    /// <summary>   
+    /// Gets or sets the timeout during the phase where data is sent within RPC calls, or data is
+    /// received within RPC replies. The <see cref="TransmitTimeout"/> timeout must be greater than 0.
+    /// </summary>
+    /// <remarks> This timeout is set to the <see cref="ConnectTimeout"/> during <see cref="Connect(string, string, int)"/>
+    /// actions and restored thereafter. </remarks>
+    /// <value> The Transmit timeout. </value>
+    public int TransmitTimeout
     {
-        get => this._sendTimeout;
+        get => this._transmitTimeout;
         set {
-            this._sendTimeout = value;
+            this._transmitTimeout = value;
             if ( this.CoreClient?.Client is not null )
-                this.CoreClient.Client.SendTimeout = value;
+                this.CoreClient.Client.TransmitTimeout = value;
             if ( this.AbortClient?.Client is not null )
-                this.AbortClient.Client.SendTimeout = value;
+                this.AbortClient.Client.TransmitTimeout = value;
         }
     }
 
@@ -466,7 +492,7 @@ public class Ieee488Client : IDisposable
         {
             DeviceWriteParms writeParam = new() {
                 Link = this.DeviceLink,
-                IOTimeout = this.SendTimeout, // in ms
+                IOTimeout = this.IOTimeout, // in ms
                 LockTimeout = this.LockTimeout, // in ms
                 Flags = new DeviceFlags( this.Eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None ),
             };
@@ -494,7 +520,7 @@ public class Ieee488Client : IDisposable
             DeviceReadParms readParam = new() {
                 Link = DeviceLink,
                 RequestSize = this.MaxReceiveSize, // response.Length,
-                IOTimeout = this.ReceiveTimeout,
+                IOTimeout = this.IOTimeout,
                 LockTimeout = this.LockTimeout,
                 Flags = new DeviceFlags(),
                 TermChar = this.ReadTermination
@@ -515,7 +541,7 @@ public class Ieee488Client : IDisposable
             DeviceReadParms readParam = new() {
                 Link = DeviceLink,
                 RequestSize = byteCount,
-                IOTimeout = this.ReceiveTimeout,
+                IOTimeout = this.IOTimeout,
                 LockTimeout = this.LockTimeout,
                 Flags = new DeviceFlags(),
                 TermChar = this.ReadTermination

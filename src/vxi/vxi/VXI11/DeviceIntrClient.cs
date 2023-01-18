@@ -17,6 +17,8 @@ namespace cc.isr.VXI11;
 public class DeviceIntrClient : OncRpcClientStubBase
 {
 
+#if false
+
     /// <summary>
     /// Constructs a <see cref="DeviceIntrClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceInterruptProgram"/>
     /// remote program can be accessed.
@@ -83,6 +85,68 @@ public class DeviceIntrClient : OncRpcClientStubBase
     public DeviceIntrClient( IPAddress host, int program, int version, int port, OncRpcProtocols protocol ) : base( host, program, version, port, protocol )
     {
     }
+#endif
+
+    /// <summary>
+    /// Constructs a <see cref="DeviceIntrClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceInterruptVersion"/>
+    /// remote program can be accessed.
+    /// </summary>
+    /// <param name="client">   The ONC/RPC client connection object implementing the particular
+    ///                         protocol and program. </param>
+    public DeviceIntrClient( OncRpcClientBase client ) : base( client )
+    {
+    }
+
+    /// <summary>
+    /// Constructs a <see cref="DeviceIntrClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceInterruptVersion"/>
+    /// remote program can be accessed.
+    /// </summary>
+    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
+    /// <param name="host">     The Internet address of host where to contact the remote program.. </param>
+    /// <param name="protocol"> The <see cref="OncRpcProtocols"/> protocol to be used for ONC/RPC calls. </param>
+    /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocols.OncRpcUdp"/>
+    ///                         or the connection timeout for <see cref="OncRpcProtocols.OncRpcTcp"/>. </param>
+    public DeviceIntrClient( IPAddress host, OncRpcProtocols protocol, int timeout ) : this( host, Vxi11ProgramConstants.DeviceInterruptProgram,
+                                                                                                   Vxi11ProgramConstants.DeviceInterruptVersion,
+                                                                                                   0, protocol, timeout )
+    {
+    }
+
+    /// <summary>
+    /// Constructs a <see cref="DeviceIntrClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceInterruptProgram"/> 
+    /// remote program can be accessed. 
+    /// </summary>
+    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
+    /// <param name="host">     The Internet address of host where to contact the remote program. </param>
+    /// <param name="port">     The Port number at host where the remote program can be reached. </param>
+    /// <param name="protocol"> The <see cref="OncRpcProtocols"/> protocol to be used for ONC/RPC
+    ///                         calls. </param>
+    /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocols.OncRpcUdp"/>
+    ///                         or the connection timeout for <see cref="OncRpcProtocols.OncRpcTcp"/>. </param>
+    public DeviceIntrClient( IPAddress host, int port, OncRpcProtocols protocol, int timeout ) : this( host, Vxi11ProgramConstants.DeviceInterruptProgram,
+                                                                                                       Vxi11ProgramConstants.DeviceInterruptVersion, port,
+                                                                                                       protocol, timeout )
+    {
+    }
+
+    /// <summary>
+    /// Constructs a <see cref="DeviceIntrClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceInterruptProgram"/>
+    /// remote program can be accessed.
+    /// </summary>
+    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
+    /// <param name="host">     The Internet address of host where to contact the remote program. </param>
+    /// <param name="program">  The Remote program number. </param>
+    /// <param name="version">  The Remote program version number. </param>
+    /// <param name="port">     The Port number at host where the remote program can be reached. </param>
+    /// <param name="protocol"> The <see cref="OncRpcProtocols"/> protocol to be used for ONC/RPC
+    ///                         calls. </param>
+    /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocols.OncRpcUdp"/>
+    ///                         or the connection timeout for <see cref="OncRpcProtocols.OncRpcTcp"/>. </param>
+    public DeviceIntrClient( IPAddress host, int program, int version, int port, OncRpcProtocols protocol,
+                                                                       int timeout ) : base( host, program, version, port, protocol, timeout )
+    {
+    }
+
 
     /// <summary>
     /// Calls remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.

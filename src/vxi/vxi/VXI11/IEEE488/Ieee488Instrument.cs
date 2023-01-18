@@ -11,7 +11,7 @@ namespace cc.isr.VXI11.IEEE488
         {
             if ( !this.Connected ) this.Reconnect();
 
-            var response = this.CoreClient!.DeviceReadStb( this.DeviceLink!, Codecs.DeviceOperationFlags.None, this.LockTimeout, this.SendTimeout );
+            var response = this.CoreClient!.DeviceReadStb( this.DeviceLink!, Codecs.DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
             return response is null
                 ? throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError )
                 : response.ErrorCode.Value != Codecs.DeviceErrorCodeValue.NoError
@@ -25,7 +25,7 @@ namespace cc.isr.VXI11.IEEE488
         {
             if ( !this.Connected ) this.Reconnect();
 
-            var response = this.CoreClient!.DeviceRemote( this.DeviceLink!, Codecs.DeviceOperationFlags.None, this.LockTimeout, this.SendTimeout );
+            var response = this.CoreClient!.DeviceRemote( this.DeviceLink!, Codecs.DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
 
             if ( response is null )
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
@@ -39,7 +39,7 @@ namespace cc.isr.VXI11.IEEE488
         {
             if ( !this.Connected ) this.Reconnect();
 
-            var response = this.CoreClient!.DeviceLocal( this.DeviceLink!, Codecs.DeviceOperationFlags.None, this.LockTimeout, this.SendTimeout );
+            var response = this.CoreClient!.DeviceLocal( this.DeviceLink!, Codecs.DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
 
             if ( response is null )
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
