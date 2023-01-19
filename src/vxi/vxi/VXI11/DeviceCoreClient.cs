@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
@@ -20,22 +19,6 @@ public class DeviceCoreClient : OncRpcClientStubBase
 {
 
     #region " construction and cleanup "
-
-#if false
-    /// <summary>
-    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
-    /// remote program can be accessed.
-    /// </summary>
-    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    /// <param name="host">     The Internet address of host where to contact the remote program. </param>
-    /// <param name="program">  The Remote program number. </param>
-    /// <param name="version">  The Remote program version number. </param>
-    /// <param name="protocol"> The <see cref="OncRpcProtocols"/> protocol to be used for ONC/RPC
-    ///                         calls. </param>
-    public DeviceCoreClient( IPAddress host, int program, int version, OncRpcProtocols protocol ) : base( host, program, version, 0, protocol )
-    {
-    }
-#endif
 
     /// <summary>
     /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/>
