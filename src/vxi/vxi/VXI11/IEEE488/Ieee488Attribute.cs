@@ -1,11 +1,13 @@
+using System.ComponentModel;
+
 namespace cc.isr.VXI11.IEEE488;
 
 /// <summary>   Values that represent IEEE488 operation types. </summary>
 public enum Ieee488OperationType
 {
-    None = 0,
-    Write,
-    Read
+    [Description( "Not specified" )] None = 0,
+    [Description( "Send message tot he device." )] Write,
+    [Description( "Read reply from the device." )] Read
 }
 
 /// <summary>
