@@ -27,7 +27,7 @@ namespace cc.isr.VXI11.Visa
         /// <returns>   True if it succeeds, false if it fails. </returns>
         public bool ParseAddress( string address )
         {
-            AddressParser parser = new (ProtocolDefault, SuffixDefault);
+            AddressParser parser = new( ProtocolDefault, SuffixDefault );
             bool result = parser.ParseAddress( address );
             if ( result )
             {

@@ -133,7 +133,7 @@ public struct DeviceAddress
         this.ModelCode = null;
         this.UsbTmcInterfaceNumber = null;
         this.InterfaceNumber = 0;
-        string[] info = interfaceDeviceAddress.TrimEnd(']').Split( '[' );
+        string[] info = interfaceDeviceAddress.TrimEnd( ']' ).Split( '[' );
         this.InterfaceName = info[0];
         this.InterfaceFamily = UsbInterfaceFamily;
         if ( this.InterfaceName.Length > this.InterfaceFamily.Length )
@@ -142,7 +142,7 @@ public struct DeviceAddress
         if ( info.Length < 2 ) return true; // address is like 'usb0'
         info = info[1].Split( ':' );
         this.ManufacturerId = Support.ConvertToInt32( info[0] );
-        this.ModelCode = Support.ConvertToInt32( info[2] ); 
+        this.ModelCode = Support.ConvertToInt32( info[2] );
         this.SerialNumber = info[4];
         this.UsbTmcInterfaceNumber = info.Length > 6 ? Support.ConvertToInt32( info[6] ) : 0;
 
@@ -182,7 +182,7 @@ public struct DeviceAddress
                       && MaximumGpibAddress >= this.PrimaryAddress.GetValueOrDefault( 1 )
                       && MinimumGpibAddress <= this.SecondaryAddress.GetValueOrDefault( 1 )
                       && MaximumGpibAddress >= this.SecondaryAddress.GetValueOrDefault( 1 )
-                    
+
               );
     }
 }

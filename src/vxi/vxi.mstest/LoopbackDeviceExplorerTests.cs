@@ -8,7 +8,6 @@ using cc.isr.ONC.RPC.Portmap;
 namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a device explorer tests. </summary>
-/// <remarks>   2023-01-16. </remarks>
 [TestClass]
 public class LoopbackDeviceExplorerTests
 {
@@ -56,9 +55,8 @@ public class LoopbackDeviceExplorerTests
     #region " helpers "
 
     /// <summary>   Gets the host. </summary>
-    /// <remarks>   2023-01-16. </remarks>
     /// <returns>   The host. </returns>
-    internal static IPAddress? GetHost ()
+    internal static IPAddress? GetHost()
     {
         IPHostEntry host = Dns.GetHostEntry( Dns.GetHostName() );
         var ipAddress = host
@@ -71,7 +69,6 @@ public class LoopbackDeviceExplorerTests
     #region " port map tests "
 
     /// <summary>   (Unit Test Method) portmap service should ping. </summary>
-    /// <remarks>   2023-01-16. </remarks>
     [TestMethod]
     public void PortmapServiceShouldPing()
     {

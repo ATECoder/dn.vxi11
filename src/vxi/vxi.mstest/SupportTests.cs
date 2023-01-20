@@ -5,7 +5,6 @@ using cc.isr.XDR;
 namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a support tests. </summary>
-/// <remarks>   2023-01-17. </remarks>
 [TestClass]
 public class SupportTests
 {
@@ -45,7 +44,6 @@ public class SupportTests
     #region " support "
 
     /// <summary>   Assert unique client identifier should be generated. </summary>
-    /// <remarks>   2023-01-17. </remarks>
     /// <returns>   An int. </returns>
     private static int AssertUniqueClientIdShouldBeGenerated()
     {
@@ -56,13 +54,12 @@ public class SupportTests
     }
 
     /// <summary>   (Unit Test Method) unique client identifier should be generated. </summary>
-    /// <remarks>   2023-01-17. </remarks>
     [TestMethod]
     public void UniqueClientIdShouldBeGenerated()
     {
         int clientId = AssertUniqueClientIdShouldBeGenerated();
         int nextClientId = AssertUniqueClientIdShouldBeGenerated();
-        Assert.AreNotEqual( clientId , nextClientId , "the client id should be unique" );
+        Assert.AreNotEqual( clientId, nextClientId, "the client id should be unique" );
         clientId = int.MaxValue - 2;
         clientId = ++clientId == int.MaxValue ? 0 : clientId;
         Assert.AreEqual( int.MaxValue - 1, clientId );
@@ -149,14 +146,15 @@ public class SupportTests
     public void IntShouldCastToDeviceOperationFlags()
     {
         int value = 0;
-        int maxValue = 0;
+        int oredValue = 0;
         foreach ( var enumValue in Enum.GetValues( typeof( DeviceOperationFlags ) ) )
         {
             value = ( int ) enumValue;
-            maxValue = value > maxValue ? value : maxValue;
             AssertIntShouldCastToDeviceOperationFlags( value );
+            oredValue |= value;
+            AssertIntShouldCastToDeviceOperationFlags( oredValue );
         }
-        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceOperationFlags( maxValue + 1 ); } );
+        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceOperationFlags( oredValue + 1 ); } );
     }
 
     /// <summary>   Assert <see langword="int"/> should cast to <see cref="DeviceReadReasons"/>. </summary>
@@ -172,14 +170,15 @@ public class SupportTests
     public void IntShouldCastToDeviceReadReasons()
     {
         int value = 0;
-        int maxValue = 0;
+        int oredValue = 0;
         foreach ( var enumValue in Enum.GetValues( typeof( DeviceReadReasons ) ) )
         {
             value = ( int ) enumValue;
-            maxValue = value > maxValue ? value : maxValue;
             AssertIntShouldCastToDeviceReadReasons( value );
+            oredValue |= value;
+            AssertIntShouldCastToDeviceReadReasons( oredValue );
         }
-        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceReadReasons( maxValue + 1 ); } );
+        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceReadReasons( oredValue + 1 ); } );
     }
 
     #endregion

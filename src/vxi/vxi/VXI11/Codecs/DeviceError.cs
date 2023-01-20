@@ -27,7 +27,6 @@ public class DeviceError : IXdrCodec
 {
 
     /// <summary>   Default constructor. </summary>
-    /// <remarks>   2023-01-04. </remarks>
     public DeviceError()
     {
         this._errorCode = new();

@@ -1,5 +1,7 @@
 using System.ComponentModel;
 
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -67,12 +69,11 @@ public class DeviceErrorCode : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.Value = ( DeviceErrorCodeValue ) decoder.DecodeInt();
+        this.Value = decoder.DecodeInt().ToDeviceErrorCodeValue();
     }
 }
 
 /// <summary>   Values that represent device error code values. </summary>
-/// <remarks>   2023-01-07. </remarks>
 public enum DeviceErrorCodeValue
 {
     /// <summary>   An enum constant representing the no error option. </summary>

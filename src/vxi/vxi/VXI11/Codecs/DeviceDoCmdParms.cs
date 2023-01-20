@@ -128,7 +128,7 @@ public class DeviceDoCmdParms : IXdrCodec
         this.Flags.Encode( encoder );
         this.IOTimeout.Encode( encoder );
         this.LockTimeout.Encode( encoder );
-        this.Cmd .Encode( encoder );
+        this.Cmd.Encode( encoder );
         this.NetworkOrder.Encode( encoder );
         this.DataSize.Encode( encoder );
         this._dataIn.EncodeDynamicOpaque( encoder );
@@ -137,7 +137,6 @@ public class DeviceDoCmdParms : IXdrCodec
     /// <summary>
     /// Decodes -- that is: deserializes -- an object from an XDR stream in compliance to RFC 1832.
     /// </summary>
-    /// <remarks>   2023-01-04. </remarks>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {

@@ -10,16 +10,16 @@ namespace cc.isr.VXI11.Visa
             this.Board = string.Empty;
             this.Protocol = string.Empty;
             this.Device = string.Empty;
-            this.Host= string.Empty;
+            this.Host = string.Empty;
             this.Suffix = string.Empty;
             this.Address = string.Empty;
-       }
+        }
 
         /// <summary>   Specialized constructor for use only by derived class. </summary>
         /// <param name="board">    The board. </param>
         /// <param name="host">     The host. </param>
         /// <param name="device">   The device. </param>
-        protected AddressBase( string board, string host, string device) : this()
+        protected AddressBase( string board, string host, string device ) : this()
         {
             this.Board = board;
             this.Host = host;
@@ -27,7 +27,6 @@ namespace cc.isr.VXI11.Visa
         }
 
         /// <summary>   Makes a deep copy of this object. </summary>
-        /// <remarks>   2023-01-12. </remarks>
         /// <param name="address"> The address of the VISA resource. </param>
         public void Clone( AddressBase address )
         {
@@ -40,7 +39,6 @@ namespace cc.isr.VXI11.Visa
         }
 
         /// <summary>   Builds the VISA address of the instrument. </summary>
-        /// <remarks>   2023-01-12. </remarks>
         /// <returns>   A string. </returns>
         public virtual string BuildAddress()
         {
@@ -85,8 +83,7 @@ namespace cc.isr.VXI11.Visa
         /// </returns>
         public bool Equals( AddressBase other )
         {
-            if ( other == null ) return false;
-            return string.Equals( this.Board, other.Board, StringComparison.OrdinalIgnoreCase ) &&
+            return other != null && string.Equals( this.Board, other.Board, StringComparison.OrdinalIgnoreCase ) &&
                    (string.Equals( this.Device, other.Device, StringComparison.OrdinalIgnoreCase ) ||
                      this.Device is null && other.Device is null ||
                      this.Device is null && string.Equals( other.Device, $"{DeviceAddress.GenericInterfaceFamily}0", StringComparison.OrdinalIgnoreCase ) ||
@@ -94,8 +91,6 @@ namespace cc.isr.VXI11.Visa
                    string.Equals( this.Host, other.Host, StringComparison.OrdinalIgnoreCase ) &&
                    string.Equals( this.Protocol, other.Protocol, StringComparison.OrdinalIgnoreCase ) &&
                    string.Equals( this.Suffix, other.Suffix, StringComparison.OrdinalIgnoreCase );
-
-
             throw new NotImplementedException();
         }
 

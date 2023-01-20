@@ -106,7 +106,7 @@ public class DeviceWriteParms : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.Link.Encode( encoder );
-        this.IOTimeout.Encode( encoder  );
+        this.IOTimeout.Encode( encoder );
         this.LockTimeout.Encode( encoder );
         this.Flags.Encode( encoder );
         this._data.EncodeDynamicOpaque( encoder );

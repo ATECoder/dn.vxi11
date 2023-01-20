@@ -24,7 +24,6 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
     }
 
     /// <summary>   Constructor. </summary>
-    /// <remarks>   2023-01-06. </remarks>
     /// <param name="bindAddr"> The bind address. </param>
     /// <param name="port">     The port. </param>
     public DeviceCoreServerStubBase( IPAddress bindAddr, int port )

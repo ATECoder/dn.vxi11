@@ -4,7 +4,6 @@ using cc.isr.VXI11.IEEE488.EnumExtensions;
 namespace cc.isr.VXI11.MSTest.IEEE488;
 
 /// <summary>   (Unit Test Class) a support tests. </summary>
-/// <remarks>   2023-01-17. </remarks>
 [TestClass]
 public class SupportTests
 {

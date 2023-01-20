@@ -91,11 +91,11 @@ public class DeviceReadParms : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.Link.Encode( encoder );
-        this.RequestSize.Encode( encoder  );
+        this.RequestSize.Encode( encoder );
         this.IOTimeout.Encode( encoder );
         this.LockTimeout.Encode( encoder );
         this.Flags.Encode( encoder );
-        this.TermChar.Encode( encoder  );
+        this.TermChar.Encode( encoder );
     }
 
     /// <summary>

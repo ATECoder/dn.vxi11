@@ -39,7 +39,6 @@ public class DeviceException : Exception
     /// <summary>
     /// Constructs an <see cref="DeviceException"/> with the specified detail reason and inner exception.
     /// </summary>
-    /// <remarks>   2023-01-09. </remarks>
     /// <param name="reason">           The detail reason. </param>
     /// <param name="innerException">   The inner exception. </param>
     public DeviceException( DeviceErrorCodeValue reason, Exception innerException ) : base( Support.GetDescription( reason ), innerException )
@@ -50,7 +49,6 @@ public class DeviceException : Exception
     /// <summary>
     /// Constructs an <see cref="DeviceException"/> with the specified detail reason, suffix message and inner exception.
     /// </summary>
-    /// <remarks>   2023-01-09. </remarks>
     /// <param name="suffixMessage">    Message describing the suffix. </param>
     /// <param name="reason">           The detail reason. </param>
     /// <param name="innerException">   The inner exception. </param>
@@ -63,7 +61,6 @@ public class DeviceException : Exception
     /// <summary>
     /// Constructs an <see cref="DeviceException"/> with the specified detail reason and a suffix message.
     /// </summary>
-    /// <remarks>   2023-01-09. </remarks>
     /// <param name="suffixMessage">    Message describing the suffix. </param>
     /// <param name="reason">           The detail reason. </param>
     public DeviceException( string suffixMessage, DeviceErrorCodeValue reason ) : base( Support.GetDescription( reason ) + suffixMessage )

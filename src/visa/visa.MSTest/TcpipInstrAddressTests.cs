@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 namespace cc.isr.VXI11.Visa.MSTest
 {
     /// <summary>   (Unit Test Class) a TCP/IP INSTR address (resource name) tests. </summary>
-    /// <remarks>   2023-01-12. </remarks>
     [TestClass]
     public class TcpipInstrAddressTests
     {
@@ -47,10 +46,10 @@ namespace cc.isr.VXI11.Visa.MSTest
             if ( !instrAddress.InterfaceDeviceAddress.IsValid() )
             {
                 // instrAddress = new( address );
-                bool val = instrAddress.InterfaceDeviceAddress.IsValid();
+                _ = instrAddress.InterfaceDeviceAddress.IsValid();
             }
             Assert.IsTrue( instrAddress.InterfaceDeviceAddress.IsValid(), $"{instrAddress.Device} is invalid in {address}" );
-            Console.WriteLine( $"device is {( string.IsNullOrEmpty( instrAddress.Device) ? "empty" : instrAddress.Device)} for {address} " );
+            Console.WriteLine( $"device is {(string.IsNullOrEmpty( instrAddress.Device ) ? "empty" : instrAddress.Device)} for {address} " );
         }
 
         [TestMethod]

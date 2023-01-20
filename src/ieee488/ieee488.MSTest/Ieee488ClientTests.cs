@@ -5,7 +5,6 @@ using System.Net.Sockets;
 namespace cc.isr.VXI11.IEEE488.MSTest;
 
 /// <summary>   (Unit Test Class) an ieee 488 client tests. </summary>
-/// <remarks>   2023-01-17. </remarks>
 [TestClass]
 public class Ieee488ClientTests
 {
@@ -45,7 +44,6 @@ public class Ieee488ClientTests
     #region " client identities "
 
     /// <summary>   Assert unique client identifier should be generated. </summary>
-    /// <remarks>   2023-01-17. </remarks>
     /// <returns>   An int. </returns>
     private static int AssertUniqueClientIdShouldBeGenerated()
     {
@@ -56,7 +54,6 @@ public class Ieee488ClientTests
 
 
     /// <summary>   (Unit Test Method) unique client identifier should be generated. </summary>
-    /// <remarks>   2023-01-17. </remarks>
     [TestMethod]
     public void UniqueClientIdShouldBeGenerated()
     {

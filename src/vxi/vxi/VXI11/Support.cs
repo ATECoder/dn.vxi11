@@ -9,7 +9,6 @@ public static class Support
 {
 
     /// <summary>   Gets a description from an Enum. </summary>
-    /// <remarks>   2023-01-07. </remarks>
     /// <param name="value">    An enum constant representing the value option. </param>
     /// <returns>   The description. </returns>
     public static string GetDescription( this Enum value )
@@ -37,7 +36,6 @@ public static class Support
     }
 
     /// <summary>   Gets the local host <see cref="IPAddress"/>. </summary>
-    /// <remarks>   2023-01-16. </remarks>
     /// <returns>   The host. </returns>
     internal static IPAddress? GetHost()
     {
@@ -55,10 +53,9 @@ public static class Support
     public static int ClientIdentifierUpperBound { get; set; } = short.MaxValue;
 
     /// <summary>   Holds the unique client identities for this solution. </summary>
-    private static readonly HashSet<int> _clientIdentifiers = new ();
+    private static readonly HashSet<int> _clientIdentifiers = new();
 
     /// <summary>   Generates a unique random client identifier. </summary>
-    /// <remarks>   2023-01-17. </remarks>
     /// <returns>   The unique random client identifier. </returns>
     public static int GenerateUniqueRandomClientIdentifier()
     {

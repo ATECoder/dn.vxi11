@@ -79,7 +79,6 @@ public class CreateLinkParms : IXdrCodec
     /// <summary>
     /// Decodes -- that is: deserializes -- an object from an XDR stream in compliance to RFC 1832.
     /// </summary>
-    /// <remarks>   2023-01-04. </remarks>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {

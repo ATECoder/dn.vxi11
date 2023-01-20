@@ -80,9 +80,9 @@ public class DeviceCoreClient : OncRpcClientStubBase
     {
     }
 
-#endregion
+    #endregion
 
-#region " defaults "
+    #region " defaults "
 
     /// <summary>   Gets or sets the default encoding. </summary>
     /// <remarks>
@@ -91,13 +91,13 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// <value> The default encoding. </value>
     public static Encoding EncodingDefault { get; set; } = Encoding.UTF8;
 
-#endregion
+    #endregion
 
-#region " members "
+    #region " members "
 
-#endregion
+    #endregion
 
-#region " remote procedure calls "
+    #region " remote procedure calls "
 
     /// <summary>
     /// Calls remote procedure <see cref="Vxi11Message.CreateLinkProcedure"/>; Opens a link to a
@@ -482,6 +482,6 @@ public class DeviceCoreClient : OncRpcClientStubBase
         return result;
     }
 
-#endregion
+    #endregion
 
 }

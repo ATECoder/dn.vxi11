@@ -9,7 +9,7 @@ namespace cc.isr.VXI11.Visa
         /// <summary>   Constructor. </summary>
         /// <param name="defaultProtocol">  The default protocol. </param>
         /// <param name="defaultSuffix">    The default suffix. </param>
-        public AddressParser(string defaultProtocol, string defaultSuffix )  : base()
+        public AddressParser( string defaultProtocol, string defaultSuffix ) : base()
         {
             this.ProtocolDefault = defaultProtocol;
             this.SuffixDefault = defaultSuffix;
@@ -47,7 +47,7 @@ namespace cc.isr.VXI11.Visa
         /// <summary>   Builds the RegEx pattern for parsing the VISA address. </summary>
         private void BuildRegexPattern()
         {
-            StringBuilder builder = new ();
+            StringBuilder builder = new();
             _ = builder.Append( @$"^(?<{nameof( this.Board )}>(?<{nameof( AddressBase.Protocol )}>{this.ProtocolDefault})\d*)" );
             _ = builder.Append( @$"(::(?<{nameof( AddressBase.Host )}>[^\s:]+))" );
             _ = builder.Append( @$"(::(?<{nameof( AddressBase.Device )}>[^\s:]+(\[.+\])?))" );
@@ -66,11 +66,11 @@ namespace cc.isr.VXI11.Visa
             var m = Regex.Match( address, this.RegexPattern, RegexOptions.IgnoreCase );
             if ( m == null ) { return false; }
             this.Address = address;
-            this.Board = m.Groups[ nameof( AddressBase.Board ) ].Value;
+            this.Board = m.Groups[nameof( AddressBase.Board )].Value;
             this.Protocol = m.Groups[nameof( AddressBase.Protocol )].Value;
             this.Host = m.Groups[nameof( AddressBase.Host )].Value;
             this.Device = m.Groups[nameof( AddressBase.Device )].Value;
-            this.Device = string.IsNullOrEmpty( this.Device ) ? $"{DeviceAddress.GenericInterfaceFamily}0" : this.Device; 
+            this.Device = string.IsNullOrEmpty( this.Device ) ? $"{DeviceAddress.GenericInterfaceFamily}0" : this.Device;
             this.Suffix = m.Groups[nameof( AddressBase.Suffix )].Value;
             return true;
         }

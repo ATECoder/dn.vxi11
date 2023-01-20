@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -63,7 +65,7 @@ public class DeviceFlags : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.Value = ( DeviceOperationFlags ) decoder.DecodeInt();
+        this.Value = decoder.DecodeInt().ToDeviceOperationFlags();
     }
 
 }

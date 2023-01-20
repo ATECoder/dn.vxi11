@@ -37,7 +37,6 @@ public class Ieee488Client : IDisposable
     /// An internal method to process connecting the device by calling the <see cref="Vxi11Message.CreateLinkProcedure"/>
     /// RPC and returning the <see cref="DeviceErrorCode"/> codec.
     /// </summary>
-    /// <remarks>   2023-01-17. </remarks>
     /// <param name="hostAddress">              The host device IPv4 address. </param>
     /// <param name="interfaceDeviceString">    The interface device string, e.g., inst0 or gpib0,8. </param>
     /// <param name="connectTimeout">           The connect timeout. This timeout overrides the 
@@ -120,7 +119,6 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Reconnects this object. </summary>
-    /// <remarks>   2023-01-17. </remarks>
     public void Reconnect()
     {
         this.Connect( this.Host, this.InterfaceDeviceString, this.ConnectTimeout );
@@ -130,7 +128,7 @@ public class Ieee488Client : IDisposable
     public DeviceError Close()
     {
         DeviceError? deviceError = new();
-        List<Exception> exceptions = new ();
+        List<Exception> exceptions = new();
         if ( this.Connected && this.DeviceLink is not null )
         {
             try
@@ -177,7 +175,7 @@ public class Ieee488Client : IDisposable
 
         if ( exceptions.Any() )
         {
-            AggregateException aggregateException = new(exceptions);
+            AggregateException aggregateException = new( exceptions );
             throw aggregateException;
         }
         return deviceError ?? new DeviceError();
@@ -318,7 +316,7 @@ public class Ieee488Client : IDisposable
 
     /// <summary>   Gets or sets the last device error. </summary>
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
-    public DeviceErrorCode LastDeviceError { get; private set; } 
+    public DeviceErrorCode LastDeviceError { get; private set; }
 
     #endregion
 
@@ -349,7 +347,7 @@ public class Ieee488Client : IDisposable
             this.IOTimeout = this.IOTimeout;
         }
         DeviceError error = this.AbortClient.DeviceAbort( this.DeviceLink! );
-        if ( error.ErrorCode.Value != DeviceErrorCodeValue.NoError  )
+        if ( error.ErrorCode.Value != DeviceErrorCodeValue.NoError )
         {
             throw new DeviceException( $"; Abort failed.", error.ErrorCode.Value );
         }
@@ -435,7 +433,7 @@ public class Ieee488Client : IDisposable
     /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
     /// released.
     /// </remarks>
-    public int LockTimeout { get; set; } 
+    public int LockTimeout { get; set; }
 
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
     /// <value> True if lock enabled, false if not. </value>
@@ -443,7 +441,7 @@ public class Ieee488Client : IDisposable
 
     /// <summary>   Gets or sets the write termination. </summary>
     /// <value> The write termination. </value>
-    public byte[] WriteTermination { get; set; } 
+    public byte[] WriteTermination { get; set; }
 
     /// <summary>   Gets a value indicating whether the VXI Core Client is connected. </summary>
     /// <value> True if connected, false if not. </value>

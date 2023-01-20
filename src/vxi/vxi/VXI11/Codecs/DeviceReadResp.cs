@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -106,7 +108,7 @@ public class DeviceReadResp : IXdrCodec
     public void Decode( XdrDecodingStreamBase decoder )
     {
         this.ErrorCode = new DeviceErrorCode( decoder );
-        this.Reason = ( DeviceReadReasons ) decoder.DecodeInt();
+        this.Reason = decoder.DecodeInt().ToDeviceReadReasons();
         this._data = decoder.DecodeDynamicOpaque();
     }
 

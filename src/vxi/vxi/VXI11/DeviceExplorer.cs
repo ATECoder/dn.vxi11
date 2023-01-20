@@ -46,7 +46,7 @@ public class DeviceExplorer
     {
 
         // start the embedded service.
-        if ( startEmbeddedPortmapService )  _ = DeviceExplorer.StartEmbeddedPortmapService();
+        if ( startEmbeddedPortmapService ) _ = DeviceExplorer.StartEmbeddedPortmapService();
 
         // enumerate the listening devices.
         return ListCoreDevices( hosts, timeout );
@@ -92,7 +92,6 @@ public class DeviceExplorer
     /// <summary>
     /// Enumerate the registered servers on the specified <paramref name="hosts"/>.
     /// </summary>
-    /// <remarks>   2023-01-16. </remarks>
     /// <param name="hosts">                        The hosts. </param>
     /// <param name="timeout">                      The timeout. </param>
     /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
@@ -129,7 +128,6 @@ public class DeviceExplorer
     }
 
     /// <summary>   Enumerate the registered servers on the specified <paramref name="host"/>. </summary>
-    /// <remarks>   2023-01-16. </remarks>
     /// <param name="host">     The host. </param>
     /// <param name="timeout">  The timeout. </param>
     /// <returns>   The List{(IPAddress host,int port)} </returns>
