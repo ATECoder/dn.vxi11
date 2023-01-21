@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
+using cc.isr.VXI11.Logging;
+
 namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a device explorer tests. </summary>
@@ -19,14 +21,13 @@ public class DeviceExplorerTests
     {
         try
         {
-            Console.WriteLine( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
+            Logger.Writer.LogInformation( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             _classTestContext = context;
-            Console.WriteLine( @$"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} starting {_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             DeviceExplorerTests.EnumerateHosts();
         }
         catch ( Exception ex )
         {
-            Console.WriteLine( $"Failed initializing fixture: \n{ex} " );
+            Logger.Writer.LogMemberError( $"Failed initializing fixture:", ex );
             CleanupFixture();
         }
     }
@@ -109,18 +110,18 @@ public class DeviceExplorerTests
     private static void AddHostIfPingPortmapService( string host, int timeout )
     {
         Stopwatch sw = Stopwatch.StartNew();
-        Console.WriteLine( $"Portmap ping {host}" );
+        Logger.Writer.LogInformation( $"Portmap ping {host}" );
         if ( DeviceExplorer.PortmapPingHost( IPAddress.Parse( host ), timeout ) )
         {
             _pingedHosts.Add( IPAddress.Parse( host ) );
-            Console.WriteLine( $"added {host} in {sw.ElapsedMilliseconds:0} ms." );
+            Logger.Writer.LogInformation( $"    added {host} in {sw.ElapsedMilliseconds:0} ms." );
         }
     }
 
     /// <summary>   Enumerate hosts. </summary>
     public static void EnumerateHosts()
     {
-        Console.WriteLine( $"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} enumerating hosts: " );
+        Logger.Writer.LogInformation( $"enumerating hosts: " );
         foreach ( string host in _hosts )
         {
             if ( string.IsNullOrEmpty( host ) ) continue;
@@ -139,7 +140,7 @@ public class DeviceExplorerTests
             }
             finally
             {
-                if ( failed ) Console.WriteLine( $"Exception pinging {host}" );
+                if ( failed ) Logger.Writer.LogMemberWarning( $"Exception pinging {host}" );
             }
         }
     }
@@ -155,15 +156,15 @@ public class DeviceExplorerTests
     [TestMethod]
     public void DeviceExplorerShouldPingHosts()
     {
-        Console.WriteLine( $"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} pinging Portmap service: " );
+        Logger.Writer.LogInformation( $"pinging Portmap service: " );
         foreach ( IPAddress host in _pingedHosts )
         {
             if ( DeviceExplorer.PingHost( host, 10 ) )
             {
-                Console.Write( $"Pinging {host}" );
+                Logger.Writer.LogInformation( $"Pinging {host}" );
                 Stopwatch sw = Stopwatch.StartNew();
                 Assert.IsTrue( DeviceExplorer.PortmapPingHost( host, 10 ), $"port map at {host} should reply to a ping" );
-                Console.WriteLine( $"; done in {sw.ElapsedMilliseconds:0} ms." );
+                Logger.Writer.LogInformation( $"   done in {sw.ElapsedMilliseconds:0} ms." );
             }
             else
             {
@@ -194,14 +195,14 @@ public class DeviceExplorerTests
         Stopwatch sw = Stopwatch.StartNew();
         var devices = DeviceExplorer.ListCoreDevices( _pingedHosts, 100 );
         Assert.IsNotNull( devices );
-        Console.WriteLine( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevices )} found {devices.Count} Core VXI-11 device(s) in {sw.ElapsedMilliseconds:0} ms:" );
+        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevices )} found {devices.Count} Core VXI-11 device(s) in {sw.ElapsedMilliseconds:0} ms:" );
 
         foreach ( (IPAddress address, int port) in devices )
         {
-            Console.Write( $"Pinging {address}:{port}" );
+            Logger.Writer.LogInformation( $"Pinging {address}:{port}" );
             sw.Start();
             Assert.IsTrue( DeviceExplorer.Paping( address, port ) );
-            Console.WriteLine( $"; in {sw.ElapsedMilliseconds:0} ms" );
+            Logger.Writer.LogInformation( $"    in {sw.ElapsedMilliseconds:0} ms" );
         }
         Assert.AreEqual( _pingedHosts.Count, devices.Count, "Device count is expected to equal pinged hosts count." );
     }
@@ -226,15 +227,15 @@ public class DeviceExplorerTests
         Stopwatch sw = Stopwatch.StartNew();
         var servers = DeviceExplorer.EnumerateRegisteredServers( _pingedHosts, 100 );
         Assert.IsNotNull( servers );
-        Console.WriteLine( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.EnumerateRegisteredServers )} found {servers.Count} VXI-11 registered servers(s) in {sw.ElapsedMilliseconds:0} ms:" );
+        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.EnumerateRegisteredServers )} found {servers.Count} VXI-11 registered servers(s) in {sw.ElapsedMilliseconds:0} ms:" );
 
         int actualCount = 0;
         foreach ( (IPAddress address, int port) in servers )
         {
-            Console.Write( $"Pinging {address}:{port}" );
+            Logger.Writer.LogInformation( $"Pinging {address}:{port}" );
             sw.Start();
             Assert.IsTrue( DeviceExplorer.Paping( address, port ) );
-            Console.WriteLine( $"; in {sw.ElapsedMilliseconds:0} ms" );
+            Logger.Writer.LogInformation( $"    in {sw.ElapsedMilliseconds:0} ms" );
 
             if ( port == 111 ) { actualCount++; }
         }

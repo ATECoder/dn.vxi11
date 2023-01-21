@@ -1,3 +1,4 @@
+using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.IEEE488;
 using cc.isr.VXI11.IEEE488.EnumExtensions;
 
@@ -17,13 +18,12 @@ public class SupportTests
     {
         try
         {
-            Console.WriteLine( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
+            Logger.Writer.LogInformation( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             _classTestContext = context;
-            Console.WriteLine( @$"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} starting {_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
         }
         catch ( Exception ex )
         {
-            Console.WriteLine( $"Failed initializing fixture: \n{ex} " );
+            Logger.Writer.LogMemberError( $"Failed initializing fixture:", ex );
             CleanupFixture();
         }
     }

@@ -4,6 +4,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 
+using cc.isr.VXI11.Logging;
 namespace cc.isr.VXI11.IEEE488Client.Helper;
 
 /// <summary>   Values that represent instrument Identifiers. </summary>
@@ -149,7 +150,7 @@ public static class IEEE488InstrumentTestInfo
         }
         catch ( ApplicationException ex )
         {
-            Console.WriteLine( ex.ToString() );
+            Logger.Writer.LogMemberError( "failed querying the device",  ex );
         }
         return "Exception occurred";
     }
@@ -167,7 +168,7 @@ public static class IEEE488InstrumentTestInfo
         }
         catch ( ApplicationException ex )
         {
-            Console.WriteLine( ex.ToString() );
+            Logger.Writer.LogMemberError( "Exception writing to the device.", ex );
         }
         return "Exception occurred";
     }

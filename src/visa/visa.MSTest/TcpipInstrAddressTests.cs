@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 
+using cc.isr.VXI11.Logging;
 namespace cc.isr.VXI11.Visa.MSTest
 {
     /// <summary>   (Unit Test Class) a TCP/IP INSTR address (resource name) tests. </summary>
@@ -23,8 +24,8 @@ namespace cc.isr.VXI11.Visa.MSTest
             var m = Regex.Match( address, pattern, RegexOptions.IgnoreCase );
             Assert.IsNotNull( m );
             Assert.IsTrue( m.Groups.Keys.Any() );
-            Console.WriteLine( $"\nParse of: {address}" );
-            foreach ( var key in m.Groups.Keys ) { Console.WriteLine( $"{key} {m.Groups[key]}" ); }
+            Logger.Writer.LogInformation( $"\nParse of: {address}" );
+            foreach ( var key in m.Groups.Keys ) { Logger.Writer.LogInformation( $"{key} {m.Groups[key]}" ); }
         }
 
         [TestMethod]
@@ -49,7 +50,7 @@ namespace cc.isr.VXI11.Visa.MSTest
                 _ = instrAddress.InterfaceDeviceAddress.IsValid();
             }
             Assert.IsTrue( instrAddress.InterfaceDeviceAddress.IsValid(), $"{instrAddress.Device} is invalid in {address}" );
-            Console.WriteLine( $"device is {(string.IsNullOrEmpty( instrAddress.Device ) ? "empty" : instrAddress.Device)} for {address} " );
+            Logger.Writer.LogInformation( $"device is {(string.IsNullOrEmpty( instrAddress.Device ) ? "empty" : instrAddress.Device)} for {address} " );
         }
 
         [TestMethod]

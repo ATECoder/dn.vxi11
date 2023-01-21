@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
+using cc.isr.VXI11.Logging;
 namespace cc.isr.VXI11.IEEE488.MSTest;
 
 /// <summary>   (Unit Test Class) an ieee 488 client tests. </summary>
@@ -18,13 +19,12 @@ public class Ieee488ClientTests
     {
         try
         {
-            Console.WriteLine( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
+            Logger.Writer.LogInformation( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             _classTestContext = context;
-            Console.WriteLine( @$"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} starting {_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
         }
         catch ( Exception ex )
         {
-            Console.WriteLine( $"Failed initializing fixture: \n{ex} " );
+            Logger.Writer.LogMemberError( $"Failed initializing fixture:", ex );
             CleanupFixture();
         }
     }

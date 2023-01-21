@@ -4,6 +4,7 @@ using System.Reflection;
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.Visa;
+using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.IEEE488;
 
@@ -171,7 +172,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         this._linkId++;
         result.DeviceLink = new DeviceLink() { Value = _linkId };
 
-        Logger.Writer.ConsoleWriteMessage( $"creating link to {linkInfo.Device}" );
+        Logger.Writer.LogVerbose( $"creating link to {linkInfo.Device}" );
 
         this.InterfaceDevice = new DeviceAddress( linkInfo.Device );
         result.ErrorCode = this.InterfaceDevice.IsValid()
@@ -312,7 +313,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     {
         // get the write command.
         string cmd = this.CharacterEncoding.GetString( deviceWriteParameters.GetData() );
-        Logger.Writer.ConsoleWriteMessage( $"link ID: {deviceWriteParameters.Link.Value} -> Received：{cmd}" );
+        Logger.Writer.LogVerbose( $"link ID: {deviceWriteParameters.Link.Value} -> Received：{cmd}" );
         DeviceWriteResp result = new() { ErrorCode = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
 
         // holds one or more SCPI commands each with its arguments
@@ -329,7 +330,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         for ( int n = 0; n < scpiCommands.Length; n++ )
         {
             string spciCommand = scpiCommands[n]; // select a complete SCPI command with optional arguments
-            Logger.Writer.ConsoleWriteMessage( $"Process the instruction： {spciCommand}" );
+            Logger.Writer.LogVerbose( $"Process the instruction： {spciCommand}" );
             string[] scpiArgs = Array.Empty<string>(); // Holds the SCPI command arguments
 
             // split the command to the core command and its arguments:
@@ -365,7 +366,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                     switch ( scpiAtt.OperationType )
                     {
                         case Ieee488OperationType.None:
-                            Logger.Writer.ConsoleWriteMessage( $"The attribute of method {method} is marked incorrectly as {scpiAtt.OperationType}。", ConsoleColor.Red );
+                            Logger.Writer.LogMemberWarning( $"The attribute of method {method} is marked incorrectly as {scpiAtt.OperationType}。" );
                             break;
                         case Ieee488OperationType.Write:
                             this.WriteMessage = scpiCommands[n];
@@ -380,12 +381,12 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                             {
                                 this.ReadMessage = res.ToString();
                                 this._readBuffer = this.CharacterEncoding.GetBytes( res.ToString()! );
-                                Logger.Writer.ConsoleWriteMessage( $"Query results： {res}。" );
+                                Logger.Writer.LogVerbose( $"Query results： {res}。" );
                             }
                             else
                             {
                                 this.ReadMessage = "null";
-                                Logger.Writer.ConsoleWriteMessage( "Query results：NULL。" );
+                                Logger.Writer.LogVerbose( "Query results：NULL。" );
                                 result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.NoError );
                             }
                             break;
@@ -393,14 +394,14 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
                 }
                 catch ( Exception ex )
                 {
-                    Logger.Writer.ConsoleWriteException( $"An error occurred when the method was called：{method}", ex );
+                    Logger.Writer.LogMemberError( $"An error occurred when the method was called：{method}", ex );
                     // Parameter error
                     result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.ParameterError );
                 }
             }
             else
             {
-                Logger.Writer.ConsoleWriteMessage( $"No method found： {spciCommand}", ConsoleColor.DarkYellow );
+                Logger.Writer.LogMemberWarning( $"No method found： {spciCommand}" );
                 result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError ); // The instruction is incorrect or undefined
                 this.CurrentOperationType = Ieee488OperationType.None;
             }
@@ -422,40 +423,40 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
 
         OncRpcEmbeddedPortmapService epm;
 
-        Logger.Writer.ConsoleWriteMessage( "Checking for portmap service: " );
+        Logger.Writer.LogVerbose( "Checking for portmap service: " );
         bool externalPortmap = OncRpcEmbeddedPortmapService.IsPortmapRunning();
         if ( externalPortmap )
-            Logger.Writer.ConsoleWriteMessage( "A portmap service is already running." );
+            Logger.Writer.LogVerbose( "A portmap service is already running." );
         else
-            Logger.Writer.ConsoleWriteMessage( "No portmap service available." );
+            Logger.Writer.LogVerbose( "No portmap service available." );
 
         // Create embedded portmap service and check whether is has sprung into action.
 
-        Logger.Writer.ConsoleWriteMessage( "Creating embedded portmap instance: " );
+        Logger.Writer.LogVerbose( "Creating embedded portmap instance: " );
         try
         {
             epm = new OncRpcEmbeddedPortmapService();
 
             if ( !epm.EmbeddedPortmapInUse() )
-                Logger.Writer.ConsoleWriteMessage( "embedded service not used: " );
+                Logger.Writer.LogVerbose( "embedded service not used: " );
             else
-                Logger.Writer.ConsoleWriteMessage( "embedded service started: " );
+                Logger.Writer.LogVerbose( "embedded service started: " );
             if ( epm.EmbeddedPortmapInUse() == externalPortmap )
             {
-                Logger.Writer.ConsoleWriteMessage( "ERROR: no service available or both." );
+                Logger.Writer.LogMemberWarning( "ERROR: no service available or both." );
                 return;
             }
         }
         catch ( IOException e )
         {
-            Logger.Writer.ConsoleWriteException( "ERROR: failed:", e );
+            Logger.Writer.LogMemberError( "failed establishing Portmap service:", e );
         }
         catch ( DeviceException e )
         {
-            Logger.Writer.ConsoleWriteException( "ERROR: failed:", e );
+            Logger.Writer.LogMemberError( "failed establishing Portmap service:", e );
         }
         externalPortmap = OncRpcEmbeddedPortmapService.IsPortmapRunning();
-        Logger.Writer.ConsoleWriteMessage( $"Port map service is {(externalPortmap ? "running" : "idle")}." );
+        Logger.Writer.LogVerbose( $"Port map service is {(externalPortmap ? "running" : "idle")}." );
     }
 
     #endregion

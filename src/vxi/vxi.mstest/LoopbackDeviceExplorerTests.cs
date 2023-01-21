@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-
+using cc.isr.VXI11.Logging;
 using cc.isr.ONC.RPC;
 using cc.isr.ONC.RPC.Portmap;
 
@@ -21,17 +21,16 @@ public class LoopbackDeviceExplorerTests
     {
         try
         {
-            Console.WriteLine( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name} Tester" );
+            Logger.Writer.LogInformation( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name} Tester" );
             _classTestContext = context;
-            Console.WriteLine( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name} Tester" );
-            Console.WriteLine( $"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} starting the embedded portmap service" );
+            Logger.Writer.LogInformation( $"starting the embedded portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
-            Console.WriteLine( $"{nameof( OncRpcEmbeddedPortmapService )} started in {sw.ElapsedMilliseconds:0} ms" );
+            Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapService )} started in {sw.ElapsedMilliseconds:0} ms" );
         }
         catch ( Exception ex )
         {
-            Console.WriteLine( $"Failed initializing fixture: \n{ex} " );
+            Logger.Writer.LogMemberError( $"Failed initializing fixture:", ex );
             CleanupFixture();
         }
     }
@@ -72,11 +71,11 @@ public class LoopbackDeviceExplorerTests
     [TestMethod]
     public void PortmapServiceShouldPing()
     {
-        Console.WriteLine( $"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} pinging Portmap service: " );
+        Logger.Writer.LogInformation( $"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} pinging Portmap service: " );
         Stopwatch sw = Stopwatch.StartNew();
         IPAddress host = IPAddress.Loopback;
         Assert.IsTrue( DeviceExplorer.PortmapPingHost( host, 1000 ), $"port map at {IPAddress.Loopback} should reply to a ping" );
-        Console.WriteLine( $"Portmap service pinged {host} in {sw.ElapsedMilliseconds:0} ms." );
+        Logger.Writer.LogInformation( $"Portmap service pinged {host} in {sw.ElapsedMilliseconds:0} ms." );
     }
 
     #endregion

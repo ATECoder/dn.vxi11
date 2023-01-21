@@ -1,5 +1,6 @@
 using System.Net;
 
+using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.IEEE488;
@@ -202,7 +203,7 @@ public class Ieee488Client : IDisposable
             // uncomment the following line if Finalize() is overridden above.
             GC.SuppressFinalize( this );
         }
-        catch ( Exception ex ) { Console.WriteLine( ex.ToString() ); }
+        catch ( Exception ex ) { Logger.Writer.LogMemberError("Exception disposing", ex ); }
         finally
         {
         }

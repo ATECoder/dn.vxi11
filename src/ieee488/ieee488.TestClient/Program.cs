@@ -2,8 +2,7 @@
 
 Console.WriteLine( "VXI-11 Test!" );
 
-string ipv4Address = "127.0.0.1";
-ipv4Address = "192.168.0.144";
+string ipv4Address = "192.168.0.144"; // "127.0.0.1";
 
 bool ready = false;
 while ( !ready )
@@ -51,7 +50,7 @@ else
     SendCommand( command );
 
     Console.WriteLine( $"closing {ipv4Address}" );
-    ieee488Client.Close();
+    _ = ieee488Client.Close();
 
 }
 
@@ -61,7 +60,7 @@ Console.ReadKey();
 void SendCommand( string command )
 {
     Console.WriteLine( $"Hit any key to send {command} to {ipv4Address}" );
-    Console.ReadKey();
+    _ = Console.ReadKey();
     (bool success, string response) = ieee488Client.Query( $"{command}\n", 0 );
     if ( success )
         Console.WriteLine( $"{command} sent{(string.IsNullOrEmpty( response ) ? string.Empty : $"; received: {response}")}" );
