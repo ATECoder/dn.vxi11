@@ -13,8 +13,9 @@ public class Ieee488ServerTests
     {
         try
         {
-            Logger.Writer.LogInformation( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name} Tester" );
             _classTestContext = context;
+            Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
+
             _device = new( Ieee488ServerTests._identity );
             _server = new( _device ) {
                 Listening = false
@@ -64,10 +65,10 @@ public class Ieee488ServerTests
     private static Ieee488Server? _server;
     private static Ieee488Device? _device;
 
-    private static void OnServerPropertyChanged( object? sender, PropertyChangedEventArgs args )
+    private static void OnServerPropertyChanged( object? sender, PropertyChangedEventArgs e )
     {
         if ( _server is null ) { return; }
-        switch ( args.PropertyName )
+        switch ( e.PropertyName )
         {
             case nameof( Ieee488Server.ReadMessage ):
                 Logger.Writer.LogInformation( _server.ReadMessage );
@@ -76,13 +77,13 @@ public class Ieee488ServerTests
                 Logger.Writer.LogInformation( _server.WriteMessage );
                 break;
             case nameof( Ieee488Server.PortNumber ):
-                Logger.Writer.LogInformation( $"{args.PropertyName} set to {_server?.PortNumber}" );
+                Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.PortNumber}" );
                 break;
             case nameof( Ieee488Server.IPv4Address ):
-                Logger.Writer.LogInformation( $"{args.PropertyName} set to {_server?.IPv4Address}" );
+                Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.IPv4Address}" );
                 break;
             case nameof( Ieee488Server.Listening ):
-                Logger.Writer.LogInformation( $"{args.PropertyName} set to {_server?.Listening}" );
+                Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.Listening}" );
                 break;
         }
     }

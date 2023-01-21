@@ -113,7 +113,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     #region " IEEE488 properties "
 
     /// <summary>
-    /// Gets or sets the encoding to use when serializing strings. If <see langword="null" />, the
+    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
     /// system's default encoding is to be used.
     /// </summary>
     /// <value> The character encoding. </value>

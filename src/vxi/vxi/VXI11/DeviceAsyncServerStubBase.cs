@@ -62,9 +62,9 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
             {
                 case ( int ) Vxi11Message.DeviceAbortProcedure:
                     {
-                        DeviceLink args = new();
-                        call.RetrieveCall( args );
-                        DeviceError result = this.DeviceAbort( args );
+                        DeviceLink link = new();
+                        call.RetrieveCall( link );
+                        DeviceError result = this.DeviceAbort( link );
                         call.Reply( result );
                         break;
                     }
@@ -83,8 +83,8 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     /// 
     /// Renamed from <c>device_abort_1</c> </para>. </remarks>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLink"/>) to the remote procedure call.. </param>
+    /// <param name="link"> The request of type <see cref="Codecs.DeviceLink"/> to send to the remote procedure call.. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceAbort( DeviceLink arg1 );
+    public abstract DeviceError DeviceAbort( DeviceLink link );
 
 }

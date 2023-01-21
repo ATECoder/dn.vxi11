@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
 
 namespace cc.isr.VXI11.IEEE488.EnumExtensions;

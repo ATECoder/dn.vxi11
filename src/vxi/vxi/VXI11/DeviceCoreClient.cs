@@ -1,5 +1,4 @@
 using System.Net;
-using System.Threading;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
@@ -737,9 +736,9 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// </returns>
     public DeviceError DestroyIntrChan()
     {
-        VoidXdrCodec args = VoidXdrCodec.VoidXdrCodecInstance;
+        VoidXdrCodec request = VoidXdrCodec.VoidXdrCodecInstance;
         DeviceError result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DestroyInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, args, result );
+        this.Client?.Call( ( int ) Vxi11Message.DestroyInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
     }
 

@@ -18,8 +18,8 @@ public class SupportTests
     {
         try
         {
-            Logger.Writer.LogInformation( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             _classTestContext = context;
+            Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
         }
         catch ( Exception ex )
         {
@@ -58,7 +58,7 @@ public class SupportTests
         AssertShouldGetDescription( Ieee488OperationType.Read, "Read reply from the device." );
     }
 
-    /// <summary>   Assert <see langword="int"/> should cast to <see cref="Ieee488OperationType"/>. </summary>
+    /// <summary>   Assert <see cref="int"/> should cast to <see cref="Ieee488OperationType"/>. </summary>
     /// <param name="expected"> The expected value. </param>
     private static void AssertIntShouldCastToIeee488OperationType( int expected )
     {
@@ -66,7 +66,7 @@ public class SupportTests
         Assert.AreEqual( expected, ( int ) actual );
     }
 
-    /// <summary>   (Unit Test Method) <see langword="int"/> should cast to <see cref="Ieee488OperationType"/>. </summary>
+    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="Ieee488OperationType"/>. </summary>
     [TestMethod]
     public void IntShouldCastToIeee488OperationType()
     {
@@ -81,7 +81,7 @@ public class SupportTests
         _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToIeee488OperationType( maxValue + 1 ); } );
     }
 
-    /// <summary>   Assert <see langword="int"/> should cast to <see cref="Ieee488InterfaceCommand"/>. </summary>
+    /// <summary>   Assert <see cref="int"/> should cast to <see cref="Ieee488InterfaceCommand"/>. </summary>
     /// <param name="expected"> The expected value. </param>
     private static void AssertIntShouldCastToIeee488InterfaceCommand( int expected )
     {
@@ -89,7 +89,7 @@ public class SupportTests
         Assert.AreEqual( expected, ( int ) actual );
     }
 
-    /// <summary>   (Unit Test Method) <see langword="int"/> should cast to <see cref="Ieee488InterfaceCommand"/>. </summary>
+    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="Ieee488InterfaceCommand"/>. </summary>
     [TestMethod]
     public void IntShouldCastToIeee488InterfaceCommand()
     {
@@ -104,7 +104,7 @@ public class SupportTests
         _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToIeee488InterfaceCommand( maxValue + 1 ); } );
     }
 
-    /// <summary>   Assert <see langword="int"/> should cast to <see cref="Ieee488InterfaceCommandOption"/>. </summary>
+    /// <summary>   Assert <see cref="int"/> should cast to <see cref="Ieee488InterfaceCommandOption"/>. </summary>
     /// <param name="expected"> The expected value. </param>
     private static void AssertIntShouldCastToIeee488InterfaceCommandOption( int expected )
     {
@@ -112,7 +112,7 @@ public class SupportTests
         Assert.AreEqual( expected, ( int ) actual );
     }
 
-    /// <summary>   (Unit Test Method) <see langword="int"/> should cast to <see cref="Ieee488InterfaceCommandOption"/>. </summary>
+    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="Ieee488InterfaceCommandOption"/>. </summary>
     [TestMethod]
     public void IntShouldCastToIeee488InterfaceCommandOption()
     {
@@ -127,7 +127,7 @@ public class SupportTests
         _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToIeee488InterfaceCommandOption( maxValue + 1 ); } );
     }
 
-    /// <summary>   Assert <see langword="int"/> should cast to <see cref="GpibCommandArgument"/>. </summary>
+    /// <summary>   Assert <see cref="int"/> should cast to <see cref="GpibCommandArgument"/>. </summary>
     /// <param name="expected"> The expected value. </param>
     private static void AssertIntShouldCastToGpibCommandArgument( int expected )
     {
@@ -135,7 +135,7 @@ public class SupportTests
         Assert.AreEqual( expected, ( int ) actual );
     }
 
-    /// <summary>   (Unit Test Method) <see langword="int"/> should cast to <see cref="GpibCommandArgument"/>. </summary>
+    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="GpibCommandArgument"/>. </summary>
     [TestMethod]
     public void IntShouldCastToGpibCommandArgument()
     {

@@ -64,113 +64,113 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
             {
                 case Vxi11Message.CreateLinkProcedure:
                     {
-                        CreateLinkParms args = new();
-                        call.RetrieveCall( args );
-                        CreateLinkResp result = this.CreateLink( args );
+                        CreateLinkParms request = new();
+                        call.RetrieveCall( request );
+                        CreateLinkResp result = this.CreateLink( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceWriteProcedure:
                     {
-                        DeviceWriteParms args = new();
-                        call.RetrieveCall( args );
-                        DeviceWriteResp result = this.DeviceWrite( args );
+                        DeviceWriteParms request = new();
+                        call.RetrieveCall( request );
+                        DeviceWriteResp result = this.DeviceWrite( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceReadProcedure:
                     {
-                        DeviceReadParms args = new();
-                        call.RetrieveCall( args );
-                        DeviceReadResp result = this.DeviceRead( args );
+                        DeviceReadParms request = new();
+                        call.RetrieveCall( request );
+                        DeviceReadResp result = this.DeviceRead( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceReadStbProcedure:
                     {
-                        DeviceGenericParms args = new();
-                        call.RetrieveCall( args );
-                        DeviceReadStbResp result = this.DeviceReadStb( args );
+                        DeviceGenericParms request = new();
+                        call.RetrieveCall( request );
+                        DeviceReadStbResp result = this.DeviceReadStb( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceTriggerProcedure:
                     {
-                        DeviceGenericParms args = new();
-                        call.RetrieveCall( args );
-                        DeviceError result = this.DeviceTrigger( args );
+                        DeviceGenericParms request = new();
+                        call.RetrieveCall( request );
+                        DeviceError result = this.DeviceTrigger( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceClearProcedure:
                     {
-                        DeviceGenericParms args = new();
-                        call.RetrieveCall( args );
-                        DeviceError result = this.DeviceClear( args );
+                        DeviceGenericParms request = new();
+                        call.RetrieveCall( request );
+                        DeviceError result = this.DeviceClear( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceRemoteProcedure:
                     {
-                        DeviceGenericParms args = new();
-                        call.RetrieveCall( args );
-                        DeviceError result = this.DeviceRemote( args );
+                        DeviceGenericParms request = new();
+                        call.RetrieveCall( request );
+                        DeviceError result = this.DeviceRemote( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceLocalProcedure:
                     {
-                        DeviceGenericParms args = new();
-                        call.RetrieveCall( args );
-                        DeviceError result = this.DeviceLocal( args );
+                        DeviceGenericParms request = new();
+                        call.RetrieveCall( request );
+                        DeviceError result = this.DeviceLocal( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceLockProcedure:
                     {
-                        DeviceLockParms args = new();
-                        call.RetrieveCall( args );
-                        DeviceError result = this.DeviceLock( args );
+                        DeviceLockParms request = new();
+                        call.RetrieveCall( request );
+                        DeviceError result = this.DeviceLock( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceUnlockProcedure:
                     {
-                        DeviceLink args = new();
-                        call.RetrieveCall( args );
-                        DeviceError result = this.DeviceUnlock( args );
+                        DeviceLink request = new();
+                        call.RetrieveCall( request );
+                        DeviceError result = this.DeviceUnlock( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceEnableSrqProcedure:
                     {
-                        DeviceEnableSrqParms args = new();
-                        call.RetrieveCall( args );
-                        DeviceError result = this.DeviceEnableSrq( args );
+                        DeviceEnableSrqParms request = new();
+                        call.RetrieveCall( request );
+                        DeviceError result = this.DeviceEnableSrq( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DeviceDoCommandProcedure:
                     {
-                        DeviceDoCmdParms args = new();
-                        call.RetrieveCall( args );
-                        DeviceDoCmdResp result = this.DeviceDoCmd( args );
+                        DeviceDoCmdParms request = new();
+                        call.RetrieveCall( request );
+                        DeviceDoCmdResp result = this.DeviceDoCmd( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DestroyLinkProcedure:
                     {
-                        DeviceLink args = new();
-                        call.RetrieveCall( args );
-                        DeviceError result = this.DestroyLink( args );
+                        DeviceLink request = new();
+                        call.RetrieveCall( request );
+                        DeviceError result = this.DestroyLink( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.CreateInterruptChannelProcedure:
                     {
-                        DeviceRemoteFunc args = new();
-                        call.RetrieveCall( args );
-                        DeviceError result = this.CreateIntrChan( args );
+                        DeviceRemoteFunc request = new();
+                        call.RetrieveCall( request );
+                        DeviceError result = this.CreateIntrChan( request );
                         call.Reply( result );
                         break;
                     }

@@ -1,7 +1,3 @@
-using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets;
-
 using cc.isr.VXI11.Logging;
 namespace cc.isr.VXI11.IEEE488.MSTest;
 
@@ -19,8 +15,8 @@ public class Ieee488ClientTests
     {
         try
         {
-            Logger.Writer.LogInformation( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             _classTestContext = context;
+            Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
         }
         catch ( Exception ex )
         {

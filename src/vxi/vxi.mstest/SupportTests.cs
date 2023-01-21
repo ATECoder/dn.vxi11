@@ -18,8 +18,8 @@ public class SupportTests
     {
         try
         {
-            Logger.Writer.LogInformation( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             _classTestContext = context;
+            Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
         }
         catch ( Exception ex )
         {
@@ -86,7 +86,7 @@ public class SupportTests
         AssertShouldGetDescription( DeviceErrorCodeValue.NoError, "No error." );
     }
 
-    /// <summary>   Assert <see langword="int"/> should cast to <see cref="DeviceErrorCodeValue"/>. </summary>
+    /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceErrorCodeValue"/>. </summary>
     /// <param name="expected"> The expected value. </param>
     private static void AssertIntShouldCastToDeviceErrorCodeValue( int expected )
     {
@@ -94,7 +94,7 @@ public class SupportTests
         Assert.AreEqual( expected, ( int ) actual );
     }
 
-    /// <summary>   (Unit Test Method) <see langword="int"/> should cast to <see cref="DeviceErrorCodeValue"/>. </summary>
+    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="DeviceErrorCodeValue"/>. </summary>
     [TestMethod]
     public void IntShouldCastToDeviceErrorCodeValue()
     {
@@ -109,7 +109,7 @@ public class SupportTests
         _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceErrorCodeValue( maxValue + 1 ); } );
     }
 
-    /// <summary>   Assert <see langword="int"/> should cast to <see cref="DeviceAddrFamily"/>. </summary>
+    /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceAddrFamily"/>. </summary>
     /// <param name="expected"> The expected value. </param>
     private static void AssertIntShouldCastToDeviceAddrFamily( int expected )
     {
@@ -117,7 +117,7 @@ public class SupportTests
         Assert.AreEqual( expected, ( int ) actual );
     }
 
-    /// <summary>   (Unit Test Method) <see langword="int"/> should cast to <see cref="DeviceAddrFamily"/>. </summary>
+    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="DeviceAddrFamily"/>. </summary>
     [TestMethod]
     public void IntShouldCastToDeviceAddrFamily()
     {
@@ -132,7 +132,7 @@ public class SupportTests
         _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceAddrFamily( maxValue + 1 ); } );
     }
 
-    /// <summary>   Assert <see langword="int"/> should cast to <see cref="DeviceOperationFlags"/>. </summary>
+    /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceOperationFlags"/>. </summary>
     /// <param name="expected"> The expected value. </param>
     private static void AssertIntShouldCastToDeviceOperationFlags( int expected )
     {
@@ -140,7 +140,7 @@ public class SupportTests
         Assert.AreEqual( expected, ( int ) actual );
     }
 
-    /// <summary>   (Unit Test Method) <see langword="int"/> should cast to <see cref="DeviceOperationFlags"/>. </summary>
+    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="DeviceOperationFlags"/>. </summary>
     [TestMethod]
     public void IntShouldCastToDeviceOperationFlags()
     {
@@ -156,7 +156,7 @@ public class SupportTests
         _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceOperationFlags( oredValue + 1 ); } );
     }
 
-    /// <summary>   Assert <see langword="int"/> should cast to <see cref="DeviceReadReasons"/>. </summary>
+    /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceReadReasons"/>. </summary>
     /// <param name="expected"> The expected value. </param>
     private static void AssertIntShouldCastToDeviceReadReasons( int expected )
     {
@@ -164,7 +164,7 @@ public class SupportTests
         Assert.AreEqual( expected, ( int ) actual );
     }
 
-    /// <summary>   (Unit Test Method) <see langword="int"/> should cast to <see cref="DeviceReadReasons"/>. </summary>
+    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="DeviceReadReasons"/>. </summary>
     [TestMethod]
     public void IntShouldCastToDeviceReadReasons()
     {

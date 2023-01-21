@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using cc.isr.VXI11.Logging;
-using cc.isr.ONC.RPC;
 using cc.isr.ONC.RPC.Portmap;
 
 namespace cc.isr.VXI11.MSTest;
@@ -21,8 +20,9 @@ public class LoopbackDeviceExplorerTests
     {
         try
         {
-            Logger.Writer.LogInformation( $"{context.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name} Tester" );
             _classTestContext = context;
+            Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
+
             Logger.Writer.LogInformation( $"starting the embedded portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();

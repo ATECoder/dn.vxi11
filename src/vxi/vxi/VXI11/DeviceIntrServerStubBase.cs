@@ -62,9 +62,9 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
             {
                 case Vxi11Message.DeviceInterruptSrqProcedure:
                     {
-                        DeviceSrqParms args = new();
-                        call.RetrieveCall( args );
-                        this.DeviceIntrSrq( args );
+                        DeviceSrqParms request = new();
+                        call.RetrieveCall( request );
+                        this.DeviceIntrSrq( request );
                         call.Reply( VoidXdrCodec.VoidXdrCodecInstance );
                         break;
                     }

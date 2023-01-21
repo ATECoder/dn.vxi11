@@ -97,7 +97,7 @@ public partial class Ieee488Server : INotifyPropertyChanged
     /// <remarks>
     /// The <see cref="PropertyChanged"/> event is not raised if the current and new value for the target property are the same.
     /// </remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="model"/> or <paramref name="callback"/> are <see langword="null"/>.</exception>
+    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="model"/> or <paramref name="callback"/> are (<see langword="null"/>).</exception>
     protected bool SetProperty<TModel, T>( T oldValue, T newValue, TModel model, Action<TModel, T> callback, [CallerMemberName] string? propertyName = null )
         where TModel : class
     {
