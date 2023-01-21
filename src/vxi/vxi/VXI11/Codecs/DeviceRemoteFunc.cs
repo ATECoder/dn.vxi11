@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -56,14 +58,14 @@ public class DeviceRemoteFunc : IXdrCodec
     /// <value> The program version. </value>
     public int ProgVers { get; set; }
 
-    /// <summary>   Gets or sets the <see cref="DeviceAddrFamily"/> program family . </summary>
+    /// <summary>   Gets or sets the <see cref="DeviceAddrFamily"/> program family. </summary>
     /// <remarks>
     /// Using UDP for the interrupt channel generally provides higher performance, but with the risks
     /// that some <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPCs might not
     /// arrive at all or that they might arrive out of order.
     /// </remarks>
     /// <value> The <see cref="DeviceAddrFamily"/> program family. </value>
-    public int ProgFamily { get; set; }
+    public DeviceAddrFamily ProgFamily { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
@@ -75,7 +77,7 @@ public class DeviceRemoteFunc : IXdrCodec
         this.HostPort.Encode( encoder );
         this.ProgNum.Encode( encoder );
         this.ProgVers.Encode( encoder );
-        this.ProgFamily.Encode( encoder );
+        (( int ) this.ProgFamily).Encode( encoder );
     }
 
     /// <summary>
@@ -88,7 +90,7 @@ public class DeviceRemoteFunc : IXdrCodec
         this.HostPort = decoder.DecodeInt();
         this.ProgNum = decoder.DecodeInt();
         this.ProgVers = decoder.DecodeInt();
-        this.ProgFamily = decoder.DecodeInt();
+        this.ProgFamily = decoder.DecodeInt().ToDeviceAddrFamily();
     }
 
 }

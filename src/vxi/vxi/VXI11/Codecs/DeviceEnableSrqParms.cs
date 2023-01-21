@@ -49,9 +49,13 @@ public class DeviceEnableSrqParms : IXdrCodec
     /// <value> True if enable, false if not. </value>
     public bool Enable { get; set; }
 
-    /// <summary>   Gets or sets the handle. Host specific data. </summary>
+    /// <summary>   Gets or sets the handle. Host specific data for handling the service request. </summary>
     /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParms.GetHandle()"/> 
-    /// when a service request occurs. </remarks>
+    /// when a service request occurs. <para>
+    /// The network instrument client should send in the handle parameter a unique link identifier. This will
+    /// allow the network instrument client to identify the link associated with subsequent 
+    /// <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPCs. </para>
+    /// </remarks>
     /// <value> The handle. </value>
     private byte[] _handle;
 

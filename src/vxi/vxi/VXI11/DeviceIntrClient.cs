@@ -77,19 +77,38 @@ public class DeviceIntrClient : OncRpcClientStubBase
     {
     }
 
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// 
+    /// Renamed from <c>device_intr_srq_1</c> </para>.
+    /// </remarks>
+    /// <param name="handle">   The handle as it was received from the Core device. </param>
+    public void DeviceIntrSrq( byte[] handle )
+    {
+        DeviceSrqParms request = new() {
+        };
+        request.SetHandle( handle );
+        this.DeviceIntrSrq( request );
+    }
 
     /// <summary>
     /// Calls remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
     /// </summary>
-    /// <remarks>   <para>
+    /// <remarks>
+    /// <para>
     /// 
-    /// Renamed from <c>device_intr_srq_1</c> </para>. </remarks>
+    /// Renamed from <c>device_intr_srq_1</c> </para>.
+    /// </remarks>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceSrqParms"/>) to the remote procedure call.. </param>
-    public void DeviceIntrSrq( DeviceSrqParms arg1 )
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceSrqParms"/> to send to
+    ///                         the remote procedure call. </param>
+    public void DeviceIntrSrq( DeviceSrqParms request )
     {
         VoidXdrCodec result = VoidXdrCodec.VoidXdrCodecInstance;
-        this.Client?.Call( ( int ) Vxi11Message.DeviceInterruptSrqProcedure, Vxi11ProgramConstants.DeviceInterruptVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceInterruptSrqProcedure, Vxi11ProgramConstants.DeviceInterruptVersion, request, result );
     }
 
 }

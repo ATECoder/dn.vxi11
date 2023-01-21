@@ -91,8 +91,8 @@ public class DeviceDoCmdParms : IXdrCodec
     /// is defined by the Internet Protocol Suite.
     /// </summary>
     /// <value>
-    /// True (set) if the architecture of the network instrument client specifies byte-ordering in
-    /// network order( big-endian), false if not.
+    /// <see langword="true"/> (set) if the architecture of the network instrument client specifies byte-ordering in
+    /// network order (big-endian), false if not.
     /// </value>
     public bool NetworkOrder { get; set; }
 

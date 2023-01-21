@@ -87,11 +87,11 @@ public class DeviceWriteParms : IXdrCodec
 
     private byte[] _data;
 
-    /// <summary>   Gets the data. </summary>
+    /// <summary>   Gets the data to send. </summary>
     /// <returns>   An array of byte. </returns>
     public byte[] GetData() { return this._data; }
 
-    /// <summary>   Sets a data. </summary>
+    /// <summary>   Sets a data to send. </summary>
     /// <remarks>
     /// Associate an END message (?EOI) with the last byte in data when the end flag in <see cref="Flags"/>
     /// is set. 

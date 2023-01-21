@@ -97,7 +97,7 @@ public static class Vxi11EnumExtensions
     /// <returns>   Value as the DeviceReadReasons. </returns>
     public static DeviceReadReasons ToDeviceReadReasons( this int value )
     {
-        return Enum.IsDefined( typeof( DeviceReadReasons ), value ) || ( ( value & DeviceReasonsAll() ) == value)
+        return Enum.IsDefined( typeof( DeviceReadReasons ), value ) || ((value & DeviceReasonsAll()) == value)
             ? ( DeviceReadReasons ) value
             : throw new ArgumentException( $"{typeof( int )} value of {value} cannot be cast to {nameof( DeviceReadReasons )}" );
     }

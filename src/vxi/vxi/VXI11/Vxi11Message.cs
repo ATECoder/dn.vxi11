@@ -115,6 +115,8 @@ internal enum Vxi11Message
     DestroyLinkProcedure = 23,
 
     /// <summary>  Core channel: device creates interrupt channel. <para>
+    /// Establishes an interrupt channel to an RPC mechanism at a specified host address and host port
+    /// whose program number version are specified using the underlying protocol specified. </para><para>
     /// 
     /// Renamed from <c>create_intr_chan_1 = 25</c>. </para> </summary>
     [Description( "Core channel: device creates interrupt channel." )]

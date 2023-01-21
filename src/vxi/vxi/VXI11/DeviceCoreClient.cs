@@ -1,4 +1,5 @@
 using System.Net;
+using System.Threading;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
@@ -104,6 +105,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// device.
     /// </summary>
     /// <remarks>   Renamed from <c>create_link_1</c> </remarks>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <param name="clientId">                 Identifier for the client. </param>
     /// <param name="lockDevice">               True to lock, false to unlock the device. </param>
     /// <param name="lockTimeout">              The lock timeout. </param>
@@ -126,6 +128,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.CreateLinkProcedure"/>; Opens a link
     /// to a device.
     /// </summary>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <remarks> Renamed from <c>create_link_1</c> </remarks>
     /// <param name="request"> The request of type <see cref="Codecs.CreateLinkParms"/> to
     ///                        send using the remote procedure call. </param>
@@ -139,28 +142,91 @@ public class DeviceCoreClient : OncRpcClientStubBase
         return reply;
     }
 
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceWriteProcedure"/>;
+    /// Device receives a message.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_write_1</c> </remarks>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
+    /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
+    ///                             server will wait for a lock to be released. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="data">         The data to send. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceWriteResp"/>.
+    /// </returns>
+    public DeviceWriteResp DeviceWrite( DeviceLink link, int ioTimeout, int lockTimeout, DeviceFlags flags, byte[] data )
+    {
+        DeviceWriteParms request = new() {
+            Link = link,
+            IOTimeout = ioTimeout,
+            LockTimeout = lockTimeout,
+            Flags = flags
+        };
+        request.SetData( data );
+        return DeviceWrite( request );
+    }
+
     /// <summary>  
     /// Calls remote procedure <see cref="Vxi11Message.DeviceWriteProcedure"/>; 
     /// Device receives a message. </summary>
     /// <remarks> Renamed from <c>device_write_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceWriteParms"/>) to the remote procedure call.. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="request"> The request of type <see cref="Codecs.DeviceWriteParms"/> to send using the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceWriteResp"/>. </returns>
-    public DeviceWriteResp DeviceWrite( DeviceWriteParms arg1 )
+    public DeviceWriteResp DeviceWrite( DeviceWriteParms request )
     {
         DeviceWriteResp result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceWriteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceWriteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceReadProcedure"/>;
+    /// Device returns a result.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_read_1</c> </remarks>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="requestSize">  Size of the request in number of bytes. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="termChar">     The termination character; valid if flags <see cref="DeviceOperationFlags.TerminationCharacterSet"/>
+    ///                             is set. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceReadResp"/>.
+    /// </returns>
+    public DeviceReadResp DeviceRead( DeviceLink link, int requestSize, int ioTimeout, int lockTimeout, DeviceFlags flags, byte termChar )
+    {
+        DeviceReadParms request = new() {
+            Link = link,
+            RequestSize = requestSize,
+            IOTimeout = ioTimeout,
+            LockTimeout = lockTimeout,
+            Flags = flags,
+            TermChar = termChar
+        };
+        return this.DeviceRead( request );
     }
 
     /// <summary> Calls remote procedure <see cref="Vxi11Message.DeviceReadProcedure"/>;
     /// Device returns a result. </summary>
     /// <remarks> Renamed from <c>device_read_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceReadParms"/>) to the remote procedure call.. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="request"> The request of type <see cref="Codecs.DeviceReadParms"/> to send to the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceReadResp"/>. </returns>
-    public DeviceReadResp DeviceRead( DeviceReadParms arg1 )
+    public DeviceReadResp DeviceRead( DeviceReadParms request )
     {
         DeviceReadResp result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceReadProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceReadProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
     }
 
@@ -169,20 +235,25 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// return its status byte encapsulated in the <see cref="DeviceReadStbResp"/> codec.
     /// </summary>
     /// <remarks>   Renamed from <c>device_readstb_1</c> </remarks>
-    /// <param name="link">         The link. </param>
-    /// <param name="flags">        The flags. </param>
-    /// <param name="lockTimeout">  The lock timeout. </param>
-    /// <param name="IOTimeout">    The i/o timeout. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
+    ///                             server will wait for a lock to be released. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceReadStbResp"/>.
     /// </returns>
-    public DeviceReadStbResp DeviceReadStb( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int IOTimeout )
+    public DeviceReadStbResp DeviceReadStb( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout )
     {
         DeviceGenericParms request = new() {
             Link = link,
             Flags = new DeviceFlags( flags ),
             LockTimeout = lockTimeout,
-            IOTimeout = IOTimeout
+            IOTimeout = ioTimeout
         };
         return DeviceReadStb( request );
     }
@@ -192,6 +263,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// return its status byte encapsulated in the <see cref="DeviceReadStbResp"/> codec.
     /// </summary>
     /// <remarks>   Renamed from <c>device_readstb_1</c> </remarks>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
     ///                         with the remote procedure call. </param>
     /// <returns>
@@ -209,22 +281,27 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device executes a trigger.
     /// </summary>
     /// <remarks>   Renamed from <c>device_trigger_1</c> </remarks>
-    /// <param name="link">         The link. </param>
-    /// <param name="flags">        The flags. </param>
-    /// <param name="lockTimeout">  The lock timeout. </param>
-    /// <param name="IOTimeout">    The i/o timeout. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
+    ///                             server will wait for a lock to be released. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceTrigger( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int IOTimeout )
+    public DeviceError DeviceTrigger( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout )
     {
         DeviceGenericParms request = new() {
             Link = link,
             Flags = new DeviceFlags( flags ),
             LockTimeout = lockTimeout,
-            IOTimeout = IOTimeout
+            IOTimeout = ioTimeout
         };
-        return DeviceTrigger( request );
+        return this.DeviceTrigger( request );
     }
 
     /// <summary>
@@ -232,15 +309,16 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device executes a trigger.
     /// </summary>
     /// <remarks>   Renamed from <c>device_trigger_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the
-    ///                     remote procedure call. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
+    ///                         to  the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceTrigger( DeviceGenericParms arg1 )
+    public DeviceError DeviceTrigger( DeviceGenericParms request )
     {
         DeviceError result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceTriggerProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceTriggerProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
     }
 
@@ -249,20 +327,25 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device clears itself.
     /// </summary>
     /// <remarks>   Renamed from <c>device_clear_1</c> </remarks>
-    /// <param name="link">         The link. </param>
-    /// <param name="flags">        The flags. </param>
-    /// <param name="lockTimeout">  The lock timeout. </param>
-    /// <param name="IOTimeout">    The i/o timeout. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
+    ///                             server will wait for a lock to be released. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceClear( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int IOTimeout )
+    public DeviceError DeviceClear( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout )
     {
         DeviceGenericParms request = new() {
             Link = link,
             Flags = new DeviceFlags( flags ),
             LockTimeout = lockTimeout,
-            IOTimeout = IOTimeout
+            IOTimeout = ioTimeout
         };
         return DeviceClear( request );
     }
@@ -272,15 +355,16 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device clears itself.
     /// </summary>
     /// <remarks>   Renamed from <c>device_clear_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the
-    ///                     remote procedure call. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
+    ///                         to the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceClear( DeviceGenericParms arg1 )
+    public DeviceError DeviceClear( DeviceGenericParms request )
     {
         DeviceError result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceClearProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceClearProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
     }
 
@@ -289,20 +373,25 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device disables its front panel.
     /// </summary>
     /// <remarks>   Renamed from <c>device_remote_1</c> </remarks>
-    /// <param name="link">         The link. </param>
-    /// <param name="flags">        The flags. </param>
-    /// <param name="lockTimeout">  The lock timeout. </param>
-    /// <param name="IOTimeout">    The i/o timeout. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
+    ///                             server will wait for a lock to be released. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceRemote( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int IOTimeout )
+    public DeviceError DeviceRemote( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout )
     {
         DeviceGenericParms request = new() {
             Link = link,
             Flags = new DeviceFlags( flags ),
             LockTimeout = lockTimeout,
-            IOTimeout = IOTimeout
+            IOTimeout = ioTimeout
         };
         return DeviceRemote( request );
     }
@@ -312,15 +401,16 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device disables its front panel.
     /// </summary>
     /// <remarks>   Renamed from <c>device_remote_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the
-    ///                     remote procedure call. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
+    ///                         to the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceRemote( DeviceGenericParms arg1 )
+    public DeviceError DeviceRemote( DeviceGenericParms request )
     {
         DeviceError result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceRemoteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceRemoteProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
     }
 
@@ -329,20 +419,25 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device enables its front panel.
     /// </summary>
     /// <remarks>   Renamed from <c>device_local_1</c> </remarks>
-    /// <param name="link">         The link. </param>
-    /// <param name="flags">        The flags. </param>
-    /// <param name="lockTimeout">  The lock timeout. </param>
-    /// <param name="IOTimeout">    The i/o timeout. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
+    ///                             server will wait for a lock to be released. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceLocal( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int IOTimeout )
+    public DeviceError DeviceLocal( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout )
     {
         DeviceGenericParms request = new() {
             Link = link,
             Flags = new DeviceFlags( flags ),
             LockTimeout = lockTimeout,
-            IOTimeout = IOTimeout
+            IOTimeout = ioTimeout
         };
         return DeviceRemote( request );
     }
@@ -352,15 +447,17 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device enables its front panel.
     /// </summary>
     /// <remarks>   Renamed from <c>device_local_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the
-    ///                     remote procedure call. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
+    ///                         to the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceLocal( DeviceGenericParms arg1 )
+    ///
+    public DeviceError DeviceLocal( DeviceGenericParms request )
     {
         DeviceError result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceLocalProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceLocalProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
     }
 
@@ -369,15 +466,40 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device is locked.
     /// </summary>
     /// <remarks>   Renamed from <c>device_lock_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLockParms"/>) to the
-    ///                     remote procedure call. </param>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
+    ///                             server will wait for a lock to be released. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceLock( DeviceLockParms arg1 )
+    public DeviceError DeviceLock( DeviceLink link, DeviceOperationFlags flags, int lockTimeout )
+    {
+        DeviceLockParms request = new() {
+            Link = link,
+            Flags = new DeviceFlags( flags ),
+            LockTimeout = lockTimeout
+        };
+        return this.DeviceLock( request );
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceLockProcedure"/>;
+    /// Device is locked.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_lock_1</c> </remarks>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceLockParms"/> to send to
+    ///                         the remote procedure call. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public DeviceError DeviceLock( DeviceLockParms request )
     {
         DeviceError result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceLockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceLockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
     }
 
@@ -386,15 +508,16 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device is unlocked.
     /// </summary>
     /// <remarks>   Renamed from <c>device_unlock_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLink"/>) to the remote
-    ///                     procedure call. </param>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="link"> The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                     call, which forms the request of this RPC call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceUnlock( DeviceLink arg1 )
+    public DeviceError DeviceUnlock( DeviceLink link )
     {
         DeviceError result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceUnlockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceUnlockProcedure, Vxi11ProgramConstants.DeviceCoreVersion, link, result );
         return result;
     }
 
@@ -403,15 +526,38 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device enables/disables sending of service requests.
     /// </summary>
     /// <remarks>   Renamed from <c>device_enable_srq_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceEnableSrqParms"/>) to the
-    ///                     remote procedure call. </param>
+    /// <param name="link">     The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                         call. </param>
+    /// <param name="enable">   True to enable, false to disable service request interrupts. </param>
+    /// <param name="handle">   The handle. Host specific data for handling the service request. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceEnableSrq( DeviceEnableSrqParms arg1 )
+    public DeviceError DeviceEnableSrq( DeviceLink link, bool enable, byte[] handle )
+    {
+        DeviceEnableSrqParms request = new() {
+            Link = link,
+            Enable = enable
+        };
+        request.SetHandle( handle );
+        return this.DeviceEnableSrq( request );
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceEnableSrqProcedure"/>;
+    /// Device enables/disables sending of service requests.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_enable_srq_1</c> </remarks>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceEnableSrqParms"/> to send
+    ///                         to the remote procedure call. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
     {
         DeviceError result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceEnableSrqProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceEnableSrqProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
     }
 
@@ -420,15 +566,80 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device executes a command.
     /// </summary>
     /// <remarks>   Renamed from <c>device_docmd_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceDoCmdParms"/>) to the
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
+    /// <param name="cmd">          The command; which command to execute. </param>
+    /// <param name="dataSize">     Size of the data. </param>
+    /// <param name="dataIn">       The data in. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
+    /// </returns>
+    public DeviceDoCmdResp DeviceDoCmd( DeviceLink link, DeviceFlags flags, int lockTimeout, int ioTimeout,
+                                        int cmd, int dataSize, byte[] dataIn )
+    {
+        return this.DeviceDoCmd( link, flags, lockTimeout, ioTimeout, cmd, true, dataSize, dataIn );
+    }
+
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
+    /// Device executes a command.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_docmd_1</c> </remarks>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
+    /// <param name="cmd">          The command; which command to execute. </param>
+    /// <param name="netWorkOrder"> True to net work order; the client's byte order. Network order is
+    ///                             defined by the Internet Protocol Suite; set <see langword="true"/>
+    ///                             for big endian. </param>
+    /// <param name="dataSize">     Size of the data. </param>
+    /// <param name="dataIn">       The data in. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
+    /// </returns>
+    public DeviceDoCmdResp DeviceDoCmd( DeviceLink link, DeviceFlags flags, int lockTimeout, int ioTimeout,
+                                        int cmd, bool netWorkOrder, int dataSize, byte[] dataIn )
+    {
+        DeviceDoCmdParms request = new() {
+            Link = link,
+            Flags = flags,
+            IOTimeout = ioTimeout,
+            LockTimeout = lockTimeout,
+            Cmd = cmd,
+            NetworkOrder = netWorkOrder,
+            DataSize = dataSize
+        };
+        request.SetDataIn( dataIn );
+        return this.DeviceDoCmd( request );
+    }
+
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
+    /// Device executes a command.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_docmd_1</c> </remarks>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="request"> The request of type <see cref="Codecs.DeviceDoCmdParms"/> to send to the
     ///                     remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
     /// </returns>
-    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms arg1 )
+    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
     {
         DeviceDoCmdResp result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DeviceDoCommandProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DeviceDoCommandProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
     }
 
@@ -437,15 +648,15 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Closes a link to a device.
     /// </summary>
     /// <remarks>   Renamed from <c>destroy_link_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLink"/>) to the remote
-    ///                     procedure call. </param>
+    /// <param name="link"> The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                     call, which serves as the request for the RPC call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DestroyLink( DeviceLink arg1 )
+    public DeviceError DestroyLink( DeviceLink link )
     {
         DeviceError result = new();
-        this.Client?.Call( ( int ) Vxi11Message.DestroyLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.DestroyLinkProcedure, Vxi11ProgramConstants.DeviceCoreVersion, link, result );
         return result;
     }
 
@@ -454,15 +665,64 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device creates interrupt channel.
     /// </summary>
     /// <remarks>   Renamed from <c>create_intr_chan_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceRemoteFunc"/>) to the
-    ///                     remote procedure call. </param>
+    /// <param name="hostAddress">      The host address. </param>
+    /// <param name="hostPort">         The host port. </param>
+    /// <param name="programFamily">    (Optional) The <see cref="DeviceAddrFamily"/> program family [TCP]. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError CreateIntrChan( DeviceRemoteFunc arg1 )
+    public DeviceError CreateIntrChan( int hostAddress, int hostPort, DeviceAddrFamily programFamily = DeviceAddrFamily.DeviceTcpAddressFamily )
+    {
+        DeviceRemoteFunc request = new() {
+            HostAddr = hostAddress,
+            HostPort = hostPort,
+            ProgNum = Vxi11ProgramConstants.DeviceInterruptProgram,
+            ProgVers = Vxi11ProgramConstants.DeviceInterruptVersion,
+            ProgFamily = programFamily
+        };
+        return this.CreateIntrChan( request );
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.CreateInterruptChannelProcedure"/>;
+    /// Device creates interrupt channel.
+    /// </summary>
+    /// <remarks>   Renamed from <c>create_intr_chan_1</c> </remarks>
+    /// <param name="hostAddress">      The host address. </param>
+    /// <param name="hostPort">         The host port. </param>
+    /// <param name="programNumber">    The program number; should be <see cref="Vxi11ProgramConstants.DeviceInterruptProgram"/>. </param>
+    /// <param name="programVersion">   The program version; should be <see cref="Vxi11ProgramConstants.DeviceInterruptVersion"/> </param>
+    /// <param name="programFamily">    The <see cref="DeviceAddrFamily"/> program family. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public DeviceError CreateIntrChan( int hostAddress, int hostPort, int programNumber, int programVersion, DeviceAddrFamily programFamily  )
+    {
+        DeviceRemoteFunc request = new() {
+            HostAddr = hostAddress,
+            HostPort = hostPort,
+            ProgNum = programNumber,
+            ProgVers = programVersion,
+            ProgFamily = programFamily
+        };
+        return this.CreateIntrChan( request );
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.CreateInterruptChannelProcedure"/>;
+    /// Device creates interrupt channel.
+    /// </summary>
+    /// <remarks>   Renamed from <c>create_intr_chan_1</c> </remarks>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceRemoteFunc"/> to send to
+    ///                         the remote procedure call. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public DeviceError CreateIntrChan( DeviceRemoteFunc request )
     {
         DeviceError result = new();
-        this.Client?.Call( ( int ) Vxi11Message.CreateInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, arg1, result );
+        this.Client?.Call( ( int ) Vxi11Message.CreateInterruptChannelProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
     }
 
@@ -471,6 +731,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Device destroys interrupt channel.
     /// </summary>
     /// <remarks>   Renamed from <c>destroy_intr_chan_1</c> </remarks>
+    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
