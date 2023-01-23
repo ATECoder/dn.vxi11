@@ -2,6 +2,8 @@ using System.Net;
 
 using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.Codecs;
+using System.Drawing;
+using System.Security.Cryptography;
 
 namespace cc.isr.VXI11.IEEE488;
 
@@ -13,7 +15,7 @@ public class Ieee488Client : IDisposable
 
     /// <summary>   Default constructor. </summary>
     public Ieee488Client()
-    {
+    {   
 
         // get the next client identifier
         this.ClientId = Ieee488Client.GetNextClientId();
@@ -243,9 +245,20 @@ public class Ieee488Client : IDisposable
 
     #region " default values "
 
-    /// <summary>   Gets or sets the default maximum length for the <see cref="ReadRaw"/> method. </summary>
+    /// <summary>
+    /// Gets or sets the default maximum length for the <see cref="ReadRaw"/> method.
+    /// </summary>
+    /// <remarks>   Was used in Python to limit the size of the raw read length. </remarks>
     /// <value> The default maximum read raw length. </value>
     public static int MaxReadRawLengthDefault { get; set; } = 128 * 1024 * 1024;
+
+    /// <summary>   Gets or sets the maximum receive length default. </summary>
+    /// <remarks>
+    /// not yet used. As used in Python to reduce the maximum receive size received from the
+    /// instrument in <see cref="CreateLinkResp"/>.
+    /// </remarks>
+    /// <value> The maximum receive length default. </value>
+    public static int MaxReceiveLengthDefault { get; set; } = 1024 * 1024;
 
     /// <summary>   Gets or sets the lock timeout default. </summary>
     /// <value> The lock timeout default. </value>
@@ -318,6 +331,13 @@ public class Ieee488Client : IDisposable
     /// <summary>   Gets or sets the last device error. </summary>
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
     public DeviceErrorCode LastDeviceError { get; private set; }
+
+    /// <summary>
+    /// Gets the encoding to use when serializing strings. If <see langcref="null" />, the
+    /// system's default encoding is to be used.
+    /// </summary>
+    /// <value> The character encoding. </value>
+    public Encoding CharacterEncoding => this.CoreClient?.Client is null ? Encoding.Default : this.CoreClient.Client.CharacterEncoding;
 
     #endregion
 
@@ -446,7 +466,7 @@ public class Ieee488Client : IDisposable
 
     /// <summary>   Gets a value indicating whether the VXI Core Client is connected. </summary>
     /// <value> True if connected, false if not. </value>
-    public bool Connected => this.DeviceLink is not null;
+    public bool Connected => this.DeviceLink is not null && this.CoreClient is not null;
 
     #endregion
 
@@ -486,19 +506,19 @@ public class Ieee488Client : IDisposable
     /// <returns>   A <see cref="DeviceWriteResp">device write response</see> . </returns>
     public DeviceWriteResp Send( byte[] data )
     {
-        DeviceWriteResp resp = new();
-        if ( this.DeviceLink is not null && this.CoreClient is not null )
-        {
-            DeviceWriteParms writeParam = new() {
-                Link = this.DeviceLink,
-                IOTimeout = this.IOTimeout, // in ms
-                LockTimeout = this.LockTimeout, // in ms
-                Flags = new DeviceFlags( this.Eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None ),
-            };
-            writeParam.SetData( data );
-            resp = this.CoreClient.DeviceWrite( writeParam );
-        }
-        return resp;
+        if ( this.DeviceLink is null || this.CoreClient  is null ) return new DeviceWriteResp();
+        if ( data is null || data.Length == 0 ) return new DeviceWriteResp();
+        if ( data.Length > this.MaxReceiveSize )
+            throw new DeviceException( $"Data size {data.Length} exceed {nameof( MaxReceiveSize )}({MaxReceiveSize})", DeviceErrorCodeValue.IOError );
+
+        DeviceWriteParms writeParam = new() {
+            Link = this.DeviceLink,
+            IOTimeout = this.IOTimeout, // in ms
+            LockTimeout = this.LockTimeout, // in ms
+            Flags = new DeviceFlags( this.Eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None ),
+        };
+        writeParam.SetData( data );
+        return this.CoreClient.DeviceWrite( writeParam );
     }
 
     /// <summary>   Send this message to the VXI-11 server. </summary>
@@ -506,27 +526,25 @@ public class Ieee488Client : IDisposable
     /// <returns>   A <see cref="DeviceWriteResp">device write response</see> . </returns>
     public DeviceWriteResp Send( string message )
     {
-        return this.Send( Encoding.Default.GetBytes( message ) );
+        this.Eoi = message.Length <= this.MaxReceiveSize;
+        return this.Send( this.CharacterEncoding.GetBytes( message ) );
     }
 
     /// <summary>   Receives a reply from the VXI-11 server. </summary>
     /// <returns>   A <see cref="DeviceReadResp">device read response</see> . </returns>
     public DeviceReadResp Receive()
     {
-        DeviceReadResp resp = new();
-        if ( this.DeviceLink is not null && this.CoreClient is not null )
-        {
-            DeviceReadParms readParam = new() {
-                Link = DeviceLink,
-                RequestSize = this.MaxReceiveSize, // response.Length,
-                IOTimeout = this.IOTimeout,
-                LockTimeout = this.LockTimeout,
-                Flags = new DeviceFlags(),
-                TermChar = this.ReadTermination
-            };
-            resp = this.CoreClient.DeviceRead( readParam );
-        }
-        return resp;
+        if ( this.DeviceLink is null || this.CoreClient is null ) return new DeviceReadResp();
+
+        DeviceReadParms readParam = new() {
+            Link = DeviceLink,
+            RequestSize = this.MaxReceiveSize, // response.Length,
+            IOTimeout = this.IOTimeout,
+            LockTimeout = this.LockTimeout,
+            Flags = new DeviceFlags(),
+            TermChar = this.ReadTermination
+        };
+        return this.CoreClient.DeviceRead( readParam );
     }
 
     /// <summary>   Receives a reply from the VXI-11 server. </summary>
@@ -534,20 +552,17 @@ public class Ieee488Client : IDisposable
     /// <returns>   A <see cref="DeviceReadResp">device read response</see> . </returns>
     public DeviceReadResp Receive( int byteCount )
     {
-        DeviceReadResp resp = new();
-        if ( this.DeviceLink is not null && this.CoreClient is not null )
-        {
-            DeviceReadParms readParam = new() {
-                Link = DeviceLink,
-                RequestSize = byteCount,
-                IOTimeout = this.IOTimeout,
-                LockTimeout = this.LockTimeout,
-                Flags = new DeviceFlags(),
-                TermChar = this.ReadTermination
-            };
-            resp = this.CoreClient.DeviceRead( readParam );
-        }
-        return resp;
+        if ( this.DeviceLink is null || this.CoreClient is null ) return new DeviceReadResp();
+
+        DeviceReadParms readParam = new() {
+            Link = DeviceLink,
+            RequestSize = byteCount,
+            IOTimeout = this.IOTimeout,
+            LockTimeout = this.LockTimeout,
+            Flags = new DeviceFlags(),
+            TermChar = this.ReadTermination
+        };
+        return this.CoreClient.DeviceRead( readParam );
     }
 
     /// <summary>   Send and receive if query. </summary>
@@ -579,17 +594,49 @@ public class Ieee488Client : IDisposable
     /// <returns>   A Tuple. </returns>
     public (DeviceWriteResp writeResponse, DeviceReadResp readResponse) SendReceive( string message, int millisecondsReadDelay = 3 )
     {
-        return this.SendReceive( Encoding.Default.GetBytes( message ), millisecondsReadDelay );
+        return this.SendReceive( this.CharacterEncoding.GetBytes( message ), millisecondsReadDelay );
     }
 
     #endregion
 
     #region " raw read and write "
 
-    public int WriteRaw( string data )
+    /// <summary>   Writes data in raw mode allowing to write a block of data 
+    /// larger than the <see cref="MaxReceiveSize"/> data that the device accepts in each block. </summary>
+    /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
+    /// <param name="data"> . </param>
+    /// <returns>   The total amount of data that was written. </returns>
+    public virtual int WriteRaw( string data )
     {
-        throw new NotImplementedException();
+        if ( this.DeviceLink is null || this.CoreClient is null || data is null || data.Length == 0 ) return 0;
+
+        data += this.CharacterEncoding.GetString( this.WriteTermination );
+
+        int total = 0;
+        int remaining = data.Length;
+        int offset = 0;
+        while ( remaining > 0 )
+        {
+            this.Eoi = remaining <= this.MaxReceiveSize;
+            var block = data.Substring( offset, this.MaxReceiveSize );
+
+            DeviceWriteResp writeResponse = this.Send( this.CharacterEncoding.GetBytes( data ) );
+
+            if ( writeResponse.ErrorCode.Value != DeviceErrorCodeValue.NoError  )
+            {
+                throw new DeviceException( $"; failed writing in raw mode", writeResponse.ErrorCode.Value );
+            }
+            else if ( writeResponse.Size < block.Length )
+            {
+                throw new DeviceException( $"; incomplete block {writeResponse.Size} or {block.Length} was written in raw mode", DeviceErrorCodeValue.IOError );
+            }
+            offset += writeResponse.Size;
+            remaining -= writeResponse.Size;
+            total += writeResponse.Size;
+        }
+        return total;
     }
+
 
     public int MaxReadRawLength { get; private set; }
 
@@ -613,7 +660,7 @@ public class Ieee488Client : IDisposable
     {
         if ( string.IsNullOrEmpty( message ) ) return 0;
 
-        (DeviceWriteResp writeResponse, _) = this.SendReceive( Encoding.Default.GetBytes( message ) );
+        (DeviceWriteResp writeResponse, _) = this.SendReceive( this.CharacterEncoding.GetBytes( message ) );
 
         return writeResponse is null
             ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )} is null.",
@@ -686,7 +733,7 @@ public class Ieee488Client : IDisposable
         {
             int length = readResponse.GetData().Length - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
             return length > 0
-                ? Encoding.Default.GetString( readResponse.GetData(), 0, length )
+                ? this.CharacterEncoding.GetString( readResponse.GetData(), 0, length )
                 : string.Empty;
         }
     }
@@ -734,7 +781,7 @@ public class Ieee488Client : IDisposable
     {
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
 
-        (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( DeviceCoreClient.EncodingDefault.GetBytes( message ), millisecondsReadDelay );
+        (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( this.CharacterEncoding.GetBytes( message ), millisecondsReadDelay );
         if ( writeResponse is null )
             throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )} is null.",
                                        DeviceErrorCodeValue.IOError );
@@ -755,7 +802,7 @@ public class Ieee488Client : IDisposable
         {
             int length = readResponse.GetData().Length - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
             return length > 0
-                ? (true, DeviceCoreClient.EncodingDefault.GetString( readResponse.GetData(), 0, length ))
+                ? (true, this.CharacterEncoding.GetString( readResponse.GetData(), 0, length ))
                 : (true, string.Empty);
         }
     }

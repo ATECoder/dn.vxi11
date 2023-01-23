@@ -15,6 +15,9 @@ namespace cc.isr.VXI11.IEEE488;
 public partial class Ieee488Server : DeviceCoreServerStubBase
 {
 
+    /// <summary>   The abort port default. </summary>
+    public static int AbortPortDefault = 440;
+
     #region " construction and cleanup "
 
     /// <summary>
@@ -62,19 +65,21 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         this._ipv4Address = bindAddr is null ? string.Empty : bindAddr.ToString();
         this._readMessage = string.Empty;
         this._writeMessage = string.Empty;
+        this.AbortPortNumber = Ieee488Server.AbortPortDefault;
+        this.MaxReceiveLength = Ieee488Client.MaxReceiveLengthDefault;
     }
 
     #endregion
 
     #region " server properties "
 
-    private int _portNumber;
-    /// <summary>   Gets or sets the port number. </summary>
+    private int _corePortNumber;
+    /// <summary>   Gets or sets the core port number. </summary>
     /// <value> The port number. </value>
-    public int PortNumber
+    public int CorePortNumber
     {
-        get => this._portNumber;
-        set => _ = this.SetProperty( ref this._portNumber, value );
+        get => this._corePortNumber;
+        set => _ = this.SetProperty( ref this._corePortNumber, value );
     }
 
     private string _ipv4Address;
@@ -84,6 +89,15 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     {
         get => this._ipv4Address;
         set => _ = this.SetProperty( ref this._ipv4Address, value );
+    }
+
+    private int _abortPortNumber;
+    /// <summary>   Gets or sets the abort port number. </summary>
+    /// <value> The abortPort number. </value>
+    public int AbortPortNumber
+    {
+        get => this._abortPortNumber;
+        set => _ = this.SetProperty( ref this._abortPortNumber, value );
     }
 
     #endregion
@@ -157,6 +171,14 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         }
     }
 
+    private int _maxReceiveLength;
+    public int MaxReceiveLength
+    {
+        get => this._maxReceiveLength;
+        set => _ = this.SetProperty( ref this._maxReceiveLength, value );
+    }
+
+
     #endregion
 
     #region " LXI-11 ONC/RPC Calls "
@@ -168,17 +190,19 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     /// <returns>   The new link to a device. </returns>
     public override CreateLinkResp CreateLink( CreateLinkParms linkInfo )
     {
-        CreateLinkResp result = new();
-        this._linkId++;
-        result.DeviceLink = new DeviceLink() { Value = _linkId };
+        CreateLinkResp reply = new() {
+            DeviceLink = new DeviceLink() { Value = this._linkId++ },
+            MaxReceiveSize = this.MaxReceiveLength,
+            AbortPort = ( short ) this.AbortPortNumber
+        };
 
         Logger.Writer.LogVerbose( $"creating link to {linkInfo.Device}" );
 
         this.InterfaceDevice = new DeviceAddress( linkInfo.Device );
-        result.ErrorCode = this.InterfaceDevice.IsValid()
+        reply.ErrorCode = this.InterfaceDevice.IsValid()
             ? new DeviceErrorCode() { Value = DeviceErrorCodeValue.NoError }
             : new DeviceErrorCode() { Value = DeviceErrorCodeValue.InvalidLinkIdentifier };
-        return result;
+        return reply;
     }
 
     /// <summary>   Destroy a connection. </summary>

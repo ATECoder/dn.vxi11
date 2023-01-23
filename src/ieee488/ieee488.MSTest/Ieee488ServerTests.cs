@@ -76,8 +76,8 @@ public class Ieee488ServerTests
             case nameof( Ieee488Server.WriteMessage ):
                 Logger.Writer.LogInformation( _server.WriteMessage );
                 break;
-            case nameof( Ieee488Server.PortNumber ):
-                Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.PortNumber}" );
+            case nameof( Ieee488Server.CorePortNumber ):
+                Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.CorePortNumber}" );
                 break;
             case nameof( Ieee488Server.IPv4Address ):
                 Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.IPv4Address}" );
