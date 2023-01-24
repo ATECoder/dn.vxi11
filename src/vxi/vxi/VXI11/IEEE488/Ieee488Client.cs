@@ -341,41 +341,6 @@ public class Ieee488Client : IDisposable
 
     #endregion
 
-    #region " abort port and client "
-
-    /// <summary>   Gets or sets the abort port. </summary>
-    /// <value> The abort port. </value>
-    private int AbortPort { get; set; }
-
-    /// <summary>   Gets or sets the <see cref="DeviceAsyncClient"/> abort client. </summary>
-    /// <value> The abort client. </value>
-    protected DeviceAsyncClient? AbortClient { get; set; }
-
-    /// <summary>   Asynchronous abort an in-progress call. </summary>
-    /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
-    public virtual void Abort()
-    {
-        if ( !this.Connected )
-        {
-            this.Connect( this.Host, this.InterfaceDeviceString );
-        }
-
-        if ( this.AbortClient is null )
-        {
-            this.AbortClient = new DeviceAsyncClient( IPAddress.Parse( this.Host ), this.AbortPort, OncRpcProtocols.OncRpcTcp, this.ConnectTimeout );
-            // set the timeouts of the client.
-            this.TransmitTimeout = this.TransmitTimeout;
-            this.IOTimeout = this.IOTimeout;
-        }
-        DeviceError error = this.AbortClient.DeviceAbort( this.DeviceLink! );
-        if ( error.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-        {
-            throw new DeviceException( $"; Abort failed.", error.ErrorCode.Value );
-        }
-    }
-
-    #endregion
-
     #region " members "
 
     /// <summary>   Gets or sets the host IPv4 Address. </summary>
@@ -531,24 +496,16 @@ public class Ieee488Client : IDisposable
     }
 
     /// <summary>   Receives a reply from the VXI-11 server. </summary>
+    /// <remarks>   Requests the <see cref="MaxReceiveSize"/> maximum byte length that
+    ///             can be received from the server on each read. </remarks>
     /// <returns>   A <see cref="DeviceReadResp">device read response</see> . </returns>
     public DeviceReadResp Receive()
     {
-        if ( this.DeviceLink is null || this.CoreClient is null ) return new DeviceReadResp();
-
-        DeviceReadParms readParam = new() {
-            Link = DeviceLink,
-            RequestSize = this.MaxReceiveSize, // response.Length,
-            IOTimeout = this.IOTimeout,
-            LockTimeout = this.LockTimeout,
-            Flags = new DeviceFlags(),
-            TermChar = this.ReadTermination
-        };
-        return this.CoreClient.DeviceRead( readParam );
+        return this.Receive( this.MaxReceiveSize );
     }
 
     /// <summary>   Receives a reply from the VXI-11 server. </summary>
-    /// <param name="byteCount">    Number of bytes. </param>
+    /// <param name="byteCount">    The number of bytes requested from the server. </param>
     /// <returns>   A <see cref="DeviceReadResp">device read response</see> . </returns>
     public DeviceReadResp Receive( int byteCount )
     {
@@ -559,11 +516,20 @@ public class Ieee488Client : IDisposable
             RequestSize = byteCount,
             IOTimeout = this.IOTimeout,
             LockTimeout = this.LockTimeout,
-            Flags = new DeviceFlags(),
+            Flags = new DeviceFlags( this.ReadTermination > 0 ? DeviceOperationFlags.TerminationCharacterSet : DeviceOperationFlags.None ),
             TermChar = this.ReadTermination
         };
         return this.CoreClient.DeviceRead( readParam );
     }
+
+    /// <summary>   Uses a task to delay execution without blocking the current thread. </summary>
+    /// <param name="delayTime">    The delay time. </param>
+    private static async void Delay( int delayTime )
+    {
+        await Task.Delay( delayTime );
+    }
+
+
 
     /// <summary>   Send and receive if query. </summary>
     /// <param name="data">                     . </param>
@@ -575,7 +541,7 @@ public class Ieee488Client : IDisposable
         if ( writeResponse.ErrorCode.Value == DeviceErrorCodeValue.NoError )
             if ( this.IsQuery( data ) )
             {
-                Thread.Sleep( millisecondsReadDelay );
+                Ieee488Client.Delay( millisecondsReadDelay );
                 DeviceReadResp readResponse = this.Receive();
                 return (writeResponse, readResponse);
             }
@@ -620,19 +586,19 @@ public class Ieee488Client : IDisposable
             this.Eoi = remaining <= this.MaxReceiveSize;
             var block = data.Substring( offset, this.MaxReceiveSize );
 
-            DeviceWriteResp writeResponse = this.Send( this.CharacterEncoding.GetBytes( data ) );
+            DeviceWriteResp reply = this.Send( this.CharacterEncoding.GetBytes( data ) );
 
-            if ( writeResponse.ErrorCode.Value != DeviceErrorCodeValue.NoError  )
+            if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError  )
             {
-                throw new DeviceException( $"; failed writing in raw mode", writeResponse.ErrorCode.Value );
+                throw new DeviceException( $"; failed writing in raw mode", reply.ErrorCode.Value );
             }
-            else if ( writeResponse.Size < block.Length )
+            else if ( reply.Size < block.Length )
             {
-                throw new DeviceException( $"; incomplete block {writeResponse.Size} or {block.Length} was written in raw mode", DeviceErrorCodeValue.IOError );
+                throw new DeviceException( $"; incomplete block {reply.Size} or {block.Length} was written in raw mode", DeviceErrorCodeValue.IOError );
             }
-            offset += writeResponse.Size;
-            remaining -= writeResponse.Size;
-            total += writeResponse.Size;
+            offset += reply.Size;
+            remaining -= reply.Size;
+            total += reply.Size;
         }
         return total;
     }
@@ -640,11 +606,70 @@ public class Ieee488Client : IDisposable
 
     public int MaxReadRawLength { get; private set; }
 
-    /// <summary>   Reads until all data is read from the instrument. </summary>
+    /// <summary>
+    /// Reads until the <paramref name="byteCount"/> or all data, if <paramref name="byteCount"/> is -
+    /// 1, are read from the instrument.
+    /// </summary>
+    /// <remarks>   2023-01-24. </remarks>
+    /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
+    /// <param name="byteCount">    (Optional) Number of bytes to read from the device; [-1] defaults
+    ///                             to reading all available data from the device. </param>
     /// <returns>   The data. </returns>
-    public string ReadRaw()
+    public byte[] ReadRaw( int byteCount = -1 )
     {
-        throw new NotImplementedException();
+
+        int requestByteCount = (byteCount > 0) ? Math.Min( byteCount, this.MaxReadRawLength ) : this.MaxReadRawLength;
+
+        DeviceReadResp reply = new();
+        DeviceReadReasons endOfStream = DeviceReadReasons.EndIndicator | DeviceReadReasons.TermCharIndicator;
+
+        var values = Array.Empty<byte>();
+
+        // Read while read reason does not match the end of stream 
+        
+        while ( requestByteCount > 0 && ( ( reply.Reason & endOfStream ) == 0 ) )
+        {
+            // request readings from the device.
+
+            reply = this.Receive( requestByteCount );
+
+            // on error, throw and exception 
+
+            if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            {
+                throw new DeviceException( $"; failed reading in raw mode", reply.ErrorCode.Value );
+            }
+
+            // extend the data by the amount of data received
+
+            values = values.Concat( reply.GetData() ).ToArray();
+
+            // update the remaining count;
+            if ( byteCount > 0 )
+            {
+                byteCount -= reply.GetData().Length ;
+                if ( byteCount < requestByteCount )
+                {
+                    requestByteCount = byteCount;
+                }
+            }
+        }
+        return values;
+    }
+
+    /// <summary>   Queries the device in raw mode. </summary>
+    /// <remarks>   2023-01-24. </remarks>
+    /// <param name="data">                     The query message. </param>
+    /// <param name="byteCount">                (Optional) Number of bytes to read from the device; [-
+    ///                                         1] defaults to reading all available data from the
+    ///                                         device. </param>
+    /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay. </param>
+    /// <returns>   A Tuple of sent count and received data. </returns>
+    public virtual ( int SentCount, byte[] Received )  QueryRaw( string data, int byteCount = -1, int millisecondsReadDelay = 3 )
+    {
+        int sentCount = this.WriteRaw( data );
+        Ieee488Client.Delay( millisecondsReadDelay );
+        return ( sentCount, this.ReadRaw( byteCount ) );
     }
 
 
@@ -878,4 +903,64 @@ public class Ieee488Client : IDisposable
     }
 
     #endregion
+
+    #region " abort port and client "
+
+    /// <summary>   Gets or sets the abort port. </summary>
+    /// <value> The abort port. </value>
+    private int AbortPort { get; set; }
+
+    /// <summary>   Gets or sets the <see cref="DeviceAsyncClient"/> abort client. </summary>
+    /// <value> The abort client. </value>
+    protected DeviceAsyncClient? AbortClient { get; set; }
+
+    /// <summary>   Asynchronous abort an in-progress call. </summary>
+    /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
+    public virtual void Abort()
+    {
+        if ( !this.Connected )
+        {
+            this.Connect( this.Host, this.InterfaceDeviceString );
+        }
+
+        if ( this.AbortClient is null )
+        {
+            this.AbortClient = new DeviceAsyncClient( IPAddress.Parse( this.Host ), this.AbortPort, OncRpcProtocols.OncRpcTcp, this.ConnectTimeout );
+            // set the timeouts of the client.
+            this.TransmitTimeout = this.TransmitTimeout;
+            this.IOTimeout = this.IOTimeout;
+        }
+        DeviceError reply = this.AbortClient.DeviceAbort( this.DeviceLink! );
+        if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+        {
+            throw new DeviceException( $"; {nameof(Abort)} failed.", reply.ErrorCode.Value );
+        }
+    }
+
+    #endregion
+
+    #region " VXI-11 call implementations "
+
+    /// <summary>   Sends the Trigger command. </summary>
+    public virtual void Trigger()
+    {
+        if ( this.DeviceLink is null || this.CoreClient is null ) return;
+        DeviceError reply =  this.CoreClient.DeviceTrigger( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
+        if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; {nameof( Trigger )} failed.", reply.ErrorCode.Value );
+    }
+
+    /// <summary>   Sends the Clear command. </summary>
+    public virtual void Clear()
+    {
+        if ( this.DeviceLink is null || this.CoreClient is null ) return;
+        DeviceError reply = this.CoreClient.DeviceClear( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
+        if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; {nameof( Clear )} failed.", reply.ErrorCode.Value );
+    }
+
+
+    #endregion
+
+
 }

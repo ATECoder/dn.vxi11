@@ -67,7 +67,7 @@ public class Ieee488ServerTests
         }
     }
 
-    /// <summary>   Delays. </summary>
+    /// <summary>   Uses a task to delay execution without blocking the current thread. </summary>
     /// <param name="delayTime">    The delay time. </param>
     private static async void Delay ( int delayTime )
     {
