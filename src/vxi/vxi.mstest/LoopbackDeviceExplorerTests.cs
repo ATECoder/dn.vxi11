@@ -43,7 +43,7 @@ public class LoopbackDeviceExplorerTests
     [ClassCleanup]
     public static void CleanupFixture()
     {
-        _embeddedPortMapService?.Shutdown();
+        _embeddedPortMapService?.Dispose();
         _embeddedPortMapService = null;
     }
 
@@ -74,7 +74,7 @@ public class LoopbackDeviceExplorerTests
         Logger.Writer.LogInformation( $"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} pinging Portmap service: " );
         Stopwatch sw = Stopwatch.StartNew();
         IPAddress host = IPAddress.Loopback;
-        Assert.IsTrue( DeviceExplorer.PortmapPingHost( host, 1000 ), $"port map at {IPAddress.Loopback} should reply to a ping" );
+        Assert.IsTrue( DeviceExplorer.PortmapPingHost( host ), $"port map at {IPAddress.Loopback} should reply to a ping" );
         Logger.Writer.LogInformation( $"Portmap service pinged {host} in {sw.ElapsedMilliseconds:0} ms." );
     }
 

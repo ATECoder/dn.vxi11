@@ -509,7 +509,7 @@ private static void EstablishPortmapService()
     /// </remarks>
     public override void Run()
     {
-        _ = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
+        using OncRpcEmbeddedPortmapServiceStub epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
         base.Run();
     }
 

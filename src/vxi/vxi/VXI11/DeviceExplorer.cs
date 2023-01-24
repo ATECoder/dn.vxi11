@@ -21,14 +21,16 @@ public class DeviceExplorer
     }
 
     /// <summary>   Ping the host using the <see cref="OncRpcPortmapClient"/> service. </summary>
-    /// <remarks> TODO: Timeout does not seem to make a difference. </remarks>
-    /// <param name="host">     The host. </param>
-    /// <param name="transmitTimeout">  The transmit timeout, which sets the socket timeouts during the
-    /// transmission of messages to the service. </param>
+    /// <remarks>   TODO: Timeout does not seem to make a difference. </remarks>
+    /// <param name="host">             The host. </param>
+    /// <param name="ioTimeout">        (Optional) The overall i/o timeout, which determines how long
+    ///                                 to wait for pinging the port . </param>
+    /// <param name="transmitTimeout">  (Optional) The transmit timeout, which sets the socket
+    ///                                 timeouts during the transmission of messages to the service. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    public static bool PortmapPingHost( IPAddress host, int transmitTimeout )
+    public static bool PortmapPingHost( IPAddress host, int ioTimeout = 100, int transmitTimeout = 25 )
     {
-        return OncRpcPortmapClient.TryPingPortmapService( host, transmitTimeout );
+        return OncRpcPortmapClient.TryPingPortmapService( host, ioTimeout, transmitTimeout );
     }
 
     #endregion 
