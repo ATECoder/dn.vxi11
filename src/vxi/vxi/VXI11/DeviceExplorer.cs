@@ -23,16 +23,12 @@ public class DeviceExplorer
     /// <summary>   Ping the host using the <see cref="OncRpcPortmapClient"/> service. </summary>
     /// <remarks> TODO: Timeout does not seem to make a difference. </remarks>
     /// <param name="host">     The host. </param>
-    /// <param name="timeout">  The timeout. </param>
+    /// <param name="transmitTimeout">  The transmit timeout, which sets the socket timeouts during the
+    /// transmission of messages to the service. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    public static bool PortmapPingHost( IPAddress host, int timeout )
+    public static bool PortmapPingHost( IPAddress host, int transmitTimeout )
     {
-        // Create a portmap client object, which can then be used to contact
-        // a local or remote ONC/RPC portmap process. 
-        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, timeout, timeout, timeout );
-
-        // Ping the port mapper...
-        return portmap.TryPing();
+        return OncRpcPortmapClient.TryPingPortmapService( host, transmitTimeout );
     }
 
     #endregion 
@@ -80,8 +76,7 @@ public class DeviceExplorer
     {
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
-        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, connectTimeout,
-            OncRpcTcpClient.IOTimeoutDefault, OncRpcTcpClient.TransmitTimeoutDefault );
+        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, connectTimeout );
 
         // get a port from this host, if any.
         return portmap.GetPort( Vxi11ProgramConstants.DeviceCoreProgram, Vxi11ProgramConstants.DeviceCoreVersion, OncRpcProtocols.OncRpcTcp );
@@ -139,8 +134,7 @@ public class DeviceExplorer
 
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
-        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, connectTimeout,
-            OncRpcTcpClient.IOTimeoutDefault, OncRpcTcpClient.TransmitTimeoutDefault );
+        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, connectTimeout );
 
         // Now dump the current list of registered servers.
         OncRpcServerIdentifierCodec[] registeredServers = portmap.ListRegisteredServers(); ;

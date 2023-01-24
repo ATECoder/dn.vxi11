@@ -448,7 +448,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         OncRpcEmbeddedPortmapService epm;
 
         Logger.Writer.LogVerbose( "Checking for portmap service: " );
-        bool externalPortmap = OncRpcEmbeddedPortmapService.IsPortmapRunning();
+        bool externalPortmap = OncRpcEmbeddedPortmapService.TryPingPortmapService();
         if ( externalPortmap )
             Logger.Writer.LogVerbose( "A portmap service is already running." );
         else
@@ -479,7 +479,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         {
             Logger.Writer.LogMemberError( "failed establishing Portmap service:", e );
         }
-        externalPortmap = OncRpcEmbeddedPortmapService.IsPortmapRunning();
+        externalPortmap = OncRpcEmbeddedPortmapService.TryPingPortmapService();
         Logger.Writer.LogVerbose( $"Port map service is {(externalPortmap ? "running" : "idle")}." );
     }
 
