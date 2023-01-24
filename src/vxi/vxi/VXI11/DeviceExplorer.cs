@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
+using cc.isr.ONC.RPC.Client;
 using cc.isr.ONC.RPC.Codecs;
 using cc.isr.ONC.RPC.Portmap;
 
@@ -28,7 +29,7 @@ public class DeviceExplorer
     {
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
-        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, timeout );
+        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, timeout, timeout, timeout );
 
         // Ping the port mapper...
         return portmap.TryPing();
@@ -42,28 +43,28 @@ public class DeviceExplorer
     /// <summary>
     /// Lists the VXI-11 Core devices that are listening on the specified <paramref name="hosts"/>.
     /// </summary>
-    public static List<(IPAddress host, int port)> ListCoreDevices( IEnumerable<IPAddress> hosts, int timeout, bool startEmbeddedPortmapService )
+    public static List<(IPAddress host, int port)> ListCoreDevices( IEnumerable<IPAddress> hosts, int connectTimeout, bool startEmbeddedPortmapService )
     {
 
         // start the embedded service.
         if ( startEmbeddedPortmapService ) _ = DeviceExplorer.StartEmbeddedPortmapService();
 
         // enumerate the listening devices.
-        return ListCoreDevices( hosts, timeout );
+        return ListCoreDevices( hosts, connectTimeout );
     }
 
     /// <summary>
     /// Lists the VXI-11 Core devices that are listening on the specified <paramref name="hosts"/>.
     /// </summary>
     /// <param name="hosts">    The hosts. </param>
-    /// <param name="timeout">  The timeout. </param>
+    /// <param name="connectTimeout">  The timeout. </param>
     /// <returns>   The List{(IPAddress host,int port)}; </returns>
-    public static List<(IPAddress host, int port)> ListCoreDevices( IEnumerable<IPAddress> hosts, int timeout )
+    public static List<(IPAddress host, int port)> ListCoreDevices( IEnumerable<IPAddress> hosts, int connectTimeout )
     {
         List<(IPAddress host, int port)> devices = new();
         foreach ( IPAddress host in hosts )
         {
-            int port = GetCoreDevicePortNumber( host, timeout );
+            int port = GetCoreDevicePortNumber( host, connectTimeout );
             if ( port > 0 ) { devices.Add( (host, port) ); }
         }
         return devices;
@@ -73,13 +74,14 @@ public class DeviceExplorer
     /// Gets the port of any VXI-11 Core device that is listening on the specific <paramref name="host"/> address.
     /// </summary>
     /// <param name="host">     The host. </param>
-    /// <param name="timeout">  The timeout. </param>
+    /// <param name="connectTimeout">  The timeout. </param>
     /// <returns>   The port on which a device is listening (if value > 0 ). </returns>
-    public static int GetCoreDevicePortNumber( IPAddress host, int timeout )
+    public static int GetCoreDevicePortNumber( IPAddress host, int connectTimeout )
     {
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
-        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, timeout );
+        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, connectTimeout,
+            OncRpcTcpClient.IOTimeoutDefault, OncRpcTcpClient.TransmitTimeoutDefault );
 
         // get a port from this host, if any.
         return portmap.GetPort( Vxi11ProgramConstants.DeviceCoreProgram, Vxi11ProgramConstants.DeviceCoreVersion, OncRpcProtocols.OncRpcTcp );
@@ -129,15 +131,16 @@ public class DeviceExplorer
 
     /// <summary>   Enumerate the registered servers on the specified <paramref name="host"/>. </summary>
     /// <param name="host">     The host. </param>
-    /// <param name="timeout">  The timeout. </param>
+    /// <param name="connectTimeout">  The timeout. </param>
     /// <returns>   The List{(IPAddress host,int port)} </returns>
-    public static List<(IPAddress host, int port)> EnumerateRegisteredServers( IPAddress host, int timeout )
+    public static List<(IPAddress host, int port)> EnumerateRegisteredServers( IPAddress host, int connectTimeout )
     {
         List<(IPAddress host, int port)> registeredDevices = new();
 
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
-        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, timeout );
+        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, connectTimeout,
+            OncRpcTcpClient.IOTimeoutDefault, OncRpcTcpClient.TransmitTimeoutDefault );
 
         // Now dump the current list of registered servers.
         OncRpcServerIdentifierCodec[] registeredServers = portmap.ListRegisteredServers(); ;
