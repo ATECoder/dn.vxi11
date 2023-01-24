@@ -40,6 +40,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
         this.SetTransports( transports );
 
         this.CharacterEncoding = DeviceCoreClient.EncodingDefault;
+        this.Running = false;
     }
 
     /// <summary>   Dispatch (handle) an ONC/RPC request from a client. </summary>

@@ -440,7 +440,8 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
 
     #region " port mapper "
 
-    private static void EstablishPortmapService()
+#if false
+private static void EstablishPortmapService()
     {
 
         // Ignore all problems during unregistration.
@@ -482,18 +483,18 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         externalPortmap = OncRpcEmbeddedPortmapService.TryPingPortmapService();
         Logger.Writer.LogVerbose( $"Port map service is {(externalPortmap ? "running" : "idle")}." );
     }
+#endif
 
     #endregion
 
     #region " start / stop "
 
-    private bool _listening;
-    /// <summary>   Gets or sets a value indicating whether the listening. </summary>
-    /// <value> True if listening, false if not. </value>
-    public bool Listening
+    /// <summary>   Gets or sets a value indicating whether the server is running. </summary>
+    /// <value> True if running, false if not. </value>
+    public override bool Running
     {
-        get => this._listening;
-        set => _ = this.SetProperty( ref this._listening, value );
+        get => base.Running;
+        protected set => _ = this.SetProperty( this.Running, value, () => base.Running = value );
     }
 
     /// <summary>
@@ -508,8 +509,7 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     /// </remarks>
     public override void Run()
     {
-        Ieee488Server.EstablishPortmapService();
-        this.Listening = true;
+        _ = OncRpcEmbeddedPortmapService.StartEmbeddedPortmapService();
         base.Run();
     }
 
@@ -525,10 +525,9 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     /// </remarks>
     public override void StopRpcProcessing()
     {
-        this.Listening = false;
         base.StopRpcProcessing();
     }
 
-    #endregion
+#endregion
 
 }

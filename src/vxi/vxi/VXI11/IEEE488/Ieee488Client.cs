@@ -509,7 +509,7 @@ public class Ieee488Client : IDisposable
         if ( this.DeviceLink is null || this.CoreClient  is null ) return new DeviceWriteResp();
         if ( data is null || data.Length == 0 ) return new DeviceWriteResp();
         if ( data.Length > this.MaxReceiveSize )
-            throw new DeviceException( $"Data size {data.Length} exceed {nameof( MaxReceiveSize )}({MaxReceiveSize})", DeviceErrorCodeValue.IOError );
+            throw new DeviceException( $"Data size {data.Length} exceed {nameof( this.MaxReceiveSize )}({this.MaxReceiveSize})", DeviceErrorCodeValue.IOError );
 
         DeviceWriteParms writeParam = new() {
             Link = this.DeviceLink,
