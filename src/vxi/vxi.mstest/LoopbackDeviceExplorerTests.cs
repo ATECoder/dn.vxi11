@@ -26,7 +26,7 @@ public class LoopbackDeviceExplorerTests
             Logger.Writer.LogInformation( $"starting the embedded portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
-            Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapService )} started in {sw.ElapsedMilliseconds:0} ms" );
+            Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.ElapsedMilliseconds:0} ms" );
         }
         catch ( Exception ex )
         {
@@ -47,7 +47,7 @@ public class LoopbackDeviceExplorerTests
         _embeddedPortMapService = null;
     }
 
-    private static OncRpcEmbeddedPortmapService? _embeddedPortMapService;
+    private static OncRpcEmbeddedPortmapServiceStub? _embeddedPortMapService;
 
     #endregion
 

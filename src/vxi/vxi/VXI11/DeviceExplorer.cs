@@ -14,10 +14,10 @@ public class DeviceExplorer
     #region " embedded port mapper "
 
     /// <summary>   Starts embedded portmap service. </summary>
-    public static OncRpcEmbeddedPortmapService StartEmbeddedPortmapService()
+    public static OncRpcEmbeddedPortmapServiceStub StartEmbeddedPortmapService()
     {
         // start the embedded service.
-        return OncRpcEmbeddedPortmapService.StartEmbeddedPortmapService();
+        return OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
     }
 
     /// <summary>   Ping the host using the <see cref="OncRpcPortmapClient"/> service. </summary>
