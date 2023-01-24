@@ -76,10 +76,11 @@ public class DeviceExplorer
     {
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
-        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, connectTimeout );
+        using OncRpcPortmapClient pmapClient = new( host, OncRpcProtocols.OncRpcTcp, connectTimeout );
+        pmapClient.OncRpcClient.IOTimeout = OncRpcTcpClient.IOTimeoutDefault;
 
         // get a port from this host, if any.
-        return portmap.GetPort( Vxi11ProgramConstants.DeviceCoreProgram, Vxi11ProgramConstants.DeviceCoreVersion, OncRpcProtocols.OncRpcTcp );
+        return pmapClient.GetPort( Vxi11ProgramConstants.DeviceCoreProgram, Vxi11ProgramConstants.DeviceCoreVersion, OncRpcProtocols.OncRpcTcp );
     }
 
     #endregion 
@@ -134,10 +135,11 @@ public class DeviceExplorer
 
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
-        using OncRpcPortmapClient portmap = new( host, OncRpcProtocols.OncRpcTcp, connectTimeout );
+        using OncRpcPortmapClient pmapClient = new( host, OncRpcProtocols.OncRpcTcp, connectTimeout );
+        pmapClient.OncRpcClient.IOTimeout= OncRpcTcpClient.IOTimeoutDefault;
 
         // Now dump the current list of registered servers.
-        OncRpcServerIdentifierCodec[] registeredServers = portmap.ListRegisteredServers(); ;
+        OncRpcServerIdentifierCodec[] registeredServers = pmapClient.ListRegisteredServers(); ;
         foreach ( OncRpcServerIdentifierCodec registeredServer in registeredServers )
         {
             if ( registeredServer.Port > 0 ) { registeredDevices.Add( (host, registeredServer.Port) ); }
