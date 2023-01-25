@@ -2,8 +2,6 @@ using System.Net;
 
 using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.Codecs;
-using System.Drawing;
-using System.Security.Cryptography;
 
 namespace cc.isr.VXI11.IEEE488;
 
@@ -91,7 +89,7 @@ public class Ieee488Client : IDisposable
     /// <param name="interfaceDeviceString">    The interface device string, e.g., inst0 or gpib0,8. </param>
     /// <param name="connectTimeout">           (Optional) The connect timeout [3000]. This timeouts overrides the 
     ///                                         <see cref="ONC.RPC.Client.OncRpcClientBase.TransmitTimeout"/></param>
-    public void Connect( string hostAddress, string interfaceDeviceString, int connectTimeout = 3000 )
+    public virtual void Connect( string hostAddress, string interfaceDeviceString, int connectTimeout = 3000 )
     {
         try
         {
@@ -603,7 +601,6 @@ public class Ieee488Client : IDisposable
         return total;
     }
 
-
     public int MaxReadRawLength { get; private set; }
 
     /// <summary>
@@ -933,34 +930,62 @@ public class Ieee488Client : IDisposable
         DeviceError reply = this.AbortClient.DeviceAbort( this.DeviceLink! );
         if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
         {
-            throw new DeviceException( $"; {nameof(Abort)} failed.", reply.ErrorCode.Value );
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Abort )} command.", reply.ErrorCode.Value );
         }
     }
 
     #endregion
 
-    #region " VXI-11 call implementations "
-
-    /// <summary>   Sends the Trigger command. </summary>
-    public virtual void Trigger()
-    {
-        if ( this.DeviceLink is null || this.CoreClient is null ) return;
-        DeviceError reply =  this.CoreClient.DeviceTrigger( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
-        if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Trigger )} failed.", reply.ErrorCode.Value );
-    }
+    #region " VXI-11 call implementations: Client "
 
     /// <summary>   Sends the Clear command. </summary>
     public virtual void Clear()
     {
         if ( this.DeviceLink is null || this.CoreClient is null ) return;
         DeviceError reply = this.CoreClient.DeviceClear( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
-        if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Clear )} failed.", reply.ErrorCode.Value );
+
+        if ( reply is null )
+            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+        else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Clear )} command.", reply.ErrorCode.Value );
     }
 
+    /// <summary>   Sends the Lock command. </summary>
+    public virtual void Lock()
+    {
+        if ( this.DeviceLink is null || this.CoreClient is null ) return;
+        DeviceError reply = this.CoreClient.DeviceLock( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout );
+
+        if ( reply is null )
+            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+        else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Lock )} command.", reply.ErrorCode.Value );
+    }
+
+    /// <summary>   Sends the Unlock command. </summary>
+    public virtual void Unlock()
+    {
+        if ( this.DeviceLink is null || this.CoreClient is null ) return;
+        DeviceError reply = this.CoreClient.DeviceUnlock( this.DeviceLink );
+
+        if ( reply is null )
+            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+        else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Unlock )} command.", reply.ErrorCode.Value );
+    }
+
+    /// <summary>   Sends the Trigger command. </summary>
+    public virtual void Trigger()
+    {
+        if ( this.DeviceLink is null || this.CoreClient is null ) return;
+        DeviceError reply = this.CoreClient.DeviceTrigger( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
+
+        if ( reply is null )
+            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+        else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Trigger )} command.", reply.ErrorCode.Value );
+    }
 
     #endregion
-
 
 }

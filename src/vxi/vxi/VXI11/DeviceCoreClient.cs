@@ -2,6 +2,7 @@ using System.Net;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
+using cc.isr.VXI11.IEEE488;
 
 namespace cc.isr.VXI11;
 
@@ -558,6 +559,76 @@ public class DeviceCoreClient : OncRpcClientStubBase
         DeviceError result = new();
         this.Client?.Call( ( int ) Vxi11Message.DeviceEnableSrqProcedure, Vxi11ProgramConstants.DeviceCoreVersion, request, result );
         return result;
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
+    /// Device executes a command.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_docmd_1</c> </remarks>
+    /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
+    /// <param name="cmd">          The command; which command to execute. </param>
+    /// <param name="value">        The value. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
+    /// </returns>
+    public virtual int DeviceDoCmd( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout, int cmd, int value )
+    {
+        XdrBufferEncodingStream encoder = new( 32 );
+        encoder.BeginEncoding();
+        encoder.EncodeInt( value );
+
+        DeviceDoCmdResp reply = this.DeviceDoCmd( link, new DeviceFlags( flags ), lockTimeout, ioTimeout, cmd, 4, encoder.GetEncodedData() );
+        if ( reply is null )
+            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+        else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( DeviceCoreClient.DeviceDoCmd)} command.", reply.ErrorCode.Value );
+
+        XdrBufferDecodingStream decoder = new( reply.GetDataOut() );
+        decoder.BeginDecoding();
+        return decoder.DecodeInt();
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
+    /// Device executes a command.
+    /// </summary>
+    /// <remarks>   Renamed from <c>device_docmd_1</c> </remarks>
+    /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
+    /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    ///                             call. </param>
+    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    ///                             options. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
+    ///                             server allows an I/O operation to take. </param>
+    /// <param name="cmd">          The command; which command to execute. </param>
+    /// <param name="value">        The value. </param>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
+    /// </returns>
+    public virtual bool DeviceDoCmd( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout, int cmd, bool value )
+    {
+        XdrBufferEncodingStream encoder = new( 32 );
+        encoder.BeginEncoding();
+        encoder.EncodeBoolean ( value );
+
+        DeviceDoCmdResp reply = this.DeviceDoCmd( link, new DeviceFlags( flags ), lockTimeout, ioTimeout, cmd, 4, encoder.GetEncodedData() );
+        if ( reply is null )
+            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+        else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( DeviceCoreClient.DeviceDoCmd )} command.", reply.ErrorCode.Value );
+
+        XdrBufferDecodingStream decoder = new( reply.GetDataOut() );
+        decoder.BeginDecoding();
+        return decoder.DecodeBoolean();
     }
 
     /// <summary>

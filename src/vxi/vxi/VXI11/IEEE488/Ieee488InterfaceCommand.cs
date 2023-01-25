@@ -98,7 +98,7 @@ public enum Ieee488InterfaceCommandOption
     ///
     /// CMD_BUS_STATUS_BUS_ADDRESS
     /// </para></summary>
-    BusAaddressStatus = 8,
+    BusAddressStatus = 8,
 
 }
 
