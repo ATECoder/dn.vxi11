@@ -168,7 +168,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
             Flags = flags
         };
         request.SetData( data );
-        return DeviceWrite( request );
+        return this.DeviceWrite( request );
     }
 
     /// <summary>  
@@ -255,7 +255,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
             LockTimeout = lockTimeout,
             IOTimeout = ioTimeout
         };
-        return DeviceReadStb( request );
+        return this.DeviceReadStb( request );
     }
 
     /// <summary>
@@ -347,7 +347,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
             LockTimeout = lockTimeout,
             IOTimeout = ioTimeout
         };
-        return DeviceClear( request );
+        return this.DeviceClear( request );
     }
 
     /// <summary>
@@ -393,7 +393,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
             LockTimeout = lockTimeout,
             IOTimeout = ioTimeout
         };
-        return DeviceRemote( request );
+        return this.DeviceRemote( request );
     }
 
     /// <summary>
@@ -439,7 +439,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
             LockTimeout = lockTimeout,
             IOTimeout = ioTimeout
         };
-        return DeviceRemote( request );
+        return this.DeviceRemote( request );
     }
 
     /// <summary>
@@ -575,17 +575,18 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
     ///                             server allows an I/O operation to take. </param>
     /// <param name="cmd">          The command; which command to execute. </param>
+    /// <param name="dataSize">     Size of the data. </param>
     /// <param name="value">        The value. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
     /// </returns>
-    public virtual int DeviceDoCmd( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout, int cmd, int value )
+    public virtual int DeviceDoCmd( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout, int cmd, int dataSize, int value )
     {
         XdrBufferEncodingStream encoder = new( 32 );
         encoder.BeginEncoding();
         encoder.EncodeInt( value );
 
-        DeviceDoCmdResp reply = this.DeviceDoCmd( link, new DeviceFlags( flags ), lockTimeout, ioTimeout, cmd, 4, encoder.GetEncodedData() );
+        DeviceDoCmdResp reply = this.DeviceDoCmd( link, new DeviceFlags( flags ), lockTimeout, ioTimeout, cmd, dataSize, encoder.GetEncodedData() );
         if ( reply is null )
             throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
         else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
@@ -610,17 +611,18 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
     ///                             server allows an I/O operation to take. </param>
     /// <param name="cmd">          The command; which command to execute. </param>
+    /// <param name="dataSize">     Size of the data. </param>
     /// <param name="value">        The value. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
     /// </returns>
-    public virtual bool DeviceDoCmd( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout, int cmd, bool value )
+    public virtual bool DeviceDoCmd( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout, int cmd, int dataSize, bool value )
     {
         XdrBufferEncodingStream encoder = new( 32 );
         encoder.BeginEncoding();
         encoder.EncodeBoolean ( value );
 
-        DeviceDoCmdResp reply = this.DeviceDoCmd( link, new DeviceFlags( flags ), lockTimeout, ioTimeout, cmd, 4, encoder.GetEncodedData() );
+        DeviceDoCmdResp reply = this.DeviceDoCmd( link, new DeviceFlags( flags ), lockTimeout, ioTimeout, cmd, dataSize, encoder.GetEncodedData() );
         if ( reply is null )
             throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
         else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )

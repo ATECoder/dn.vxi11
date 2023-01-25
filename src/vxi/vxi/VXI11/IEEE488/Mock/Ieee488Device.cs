@@ -1,4 +1,4 @@
-namespace cc.isr.VXI11.IEEE488;
+namespace cc.isr.VXI11.IEEE488.Mock;
 
 /// <summary>   An IEEE 488 Mock device. </summary>
 public partial class Ieee488Device : IIeee488Device

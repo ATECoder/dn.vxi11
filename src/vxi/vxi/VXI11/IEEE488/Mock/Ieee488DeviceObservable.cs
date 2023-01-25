@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace cc.isr.VXI11.IEEE488;
+namespace cc.isr.VXI11.IEEE488.Mock;
 
 public partial class Ieee488Device : INotifyPropertyChanged
 {

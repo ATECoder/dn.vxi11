@@ -17,7 +17,44 @@ Instruments may support this protocol directly (e.g., as part of implementing th
 
 VXI-11 uses TCP as its transport protocol.
 
-The [VXI Bus Specification] was published in 1995 by the VXIbus Consortium, Inc.
+The [VXI-11 Specifications] was published in 1995 by the VXIbus Consortium, Inc.
+
+## [Making sense of T&M protocols] LAN - VXI-11
+VXI-11 dates all the way back to 1995. It is layered on top of the [ONC Remote Procedure Call (RPC)]protocol, which itself is layered on top of TCP/IP. You can find the [VXI-11 Specifications].
+
+RPC is synchronous by nature, which means that a request needs to be completed before the next one can be issued. (This can be a performance bottleneck when there’s a sequence of many small calls, which is why HiSLIP was developed as an alternative.)
+
+One interesting feature of VXI-11 is the ability to discover connected devices on the network: instead of explicitly specifying the IP address or host name of your device, devices make themselves known by responding to a broadcast transmission (While it’s supposed to be supported, I have unable to make this work on some instruments).
+
+Everything that follows in this section is nicely hidden behind APIs, but it took me a long time to figure this all out, so I’m recording it here for posterity. Feel free to skip.
+
+Under the hood, making a connection to a VXI-11 enabled device goes in two phases:
+
+* RPC PortMap call to request TCP/IP communication port - Port 111
+
+<ul>
+All TCP/IP connections go over ports. There is no standard port assigned for VXI-11 transactions, but RPC enabled servers often (always?) run a PortMap service on port 111.  
+</ul>
+
+<ul>
+When a client wants to establish an RPC connection, the client first issues a request to the PortMap port to ask which TCP/IP port should be used for a particular RPC service. Each RPC service is assigned a so-called program number. The program number of the VXI-11 core, Abort and Interrupt channels are 395183(0x607af), 395184 and 395185 respectively.
+</ul>
+
+<ul>
+The PortMap server replies with the port number that should be used for the actual VXI-11 RPC transaction.
+</ul>
+
+<ul>
+A port number commonly used by Siglent scopes seems to be 9009. Keithley instruments use 1024 as specified by the LXI specifications.
+</ul>
+
+* Actual VXI-11 transactions over the assigned port - Port 9009
+
+<ul>
+Like all RPC programs, the VXI-11 RPC calls are specified in RPCL (Remote Procedure Call Language), a formal description that can be used for code generators such as RPCGEN to automatically create client and server stubs for implementation.
+</ul>
+
+Wireshark was really useful to dump all the traffic between my PC and the instrument, and it has built-in support for VXI-11 RPC calls!
 
 <a name="Network-Instrument-Protocol"></a>
 ## Network Instrument Protocol
@@ -52,6 +89,7 @@ The interface definition ( see Appendix I, "Network instrument RPCL") gives the 
 |device_abort      |DeviceAbort     |abort    |device aborts an in-progress call
 |device_intr_srq   |DeviceIntrSrq   |interrupt|used by device to send a service request
 
+<a name="Table-1"></a>
 #### Table 1 Network instrument Protocol
 The 17 messages that define the network instrument protocol. These messages are expected to be supported by all devices that claim to be network instrument compliant. Most of these messages will be familiar to those who have worked with IEEE 488 devices.
 
@@ -70,6 +108,7 @@ These three channels correspond to three RPC clients/servers.
 |DEVICE_ASYNC   |DeviceAsync      |0x0607B0 
 |DEVICE_INTR    |DeviceInterrupt  |0x0607B1
 
+<a name="Table-2"></a>
 #### Table 2 VXI-11 RPC Programs
 
 
@@ -93,6 +132,7 @@ These three channels correspond to three RPC clients/servers.
 |Device_Error       |create_intr_chan  |Device_RemoteFunc     | 25
 |Device_Error       |destroy_intr_chan |void                  | 26
 
+<a name="Table-3"></a>
 #### Table 3 Device Core Program Implementation
 
 ## Device Async Program implementation
@@ -109,7 +149,8 @@ These three channels correspond to three RPC clients/servers.
 |-------------------|------------------|-----------------|---
 |void               |device_intr_srq   |Device_SrqParms  | 30
 
-#### Table 5 Device Interrupt Program Implementation
+<a name="Table-4"></a>
+#### Table 4 Device Interrupt Program Implementation
 
 |VXI-11 Name           | C# Name 
 |----------------------|--------------
@@ -130,7 +171,8 @@ These three channels correspond to three RPC clients/servers.
 |Device_WriteResp      | DeviceWriteResp     
 |void                  |  
 
-#### Table 4 VXI-11 and C# Nomenclature
+<a name="Table-5"></a>
+#### Table 5 VXI-11 and C# Nomenclature
 
 ## Core and Abort Channel Establishment Sequence
 Implementation details may vary from one
@@ -154,7 +196,8 @@ The interrupt is established as follows:
 |                                        | create RPC client (interrupt channel)
 |                                        | reply to create_intr_chan
 
-#### Table 5. Interrupt Channel Establishment Sequence
+<a name="Table-6"></a>
+#### Table 6. Interrupt Channel Establishment Sequence
 
 ### Note
 * A `create_intr_chan` request received when an interrupt channel already exists is ignored; the
@@ -178,7 +221,8 @@ The interrupt mechanism allows the device to send a notification call to the con
 |                      | <= acknowledge to write
 |                      | <= device_intr_srq
 
-#### Table 6 Possible sequences of interrupt channel creation and usage.
+<a name="Table-7"></a>
+#### Table 7 Possible sequences of interrupt channel creation and usage.
 
 ### Note
 * Network instrument clients can implement interrupts by using either a separate interrupt process, threads, or by emulating threads using a signal handling routine that is invoked on incoming messages to the interrupt port.
@@ -251,8 +295,7 @@ A controller should use links to the interface with great care. They must be use
 ## TCP/IP-IEEE 488.2 Device String Format
 The contents of the device string determines which Message Exchange Interface is associated with a link. This structure allows multiple instruments to use the same IP address.
 
-A TCP/IP-IEEE 488.2 Instrument Interface supports a device string of the following format:
-`<inst_name>` where:
+A TCP/IP-IEEE 488.2 Instrument Interface supports a device string of the following format: `<inst_name>` where:
 * `<inst_name>` A name corresponding to a single instrument.
 
 The TCP/IP-IEEE 488.2 Instrument Interface recognizes an `<inst_name>` of `"inst0"` as the first or only instrument within the TCP/IP-IEEE 488.2 Instrument Interface. Additional instruments are identified by `"instN"` where N is a non-negative integer assigned sequentially beginning at one.
@@ -261,8 +304,7 @@ One and only one Message Exchange Interface and Status Reporting exists for each
 
 ## Interface Communication 
 
-The `device_docmd` RPC is a general purpose RPC which provides interface specific operations not
-covered by the other defined RPCs. Table 7 describes the allowed commands.
+The `device_docmd` RPC is a general purpose RPC which provides interface specific operations not covered by the other defined RPCs. Table 7 describes the allowed commands.
 
 | Name        | `cmd`    | len   | `datasize`
 |-------------|----------|-------|-----------
@@ -274,9 +316,54 @@ covered by the other defined RPCs. Table 7 describes the allowed commands.
 |Bus Address  | 0x02000A | 4     | 4
 |IFC Control  | 0x020010 | 0     | X
 
-## References
+<a name="Table-8"></a>
+#### Table 8 Allowed generic commands.
 
-* VMEbus Extensions for Instrumentation: TCP/IP Instrument Protocol Specification VXI-11, Revision 1.0, July 17, 1995, [VXI Bus Specification].
+### Send Command
+In response to a device_docmd RPC whose `cmd` value is 0x20001, a TCP/IP-IEEE 488.1 Interface Device executes the SEND COMMAND control sequence described in IEEE 488.2, 16.2.1, where the commands sent are contained in `data_in`. The returned `data_out` is the be same as the received 'data_in'.
+
+### Bus Status
+In response to a device_docmd RPC whose `cmd` value is 0x20001, a TCP/IP-IEEE 488.1 Interface Device returns a value in the response parameter 'data_out' which depends on the received value in 'data_in' as described in Table 8. The size of the returned `data_out`, `data_out.data_out_len`, is two.
+
+
+| Name        |`data_in`| Value returned
+|-------------|---------|-------
+|REMOTE       |1        |1 if the REN message is true, 0 otherwise
+|SRQ          |2 |1 if the SRQ message is true, 0 otherwise
+|NDAC         |3 |1 if the NDAC message is true, 0 otherwise
+|SYSTEM CONTROLLER |4 |1 if the TCP/IP-IEEE 488.1 Interface Device is in the system control active state, 0 otherwise
+|CONTROLLER-IN-CHARGE |5 |1 if the TCP/IP-IEEE 488.1 Interface Device is not in the controller idle state, 0 otherwise
+|TALKER      |6 |1 if the TCP/IP-IEEE 488.1 Interface Device is addressed to talk, 0 otherwise
+|LISTENER    |7 |1 if the TCP/IP-IEEE 488.1 Interface Device is addressed to listen, 0 otherwise
+|BUS ADDRESS |8 |the TCP/IP-IEEE 488.1 Interface Device's address (0-30)
+
+<a name="Table-1"></a>
+#### Table 9 Received and returned values for Bus Status.
+
+### ATN Control
+In response to a device_docmd RPC whose `cmd` value is 0x20002, a TCP/IP-IEEE 488.1 Interface Device sets the ATN line as follows:
+1. If the `data_in` parameter is non-zero, then set the ATN line true.
+2. If the `data_in` parameter is zero, then set the ATN line false. 
+The returned `data_out` is the same as the received `data_in`.
+
+### REN Control
+In response to a device_docmd RPC whose `cmd` value is 0x20003, a TCP/IP-IEEE 488.1 Interface Device sets the REN line as follows:
+1. If the `data_in` parameter is non-zero, then set the SRE (send remote enable) message true.
+2. If the `data_in` parameter is zero, then set the SRE (send remote enable) message false.  
+The returned `data_out` is be same as the received `data_in`.
+
+### Pass Control
+In response to a device_docmd RPC whose `cmd` value is 0x20004, a TCP/IP-IEEE 488.1 Interface Device executes the `PASS CONTROL` control sequence described in IEEE 488.2, 16.2.14 where the talk address is constructed from the value in `data_in` bitwise OR-ed with 0x80. The returned `data_out` is the same as the received `data_in`.
+
+### Bus Address
+In response to a device_docmd RPC whose `cmd` value is 0x2000A and `data_in` contains a value between 0 and 30 inclusive, a TCP/IP-IEEE 488.1 Interface Device sets its address to the contents of `data_in`. If `data_in` does not contain a legal value, device_docmd returns immediately with error set to `parameter error` (5). The returned `data_out` is the same as the received `data_in`.
+
+### IFC Control
+In response to a device_docmd RPC whose `cmd` value is 0x20010, a TCP/IP-IEEE 488.1 Interface Device executes the `SEND IFC` control sequence described in IEEE 488.2, 16.2.8. The returned `data_out` has `data_out.data_out_len` set to zero.
+
+### References
+
+* VMEbus Extensions for Instrumentation: TCP/IP Instrument Protocol Specification VXI-11, Revision 1.0, July 17, 1995, [VXI-11 Specifications].
 * Power Programming with RPC, John Bloomer, O’Reilly & Associates, Inc., 1999.
 * VXI-11 RPC Programming Guide for the 8065: An Introduction to RPC Programming, Application Note AB80-3, [ICS Electronics].
 * SRQ Handling With a VXI-11 Interrupt Channel On ICS’s Model 8065 Ethernet-To-GPIB Controller, Application Note AB80-4, [ICS Electronics].
@@ -288,5 +375,7 @@ covered by the other defined RPCs. Table 7 describes the allowed commands.
 [ICS Electronics]: https://www.icselect.com/
 [LXI]: https://www.lxistandard.org/About/AboutLXI.aspx
 [VXI Consortium]: http://www.vxibus.org
-[VXI Bus Specification]: https://vxibus.org/specifications.html
+[VXI-11 Specifications]: https://vxibus.org/specifications.html
 [RPC]: https://en.wikipedia.org/wiki/Sun_RPC
+[Making sense of T&M protocols]: https://tomverbeure.github.io/2020/06/07/Making-Sense-of-Test-and-Measurement-Protocols.html
+[ONC Remote Procedure Call (RPC)]: https://en.wikipedia.org/wiki/Open_Network_Computing_Remote_Procedure_Call

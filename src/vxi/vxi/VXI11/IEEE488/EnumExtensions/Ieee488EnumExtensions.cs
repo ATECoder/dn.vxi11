@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Reflection;
 
+using cc.isr.VXI11.IEEE488.Mock;
+
 namespace cc.isr.VXI11.IEEE488.EnumExtensions;
 
 /// <summary>   A support class for VXI-11 IEEE 488 enum extensions. </summary>

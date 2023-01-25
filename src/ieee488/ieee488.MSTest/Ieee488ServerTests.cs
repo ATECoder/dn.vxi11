@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Reflection;
 
 using cc.isr.VXI11.Logging;
+using cc.isr.VXI11.IEEE488.Mock;
 
 namespace cc.isr.VXI11.IEEE488.MSTest;
 

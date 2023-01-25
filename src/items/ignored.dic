@@ -18,8 +18,10 @@ Portmap
 portmapper
 rethrow
 rpcgen
+Siglent
 struct
 Tegam
 unlisten
 unregistration
 upcast
+Wireshark

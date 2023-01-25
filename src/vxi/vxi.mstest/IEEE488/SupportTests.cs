@@ -1,6 +1,7 @@
 using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.IEEE488;
 using cc.isr.VXI11.IEEE488.EnumExtensions;
+using cc.isr.VXI11.IEEE488.Mock;
 
 namespace cc.isr.VXI11.MSTest.IEEE488;
 

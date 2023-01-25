@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace cc.isr.VXI11.IEEE488;
+namespace cc.isr.VXI11.IEEE488.Mock;
 
 /// <summary>   Values that represent IEEE488 operation types. </summary>
 public enum Ieee488OperationType
