@@ -525,7 +525,37 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceEnableSrqProcedure"/>;
     /// Device enables/disables sending of service requests.
     /// </summary>
-    /// <remarks>   Renamed from <c>device_enable_srq_1</c> </remarks>
+    /// <remarks>   <para> 
+    /// 
+    /// The <c>create_intr_chan</c> RPC is used to identify the host or port that can service the interrupt. The
+    /// <c>device_enable_srq</c> RPC is used to enable or disable an interrupt. The <c>destroy_intr_chan</c> RPC is used to
+    /// close the interrupt channel. </para><para>
+    ///
+    /// The <c>device_enable_srq</c> RPC contains a handle parameter. The same data contained in handle is passed
+    /// back in the handle parameter of the <c>device_intr_srq</c> RPC. Since the same data is passed back, the
+    /// network instrument client can identify the link associated with the <c>device_intr_srq</c>. </para><para>
+    ///
+    /// The network instrument protocol recognizes one type of interrupt, service request. Note that the return
+    /// type to the interrupt RPC is void, denoting a one-way RPC. </para><para>
+    ///
+    /// A network instrument host uses the following RPCL definition for interrupt messages.
+    /// <code>
+    /// struct Device_SrqParms
+    /// {
+    ///    opaque handle;
+    /// };
+    /// program DEVICE_INTR
+    /// {
+    ///    version DEVICE_INTR_VERSION {
+    ///        void device_intr_srq( Device_SrqParms) = 30;
+    ///    }=1;
+    /// } = 0x0607B1;
+    /// </code>
+    /// The program number <c>0x0607B1</c> is the registered program number for the network instrument protocol's
+    /// interrupt channel. </para> <para>
+    /// 
+    /// Renamed from <c>device_enable_srq_1</c> </para>
+    /// </remarks>
     /// <param name="link">     The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                         call. </param>
     /// <param name="enable">   True to enable, false to disable service request interrupts. </param>
@@ -736,7 +766,15 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.CreateInterruptChannelProcedure"/>;
     /// Device creates interrupt channel.
     /// </summary>
-    /// <remarks>   Renamed from <c>create_intr_chan_1</c> </remarks>
+    /// <remarks>   <para> 
+    /// 
+    /// The <c>create_intr_chan</c> RPC is used to identify the host or port that can service the interrupt. The
+    /// <c>device_enable_srq</c> RPC is used to enable or disable an interrupt. The <c>destroy_intr_chan</c> RPC is used to
+    /// close the interrupt channel. </para><para>
+    ///
+    /// Renamed from <c>create_intr_chan_1</c>  </para>
+    /// 
+    /// </remarks>
     /// <param name="hostAddress">      The host address. </param>
     /// <param name="hostPort">         The host port. </param>
     /// <param name="programFamily">    (Optional) The <see cref="DeviceAddrFamily"/> program family [TCP]. </param>

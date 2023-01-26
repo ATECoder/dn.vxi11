@@ -6,10 +6,10 @@ using System.Net;
 namespace cc.isr.VXI11;
 
 /// <summary>
-/// The abstract VXI-11 <see cref="Vxi11ProgramConstants.DeviceInterruptProgram"/> <see cref="DeviceIntrServerStubBase"/> class is the base class upon which
+/// The VXI-11 <see cref="Vxi11ProgramConstants.DeviceInterruptProgram"/> <see cref="DeviceIntrServerStubBase"/> class is the base class upon which
 /// to build VXI-11 <see cref="Vxi11ProgramConstants.DeviceInterruptProgram"/> TCP and UDP servers.
 /// </summary>
-public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
+public class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
 {
 
     /// <summary>   The interrupt port default. </summary>
@@ -98,7 +98,7 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
                     {
                         DeviceSrqParms request = new();
                         call.RetrieveCall( request );
-                        this.DeviceIntrSrq( request );
+                        this.HandleSerivceRequest( request );
                         call.Reply( VoidXdrCodec.VoidXdrCodecInstance );
                         break;
                     }
@@ -112,17 +112,33 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
 
     #endregion
 
-    #region " remote procedure calls."
+    #region " event handlers "
+
+    public event EventHandler<ServiceRequestEventArgs>? ServiceRequested;
+
+    /// <summary>   Executes the <see cref="ServiceRequested"/> event. </summary>
+    /// <param name="e">    Event information to send to registered event handlers. </param>
+    private void OnServiceRequested( ServiceRequestEventArgs e )
+    {
+        var handler = this.ServiceRequested;
+        handler?.Invoke( this, e );
+    }
+
+    #endregion
+
+    #region " handle remote procedure dispatch."
 
     /// <summary>
-    /// Calls remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
+    /// Handles the remote <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> request.
     /// </summary>
-    /// <remarks>   <para>
-    /// 
-    /// Renamed from <c>device_intr_srq_1</c> </para>. </remarks>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    /// <param name="request"> The parameter of type <see cref="Codecs.DeviceSrqParms"/> to send to the remote procedure call.. </param>
-    public abstract void DeviceIntrSrq( DeviceSrqParms request );
+    /// <param name="request"> The parameter of type <see cref="Codecs.DeviceSrqParms"/> received from the network instrument,
+    /// which acts as a client for the network instrument client, which acts as a server, when handling service requests. </param>
+    public virtual void HandleSerivceRequest( DeviceSrqParms request )
+    {
+        if ( request == null ) return;
+        this.OnServiceRequested( new ServiceRequestEventArgs( request.GetHandle() ) );
+    }
 
     #endregion
 

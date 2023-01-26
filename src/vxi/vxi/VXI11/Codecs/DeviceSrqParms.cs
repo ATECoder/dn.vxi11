@@ -17,9 +17,14 @@ public class DeviceSrqParms : IXdrCodec
 {
 
     /// <summary>   Default constructor. </summary>
-    public DeviceSrqParms()
+    public DeviceSrqParms() : this( new byte[ 40 ] )
     {
         this._handle = Array.Empty<byte>();
+    }
+
+    public DeviceSrqParms( byte[] handle )
+    {
+        this._handle = handle ?? new byte[ 40 ];
     }
 
     /// <summary>   Constructor. </summary>
