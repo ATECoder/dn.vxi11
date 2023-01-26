@@ -3,6 +3,7 @@ using System.Reflection;
 
 using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.IEEE488.Mock;
+using cc.isr.ONC.RPC.Portmap;
 
 namespace cc.isr.VXI11.IEEE488.MSTest;
 
@@ -32,17 +33,19 @@ public class Ieee488ServerTests
 
             _server.PropertyChanged += OnServerPropertyChanged;
             _ = Task.Factory.StartNew( () => {
-                Logger.Writer.LogInformation( "starting the server task; this takes ~11 seconds..." );
+                Logger.Writer.LogInformation( "starting the embedded port map service; this takes ~3.5 seconds." );
+                using OncRpcEmbeddedPortmapServiceStub epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
+                Logger.Writer.LogInformation( "starting the server task; this takes ~2.5 seconds." );
                 _server.Run();
             } );
 
-            Logger.Writer.LogInformation( $"{nameof( Ieee488Server )} waiting running {DateTime.Now:ss.fff}" );
+            Logger.Writer.LogInformation( $"{nameof( Ieee488MockServer )} waiting running {DateTime.Now:ss.fff}" );
 
             // wait till the server is running.
 
             _ = _server.ServerStarted( 2 * Ieee488ServerTests.ServerStartTimeTypical , Ieee488ServerTests.ServerStartLoopDelay );
 
-            Logger.Writer.LogInformation( $"{nameof( Ieee488Server )} is {(_server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
+            Logger.Writer.LogInformation( $"{nameof( Ieee488MockServer )} is {(_server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
         }
         catch ( Exception ex )
         {
@@ -78,7 +81,7 @@ public class Ieee488ServerTests
     private static readonly string? _ipv4Address = "127.0.0.1";
 
     private static readonly string _identity = "Ieee488 mock device";
-    private static Ieee488Server? _server;
+    private static Ieee488MockServer? _server;
     private static Ieee488Device? _device;
 
     private static void OnServerPropertyChanged( object? sender, PropertyChangedEventArgs e )
@@ -86,19 +89,19 @@ public class Ieee488ServerTests
         if ( _server is null ) { return; }
         switch ( e.PropertyName )
         {
-            case nameof( Ieee488Server.ReadMessage ):
+            case nameof( Ieee488MockServer.ReadMessage ):
                 Logger.Writer.LogInformation( _server.ReadMessage );
                 break;
-            case nameof( Ieee488Server.WriteMessage ):
+            case nameof( Ieee488MockServer.WriteMessage ):
                 Logger.Writer.LogInformation( _server.WriteMessage );
                 break;
-            case nameof( Ieee488Server.CorePortNumber ):
-                Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.CorePortNumber}" );
+            case nameof( Ieee488MockServer.PortNumber ):
+                Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.PortNumber}" );
                 break;
-            case nameof( Ieee488Server.IPv4Address ):
+            case nameof( Ieee488MockServer.IPv4Address ):
                 Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.IPv4Address}" );
                 break;
-            case nameof( Ieee488Server.Running ):
+            case nameof( Ieee488MockServer.Running ):
                 Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.Running}" );
                 break;
         }

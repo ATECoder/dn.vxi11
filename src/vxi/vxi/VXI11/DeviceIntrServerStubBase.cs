@@ -12,6 +12,11 @@ namespace cc.isr.VXI11;
 public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
 {
 
+    /// <summary>   The interrupt port default. </summary>
+    public static int InterruptPortDefault = 540;
+
+    #region " construction and cleanup "
+
     /// <summary>   Default constructor. </summary>
     public DeviceIntrServerStubBase() : this( 0 )
     {
@@ -28,6 +33,9 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
     /// <param name="port">     The port. </param>
     public DeviceIntrServerStubBase( IPAddress bindAddr, int port )
     {
+        this._ipv4Address = bindAddr;
+        this.PortNumber = port;
+
         OncRpcProgramInfo[] registeredPrograms = new OncRpcProgramInfo[] {
             new OncRpcProgramInfo(Vxi11ProgramConstants.DeviceInterruptProgram, Vxi11ProgramConstants.DeviceInterruptVersion),
         };
@@ -39,6 +47,32 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
         };
         this.SetTransports( transports );
     }
+
+    #endregion
+
+    #region " members "
+
+    private int _portNumber;
+    /// <summary>   Gets or sets the port number. </summary>
+    /// <value> The port number. </value>
+    public int PortNumber
+    {
+        get => this._portNumber;
+        set => _ = this.SetProperty( ref this._portNumber, value );
+    }
+
+    private IPAddress _ipv4Address;
+    /// <summary>   Gets or sets the host IPv4 address of this server. </summary>
+    /// <value> The IPv4 address. </value>
+    public IPAddress IPv4Address
+    {
+        get => this._ipv4Address;
+        set => _ = this.SetProperty( ref this._ipv4Address, value );
+    }
+
+    #endregion
+
+    #region " actions "
 
     /// <summary>   Dispatch (handle) an ONC/RPC request from a client. </summary>
     /// <remarks>
@@ -76,6 +110,10 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
             call.ReplyProgramNotAvailable();
     }
 
+    #endregion
+
+    #region " remote procedure calls."
+
     /// <summary>
     /// Calls remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
     /// </summary>
@@ -83,7 +121,9 @@ public abstract class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDi
     /// 
     /// Renamed from <c>device_intr_srq_1</c> </para>. </remarks>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceSrqParms"/>) to the remote procedure call.. </param>
-    public abstract void DeviceIntrSrq( DeviceSrqParms arg1 );
+    /// <param name="request"> The parameter of type <see cref="Codecs.DeviceSrqParms"/> to send to the remote procedure call.. </param>
+    public abstract void DeviceIntrSrq( DeviceSrqParms request );
+
+    #endregion
 
 }

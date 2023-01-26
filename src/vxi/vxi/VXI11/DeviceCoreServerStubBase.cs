@@ -12,6 +12,8 @@ namespace cc.isr.VXI11;
 public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
 {
 
+    #region " construction and cleanup "
+
     /// <summary>   Default constructor. </summary>
     public DeviceCoreServerStubBase() : this( 0 )
     {
@@ -28,6 +30,9 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
     /// <param name="port">     The port. </param>
     public DeviceCoreServerStubBase( IPAddress bindAddr, int port )
     {
+        this._ipv4Address = bindAddr;
+        this.PortNumber = port;
+
         OncRpcProgramInfo[] registeredPrograms = new OncRpcProgramInfo[] {
             new OncRpcProgramInfo(Vxi11ProgramConstants.DeviceCoreProgram, Vxi11ProgramConstants.DeviceCoreVersion),
         };
@@ -42,6 +47,32 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
         this.CharacterEncoding = DeviceCoreClient.EncodingDefault;
         this.Running = false;
     }
+
+    #endregion
+
+    #region " members "
+
+    private int _portNumber;
+    /// <summary>   Gets or sets the port number. </summary>
+    /// <value> The port number. </value>
+    public int PortNumber
+    {
+        get => this._portNumber;
+        set => _ = this.SetProperty( ref this._portNumber, value );
+    }
+
+    private IPAddress _ipv4Address;
+    /// <summary>   Gets or sets the host IPv4 address of this server. </summary>
+    /// <value> The IPv4 address. </value>
+    public IPAddress IPv4Address
+    {
+        get => this._ipv4Address;
+        set => _ = this.SetProperty( ref this._ipv4Address, value );
+    }
+
+    #endregion
+
+    #region " actions "
 
     /// <summary>   Dispatch (handle) an ONC/RPC request from a client. </summary>
     /// <remarks>
@@ -190,6 +221,10 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
             call.ReplyProgramNotAvailable();
     }
 
+    #endregion
+
+    #region " VXI-11 procedure calls. "
+
     /// <summary>  Opens a link to a device. </summary>
     /// <remarks> Renamed from <c>create_link_1</c> </remarks>
     /// <param name="arg1"> The parameter (of type <see cref="Codecs.CreateLinkParms"/>) to the remote procedure call.. </param>
@@ -278,5 +313,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
     /// <remarks> Renamed from <c>destroy_intr_chan_1</c> </remarks>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
     public abstract DeviceError DestroyIntrChan();
+
+    #endregion
 
 }

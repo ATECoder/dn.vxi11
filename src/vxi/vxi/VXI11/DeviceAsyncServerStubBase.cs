@@ -12,6 +12,11 @@ namespace cc.isr.VXI11;
 public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
 {
 
+    /// <summary>   The abort port default. </summary>
+    public static int AbortPortDefault = 440;
+
+    #region " construction and cleanup "
+
     /// <summary>   Default constructor. </summary>
     public DeviceAsyncServerStubBase() : this( 0 )
     {
@@ -28,6 +33,9 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     /// <param name="port">     The port. </param>
     public DeviceAsyncServerStubBase( IPAddress bindAddr, int port )
     {
+        this._ipv4Address= bindAddr;
+        this.PortNumber = port;
+
         OncRpcProgramInfo[] registeredPrograms = new OncRpcProgramInfo[] {
             new OncRpcProgramInfo(Vxi11ProgramConstants.DeviceAsyncProgram, Vxi11ProgramConstants.DeviceAsyncVersion),
         };
@@ -39,6 +47,32 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
         };
         this.SetTransports( transports );
     }
+
+    #endregion
+
+    #region " members "
+
+    private int _portNumber;
+    /// <summary>   Gets or sets the port number. </summary>
+    /// <value> The port number. </value>
+    public int PortNumber
+    {
+        get => this._portNumber;
+        set => _ = this.SetProperty( ref this._portNumber, value );
+    }
+
+    private IPAddress _ipv4Address;
+    /// <summary>   Gets or sets the host IPv4 address of this server. </summary>
+    /// <value> The IPv4 address. </value>
+    public IPAddress IPv4Address
+    {
+        get => this._ipv4Address;
+        set => _ = this.SetProperty( ref this._ipv4Address, value );
+    }
+
+    #endregion
+
+    #region " action " 
 
     /// <summary>   Dispatch (handle) an ONC/RPC request from a client. </summary>
     /// <remarks>
@@ -76,6 +110,10 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
             call.ReplyProgramNotAvailable();
     }
 
+    #endregion
+
+    #region " remote procedure actions " 
+
     /// <summary>
     /// Calls remote procedure <see cref="Vxi11Message.DeviceAbortProcedure"/>.
     /// </summary>
@@ -86,5 +124,7 @@ public abstract class DeviceAsyncServerStubBase : OncRpcServerStubBase, IOncRpcD
     /// <param name="link"> The request of type <see cref="Codecs.DeviceLink"/> to send to the remote procedure call.. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
     public abstract DeviceError DeviceAbort( DeviceLink link );
+
+    #endregion
 
 }

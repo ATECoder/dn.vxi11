@@ -1,11 +1,17 @@
 // See https://aka.ms/new-console-template for more information
 
-Console.WriteLine( "Starting VXI-11 IEEE 488 Server..." );
+using cc.isr.ONC.RPC.Logging;
+using cc.isr.ONC.RPC.Portmap;
+
 try
 {
-    cc.isr.VXI11.IEEE488.Mock.Ieee488Server server = new();
+    cc.isr.VXI11.IEEE488.Mock.Ieee488MockServer server = new();
     // TestServer.Ieee488Server server = new();
     // Vxi11Server server = new Vxi11Server();
+    Logger.Writer.LogInformation( "Starting the embedded port map service" );
+    using OncRpcEmbeddedPortmapServiceStub epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
+
+    Logger.Writer.LogInformation( "Starting VXI-11 IEEE 488 Server" );
     server.Run();
 }
 catch ( System.Exception e )

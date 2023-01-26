@@ -1,56 +1,37 @@
 using System.Net;
 using System.Reflection;
 
-using cc.isr.ONC.RPC.Portmap;
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.Visa;
 using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.IEEE488.Mock;
 
-/// <summary>   An IEEE488 server. </summary>
+/// <summary>   An IEEE488 Mock server. </summary>
 /// <remarks>   
 /// Closing a client connected to the Mock local server no longer throws an exception when destroying the link.
 /// </remarks>
-public partial class Ieee488Server : DeviceCoreServerStubBase
+public partial class Ieee488MockServer : DeviceCoreServerStubBase
 {
-
-    /// <summary>   The abort port default. </summary>
-    public static int AbortPortDefault = 440;
 
     #region " construction and cleanup "
 
-    /// <summary>
-    /// current device
-    /// </summary>
-    private readonly IIeee488Device? _device = null;
-
-    /// <summary>
-    /// Thread synchronization locks
-    /// </summary>
-    private readonly ManualResetEvent _asyncLocker = new( false );
-
-    /// <summary>
-    /// Read cache buffer
-    /// </summary>
-    private byte[] _readBuffer = Array.Empty<byte>();
-
     /// <summary>   Default constructor. </summary>
-    public Ieee488Server() : this( null, 0 )
+    public Ieee488MockServer() : this( null, 0 )
     {
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port number where the server will wait for incoming calls. </param>
-    public Ieee488Server( int port ) : this( null, port )
+    public Ieee488MockServer( int port ) : this( null, port )
     {
     }
 
-    public Ieee488Server( IPAddress? bindAddr, int port ) : this( new Ieee488Device(), bindAddr, port )
+    public Ieee488MockServer( IPAddress? bindAddr, int port ) : this( new Ieee488Device(), bindAddr, port )
     {
     }
 
-    public Ieee488Server( Ieee488Device device ) : this( device, null, 0 )
+    public Ieee488MockServer( Ieee488Device device ) : this( device, null, 0 )
     {
     }
 
@@ -58,38 +39,19 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     /// <param name="device">   current device. </param>
     /// <param name="bindAddr"> The local Internet Address the server will bind to. </param>
     /// <param name="port">     The port number where the server will wait for incoming calls. </param>
-    public Ieee488Server( Ieee488Device device, IPAddress? bindAddr, int port ) : base( bindAddr ?? IPAddress.Any, port )
+    public Ieee488MockServer( Ieee488Device device, IPAddress? bindAddr, int port ) : base( bindAddr ?? IPAddress.Any, port )
     {
         this._device = device;
         this._interfaceDeviceString = string.Empty;
-        this._ipv4Address = bindAddr is null ? string.Empty : bindAddr.ToString();
         this._readMessage = string.Empty;
         this._writeMessage = string.Empty;
-        this.AbortPortNumber = Ieee488Server.AbortPortDefault;
+        this.AbortPortNumber = DeviceAsyncServerStubBase.AbortPortDefault;
         this.MaxReceiveLength = Ieee488Client.MaxReceiveLengthDefault;
     }
 
     #endregion
 
-    #region " server properties "
-
-    private int _corePortNumber;
-    /// <summary>   Gets or sets the core port number. </summary>
-    /// <value> The port number. </value>
-    public int CorePortNumber
-    {
-        get => this._corePortNumber;
-        set => _ = this.SetProperty( ref this._corePortNumber, value );
-    }
-
-    private string _ipv4Address;
-    /// <summary>   Gets or sets the IPv4 address. </summary>
-    /// <value> The IPv4 address. </value>
-    public string IPv4Address
-    {
-        get => this._ipv4Address;
-        set => _ = this.SetProperty( ref this._ipv4Address, value );
-    }
+    #region " abort server "
 
     private int _abortPortNumber;
     /// <summary>   Gets or sets the abort port number. </summary>
@@ -178,6 +140,24 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
         set => _ = this.SetProperty( ref this._maxReceiveLength, value );
     }
 
+    #endregion
+
+    #region " mock device "
+
+    /// <summary>
+    /// current device
+    /// </summary>
+    private readonly IIeee488Device? _device = null;
+
+    /// <summary>
+    /// Thread synchronization locks
+    /// </summary>
+    private readonly ManualResetEvent _asyncLocker = new( false );
+
+    /// <summary>
+    /// Read cache buffer
+    /// </summary>
+    private byte[] _readBuffer = Array.Empty<byte>();
 
     #endregion
 
@@ -437,97 +417,5 @@ public partial class Ieee488Server : DeviceCoreServerStubBase
     }
 
     #endregion
-
-    #region " port mapper "
-
-#if false
-private static void EstablishPortmapService()
-    {
-
-        // Ignore all problems during unregistration.
-
-        OncRpcEmbeddedPortmapService epm;
-
-        Logger.Writer.LogVerbose( "Checking for portmap service: " );
-        bool externalPortmap = OncRpcEmbeddedPortmapService.TryPingPortmapService();
-        if ( externalPortmap )
-            Logger.Writer.LogVerbose( "A portmap service is already running." );
-        else
-            Logger.Writer.LogVerbose( "No portmap service available." );
-
-        // Create embedded portmap service and check whether is has sprung into action.
-
-        Logger.Writer.LogVerbose( "Creating embedded portmap instance: " );
-        try
-        {
-            epm = new OncRpcEmbeddedPortmapService();
-
-            if ( !epm.EmbeddedPortmapInUse() )
-                Logger.Writer.LogVerbose( "embedded service not used: " );
-            else
-                Logger.Writer.LogVerbose( "embedded service started: " );
-            if ( epm.EmbeddedPortmapInUse() == externalPortmap )
-            {
-                Logger.Writer.LogMemberWarning( "ERROR: no service available or both." );
-                return;
-            }
-        }
-        catch ( IOException e )
-        {
-            Logger.Writer.LogMemberError( "failed establishing Portmap service:", e );
-        }
-        catch ( DeviceException e )
-        {
-            Logger.Writer.LogMemberError( "failed establishing Portmap service:", e );
-        }
-        externalPortmap = OncRpcEmbeddedPortmapService.TryPingPortmapService();
-        Logger.Writer.LogVerbose( $"Port map service is {(externalPortmap ? "running" : "idle")}." );
-    }
-#endif
-
-    #endregion
-
-    #region " start / stop "
-
-    /// <summary>   Gets or sets a value indicating whether the server is running. </summary>
-    /// <value> True if running, false if not. </value>
-    public override bool Running
-    {
-        get => base.Running;
-        protected set => _ = this.SetProperty( this.Running, value, () => base.Running = value );
-    }
-
-    /// <summary>
-    /// All inclusive convenience method: register server transports with port mapper, then Runs the
-    /// call dispatcher until the server is signaled to shut down, and finally deregister the
-    /// transports.
-    /// </summary>
-    /// <remarks>
-    /// All inclusive convenience method: register server transports with port mapper, then Runs the
-    /// call dispatcher until the server is signaled to shut down, and finally deregister the
-    /// transports.
-    /// </remarks>
-    public override void Run()
-    {
-        using OncRpcEmbeddedPortmapServiceStub epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
-        base.Run();
-    }
-
-    /// <summary>
-    /// Notify the RPC server to stop processing of remote procedure call requests as soon as
-    /// possible.
-    /// </summary>
-    /// <remarks>
-    /// Notify the RPC server to stop processing of remote procedure call requests as soon as
-    /// possible. Note that each transport has its own thread, so processing will not stop before the
-    /// transports have been closed by calling the <see cref="cc.isr.ONC.RPC.Server.OncRpcServerStubBase.Close()"/>
-    /// method of the server.
-    /// </remarks>
-    public override void StopRpcProcessing()
-    {
-        base.StopRpcProcessing();
-    }
-
-#endregion
 
 }
