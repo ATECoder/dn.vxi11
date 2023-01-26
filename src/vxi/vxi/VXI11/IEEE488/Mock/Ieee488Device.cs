@@ -1,3 +1,5 @@
+using cc.isr.VXI11.Codecs;
+
 namespace cc.isr.VXI11.IEEE488.Mock;
 
 /// <summary>   An IEEE 488 Mock device. </summary>
@@ -14,6 +16,43 @@ public partial class Ieee488Device : IIeee488Device
     }
 
     #endregion
+
+    #region " RPC implementations "
+
+    /// <summary>   Aborts and returns the <see cref="DeviceError"/>. </summary>
+    /// <remarks>
+    /// To successfully complete a device_abort RPC, a network instrument server SHALL: <para>
+    /// 
+    /// 1. Initiate termination of any core channel, in-progress RPC associated with the link except
+    /// destroy_link, device_enable_srq, and device_unlock. </para><para>
+    /// 
+    /// 2. Return with error set to 0, no error, to indicate successful completion </para><para>
+    /// 
+    /// The intent of this rule is to handle the device_abort RPC ahead of the other operations, but
+    /// due to operating system specific implementation details the timeliness cannot be guaranteed. </para>
+    /// <para>
+    /// 
+    /// The device_abort RPC only aborts an in-progress RPC, not a queued RPC. </para><para>
+    /// 
+    /// After replying to the device_abort call, the network instrument server SHALL reply to the
+    /// original in-progress call which was aborted with error set to 23, aborted.  </para><para>
+    /// 
+    /// Receiving 0 on the abort call at the network instrument client only means that the abort was
+    /// successfully delivered to the network instrument server. </para><para>
+    /// 
+    /// The lid parameter is compared against the active link identifiers . If none match,
+    /// device_abort SHALL terminate with error set to 4 invalid link identifier.  </para><para>
+    /// 
+    /// The operation of device_abort SHALL NOT be affected by locking  </para>
+    /// </remarks>
+    /// <returns>   A DeviceError. </returns>
+    public DeviceError Abort()
+    {
+        return new DeviceError( new DeviceErrorCode( DeviceErrorCodeValue.NoError )) ;
+    }
+
+    #endregion
+
 
     #region " Ieee488Device Interface implementation "
 

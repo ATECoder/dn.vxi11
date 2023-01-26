@@ -11,9 +11,12 @@ namespace cc.isr.VXI11;
 /// stubs which, when called, in turn call the appropriate remote method (procedure).
 /// </summary>
 /// <remarks>
-/// Used to transfer the <c>device_abort</c> RPC (optional for client).
+/// After the first create_link, the network instrument client may create an RPC client for the abort channel,
+/// but no additional client creations are necessary after subsequent <c>create_link</c>s. These connections may be
+/// torn down by the network instrument client once all links have been closed with <c>destroy_link</c>. The whole
+/// sequence could then start over. <para>
 /// 
-/// <para>
+/// Used to transfer the <c>device_abort</c> RPC (optional for client).</para><para>
 /// 
 /// Renamed from <c>vxi11_DEVICE_ASYNC_Client</c> </para>
 /// </remarks>

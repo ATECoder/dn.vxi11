@@ -6,10 +6,14 @@ using System.Net;
 namespace cc.isr.VXI11;
 
 /// <summary>
-/// The abstract VXI-11 <see cref="Vxi11ProgramConstants.AsyncProgram"/> <see cref="AbortChannelServerBase"/> class is the base class upon which
-/// to build VXI-11 <see cref="Vxi11ProgramConstants.AsyncProgram"/> TCP and UDP servers.
+/// The VXI-11 <see cref="AbortChannelServer"/> class serves the <see cref="Vxi11ProgramConstants.AsyncProgram"/> 
+/// for the <see cref="Vxi11Message.DeviceAbortProcedure"/>.
 /// </summary>
-public class AbortChannelServerBase : OncRpcServerStubBase, IOncRpcDispatchable
+/// <remarks>
+/// A network instrument server's abort channel is typically implemented as an interrupt or signal handler in a
+/// single threaded operating system, or as a higher priority thread in a multi-threaded operating system.
+/// </remarks>
+public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
 {
 
     /// <summary>   The default value of the abort port number. </summary>
@@ -18,20 +22,20 @@ public class AbortChannelServerBase : OncRpcServerStubBase, IOncRpcDispatchable
     #region " construction and cleanup "
 
     /// <summary>   Default constructor. </summary>
-    public AbortChannelServerBase() : this( 0 )
+    public AbortChannelServer() : this( 0 )
     {
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
-    public AbortChannelServerBase( int port ) : this( IPAddress.Any, port )
+    public AbortChannelServer( int port ) : this( IPAddress.Any, port )
     {
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="bindAddr"> The bind address. </param>
     /// <param name="port">     The port. </param>
-    public AbortChannelServerBase( IPAddress bindAddr, int port )
+    public AbortChannelServer( IPAddress bindAddr, int port )
     {
         this._ipv4Address= bindAddr;
         this.PortNumber = port;

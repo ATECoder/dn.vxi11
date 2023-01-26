@@ -4,7 +4,7 @@ namespace cc.isr.VXI11;
 
 /// <summary>
 /// The class <see cref="DeviceErrorEventArgs"/> defines the event arguments for the 
-/// an event fired by the <see cref="AbortChannelServerBase">Abort server</see> whenever replies to a
+/// an event fired by the <see cref="AbortChannelServer">Abort server</see> whenever replies to a
 /// <see cref="AbortChannelClient.DeviceAbort(cc.isr.VXI11.Codecs.DeviceLink)"/> message is received.
 /// </summary>
 public class DeviceErrorEventArgs : EventArgs
