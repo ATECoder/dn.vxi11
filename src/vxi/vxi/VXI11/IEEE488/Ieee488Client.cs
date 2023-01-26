@@ -54,7 +54,7 @@ public class Ieee488Client : IDisposable
         this.InterfaceDeviceString = string.Empty;
 
         // instantiate the core client.
-        this.CoreClient = new DeviceCoreClient( IPAddress.Parse( hostAddress ), OncRpcProtocols.OncRpcTcp, connectTimeout );
+        this.CoreClient = new DeviceCoreClient( IPAddress.Parse( hostAddress ), OncRpcProtocol.OncRpcTcp, connectTimeout );
 
         // set the client timeouts.
         this.IOTimeout = this.IOTimeout;
@@ -70,7 +70,7 @@ public class Ieee488Client : IDisposable
             LockTimeout = this.LockTimeout,
         };
         CreateLinkResp linkResp = this.CoreClient.CreateLink( createLinkParam );
-        if ( linkResp.ErrorCode.Value == DeviceErrorCodeValue.NoError )
+        if ( linkResp.ErrorCode.ErrorCodeValue == DeviceErrorCodeValue.NoError )
         {
             this.DeviceLink = linkResp.DeviceLink;
             this.MaxReceiveSize = linkResp.MaxReceiveSize;
@@ -95,9 +95,9 @@ public class Ieee488Client : IDisposable
         {
             this.LastDeviceError = this.ConnectDevice( hostAddress, interfaceDeviceString, connectTimeout );
 
-            if ( this.LastDeviceError.Value != DeviceErrorCodeValue.NoError )
+            if ( this.LastDeviceError.ErrorCodeValue != DeviceErrorCodeValue.NoError )
             {
-                throw new VXI11.DeviceException( this.LastDeviceError.Value );
+                throw new VXI11.DeviceException( this.LastDeviceError.ErrorCodeValue );
             }
         }
         catch
@@ -536,7 +536,7 @@ public class Ieee488Client : IDisposable
     public (DeviceWriteResp writeResponse, DeviceReadResp readResponse) SendReceive( byte[] data, int millisecondsReadDelay = 3 )
     {
         DeviceWriteResp writeResponse = this.Send( data );
-        if ( writeResponse.ErrorCode.Value == DeviceErrorCodeValue.NoError )
+        if ( writeResponse.ErrorCode.ErrorCodeValue == DeviceErrorCodeValue.NoError )
             if ( this.IsQuery( data ) )
             {
                 Ieee488Client.Delay( millisecondsReadDelay );
@@ -586,9 +586,9 @@ public class Ieee488Client : IDisposable
 
             DeviceWriteResp reply = this.Send( this.CharacterEncoding.GetBytes( data ) );
 
-            if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError  )
+            if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError  )
             {
-                throw new DeviceException( $"; failed writing in raw mode", reply.ErrorCode.Value );
+                throw new DeviceException( $"; failed writing in raw mode", reply.ErrorCode.ErrorCodeValue );
             }
             else if ( reply.Size < block.Length )
             {
@@ -632,9 +632,9 @@ public class Ieee488Client : IDisposable
 
             // on error, throw and exception 
 
-            if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+            if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
             {
-                throw new DeviceException( $"; failed reading in raw mode", reply.ErrorCode.Value );
+                throw new DeviceException( $"; failed reading in raw mode", reply.ErrorCode.ErrorCodeValue );
             }
 
             // extend the data by the amount of data received
@@ -690,8 +690,8 @@ public class Ieee488Client : IDisposable
             : writeResponse.ErrorCode is null
                 ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )}.{nameof( DeviceWriteResp.ErrorCode )} is null.",
                                        DeviceErrorCodeValue.IOError )
-                : writeResponse.ErrorCode.Value != DeviceErrorCodeValue.NoError
-                    ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode.Value )
+                : writeResponse.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError
+                    ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode.ErrorCodeValue )
                     : writeResponse.Size;
     }
 
@@ -749,8 +749,8 @@ public class Ieee488Client : IDisposable
         else if ( readResponse.ErrorCode is null )
             throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed; {nameof( DeviceReadResp )}.{nameof( DeviceReadResp.ErrorCode )} is null.",
                                        DeviceErrorCodeValue.IOError );
-        else if ( readResponse.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed.", readResponse.ErrorCode.Value );
+        else if ( readResponse.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed.", readResponse.ErrorCode.ErrorCodeValue );
         else
         {
             int length = readResponse.GetData().Length - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
@@ -810,16 +810,16 @@ public class Ieee488Client : IDisposable
         else if ( writeResponse.ErrorCode is null )
             throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )}.{nameof( DeviceWriteResp.ErrorCode )} is null.",
                                        DeviceErrorCodeValue.IOError );
-        else if ( writeResponse.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode.Value );
+        else if ( writeResponse.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode.ErrorCodeValue );
         else if ( readResponse is null )
             throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed; {nameof( DeviceReadResp )} is null.",
                                        DeviceErrorCodeValue.IOError );
         else if ( readResponse.ErrorCode is null )
             throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed; {nameof( DeviceReadResp )}.{nameof( DeviceReadResp.ErrorCode )} is null.",
                                        DeviceErrorCodeValue.IOError );
-        else if ( readResponse.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed.", readResponse.ErrorCode.Value );
+        else if ( readResponse.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed.", readResponse.ErrorCode.ErrorCodeValue );
         else
         {
             int length = readResponse.GetData().Length - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
@@ -907,9 +907,9 @@ public class Ieee488Client : IDisposable
     /// <value> The abort port. </value>
     private int AbortPort { get; set; }
 
-    /// <summary>   Gets or sets the <see cref="DeviceAsyncClient"/> abort client. </summary>
+    /// <summary>   Gets or sets the <see cref="AbortChannelClient"/> abort client. </summary>
     /// <value> The abort client. </value>
-    protected DeviceAsyncClient? AbortClient { get; set; }
+    protected AbortChannelClient? AbortClient { get; set; }
 
     /// <summary>   Asynchronous abort an in-progress call. </summary>
     /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
@@ -922,15 +922,15 @@ public class Ieee488Client : IDisposable
 
         if ( this.AbortClient is null )
         {
-            this.AbortClient = new DeviceAsyncClient( IPAddress.Parse( this.Host ), this.AbortPort, OncRpcProtocols.OncRpcTcp, this.ConnectTimeout );
+            this.AbortClient = new AbortChannelClient( IPAddress.Parse( this.Host ), this.AbortPort, OncRpcProtocol.OncRpcTcp, this.ConnectTimeout );
             // set the timeouts of the client.
             this.TransmitTimeout = this.TransmitTimeout;
             this.IOTimeout = this.IOTimeout;
         }
         DeviceError reply = this.AbortClient.DeviceAbort( this.DeviceLink! );
-        if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
+        if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
         {
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Abort )} command.", reply.ErrorCode.Value );
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Abort )} command.", reply.ErrorCode.ErrorCodeValue );
         }
     }
 
@@ -946,8 +946,8 @@ public class Ieee488Client : IDisposable
 
         if ( reply is null )
             throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-        else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Clear )} command.", reply.ErrorCode.Value );
+        else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Clear )} command.", reply.ErrorCode.ErrorCodeValue );
     }
 
     /// <summary>   Sends the Lock command. </summary>
@@ -958,8 +958,8 @@ public class Ieee488Client : IDisposable
 
         if ( reply is null )
             throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-        else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Lock )} command.", reply.ErrorCode.Value );
+        else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Lock )} command.", reply.ErrorCode.ErrorCodeValue );
     }
 
     /// <summary>   Sends the Unlock command. </summary>
@@ -970,8 +970,8 @@ public class Ieee488Client : IDisposable
 
         if ( reply is null )
             throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-        else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Unlock )} command.", reply.ErrorCode.Value );
+        else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Unlock )} command.", reply.ErrorCode.ErrorCodeValue );
     }
 
     /// <summary>   Sends the Trigger command. </summary>
@@ -982,8 +982,8 @@ public class Ieee488Client : IDisposable
 
         if ( reply is null )
             throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-        else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Trigger )} command.", reply.ErrorCode.Value );
+        else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Trigger )} command.", reply.ErrorCode.ErrorCodeValue );
     }
 
     #endregion

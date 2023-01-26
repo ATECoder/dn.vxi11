@@ -6,8 +6,8 @@ using System.Net;
 namespace cc.isr.VXI11;
 
 /// <summary>
-/// The abstract VXI-11 <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/> <see cref="DeviceCoreServerStubBase"/> class is the base class upon which
-/// to build VXI-11 <see cref="Vxi11ProgramConstants.DeviceCoreProgram"/> TCP servers.
+/// The abstract VXI-11 <see cref="Vxi11ProgramConstants.CoreProgram"/> <see cref="DeviceCoreServerStubBase"/> class is the base class upon which
+/// to build VXI-11 <see cref="Vxi11ProgramConstants.CoreProgram"/> TCP servers.
 /// </summary>
 public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
 {
@@ -34,7 +34,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
         this.PortNumber = port;
 
         OncRpcProgramInfo[] registeredPrograms = new OncRpcProgramInfo[] {
-            new OncRpcProgramInfo(Vxi11ProgramConstants.DeviceCoreProgram, Vxi11ProgramConstants.DeviceCoreVersion),
+            new OncRpcProgramInfo(Vxi11ProgramConstants.CoreProgram, Vxi11ProgramConstants.CoreVersion),
         };
         this.SetRegisteredPrograms( registeredPrograms );
 
@@ -91,7 +91,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
     /// <param name="procedure">    Procedure number requested. </param>
     public void DispatchOncRpcCall( OncRpcCallHandler call, int program, int version, int procedure )
     {
-        if ( version == Vxi11ProgramConstants.DeviceCoreVersion )
+        if ( version == Vxi11ProgramConstants.CoreVersion )
             switch ( ( Vxi11Message ) procedure )
             {
                 case Vxi11Message.CreateLinkProcedure:

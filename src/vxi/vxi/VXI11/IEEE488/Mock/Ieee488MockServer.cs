@@ -45,7 +45,7 @@ public partial class Ieee488MockServer : DeviceCoreServerStubBase
         this._interfaceDeviceString = string.Empty;
         this._readMessage = string.Empty;
         this._writeMessage = string.Empty;
-        this.AbortPortNumber = DeviceAsyncServerStubBase.AbortPortDefault;
+        this.AbortPortNumber = AbortChannelServerBase.AbortPortDefault;
         this.MaxReceiveLength = Ieee488Client.MaxReceiveLengthDefault;
     }
 
@@ -171,7 +171,7 @@ public partial class Ieee488MockServer : DeviceCoreServerStubBase
     public override CreateLinkResp CreateLink( CreateLinkParms linkInfo )
     {
         CreateLinkResp reply = new() {
-            DeviceLink = new DeviceLink() { Value = this._linkId++ },
+            DeviceLink = new DeviceLink() { LinkId = this._linkId++ },
             MaxReceiveSize = this.MaxReceiveLength,
             AbortPort = ( short ) this.AbortPortNumber
         };
@@ -180,8 +180,8 @@ public partial class Ieee488MockServer : DeviceCoreServerStubBase
 
         this.InterfaceDevice = new DeviceAddress( linkInfo.Device );
         reply.ErrorCode = this.InterfaceDevice.IsValid()
-            ? new DeviceErrorCode() { Value = DeviceErrorCodeValue.NoError }
-            : new DeviceErrorCode() { Value = DeviceErrorCodeValue.InvalidLinkIdentifier };
+            ? new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.NoError }
+            : new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.InvalidLinkIdentifier };
         return reply;
     }
 
@@ -295,7 +295,7 @@ public partial class Ieee488MockServer : DeviceCoreServerStubBase
         if ( !this._asyncLocker.WaitOne( this.WaitOnOutTime ) )
         {
             readRes.SetData( this._readBuffer );
-            readRes.ErrorCode = new DeviceErrorCode() { Value = DeviceErrorCodeValue.IOError }; // timeout
+            readRes.ErrorCode = new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.IOError }; // timeout
             readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
             return readRes;
         }
@@ -303,7 +303,7 @@ public partial class Ieee488MockServer : DeviceCoreServerStubBase
         if ( this.CurrentOperationType == Ieee488OperationType.Read )
         {
             readRes.SetData( this._readBuffer );
-            readRes.ErrorCode = new DeviceErrorCode() { Value = DeviceErrorCodeValue.NoError };
+            readRes.ErrorCode = new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.NoError };
             readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
         }
         this.CurrentOperationType = Ieee488OperationType.None; //Reset the action type
@@ -317,7 +317,7 @@ public partial class Ieee488MockServer : DeviceCoreServerStubBase
     {
         // get the write command.
         string cmd = this.CharacterEncoding.GetString( deviceWriteParameters.GetData() );
-        Logger.Writer.LogVerbose( $"link ID: {deviceWriteParameters.Link.Value} -> Received：{cmd}" );
+        Logger.Writer.LogVerbose( $"link ID: {deviceWriteParameters.Link.LinkId} -> Received：{cmd}" );
         DeviceWriteResp result = new() { ErrorCode = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
 
         // holds one or more SCPI commands each with its arguments

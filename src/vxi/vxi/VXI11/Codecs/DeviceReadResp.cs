@@ -6,7 +6,9 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceReadResp"/> class defines the response XDR
 /// codec for the <see cref="Vxi11Message.DeviceReadProcedure"/> RPC message.
 /// </summary>
-/// <remarks>   Renamed from <c>Device_ReadResp</c>. <para>
+/// <remarks> <para>
+///
+/// Renamed from <c>Device_ReadResp</c>. </para><para>
 ///  
 /// VXI-11 Specifications: </para>
 /// <code>

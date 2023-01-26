@@ -1,54 +1,64 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11;
 
-/// <summary>   A service request codec. </summary>
+/// <summary>   A VXI-11 Event codec. </summary>
 /// <remarks>   2023-01-25. </remarks>
-public class ServiceRequestCodec : IXdrCodec
+public class Vxi11EventCodec : IXdrCodec
 {
 
     /// <summary>   Default constructor. </summary>
-    public ServiceRequestCodec() : this( new byte[40] )   
+    public Vxi11EventCodec() : this( new byte[40] )   
     {
     }
 
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-01-25. </remarks>
     /// <param name="handle">   The handle. </param>
-    public ServiceRequestCodec( byte[] handle )
+    public Vxi11EventCodec( byte[] handle )
     {
         this._handle = handle;
     }
 
     /// <summary>   Constructor. </summary>
-    /// <param name="decoder">  The XDR Decoding stream </param>
-    public ServiceRequestCodec( XdrDecodingStreamBase decoder ) : this()
+    /// <remarks>   2023-01-26. </remarks>
+    /// <param name="eventType">    The event type. </param>
+    public Vxi11EventCodec( Vxi11EventType eventType ) : this()
     {
-        this.Decode( decoder );
+        this.EventType = eventType;
     }
 
-    /// <summary>   Decodes an instance of a <see cref="ServiceRequestCodec"/>. </summary>
-    /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    /// <returns>   The <see cref="ServiceRequestCodec"/>. </returns>
-    public static ServiceRequestCodec DecodeInstance( XdrDecodingStreamBase decoder )
-    {
-        return new ServiceRequestCodec( decoder );
-    }
-
-    /// <summary>   Decodes an instance of a <see cref="ServiceRequestCodec"/>. </summary>
+    /// <summary>   Decodes an instance of a <see cref="Vxi11EventCodec"/>. </summary>
     /// <remarks>   2023-01-25. </remarks>
     /// <param name="handle">   The handle. </param>
-    /// <returns>   The <see cref="ServiceRequestCodec"/>. </returns>
-    public static ServiceRequestCodec DecodeInstance( byte[] handle )
+    /// <returns>   The <see cref="Vxi11EventCodec"/>. </returns>
+    public static Vxi11EventCodec DecodeInstance( byte[] handle )
     {
+        Vxi11EventCodec codec = new Vxi11EventCodec( handle );
         XdrBufferDecodingStream decoder  = new XdrBufferDecodingStream( handle );
-        return new ServiceRequestCodec( decoder );
+        codec.Decode( decoder );
+        return codec;
     }
 
-    /// <summary>   Gets or sets the identifier of the event. </summary>
-    /// <value> The identifier of the event. </value>
-    public int EventId { get; set; }
+    /// <summary>   Encodes an instance of a <see cref="Vxi11EventCodec"/>. </summary>
+    /// <remarks>   2023-01-26. </remarks>
+    /// <param name="eventType">    The event type. </param>
+    /// <returns>   A Vxi11EventCodec. </returns>
+    public static Vxi11EventCodec EncodeInstance( Vxi11EventType eventType )
+    {
+        Vxi11EventCodec codec = new Vxi11EventCodec( eventType );
+        XdrBufferEncodingStream encoder = new ( codec._handle );
+        encoder.EncodeInt( ( int ) eventType );
+        codec.SetHandle( encoder.GetEncodedData() );
+        return codec;
+    }
+
+    /// <summary>   Gets or sets the <see cref="Vxi11EventType"/>. </summary>
+    /// <value> The event type. </value>
+    public Vxi11EventType EventType { get; set; }
 
     /// <summary>   Gets or sets the handle. Host specific data for handling the service request. </summary>
-    /// <remarks> The handle is passed back to the client with <see cref="ServiceRequestCodec.GetHandle()"/>
+    /// <remarks> The handle is passed back to the client with <see cref="Vxi11EventCodec.GetHandle()"/>
     /// when a service request occurs. <para>
     /// The network instrument client should send in the handle parameter a unique link identifier. This will
     /// allow the network instrument client to identify the link associated with subsequent 
@@ -58,7 +68,7 @@ public class ServiceRequestCodec : IXdrCodec
     private byte[] _handle;
 
     /// <summary>   Gets the handle. </summary>
-    /// <remarks> The handle is passed back to the client with <see cref="ServiceRequestCodec.GetHandle()"/>
+    /// <remarks> The handle is passed back to the client with <see cref="Vxi11EventCodec.GetHandle()"/>
     /// when a service request occurs. </remarks>
     /// <returns>   An array of byte. </returns>
     public byte[] GetHandle()
@@ -67,7 +77,7 @@ public class ServiceRequestCodec : IXdrCodec
     }
 
     /// <summary>   Sets a handle. </summary>
-    /// <remarks> The handle is passed back to the client with <see cref="ServiceRequestCodec.GetHandle()"/>
+    /// <remarks> The handle is passed back to the client with <see cref="Vxi11EventCodec.GetHandle()"/>
     /// when a service request occurs. </remarks>
     /// <param name="handle">   The handle. </param>
     public void SetHandle( byte[] handle )
@@ -77,7 +87,7 @@ public class ServiceRequestCodec : IXdrCodec
 
     /// <summary>   Sets a handle. </summary>
     /// <remarks>
-    /// The handle is passed back to the client with <see cref="ServiceRequestCodec.GetHandle()"/>
+    /// The handle is passed back to the client with <see cref="Vxi11EventCodec.GetHandle()"/>
     /// when a service request occurs.
     /// </remarks>
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
@@ -88,7 +98,7 @@ public class ServiceRequestCodec : IXdrCodec
 
     /// <summary>   Sets the handle array. </summary>
     /// <remarks>
-    /// The handle is passed back to the client with <see cref="ServiceRequestCodec.GetHandle()"/>
+    /// The handle is passed back to the client with <see cref="Vxi11EventCodec.GetHandle()"/>
     /// when a service request occurs.
     /// </remarks>
     /// <param name="decoder">  The XDR Decoding stream. </param>
@@ -103,7 +113,7 @@ public class ServiceRequestCodec : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        encoder.EncodeInt( this.EventId );
+        encoder.EncodeInt( ( int ) this.EventType );
     }
 
     /// <summary>
@@ -112,7 +122,7 @@ public class ServiceRequestCodec : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.EventId = decoder.DecodeInt();
+        this.EventType = decoder.DecodeInt().ToVxi11EventType();
     }
 
 }

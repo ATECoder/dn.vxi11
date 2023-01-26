@@ -13,7 +13,9 @@ namespace cc.isr.VXI11.Codecs;
 /// <see cref="Vxi11Message.CreateInterruptChannelProcedure"/>, and
 /// <see cref="Vxi11Message.DestroyInterruptChannelProcedure"/> RPC messages.
 /// </summary>
-/// <remarks>   Renamed from <c>Device_Error</c>. <para>
+/// <remarks> <para>
+///
+/// Renamed from <c>Device_Error</c>. </para><para>
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
@@ -27,9 +29,15 @@ public class DeviceError : IXdrCodec
 {
 
     /// <summary>   Default constructor. </summary>
-    public DeviceError()
+    public DeviceError() : this( new DeviceErrorCode() )
+    { }
+
+    /// <summary>   Constructor. </summary>
+    /// <remarks>   2023-01-26. </remarks>
+    /// <param name="deviceErrorCode">    The <see cref="DeviceErrorCode"/> codec. </param>
+    public DeviceError( DeviceErrorCode deviceErrorCode )
     {
-        this._errorCode = new();
+        this._errorCode = deviceErrorCode;
     }
 
     /// <summary>   Constructor. </summary>

@@ -6,8 +6,8 @@ using System.Net;
 namespace cc.isr.VXI11;
 
 /// <summary>
-/// The VXI-11 <see cref="Vxi11ProgramConstants.DeviceInterruptProgram"/> <see cref="DeviceIntrServerStubBase"/> class is the base class upon which
-/// to build VXI-11 <see cref="Vxi11ProgramConstants.DeviceInterruptProgram"/> TCP and UDP servers.
+/// The VXI-11 <see cref="Vxi11ProgramConstants.InterruptProgram"/> <see cref="DeviceIntrServerStubBase"/> class is the base class upon which
+/// to build VXI-11 <see cref="Vxi11ProgramConstants.InterruptProgram"/> TCP and UDP servers.
 /// </summary>
 public class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
 {
@@ -37,7 +37,7 @@ public class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDispatchabl
         this.PortNumber = port;
 
         OncRpcProgramInfo[] registeredPrograms = new OncRpcProgramInfo[] {
-            new OncRpcProgramInfo(Vxi11ProgramConstants.DeviceInterruptProgram, Vxi11ProgramConstants.DeviceInterruptVersion),
+            new OncRpcProgramInfo(Vxi11ProgramConstants.InterruptProgram, Vxi11ProgramConstants.InterruptVersion),
         };
         this.SetRegisteredPrograms( registeredPrograms );
 
@@ -91,14 +91,14 @@ public class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDispatchabl
     /// <param name="procedure">    Procedure number requested. </param>
     public void DispatchOncRpcCall( OncRpcCallHandler call, int program, int version, int procedure )
     {
-        if ( version == Vxi11ProgramConstants.DeviceInterruptVersion )
+        if ( version == Vxi11ProgramConstants.InterruptVersion )
             switch ( ( Vxi11Message ) procedure )
             {
                 case Vxi11Message.DeviceInterruptSrqProcedure:
                     {
                         DeviceSrqParms request = new();
                         call.RetrieveCall( request );
-                        this.HandleSerivceRequest( request );
+                        this.HandleServiceRequest( request );
                         call.Reply( VoidXdrCodec.VoidXdrCodecInstance );
                         break;
                     }
@@ -114,11 +114,11 @@ public class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDispatchabl
 
     #region " event handlers "
 
-    public event EventHandler<ServiceRequestEventArgs>? ServiceRequested;
+    public event EventHandler<Vxi11EventArgs>? ServiceRequested;
 
     /// <summary>   Executes the <see cref="ServiceRequested"/> event. </summary>
     /// <param name="e">    Event information to send to registered event handlers. </param>
-    private void OnServiceRequested( ServiceRequestEventArgs e )
+    private void OnServiceRequested( Vxi11EventArgs e )
     {
         var handler = this.ServiceRequested;
         handler?.Invoke( this, e );
@@ -131,13 +131,15 @@ public class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDispatchabl
     /// <summary>
     /// Handles the remote <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> request.
     /// </summary>
-    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    /// <param name="request"> The parameter of type <see cref="Codecs.DeviceSrqParms"/> received from the network instrument,
-    /// which acts as a client for the network instrument client, which acts as a server, when handling service requests. </param>
-    public virtual void HandleSerivceRequest( DeviceSrqParms request )
+    /// <remarks>   2023-01-26. </remarks>
+    /// <param name="request">  The parameter of type <see cref="Codecs.DeviceSrqParms"/> received
+    ///                         from the network instrument, which acts as a client for the network
+    ///                         instrument client, which acts as a server, when handling service
+    ///                         requests. </param>
+    public virtual void HandleServiceRequest( DeviceSrqParms request )
     {
         if ( request == null ) return;
-        this.OnServiceRequested( new ServiceRequestEventArgs( request.GetHandle() ) );
+        this.OnServiceRequested( new Vxi11EventArgs( request.GetHandle() ) );
     }
 
     #endregion

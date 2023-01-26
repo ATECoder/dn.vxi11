@@ -4,7 +4,9 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceLockParms"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.DeviceLockProcedure"/> RPC message.
 /// </summary>
-/// <remarks>   Renamed from <c>Device_LockParms</c>. <para>
+/// <remarks> <para>
+///
+/// Renamed from <c>Device_LockParms</c>. </para><para>
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>

@@ -100,16 +100,17 @@ The network instrument protocol uses up to three channels between the controller
 * __Abort Channel:__ a secondary, asynchronous abort channel for aborting core channel operations using the `device_abort` remote procedure call (optional for client). A network instrument server's abort channel is typically implemented as an interrupt or signal handler in a single threaded operating system, or as a higher priority thread in a multi-threaded operating system.
 * __Interrupt Channel:__ a this, interrupt channel to transfer the `device_intr_srq` remote procedure call from the device to the controller (optional for client). The interrupt channel is used by the network instrument server to deliver service requests to the network instrument client. This effectively reverses the role of client and server. The network instrument server acts as an RPC client, making a remote procedure request of the network instrument client, acting as an RPC server.
 
-These three channels correspond to three RPC clients/servers.
+These three channels correspond to three RPC client/server programs.
 
-|VXI-11         | C# Program      | ID
-|---------------|-----------------|-------
-|DEVICE_CORE    |DeviceCore       |0x0607AF
-|DEVICE_ASYNC   |DeviceAsync      |0x0607B0 
-|DEVICE_INTR    |DeviceInterrupt  |0x0607B1
+|Channel   |Program      |C# Program        |ID
+|----------|:------------|:-----------------|:------
+|Core      |DEVICE_CORE  |CoreProgram       |0x0607AF
+|Abort     |DEVICE_ASYNC |AsyncProgram      |0x0607B0 
+|Interrupt |DEVICE_INTR  |InterruptProgram  |0x0607B1
 
 <a name="Table-2"></a>
 #### Table 2 VXI-11 RPC Programs
+Note that the [VXI-11 Specifications] defines an Abort channel. 
 
 
 ## Device Core Program implementation

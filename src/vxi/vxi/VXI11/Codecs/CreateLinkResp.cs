@@ -4,7 +4,9 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="CreateLinkResp"/> class defines the response XDR
 /// codec for the <see cref="Vxi11Message.CreateLinkProcedure"/> RPC message.
 /// </summary>
-/// <remarks>   Renamed from <c>Create_LinkResp</c>. <para>
+/// <remarks> <para>
+///
+/// Renamed from <c>Create_LinkResp</c>. </para><para>
 ///  
 /// VXI-11 Specifications: </para>
 /// <code>
@@ -59,7 +61,7 @@ public class CreateLinkResp : IXdrCodec
     /// <value> The link to the device. </value>
     public DeviceLink DeviceLink { get => this._link; set => this._link = value ?? new(); }
 
-    /// <summary>   Gets or sets the abort port for the <see cref="DeviceAsyncClient.DeviceAbort(DeviceLink)"/>
+    /// <summary>   Gets or sets the abort port for the <see cref="AbortChannelClient.DeviceAbort(DeviceLink)"/>
     /// <see cref="Vxi11Message.DeviceAbortProcedure">Device Abort</see>/> RPC. </summary>
     /// <value> The abort port. </value>
     public short AbortPort { get; set; }

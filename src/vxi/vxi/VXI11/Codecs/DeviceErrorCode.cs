@@ -8,8 +8,9 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceErrorCode"/> class defines the XDR codec used with the <see cref="DeviceErrorCode"/>
 /// XDR Codec.
 /// </summary>
-/// <remarks>
-/// Renamed from <c>Device_ErrorCode</c>. <para>
+/// <remarks> <para>
+/// 
+/// Renamed from <c>Device_ErrorCode</c>. </para><para>
 ///  
 /// VXI-11 Specifications: </para>
 /// <code>
@@ -32,7 +33,7 @@ public class DeviceErrorCode : IXdrCodec
     /// <param name="errorCode">    The error code value. </param>
     public DeviceErrorCode( DeviceErrorCodeValue errorCode )
     {
-        this.Value = errorCode;
+        this.ErrorCodeValue = errorCode;
     }
 
     /// <summary>   Constructor. </summary>
@@ -52,7 +53,7 @@ public class DeviceErrorCode : IXdrCodec
 
     /// <summary>   Gets or set the <see cref="DeviceErrorCodeValue"/>. </summary>
     /// <value> The <see cref="DeviceErrorCodeValue"/>. </value>
-    public DeviceErrorCodeValue Value { get; set; }
+    public DeviceErrorCodeValue ErrorCodeValue { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
@@ -60,7 +61,7 @@ public class DeviceErrorCode : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        (( int ) this.Value).Encode( encoder );
+        (( int ) this.ErrorCodeValue).Encode( encoder );
     }
 
     /// <summary>
@@ -69,7 +70,7 @@ public class DeviceErrorCode : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.Value = decoder.DecodeInt().ToDeviceErrorCodeValue();
+        this.ErrorCodeValue = decoder.DecodeInt().ToDeviceErrorCodeValue();
     }
 }
 

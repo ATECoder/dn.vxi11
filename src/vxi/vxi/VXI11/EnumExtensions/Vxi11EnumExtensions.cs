@@ -36,17 +36,31 @@ public static class Vxi11EnumExtensions
             : throw new ArgumentException( $"{typeof( int )} value of {value} cannot be cast to {nameof( DeviceErrorCodeValue )}" );
     }
 
-    /// <summary>   An int extension method that converts a value to a <see cref="DeviceAddrFamily"/>. </summary>
+    /// <summary>   An int extension method that converts a value to a <see cref="Vxi11EventType"/>. </summary>
     /// <exception cref="ArgumentException">    Thrown when one or more arguments have unsupported or
     ///                                         illegal values. </exception>
     /// <param name="value">    An enum constant representing the enum value. </param>
-    /// <returns>   Value as the DeviceAddrFamily. </returns>
-    public static DeviceAddrFamily ToDeviceAddrFamily( this int value )
+    /// <returns>   Value as the <see cref="Vxi11EventType"/>. </returns>
+    public static Vxi11EventType ToVxi11EventType( this int value )
     {
-        return Enum.IsDefined( typeof( DeviceAddrFamily ), value )
-            ? ( DeviceAddrFamily ) value
+        return Enum.IsDefined( typeof( Vxi11EventType ), value )
+            ? ( Vxi11EventType ) value
             : throw new ArgumentException(
-                $"{typeof( int )} value of {value} cannot be cast to {nameof( DeviceAddrFamily )}" );
+                $"{typeof( int )} value of {value} cannot be cast to {nameof( Vxi11EventType )}" );
+    }
+
+
+    /// <summary>   An int extension method that converts a value to a <see cref="TransportProtocol"/>. </summary>
+    /// <exception cref="ArgumentException">    Thrown when one or more arguments have unsupported or
+    ///                                         illegal values. </exception>
+    /// <param name="value">    An enum constant representing the enum value. </param>
+    /// <returns>   Value as the <see cref="TransportProtocol"/>. </returns>
+    public static TransportProtocol ToTransportProtocol( this int value )
+    {
+        return Enum.IsDefined( typeof( TransportProtocol ), value )
+            ? ( TransportProtocol ) value
+            : throw new ArgumentException(
+                $"{typeof( int )} value of {value} cannot be cast to {nameof( TransportProtocol )}" );
     }
 
     private static int _allDeviceOperationFlags;

@@ -31,8 +31,8 @@ namespace cc.isr.VXI11.IEEE488
                                                                 ( int ) Ieee488InterfaceCommand.SendCommand, true, 1, data );
             if ( reply is null )
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Interface.SendCommand )} command.", reply.ErrorCode.Value );
+            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Interface.SendCommand )} command.", reply.ErrorCode.ErrorCodeValue );
             return reply.GetDataOut();
         }
 
@@ -255,8 +255,8 @@ namespace cc.isr.VXI11.IEEE488
                                                                 ( int ) Ieee488InterfaceCommand.InterfaceClearControl, true, 1, Array.Empty<byte>() );
             if ( reply is null )
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Interface.SendInterfaceClear )} command.", reply.ErrorCode.Value );
+            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Interface.SendInterfaceClear )} command.", reply.ErrorCode.ErrorCodeValue );
             return reply.GetDataOut();
         }
 

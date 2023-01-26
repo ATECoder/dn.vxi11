@@ -23,8 +23,8 @@ namespace cc.isr.VXI11.IEEE488
 
             if ( reply is null )
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.Value != Codecs.DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.CreateInterruptChannel )} command", reply.ErrorCode.Value );
+            else if ( reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.CreateInterruptChannel )} command", reply.ErrorCode.ErrorCodeValue );
         }
 
         /// <summary>   Destroys the interrupt channel. </summary>
@@ -37,8 +37,8 @@ namespace cc.isr.VXI11.IEEE488
 
             if ( reply is null )
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.Value != Codecs.DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.DestroyInterruptChannel )} command", reply.ErrorCode.Value );
+            else if ( reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.DestroyInterruptChannel )} command", reply.ErrorCode.ErrorCodeValue );
         }
 
         /// <summary>   Enables/disables sending of service requests. </summary>
@@ -52,8 +52,8 @@ namespace cc.isr.VXI11.IEEE488
 
             if ( reply is null )
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.Value != DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.EnableSrq )} command.", reply.ErrorCode.Value );
+            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.EnableSrq )} command.", reply.ErrorCode.ErrorCodeValue );
         }
 
         /// <summary>   Send local command. </summary>
@@ -66,8 +66,8 @@ namespace cc.isr.VXI11.IEEE488
 
             if ( reply is null )
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.Value != Codecs.DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.Local )} command", reply.ErrorCode.Value );
+            else if ( reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.Local )} command", reply.ErrorCode.ErrorCodeValue );
         }
 
         /// <summary>   Send remote command. </summary>
@@ -80,8 +80,8 @@ namespace cc.isr.VXI11.IEEE488
 
             if ( reply is null )
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.Value != Codecs.DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.Remote )} command", reply.ErrorCode.Value );
+            else if ( reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.Remote )} command", reply.ErrorCode.ErrorCodeValue );
         }
 
         /// <summary>   Reads status byte. </summary>
@@ -94,8 +94,8 @@ namespace cc.isr.VXI11.IEEE488
             var reply = this.CoreClient!.DeviceReadStb( this.DeviceLink!, Codecs.DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
             return reply is null
                 ? throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError )
-                : reply.ErrorCode.Value != Codecs.DeviceErrorCodeValue.NoError
-                    ? throw new DeviceException( $"; failed {nameof( Ieee488Instrument.ReadStatusByte )} reading the status byte.", reply.ErrorCode.Value )
+                : reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError
+                    ? throw new DeviceException( $"; failed {nameof( Ieee488Instrument.ReadStatusByte )} reading the status byte.", reply.ErrorCode.ErrorCodeValue )
                     : reply.Stb;
         }
 

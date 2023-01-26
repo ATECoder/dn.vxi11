@@ -5,8 +5,8 @@ namespace cc.isr.VXI11.Codecs;
 /// codec for the <see cref="Vxi11Message.CreateLinkProcedure"/> RPC message.
 /// </summary>
 /// <remarks> <para>
-/// </para>
-///    Renamed from <c>Create_LinkParms</c>. <para>
+/// 
+/// Renamed from <c>Create_LinkParms</c>. </para><para>
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>

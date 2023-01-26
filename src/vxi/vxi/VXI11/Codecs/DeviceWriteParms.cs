@@ -4,8 +4,9 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceWriteParms"/> class defines the request XDR codec for the <see cref="Vxi11Message.DeviceWriteProcedure"/>
 /// RPC message.
 /// </summary>
-/// <remarks>
-/// Renamed from <c>Device_WriteParms</c>. <para>
+/// <remarks> <para>
+/// 
+/// Renamed from <c>Device_WriteParms</c>. </para><para>
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>

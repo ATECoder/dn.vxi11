@@ -109,21 +109,21 @@ public class SupportTests
         _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceErrorCodeValue( maxValue + 1 ); } );
     }
 
-    /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceAddrFamily"/>. </summary>
+    /// <summary>   Assert <see cref="int"/> should cast to <see cref="TransportProtocol"/>. </summary>
     /// <param name="expected"> The expected value. </param>
     private static void AssertIntShouldCastToDeviceAddrFamily( int expected )
     {
-        DeviceAddrFamily actual = expected.ToDeviceAddrFamily();
+        TransportProtocol actual = expected.ToTransportProtocol();
         Assert.AreEqual( expected, ( int ) actual );
     }
 
-    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="DeviceAddrFamily"/>. </summary>
+    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="TransportProtocol"/>. </summary>
     [TestMethod]
     public void IntShouldCastToDeviceAddrFamily()
     {
         int value = 0;
         int maxValue = 0;
-        foreach ( var enumValue in Enum.GetValues( typeof( DeviceAddrFamily ) ) )
+        foreach ( var enumValue in Enum.GetValues( typeof( TransportProtocol ) ) )
         {
             value = ( int ) enumValue;
             maxValue = value > maxValue ? value : maxValue;

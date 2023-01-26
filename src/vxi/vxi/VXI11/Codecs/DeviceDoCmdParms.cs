@@ -4,7 +4,9 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceDoCmdParms"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.DeviceDoCommandProcedure"/> RPC message.
 /// </summary>
-/// <remarks>   Renamed from <c>Device_DocmdParms</c>. <para>
+/// <remarks> <para>
+///
+/// Renamed from <c>Device_DocmdParms</c>. </para><para>
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>

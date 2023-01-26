@@ -4,7 +4,9 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceLink"/> class defines the request XDR
 /// codec used with all device core XDR codecs such as <see cref="CreateLinkResp"/>.
 /// </summary>
-/// <remarks>   Renamed from <c>Device_Link</c>. <para>
+/// <remarks> <para>
+///
+/// Renamed from <c>Device_Link</c>. </para><para>
 ///  
 /// VXI-11 Specifications: </para>
 /// <code>
@@ -25,10 +27,10 @@ public class DeviceLink : IXdrCodec
     }
 
     /// <summary>   Constructor. </summary>
-    /// <param name="value">    The device link id. </param>
-    public DeviceLink( int value )
+    /// <param name="linkId">    The device link id. </param>
+    public DeviceLink( int linkId )
     {
-        this.Value = value;
+        this.LinkId = linkId;
     }
 
     /// <summary>   Constructor. </summary>
@@ -46,9 +48,9 @@ public class DeviceLink : IXdrCodec
         return new DeviceLink( decoder );
     }
 
-    /// <summary>   The identifies of the Core device link between the client and the server. </summary>
+    /// <summary>   The identifier of the Core device link between the client and the server. </summary>
     /// <value> The value. </value>
-    public int Value { get; set; }
+    public int LinkId { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
@@ -56,7 +58,7 @@ public class DeviceLink : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        this.Value.Encode( encoder );
+        this.LinkId.Encode( encoder );
     }
 
     /// <summary>
@@ -65,6 +67,6 @@ public class DeviceLink : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.Value = decoder.DecodeInt();
+        this.LinkId = decoder.DecodeInt();
     }
 }

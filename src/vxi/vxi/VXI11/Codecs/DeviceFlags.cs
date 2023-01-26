@@ -8,8 +8,9 @@ namespace cc.isr.VXI11.Codecs;
 /// <see cref="DeviceLockParms"/>, <see cref="DeviceReadParms"/>, and
 /// <see cref="DeviceWriteParms"/> XDR Codecs.
 /// </summary>
-/// <remarks>
-/// Renamed from <c>Device_Flags</c>. <para>
+/// <remarks> <para>
+/// 
+/// Renamed from <c>Device_Flags</c>. </para><para>
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>

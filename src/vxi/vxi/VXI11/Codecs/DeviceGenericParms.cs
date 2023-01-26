@@ -10,7 +10,9 @@ namespace cc.isr.VXI11.Codecs
     /// <see cref="Vxi11Message.DeviceRemoteProcedure"/>, and
     /// <see cref="Vxi11Message.DeviceLocalProcedure"/>
     /// RPC messages.</summary>
-    /// <remarks>   Renamed from <c>Device_GenericParms</c>. <para>
+    /// <remarks> <para>
+    ///
+    /// Renamed from <c>Device_GenericParms</c>. </para><para>
     /// 
     /// VXI-11 Specifications: </para>
     /// <code>
