@@ -1,3 +1,5 @@
+using System.Net;
+
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.EnumExtensions;
 using cc.isr.VXI11.Logging;
@@ -40,7 +42,7 @@ public class SupportTests
 
     #endregion
 
-    #region " support "
+    #region " unique client id "
 
     /// <summary>   Assert unique client identifier should be generated. </summary>
     /// <returns>   An int. </returns>
@@ -64,6 +66,27 @@ public class SupportTests
         Assert.AreEqual( int.MaxValue - 1, clientId );
         clientId = ++clientId == int.MaxValue ? 0 : clientId;
         Assert.AreEqual( 0, clientId );
+    }
+
+    #endregion
+
+    #region " IP Address "
+    private static void AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress address )
+    {
+        uint unsignedIntAddress = address.ToUInt();
+        IPAddress restoredAddress = unsignedIntAddress.ToIPAddress();
+        Assert.AreEqual( address.ToString(), restoredAddress.ToString(), $"Address should restored from unsigned integer address {unsignedIntAddress}" );
+    }
+
+    [TestMethod]
+    public void IPAddressShouldRestoreFromUnsignedIntegerValue()
+    {
+        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "127.0.0.1" ) );
+        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "192.168.0.1" ) );
+        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "255.255.255.255" ) );
+        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "255.255.255.1" ) );
+        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "1.1.1.1" ) );
+        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "1.1.1.0" ) );
     }
 
     #endregion

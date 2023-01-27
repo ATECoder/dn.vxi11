@@ -62,7 +62,7 @@ public static class Support
     /// stack overflow</see> </para>
     /// </remarks>
     /// <param name="address">  The address to act on. </param>
-    /// <returns>   Address as an unsigned integer. </returns>
+    /// <returns>   Address as an <see cref="uint">unsigned integer</see>. </returns>
     public static uint ToUInt( this IPAddress address )
     {
         byte[] bytes = address.GetAddressBytes();
@@ -75,11 +75,13 @@ public static class Support
         return BitConverter.ToUInt32( bytes, 0 );
     }
 
-    /// <summary>   An <see cref="uint"/> extension method that converts the address to an IP address. </summary>
+    /// <summary>
+    /// An <see cref="uint"/> extension method that converts the address to an IP address.
+    /// </summary>
     /// <remarks>   2023-01-26. </remarks>
     /// <param name="address">  The address to act on. </param>
-    /// <returns>   Address as a string. </returns>
-    public static string ToIPAddress( this uint address )
+    /// <returns>   Address as an <see cref="IPAddress">IP Addressunsigned integer</see>. </returns>
+    public static IPAddress ToIPAddress( this uint address )
     {
         byte[] bytes = BitConverter.GetBytes( address );
 
@@ -89,7 +91,7 @@ public static class Support
             Array.Reverse( bytes );
         }
 
-        return new IPAddress( bytes ).ToString();
+        return new IPAddress( bytes );
     }
 
     #endregion
