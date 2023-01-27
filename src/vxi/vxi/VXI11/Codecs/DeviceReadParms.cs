@@ -61,20 +61,29 @@ public class DeviceReadParms : IXdrCodec
 
     /// <summary>   Gets or sets the i/o timeout. </summary>
     /// <remarks>
-    /// The <see cref="IOTimeout"/> determines how long a network instrument server allows an I/O operation 
-    /// to take. If the <see cref="IOTimeout"/> is non-zero, the network instrument server allows at least 
-    /// <see cref="IOTimeout"/> milliseconds before returning control to the client with a timeout error.
-    /// The time it takes for the I/O operation to complete does not include any time spent waiting for the lock.
+    /// The <see cref="IOTimeout"/> determines how long a network instrument server allows an I/O
+    /// operation to take. If the <see cref="IOTimeout"/> is non-zero, the network instrument server
+    /// allows at least <see cref="IOTimeout"/> milliseconds before returning control to the client
+    /// with a timeout error. The time it takes for the I/O operation to complete does not include
+    /// any time spent waiting for the lock. <para>
+    /// 
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value. </para>
     /// </remarks>
     /// <value> The i/o timeout. </value>
     public int IOTimeout { get; set; }
 
     /// <summary>   Gets or sets the lock timeout. </summary>
     /// <remarks>
-    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
-    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
-    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
-    /// released.
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
+    /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
+    /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
+    /// milliseconds for a lock to be released. <para>
+    /// 
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value. </para>
     /// </remarks>
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }

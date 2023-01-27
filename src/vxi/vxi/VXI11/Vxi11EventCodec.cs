@@ -53,6 +53,10 @@ public class Vxi11EventCodec : IXdrCodec
         return codec;
     }
 
+    /// <summary>   Gets or sets the identifier that uniquely identifies the 
+    /// client sending the event. This value is encoded into the <see cref="_handle"/></summary>
+    public int ClientId { get; set; }
+
     /// <summary>   Gets or sets the <see cref="Vxi11EventType"/>. </summary>
     /// <value> The event type. </value>
     public Vxi11EventType EventType { get; set; }
@@ -113,7 +117,8 @@ public class Vxi11EventCodec : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        encoder.EncodeInt( ( int ) this.EventType );
+        this.ClientId.Encode( encoder );
+        ( ( int) this.EventType).Encode( encoder );
     }
 
     /// <summary>
@@ -122,6 +127,7 @@ public class Vxi11EventCodec : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
+        this.ClientId = decoder.DecodeInt();
         this.EventType = decoder.DecodeInt().ToVxi11EventType();
     }
 

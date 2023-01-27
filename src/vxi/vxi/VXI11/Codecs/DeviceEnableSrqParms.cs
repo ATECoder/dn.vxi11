@@ -53,12 +53,16 @@ public class DeviceEnableSrqParms : IXdrCodec
     public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }
 
     /// <summary>   Gets or sets a value indicating whether to enable or disable interrupts. </summary>
+    /// <remarks>
+    /// <see cref="bool"/> types are encoded as <see cref="int"/> with 1 is <see langword="true"/>.
+    /// </remarks>
     /// <value> True if enable, false if not. </value>
     public bool Enable { get; set; }
 
     /// <summary>   Gets or sets the handle. Host specific data for handling the service request. </summary>
     /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParms.GetHandle()"/> 
     /// when a service request occurs. <para>
+    /// 
     /// The network instrument client should send in the handle parameter a unique link identifier. This will
     /// allow the network instrument client to identify the link associated with subsequent 
     /// <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPCs. </para>

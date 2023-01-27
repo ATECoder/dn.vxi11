@@ -62,7 +62,7 @@ public class DeviceFlags : IXdrCodec
     /// <param name="encoder">  XDR stream to which information is sent for encoding. </param>
     public void Encode( XdrEncodingStreamBase encoder )
     {
-        (( int ) this.Value).Encode( encoder );
+        this.Value.Encode( encoder );
     }
 
     /// <summary>

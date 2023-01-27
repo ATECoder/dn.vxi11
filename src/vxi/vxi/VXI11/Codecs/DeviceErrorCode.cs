@@ -80,6 +80,8 @@ public class DeviceErrorCode : IXdrCodec
 }
 
 /// <summary>   Values that represent device error code values. </summary>
+/// <remarks>   Negative values added outside the VXI-11 specifications to represent
+/// exceptions such as <see cref="NotImplementedException"/>. </remarks>
 public enum DeviceErrorCodeValue
 {
     /// <summary>   An enum constant representing the no error option. </summary>
@@ -140,4 +142,9 @@ public enum DeviceErrorCodeValue
     /// <summary>   An enum constant representing the channel already established option. </summary>
     [Description( "Channel already established." )]
     ChannelAlreadyEstablished = 29,
+
+    /// <summary>   An enum constant representing the procedure not implemented option. </summary>
+    [Description( "Procedure not implemented." )]
+    NoImplemented = -1,
+
 }

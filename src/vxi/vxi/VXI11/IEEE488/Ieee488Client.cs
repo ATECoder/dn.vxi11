@@ -322,7 +322,14 @@ public partial class Ieee488Client : IDisposable
 
     /// <summary>   Gets or sets the max data size in bytes device will accept on a write. </summary>
     /// <remarks> This is the size of the largest data set the network instrument server can
-    /// accept in a <see cref="Vxi11Message.DeviceWriteProcedure"/> RPC. This value is at least 1024. </remarks>
+    /// accept in a <see cref="Vxi11Message.DeviceWriteProcedure"/> RPC. This value is at least 1024. <para>
+    /// 
+    /// The value is returned from the network instrument is used by the <see cref="CoreChannelClient"/> for 
+    /// implementing the <see cref="Vxi11Message.DeviceWriteProcedure">Device Write</see>/> RPC. </para><para>
+    /// 
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for using an 
+    /// unsigned short because XDR encodes <see cref="short"/>s as <see cref="int"/>s. </para>
+    /// </remarks>
     /// <value> The maximum <see cref="Vxi11Message.DeviceWriteProcedure"/> data size. </value>
     public int MaxReceiveSize { get; private set; }
 
@@ -385,6 +392,11 @@ public partial class Ieee488Client : IDisposable
     public byte ReadTermination { get; set; }
 
     /// <summary>   Gets or sets the connect timeout. </summary>
+    /// <remarks>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value.
+    /// </remarks>
     /// <value> The connect timeout. </value>
     public int ConnectTimeout { get; set; }
 
@@ -424,13 +436,17 @@ public partial class Ieee488Client : IDisposable
     }
 
     /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
-    /// <remarks> </remarks>
     /// <remarks>
-    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
-    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
-    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
-    /// released.
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
+    /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
+    /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
+    /// milliseconds for a lock to be released. <para>
+    /// 
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value. </para>
     /// </remarks>
+    /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
 
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
@@ -579,12 +595,15 @@ public partial class Ieee488Client : IDisposable
 
     #region " raw read and write "
 
-    /// <summary>   Writes data in raw mode allowing to write a block of data 
-    /// larger than the <see cref="MaxReceiveSize"/> data that the device accepts in each block. </summary>
+    /// <summary>
+    /// Writes data in raw mode allowing to write a block of data larger than the <see cref="MaxReceiveSize"/>
+    /// data that the device accepts in each block.
+    /// </summary>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
-    /// <param name="data"> . </param>
+    /// <param name="data">                 The data to write to the instrument. </param>
+    /// <param name="appendTermination">    (Optional) True to append the <see cref="WriteTermination"/>. </param>
     /// <returns>   The total amount of data that was written. </returns>
-    public virtual int WriteRaw( string data )
+    public virtual int WriteRaw( string data, bool appendTermination = true )
     {
         if ( this.DeviceLink is null || this.CoreClient is null || data is null || data.Length == 0 ) return 0;
 

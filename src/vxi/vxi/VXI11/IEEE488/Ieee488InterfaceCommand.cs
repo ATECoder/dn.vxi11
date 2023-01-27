@@ -1,5 +1,6 @@
 namespace cc.isr.VXI11.IEEE488;
 
+/// <summary>   Values that represent IEEE 488 interface commands. </summary>
 public enum Ieee488InterfaceCommand
 {
     /// <summary>   An enum constant representing the send command option. <para>

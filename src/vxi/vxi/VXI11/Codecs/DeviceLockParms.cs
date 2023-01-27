@@ -62,10 +62,14 @@ public class DeviceLockParms : IXdrCodec
 
     /// <summary>   Gets or sets the lock timeout; time to wait to acquire lock. </summary>
     /// <remarks>
-    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
-    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
-    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
-    /// released.
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
+    /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
+    /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
+    /// milliseconds for a lock to be released. <para>
+    /// 
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value. </para>
     /// </remarks>
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }

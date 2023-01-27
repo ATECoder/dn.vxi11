@@ -55,31 +55,46 @@ public class DeviceDoCmdParms : IXdrCodec
     }
 
     private DeviceLink _link;
-    /// <summary>   Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
+    /// <summary>
+    /// Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    /// call.
+    /// </summary>
     /// <value> The identifier of the device link. </value>
     public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }
 
     private DeviceFlags _flags;
-    /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
+    /// <summary>
+    /// Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    /// options.
+    /// </summary>
     /// <value> The flags. </value>
     public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
 
     /// <summary>   Gets or sets the i/o timeout. </summary>
     /// <remarks>
-    /// The <see cref="IOTimeout"/> determines how long a network instrument server allows an I/O operation 
-    /// to take. If the <see cref="IOTimeout"/> is non-zero, the network instrument server allows at least 
-    /// <see cref="IOTimeout"/> milliseconds before returning control to the client with a timeout error.
-    /// The time it takes for the I/O operation to complete does not include any time spent waiting for the lock.
+    /// The <see cref="IOTimeout"/> determines how long a network instrument server allows an I/O
+    /// operation to take. If the <see cref="IOTimeout"/> is non-zero, the network instrument server
+    /// allows at least <see cref="IOTimeout"/> milliseconds before returning control to the client
+    /// with a timeout error. The time it takes for the I/O operation to complete does not include
+    /// any time spent waiting for the lock. <para>
+    /// 
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value. </para>
     /// </remarks>
     /// <value> The i/o timeout. </value>
     public int IOTimeout { get; set; }
 
     /// <summary>   Gets or sets the lock timeout. </summary>
     /// <remarks>
-    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
-    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
-    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
-    /// released.
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
+    /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
+    /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
+    /// milliseconds for a lock to be released. <para>
+    /// 
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value. </para>
     /// </remarks>
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
@@ -88,7 +103,11 @@ public class DeviceDoCmdParms : IXdrCodec
     /// <remarks>
     /// The value of <see cref="Cmd"/> is compared against the values supported by the network
     /// instrument server. If the particular value is not supported, the server returns error code
-    /// <see cref="DeviceErrorCodeValue.OperationNotSupported"/> (8).
+    /// <see cref="DeviceErrorCodeValue.OperationNotSupported"/> (8). <para>
+    /// 
+    /// Commands, such as interface commands, are enumerated in <see cref="IEEE488.Ieee488InterfaceCommand"/>
+    /// and <see cref="IEEE488.GpibCommandArgument"/>.
+    /// </para>
     /// </remarks>
     /// <value> The command. </value>
     public int Cmd { get; set; }
@@ -97,6 +116,12 @@ public class DeviceDoCmdParms : IXdrCodec
     /// Gets or sets a value indicating whether the network order; client's byte order. Network order
     /// is defined by the Internet Protocol Suite.
     /// </summary>
+    /// <remarks> 
+    /// While the Windows default byte ordering is little-endian, XDR uses big-endian. <para>
+    /// 
+    /// <see cref="bool"/> types are encoded as <see cref="int"/> with 1 is <see langword="true"/>.
+    /// </para>
+    /// </remarks>
     /// <value>
     /// <see langword="true"/> (set) if the architecture of the network instrument client specifies byte-ordering in
     /// network order (big-endian), false if not.
