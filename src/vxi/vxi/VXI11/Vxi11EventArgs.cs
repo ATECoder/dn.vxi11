@@ -2,8 +2,8 @@ namespace cc.isr.VXI11;
 
 /// <summary>
 /// The class <see cref="Vxi11EventArgs"/> defines the event arguments for the 
-/// an event fired by the <see cref="DeviceIntrServerStubBase">Interrupt server</see> whenever replies to a
-/// <see cref="DeviceIntrClient.DeviceIntrSrq(cc.isr.VXI11.Codecs.DeviceSrqParms)"/> message
+/// an event fired by the <see cref="InterruptChannelServer">Interrupt server</see> whenever replies to a
+/// <see cref="InterruptChannelClient.DeviceIntrSrq(cc.isr.VXI11.Codecs.DeviceSrqParms)"/> message
 /// is received.
 /// </summary>
 public class Vxi11EventArgs : EventArgs

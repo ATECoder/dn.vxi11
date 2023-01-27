@@ -244,7 +244,7 @@ public class DeviceExplorerTests
         foreach ( var host in _pingedHosts )
         {
             // count only hosts that are know to respond to the enumeration of registered servers
-            if ( !_nonRespondingHosts.Contains( host.ToString() ))
+            if ( !_nonRespondingHosts.Contains( host.ToString() ) )
             {
                 expectedCount++;
             }

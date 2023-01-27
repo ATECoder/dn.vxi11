@@ -6,7 +6,7 @@ using cc.isr.VXI11.Codecs;
 namespace cc.isr.VXI11;
 
 /// <summary>
-/// The class <see cref="DeviceIntrClient"/> implements the client stub proxy for the
+/// The class <see cref="InterruptChannelClient"/> implements the client stub proxy for the
 /// <see cref="Vxi11ProgramConstants.InterruptProgram"/> remote program. It provides method
 /// stubs which, when called, in turn call the appropriate remote method (procedure).
 /// </summary>
@@ -41,23 +41,23 @@ namespace cc.isr.VXI11;
 /// 
 /// Renamed from <c>vxi11_DEVICE_INTR_Client</c> </para>.
 /// </remarks>
-public class DeviceIntrClient : OncRpcClientStubBase
+public class InterruptChannelClient : OncRpcClientStubBase
 {
 
     #region " construction and cleanup "
 
     /// <summary>
-    /// Constructs a <see cref="DeviceIntrClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptVersion"/>
+    /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptVersion"/>
     /// remote program can be accessed.
     /// </summary>
     /// <param name="client">   The ONC/RPC client connection object implementing the particular
     ///                         protocol and program. </param>
-    public DeviceIntrClient( OncRpcClientBase client ) : base( client )
+    public InterruptChannelClient( OncRpcClientBase client ) : base( client )
     {
     }
 
     /// <summary>
-    /// Constructs a <see cref="DeviceIntrClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptVersion"/>
+    /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptVersion"/>
     /// remote program can be accessed.
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
@@ -65,14 +65,14 @@ public class DeviceIntrClient : OncRpcClientStubBase
     /// <param name="protocol"> The <see cref="OncRpcProtocol"/> protocol to be used for ONC/RPC calls. </param>
     /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocol.OncRpcUdp"/>
     ///                         or the connection timeout for <see cref="OncRpcProtocol.OncRpcTcp"/>. </param>
-    public DeviceIntrClient( IPAddress host, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.InterruptProgram,
+    public InterruptChannelClient( IPAddress host, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.InterruptProgram,
                                                                                                    Vxi11ProgramConstants.InterruptVersion,
                                                                                                    0, protocol, timeout )
     {
     }
 
     /// <summary>
-    /// Constructs a <see cref="DeviceIntrClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptProgram"/> 
+    /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptProgram"/> 
     /// remote program can be accessed. 
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
@@ -82,14 +82,14 @@ public class DeviceIntrClient : OncRpcClientStubBase
     ///                         calls. </param>
     /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocol.OncRpcUdp"/>
     ///                         or the connection timeout for <see cref="OncRpcProtocol.OncRpcTcp"/>. </param>
-    public DeviceIntrClient( IPAddress host, int port, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.InterruptProgram,
+    public InterruptChannelClient( IPAddress host, int port, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.InterruptProgram,
                                                                                                        Vxi11ProgramConstants.InterruptVersion, port,
                                                                                                        protocol, timeout )
     {
     }
 
     /// <summary>
-    /// Constructs a <see cref="DeviceIntrClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptProgram"/>
+    /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptProgram"/>
     /// remote program can be accessed.
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
@@ -101,7 +101,7 @@ public class DeviceIntrClient : OncRpcClientStubBase
     ///                         calls. </param>
     /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocol.OncRpcUdp"/>
     ///                         or the connection timeout for <see cref="OncRpcProtocol.OncRpcTcp"/>. </param>
-    public DeviceIntrClient( IPAddress host, int program, int version, int port, OncRpcProtocol protocol,
+    public InterruptChannelClient( IPAddress host, int program, int version, int port, OncRpcProtocol protocol,
                                                                        int timeout ) : base( host, program, version, port, protocol, timeout )
     {
     }

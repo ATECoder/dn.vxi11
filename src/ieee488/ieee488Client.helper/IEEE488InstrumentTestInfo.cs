@@ -150,7 +150,7 @@ public static class IEEE488InstrumentTestInfo
         }
         catch ( ApplicationException ex )
         {
-            Logger.Writer.LogMemberError( "failed querying the device",  ex );
+            Logger.Writer.LogMemberError( "failed querying the device", ex );
         }
         return "Exception occurred";
     }

@@ -43,7 +43,7 @@ public class Ieee488ServerTests
 
             // wait till the server is running.
 
-            _ = _server.ServerStarted( 2 * Ieee488ServerTests.ServerStartTimeTypical , Ieee488ServerTests.ServerStartLoopDelay );
+            _ = _server.ServerStarted( 2 * Ieee488ServerTests.ServerStartTimeTypical, Ieee488ServerTests.ServerStartLoopDelay );
 
             Logger.Writer.LogInformation( $"{nameof( Ieee488MockServer )} is {(_server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
         }
@@ -73,7 +73,7 @@ public class Ieee488ServerTests
 
     /// <summary>   Uses a task to delay execution without blocking the current thread. </summary>
     /// <param name="delayTime">    The delay time. </param>
-    private static async void Delay ( int delayTime )
+    private static async void Delay( int delayTime )
     {
         await Task.Delay( delayTime );
     }

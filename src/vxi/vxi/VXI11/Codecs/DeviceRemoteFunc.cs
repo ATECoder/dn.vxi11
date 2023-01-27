@@ -6,7 +6,12 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceRemoteFunc"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.CreateInterruptChannelProcedure"/> RPC message.
 /// </summary>
-/// <remarks> <para> 
+/// <remarks> 
+/// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
+/// have different integer representations. <para>
+/// 
+/// All integers defined by the VXI-11 specification are passed over the
+/// network as 32-bit integers, either signed or unsigned as defined. </para><para>
 /// 
 /// Renamed from <c>Device_RemoteFunc</c>. </para><para>
 /// 
@@ -46,7 +51,7 @@ public class DeviceRemoteFunc : IXdrCodec
 
     /// <summary>   Gets or sets the host address. </summary>
     /// <value> The host address. </value>
-    public int HostAddr { get; set; }
+    public uint HostAddr { get; set; }
 
     /// <summary>   Gets or sets the host port. </summary>
     /// <value> The host port. </value>
@@ -88,7 +93,7 @@ public class DeviceRemoteFunc : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.HostAddr = decoder.DecodeInt();
+        this.HostAddr = decoder.DecodeUInt();
         this.HostPort = decoder.DecodeInt();
         this.ProgNum = decoder.DecodeInt();
         this.ProgVers = decoder.DecodeInt();

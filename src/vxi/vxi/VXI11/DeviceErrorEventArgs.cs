@@ -25,7 +25,7 @@ public class DeviceErrorEventArgs : EventArgs
     /// <remarks>   2023-01-26. </remarks>
     /// <param name="errorCodeValue">   The error code value. </param>
     /// <param name="deviceLinkId">     Identifier for the device link. </param>
-    public DeviceErrorEventArgs(  DeviceErrorCodeValue errorCodeValue, int deviceLinkId )
+    public DeviceErrorEventArgs( DeviceErrorCodeValue errorCodeValue, int deviceLinkId )
     {
         this.ErrorCodeValue = errorCodeValue;
         this.DeviceLinkId = deviceLinkId;

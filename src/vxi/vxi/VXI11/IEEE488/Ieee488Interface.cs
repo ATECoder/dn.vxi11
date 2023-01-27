@@ -27,7 +27,7 @@ namespace cc.isr.VXI11.IEEE488
         {
             if ( this.DeviceLink is null || this.CoreClient is null ) return Array.Empty<byte>();
 
-            DeviceDoCmdResp reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, new DeviceFlags( DeviceOperationFlags.None), this.LockTimeout, this.IOTimeout,
+            DeviceDoCmdResp reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, new DeviceFlags( DeviceOperationFlags.None ), this.LockTimeout, this.IOTimeout,
                                                                 ( int ) Ieee488InterfaceCommand.SendCommand, true, 1, data );
             if ( reply is null )
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
@@ -43,11 +43,11 @@ namespace cc.isr.VXI11.IEEE488
         /// <returns>   A new array of byte. </returns>
         public virtual byte[] CreateSetup( List<byte[]> addressList )
         {
-            List<byte> data = new ( new byte[] { ( byte ) (this.BusAddress | ( byte ) GpibCommandArgument.TalkAddress), ( byte ) GpibCommandArgument.Unlisten } );
+            List<byte> data = new( new byte[] { ( byte ) (this.BusAddress | ( byte ) GpibCommandArgument.TalkAddress), ( byte ) GpibCommandArgument.Unlisten } );
 
             foreach ( byte[] addr in addressList )
             {
-                if ( addr is not null && addr.Length> 0 )
+                if ( addr is not null && addr.Length > 0 )
                 {
                     for ( int i = 0; i < addr.Length; i++ )
                     {
@@ -55,7 +55,7 @@ namespace cc.isr.VXI11.IEEE488
                         {
                             throw new DeviceException( $"; {nameof( CreateSetup )} failed because {i}-th address {addr[i]} is an invalid bus address.", DeviceErrorCodeValue.InvalidAddress );
                         }
-                        data.Add( ( byte ) (addr[i] | ( byte ) ( i == 0 ? GpibCommandArgument.ListenAddress : GpibCommandArgument.SecondaryAddress ) ) );
+                        data.Add( ( byte ) (addr[i] | ( byte ) (i == 0 ? GpibCommandArgument.ListenAddress : GpibCommandArgument.SecondaryAddress)) );
                     }
                 }
 
@@ -235,7 +235,7 @@ namespace cc.isr.VXI11.IEEE488
             }
 
             int reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout,
-                                                               ( int ) Ieee488InterfaceCommand.BusAddress,4,  addr );
+                                                               ( int ) Ieee488InterfaceCommand.BusAddress, 4, addr );
             if ( reply == addr )
                 this.BusAddress = addr;
             return addr == reply;
@@ -265,16 +265,16 @@ namespace cc.isr.VXI11.IEEE488
         /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
         /// <param name="address_list"> (Optional) List of address. </param>
         /// <returns>   The found listeners. </returns>
-        public virtual List<( int Primary, int Secondary)> FindListeners( List<int>? address_list = null )
+        public virtual List<(int Primary, int Secondary)> FindListeners( List<int>? address_list = null )
         {
-            if ( this.DeviceLink is null || this.CoreClient is null ) return new List<( int, int )>();
+            if ( this.DeviceLink is null || this.CoreClient is null ) return new List<(int, int)>();
 
             if ( address_list is null )
             {
                 address_list = Enumerable.Range( 0, 31 ).ToList();
                 _ = address_list.Remove( this.BusAddress );
             }
-            var found = new List<( int, int )>();
+            var found = new List<(int, int)>();
             try
             {
                 this.Lock();
@@ -291,7 +291,7 @@ namespace cc.isr.VXI11.IEEE488
                     {
                         throw new DeviceException( $"; {nameof( FindListeners )} failed because {addr} is an invalid bus address.", DeviceErrorCodeValue.InvalidAddress );
                     }
-                    cmd.Add( (byte) ( addr | ( byte ) GpibCommandArgument.ListenAddress) );
+                    cmd.Add( ( byte ) (addr | ( byte ) GpibCommandArgument.ListenAddress) );
 
                     _ = this.SendCommand( cmd.ToArray() );
 
@@ -300,7 +300,7 @@ namespace cc.isr.VXI11.IEEE488
                     Thread.Sleep( 15 );
                     if ( 0 != this.ReadNdacLine() )
                     {
-                        found.Add( ( addr, 0 ) );
+                        found.Add( (addr, 0) );
                     }
                     else
                     {

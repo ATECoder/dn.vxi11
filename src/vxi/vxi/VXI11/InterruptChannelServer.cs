@@ -6,32 +6,32 @@ using System.Net;
 namespace cc.isr.VXI11;
 
 /// <summary>
-/// The VXI-11 <see cref="Vxi11ProgramConstants.InterruptProgram"/> <see cref="DeviceIntrServerStubBase"/> class is the base class upon which
+/// The VXI-11 <see cref="Vxi11ProgramConstants.InterruptProgram"/> <see cref="InterruptChannelServer"/> class is the base class upon which
 /// to build VXI-11 <see cref="Vxi11ProgramConstants.InterruptProgram"/> TCP and UDP servers.
 /// </summary>
-public class DeviceIntrServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
+public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
 {
 
     /// <summary>   The interrupt port default. </summary>
-    public static int InterruptPortDefault = 540;
+    public static int InterruptPortDefault = 1099;
 
     #region " construction and cleanup "
 
     /// <summary>   Default constructor. </summary>
-    public DeviceIntrServerStubBase() : this( 0 )
+    public InterruptChannelServer() : this( 0 )
     {
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
-    public DeviceIntrServerStubBase( int port ) : this( IPAddress.Any, port )
+    public InterruptChannelServer( int port ) : this( IPAddress.Any, port )
     {
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="bindAddr"> The bind address. </param>
     /// <param name="port">     The port. </param>
-    public DeviceIntrServerStubBase( IPAddress bindAddr, int port )
+    public InterruptChannelServer( IPAddress bindAddr, int port )
     {
         this._ipv4Address = bindAddr;
         this.PortNumber = port;

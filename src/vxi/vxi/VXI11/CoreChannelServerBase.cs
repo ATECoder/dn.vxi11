@@ -6,29 +6,29 @@ using System.Net;
 namespace cc.isr.VXI11;
 
 /// <summary>
-/// The abstract VXI-11 <see cref="Vxi11ProgramConstants.CoreProgram"/> <see cref="DeviceCoreServerStubBase"/> class is the base class upon which
+/// The abstract VXI-11 <see cref="Vxi11ProgramConstants.CoreProgram"/> <see cref="CoreChannelServerBase"/> class is the base class upon which
 /// to build VXI-11 <see cref="Vxi11ProgramConstants.CoreProgram"/> TCP servers.
 /// </summary>
-public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDispatchable
+public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispatchable
 {
 
     #region " construction and cleanup "
 
     /// <summary>   Default constructor. </summary>
-    public DeviceCoreServerStubBase() : this( 0 )
+    public CoreChannelServerBase() : this( 0 )
     {
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
-    public DeviceCoreServerStubBase( int port ) : this( IPAddress.Any, port )
+    public CoreChannelServerBase( int port ) : this( IPAddress.Any, port )
     {
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="bindAddr"> The bind address. </param>
     /// <param name="port">     The port. </param>
-    public DeviceCoreServerStubBase( IPAddress bindAddr, int port )
+    public CoreChannelServerBase( IPAddress bindAddr, int port )
     {
         this._ipv4Address = bindAddr;
         this.PortNumber = port;
@@ -44,7 +44,7 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
         };
         this.SetTransports( transports );
 
-        this.CharacterEncoding = DeviceCoreClient.EncodingDefault;
+        this.CharacterEncoding = CoreChannelClient.EncodingDefault;
         this.Running = false;
     }
 
@@ -227,87 +227,87 @@ public abstract class DeviceCoreServerStubBase : OncRpcServerStubBase, IOncRpcDi
 
     /// <summary>  Opens a link to a device. </summary>
     /// <remarks> Renamed from <c>create_link_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.CreateLinkParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type <see cref="Codecs.CreateLinkParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract CreateLinkResp CreateLink( CreateLinkParms arg1 );
+    public abstract CreateLinkResp CreateLink( CreateLinkParms request );
 
     /// <summary>  Device receives a message. </summary>
     /// <remarks> Renamed from <c>device_write_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceWriteParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type <see cref="Codecs.DeviceWriteParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceWriteResp"/>. </returns>
-    public abstract DeviceWriteResp DeviceWrite( DeviceWriteParms arg1 );
+    public abstract DeviceWriteResp DeviceWrite( DeviceWriteParms request );
 
     /// <summary>  Device returns a result. </summary>
     /// <remarks> Renamed from <c>device_read_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceReadParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceReadParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceReadResp"/>. </returns>
-    public abstract DeviceReadResp DeviceRead( DeviceReadParms arg1 );
+    public abstract DeviceReadResp DeviceRead( DeviceReadParms request );
 
     /// <summary>  Device returns its status byte. </summary>
     /// <remarks> Renamed from <c>device_readstb_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceReadStbResp"/>. </returns>
-    public abstract DeviceReadStbResp DeviceReadStb( DeviceGenericParms arg1 );
+    public abstract DeviceReadStbResp DeviceReadStb( DeviceGenericParms request );
 
     /// <summary>  Device executes a trigger. </summary>
     /// <remarks> Renamed from <c>device_trigger_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceTrigger( DeviceGenericParms arg1 );
+    public abstract DeviceError DeviceTrigger( DeviceGenericParms request );
 
     /// <summary>  Device clears itself. </summary>
     /// <remarks> Renamed from <c>device_clear_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceClear( DeviceGenericParms arg1 );
+    public abstract DeviceError DeviceClear( DeviceGenericParms request );
 
     /// <summary>  Device disables its front panel. </summary>
     /// <remarks> Renamed from <c>device_remote_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceRemote( DeviceGenericParms arg1 );
+    public abstract DeviceError DeviceRemote( DeviceGenericParms request );
 
     /// <summary>  Device enables its front panel. </summary>
     /// <remarks> Renamed from <c>device_local_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceGenericParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceLocal( DeviceGenericParms arg1 );
+    public abstract DeviceError DeviceLocal( DeviceGenericParms request );
 
     /// <summary>  Device is locked. </summary>
     /// <remarks> Renamed from <c>device_lock_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLockParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceLockParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceLock( DeviceLockParms arg1 );
+    public abstract DeviceError DeviceLock( DeviceLockParms request );
 
     /// <summary>  Device is unlocked. </summary>
     /// <remarks> Renamed from <c>device_unlock_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLink"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceLink"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceUnlock( DeviceLink arg1 );
+    public abstract DeviceError DeviceUnlock( DeviceLink request );
 
     /// <summary>  Device enables/disables sending of service requests. </summary>
     /// <remarks> Renamed from <c>device_enable_srq_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceEnableSrqParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceEnableSrqParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceEnableSrq( DeviceEnableSrqParms arg1 );
+    public abstract DeviceError DeviceEnableSrq( DeviceEnableSrqParms request );
 
     /// <summary>  Device executes a command. </summary>
     /// <remarks> Renamed from <c>device_docmd_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceDoCmdParms"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceDoCmdParms"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>. </returns>
-    public abstract DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms arg1 );
+    public abstract DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request );
 
     /// <summary>  Closes a link to a device. </summary>
     /// <remarks> Renamed from <c>destroy_link_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceLink"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceLink"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DestroyLink( DeviceLink arg1 );
+    public abstract DeviceError DestroyLink( DeviceLink request );
 
     /// <summary>  Device creates interrupt channel. </summary>
     /// <remarks> Renamed from <c>create_intr_chan_1</c> </remarks>
-    /// <param name="arg1"> The parameter (of type <see cref="Codecs.DeviceRemoteFunc"/>) to the remote procedure call.. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceRemoteFunc"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError CreateIntrChan( DeviceRemoteFunc arg1 );
+    public abstract DeviceError CreateIntrChan( DeviceRemoteFunc request );
 
     /// <summary>  Device destroys interrupt channel. </summary>
     /// <remarks> Renamed from <c>destroy_intr_chan_1</c> </remarks>

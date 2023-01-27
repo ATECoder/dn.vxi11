@@ -4,13 +4,18 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceWriteParms"/> class defines the request XDR codec for the <see cref="Vxi11Message.DeviceWriteProcedure"/>
 /// RPC message.
 /// </summary>
-/// <remarks> <para>
+/// <remarks> 
+/// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
+/// have different integer representations. <para>
+/// 
+/// All integers defined by the VXI-11 specification are passed over the
+/// network as 32-bit integers, either signed or unsigned as defined. </para><para>
 /// 
 /// Renamed from <c>Device_WriteParms</c>. </para><para>
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
-/// struct Device_WriteParms {
+/// struct <c>device_write</c> Parms {
 ///    Device_Link lid;             /* link id from create_link */
 ///    unsigned long io_timeout;    /* time to wait for I/O */
 ///    unsigned long lock_timeout;  /* time to wait for lock */

@@ -6,14 +6,14 @@ using cc.isr.VXI11.Codecs;
 namespace cc.isr.VXI11.IEEE488;
 
 /// <summary>   An IEEE 488 VXI-11 client. </summary>
-public class Ieee488Client : IDisposable
+public partial class Ieee488Client : IDisposable
 {
 
     #region " construction, connection and cleanup "
 
     /// <summary>   Default constructor. </summary>
     public Ieee488Client()
-    {   
+    {
 
         // get the next client identifier
         this.ClientId = Ieee488Client.GetNextClientId();
@@ -22,8 +22,8 @@ public class Ieee488Client : IDisposable
         this.MaxReadRawLength = Ieee488Client.MaxReadRawLengthDefault;
         this.MaxReceiveSize = 0;
         this.LastDeviceError = new DeviceErrorCode();
-        this.Host = string.Empty;
-        this.InterfaceDeviceString = string.Empty;
+        this._host = string.Empty;
+        this._interfaceDeviceString = string.Empty;
         this.Eoi = Ieee488Client.EoiEnabledDefault;
         this.IOTimeout = Ieee488Client.IOTimeoutDefault;
         this.TransmitTimeout = Ieee488Client.TransmitTimeoutDefault;
@@ -54,7 +54,7 @@ public class Ieee488Client : IDisposable
         this.InterfaceDeviceString = string.Empty;
 
         // instantiate the core client.
-        this.CoreClient = new DeviceCoreClient( IPAddress.Parse( hostAddress ), OncRpcProtocol.OncRpcTcp, connectTimeout );
+        this.CoreClient = new CoreChannelClient( IPAddress.Parse( hostAddress ), OncRpcProtocol.OncRpcTcp, connectTimeout );
 
         // set the client timeouts.
         this.IOTimeout = this.IOTimeout;
@@ -203,7 +203,7 @@ public class Ieee488Client : IDisposable
             // uncomment the following line if Finalize() is overridden above.
             GC.SuppressFinalize( this );
         }
-        catch ( Exception ex ) { Logger.Writer.LogMemberError("Exception disposing", ex ); }
+        catch ( Exception ex ) { Logger.Writer.LogMemberError( "Exception disposing", ex ); }
         finally
         {
         }
@@ -310,7 +310,7 @@ public class Ieee488Client : IDisposable
     #region " VXI-11 members "
 
     /// <summary>   Gets or sets the Core client. </summary>
-    protected DeviceCoreClient? CoreClient { get; set; }
+    protected CoreChannelClient? CoreClient { get; set; }
 
     /// <summary>   Gets or sets the identifier of the client. </summary>
     /// <value> The identifier of the client. </value>
@@ -341,15 +341,29 @@ public class Ieee488Client : IDisposable
 
     #region " members "
 
+    private string _host;
     /// <summary>   Gets or sets the host IPv4 Address. </summary>
     /// <value> The host. </value>
-    public string Host { get; private set; }
+    public string Host
+    {
+        get => this._host;
+        private set => _ = this.SetProperty( ref this._host, value );
+    }
 
+    /// <summary>   Gets the IP address. </summary>
+    /// <value> The IP address. </value>
+    public IPAddress IPAddress => IPAddress.Parse( this.Host );
+
+    private string _interfaceDeviceString;
     /// <summary>
     /// Gets or sets the interface device string, .e.g, inst0, gpib0,5, or usb0[...].
     /// </summary>
     /// <value> The interface device string. </value>
-    public string InterfaceDeviceString { get; private set; }
+    public string InterfaceDeviceString
+    {
+        get => this._interfaceDeviceString;
+        set => _ = this.SetProperty( ref this._interfaceDeviceString, value );
+    }
 
     /// <summary>
     /// Gets or sets a value indicating whether the end-or-identify (EOI) terminator is enabled.
@@ -469,7 +483,7 @@ public class Ieee488Client : IDisposable
     /// <returns>   A <see cref="DeviceWriteResp">device write response</see> . </returns>
     public DeviceWriteResp Send( byte[] data )
     {
-        if ( this.DeviceLink is null || this.CoreClient  is null ) return new DeviceWriteResp();
+        if ( this.DeviceLink is null || this.CoreClient is null ) return new DeviceWriteResp();
         if ( data is null || data.Length == 0 ) return new DeviceWriteResp();
         if ( data.Length > this.MaxReceiveSize )
             throw new DeviceException( $"Data size {data.Length} exceed {nameof( this.MaxReceiveSize )}({this.MaxReceiveSize})", DeviceErrorCodeValue.IOError );
@@ -586,7 +600,7 @@ public class Ieee488Client : IDisposable
 
             DeviceWriteResp reply = this.Send( this.CharacterEncoding.GetBytes( data ) );
 
-            if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError  )
+            if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
             {
                 throw new DeviceException( $"; failed writing in raw mode", reply.ErrorCode.ErrorCodeValue );
             }
@@ -623,8 +637,8 @@ public class Ieee488Client : IDisposable
         var values = Array.Empty<byte>();
 
         // Read while read reason does not match the end of stream 
-        
-        while ( requestByteCount > 0 && ( ( reply.Reason & endOfStream ) == 0 ) )
+
+        while ( requestByteCount > 0 && ((reply.Reason & endOfStream) == 0) )
         {
             // request readings from the device.
 
@@ -644,7 +658,7 @@ public class Ieee488Client : IDisposable
             // update the remaining count;
             if ( byteCount > 0 )
             {
-                byteCount -= reply.GetData().Length ;
+                byteCount -= reply.GetData().Length;
                 if ( byteCount < requestByteCount )
                 {
                     requestByteCount = byteCount;
@@ -662,11 +676,11 @@ public class Ieee488Client : IDisposable
     ///                                         device. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay. </param>
     /// <returns>   A Tuple of sent count and received data. </returns>
-    public virtual ( int SentCount, byte[] Received )  QueryRaw( string data, int byteCount = -1, int millisecondsReadDelay = 3 )
+    public virtual (int SentCount, byte[] Received) QueryRaw( string data, int byteCount = -1, int millisecondsReadDelay = 3 )
     {
         int sentCount = this.WriteRaw( data );
         Ieee488Client.Delay( millisecondsReadDelay );
-        return ( sentCount, this.ReadRaw( byteCount ) );
+        return (sentCount, this.ReadRaw( byteCount ));
     }
 
 

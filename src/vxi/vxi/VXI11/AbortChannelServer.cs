@@ -37,7 +37,7 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     /// <param name="port">     The port. </param>
     public AbortChannelServer( IPAddress bindAddr, int port )
     {
-        this._ipv4Address= bindAddr;
+        this._ipv4Address = bindAddr;
         this.PortNumber = port;
 
         OncRpcProgramInfo[] registeredPrograms = new OncRpcProgramInfo[] {
@@ -126,7 +126,7 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     {
         var handler = this.AbortRequested;
         handler?.Invoke( this, e );
-        return new DeviceError( new DeviceErrorCode(  e.ErrorCodeValue ) );
+        return new DeviceError( new DeviceErrorCode( e.ErrorCodeValue ) );
     }
 
     #endregion
@@ -144,7 +144,7 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     {
         return link == null
             ? new DeviceError()
-            : this.OnAbortRequested( new DeviceErrorEventArgs(   ) );
+            : this.OnAbortRequested( new DeviceErrorEventArgs() );
     }
 
     #endregion

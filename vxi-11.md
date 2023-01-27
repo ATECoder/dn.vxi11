@@ -213,12 +213,12 @@ The interrupt mechanism allows the device to send a notification call to the con
 |---------------------:|:----------------------------------
 | create_intr_chan =>  |
 |                      | <= acknowledge
-| device_enable_srq => | 
+| <c>device_enable_srq</c> => | 
 |                      | <= acknowledge
-| device_write =>      | <i>SRQ in the middle of another call</i>:
+| <c>device_write</c>  =>      | <i>SRQ in the middle of another call</i>:
 |                      | <= device_intr_srq
 |                      | <= acknowledge to write
-| device_write =>      | <i>SRQ after another call</i>:
+| <c>device_write</c>  =>      | <i>SRQ after another call</i>:
 |                      | <= acknowledge to write
 |                      | <= device_intr_srq
 
@@ -228,7 +228,7 @@ The interrupt mechanism allows the device to send a notification call to the con
 ### Note
 * Network instrument clients can implement interrupts by using either a separate interrupt process, threads, or by emulating threads using a signal handling routine that is invoked on incoming messages to the interrupt port.
 * The network instrument server MAY issue interrupts in the middle of an active call. In general, this implementation gives more timely responses, and can be easier than delaying the interrupt until an in-progress action has finished.
-* The device_intr_srq RPC is implemented as a one-way RPC. This means that the network instrument server does not expect a response from the network instrument client. This is necessary to avoid deadlock situations in a single-threaded environment where if a response were expected to an interrupt both the network instrument client and network instrument server could be waiting for a response from the other, with neither proceeding. 
+* The <c>device_intr_srq</c> RPC is implemented as a one-way RPC. This means that the network instrument server does not expect a response from the network instrument client. This is necessary to avoid deadlock situations in a single-threaded environment where if a response were expected to an interrupt both the network instrument client and network instrument server could be waiting for a response from the other, with neither proceeding. 
 * The `create_intr_chan` RPC is used to identify the host or port that can service the interrupt. The `device_enable_srq` RPC is used to enable or disable an interrupt. The `destroy_intr_chan` RPC is used to close the interrupt channel.
 * The `device_enable_srq` RPC contains a handle parameter. The same data contained in handle is passed back in the handle parameter of the `device_intr_srq` RPC. Since the same data is passed back, the network instrument client can identify the link associated with the `device_intr_srq`.
 * The network instrument protocol recognizes one type of interrupt, service request. Note that the return type to the interrupt RPC is void, denoting a one-way RPC.

@@ -23,10 +23,11 @@ public static class Support
             ?? value.ToString();
     }
 
-    /// <summary>   Converts a value to an int 32. </summary>
+    /// <summary>   A <see cref="string"/> extension method that converts a value to an <see cref="int"/>. </summary>
+    /// <remarks>   2023-01-26. </remarks>
     /// <param name="value">    The value. </param>
     /// <returns>   The given data converted to an int 32. </returns>
-    public static int ConvertToInt32( this string value )
+    public static int ToInt( this string value )
     {
         return string.IsNullOrEmpty( value )
             ? 0
@@ -45,6 +46,53 @@ public static class Support
             .FirstOrDefault( ip => ip.AddressFamily == AddressFamily.InterNetwork );
         return ipAddress;
     }
+
+    #region " IP Address converters "
+
+    /// <summary>   An <see cref="IPAddress"/> extension method that converts the address to an <see cref="uint"/>. </summary>
+    /// <remarks>
+    /// IP addresses are in network order (big-endian), while <see cref="int"/>s are little-endian on
+    /// Windows, so to get a correct value, you must reverse the bytes before converting on a little-
+    /// endian system. <para>
+    /// 
+    /// Also, even for IPv4, an int can't hold addresses bigger than 127.255.255.255, e.g. the
+    /// broadcast address (255.255.255.255), so use a uint. </para><para>
+    /// 
+    /// <see href="https://stackoverflow.com/questions/461742/how-to-convert-an-ipv4-address-into-a-integer-in-c">
+    /// stack overflow</see> </para>
+    /// </remarks>
+    /// <param name="address">  The address to act on. </param>
+    /// <returns>   Address as an unsigned integer. </returns>
+    public static uint ToUInt( this IPAddress address )
+    {
+        byte[] bytes = address.GetAddressBytes();
+
+        // flip big-endian(network order) to little-endian
+        if ( BitConverter.IsLittleEndian )
+        {
+            Array.Reverse( bytes );
+        }
+        return BitConverter.ToUInt32( bytes, 0 );
+    }
+
+    /// <summary>   An <see cref="uint"/> extension method that converts the address to an IP address. </summary>
+    /// <remarks>   2023-01-26. </remarks>
+    /// <param name="address">  The address to act on. </param>
+    /// <returns>   Address as a string. </returns>
+    public static string ToIPAddress( this uint address )
+    {
+        byte[] bytes = BitConverter.GetBytes( address );
+
+        // flip little-endian to big-endian(network order)
+        if ( BitConverter.IsLittleEndian )
+        {
+            Array.Reverse( bytes );
+        }
+
+        return new IPAddress( bytes ).ToString();
+    }
+
+    #endregion
 
     #region " client identifiers "
 

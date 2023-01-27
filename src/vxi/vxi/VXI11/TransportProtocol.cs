@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace cc.isr.VXI11;
 
-/// <summary>   The underlying transfer protocol as defined in <see cref="DeviceCoreClient.CreateIntrChan(cc.isr.VXI11.Codecs.DeviceRemoteFunc)"/>
+/// <summary>   The underlying transfer protocol as defined in <see cref="CoreChannelClient.CreateIntrChan(cc.isr.VXI11.Codecs.DeviceRemoteFunc)"/>
 /// for <see cref="Vxi11Message.CreateInterruptChannelProcedure"/>RPC. </summary>
 /// <remarks> <para> 
 /// 

@@ -8,7 +8,12 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceErrorCode"/> class defines the XDR codec used with the <see cref="DeviceErrorCode"/>
 /// XDR Codec.
 /// </summary>
-/// <remarks> <para>
+/// <remarks> 
+/// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
+/// have different integer representations. <para>
+/// 
+/// All integers defined by the VXI-11 specification are passed over the
+/// network as 32-bit integers, either signed or unsigned as defined. </para><para>
 /// 
 /// Renamed from <c>Device_ErrorCode</c>. </para><para>
 ///  

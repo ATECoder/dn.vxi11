@@ -141,10 +141,10 @@ public struct DeviceAddress
                 this.InterfaceNumber = interfaceNumber;
         if ( info.Length < 2 ) return true; // address is like 'usb0'
         info = info[1].Split( ':' );
-        this.ManufacturerId = Support.ConvertToInt32( info[0] );
-        this.ModelCode = Support.ConvertToInt32( info[2] );
+        this.ManufacturerId = Support.ToInt( info[0] );
+        this.ModelCode = Support.ToInt( info[2] );
         this.SerialNumber = info[4];
-        this.UsbTmcInterfaceNumber = info.Length > 6 ? Support.ConvertToInt32( info[6] ) : 0;
+        this.UsbTmcInterfaceNumber = info.Length > 6 ? Support.ToInt( info[6] ) : 0;
 
         return true;
     }

@@ -8,7 +8,12 @@ namespace cc.isr.VXI11.Codecs;
 /// <see cref="DeviceLockParms"/>, <see cref="DeviceReadParms"/>, and
 /// <see cref="DeviceWriteParms"/> XDR Codecs.
 /// </summary>
-/// <remarks> <para>
+/// <remarks> 
+/// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
+/// have different integer representations. <para>
+/// 
+/// All integers defined by the VXI-11 specification are passed over the
+/// network as 32-bit integers, either signed or unsigned as defined. </para><para>
 /// 
 /// Renamed from <c>Device_Flags</c>. </para><para>
 /// 
@@ -87,10 +92,10 @@ public enum DeviceOperationFlags
     /// 
     /// <b>Wait Lock (bit 0):</b> If the flag is set to one (1), then the network instrument server suspends (blocks) the
     /// requested operation if it cannot be performed due to a lock held by another link for at least
-    /// lock_timeout milliseconds. If the flag is reset to zero (0), then the network instrument server sets the
+    /// <c>lock_timeout</c> milliseconds. If the flag is reset to zero (0), then the network instrument server sets the
     /// error value to 11 and returns if the operation cannot be performed due to a lock held by another link. </para>
     /// </summary>
-    WaitLock = 1,
+    Waitlock = 1,
 
     /// <summary>   An enum constant representing the end indicator option. 
     /// <b>EOI Enabled (bit 3)</b> If the flag is set to one (1) then the last byte in the buffer is sent with an END indicator.

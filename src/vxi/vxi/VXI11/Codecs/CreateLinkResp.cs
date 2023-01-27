@@ -4,8 +4,13 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="CreateLinkResp"/> class defines the response XDR
 /// codec for the <see cref="Vxi11Message.CreateLinkProcedure"/> RPC message.
 /// </summary>
-/// <remarks> <para>
-///
+/// <remarks> 
+/// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
+/// have different integer representations. <para>
+/// 
+/// All integers defined by the VXI-11 specification are passed over the
+/// network as 32-bit integers, either signed or unsigned as defined. </para><para>
+/// 
 /// Renamed from <c>Create_LinkResp</c>. </para><para>
 ///  
 /// VXI-11 Specifications: </para>

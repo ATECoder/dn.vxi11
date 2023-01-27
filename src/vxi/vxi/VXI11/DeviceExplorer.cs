@@ -138,7 +138,7 @@ public class DeviceExplorer
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
         using OncRpcPortmapClient pmapClient = new( host, OncRpcProtocol.OncRpcTcp, connectTimeout );
-        pmapClient.OncRpcClient.IOTimeout= OncRpcTcpClient.IOTimeoutDefault;
+        pmapClient.OncRpcClient.IOTimeout = OncRpcTcpClient.IOTimeoutDefault;
 
         // Now dump the current list of registered servers.
         OncRpcServerIdentifierCodec[] registeredServers = pmapClient.ListRegisteredServers(); ;

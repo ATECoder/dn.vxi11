@@ -7,7 +7,7 @@ using cc.isr.VXI11.IEEE488;
 namespace cc.isr.VXI11;
 
 /// <summary>
-/// The class <see cref="DeviceCoreClient"/> implements the client stub proxy for the
+/// The class <see cref="CoreChannelClient"/> implements the client stub proxy for the
 /// <see cref="Vxi11ProgramConstants.CoreProgram"/> remote program. It provides method
 /// stubs which, when called, in turn call the appropriate remote method (procedure).
 /// </summary>
@@ -16,23 +16,23 @@ namespace cc.isr.VXI11;
 ///  
 /// Renamed from <c>vxi11_DEVICE_CORE_Client</c> </para>
 /// </remarks>
-public class DeviceCoreClient : OncRpcClientStubBase
+public class CoreChannelClient : OncRpcClientStubBase
 {
 
     #region " construction and cleanup "
 
     /// <summary>
-    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
+    /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
     /// remote program can be accessed.
     /// </summary>
     /// <param name="client">   The ONC/RPC client connection object implementing the particular
     ///                         protocol and program. </param>
-    public DeviceCoreClient( OncRpcClientBase client ) : base( client )
+    public CoreChannelClient( OncRpcClientBase client ) : base( client )
     {
     }
 
     /// <summary>
-    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
+    /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
     /// remote program can be accessed.
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
@@ -40,14 +40,14 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// <param name="protocol"> The <see cref="OncRpcProtocol"/> protocol to be used for ONC/RPC calls. </param>
     /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocol.OncRpcUdp"/>
     ///                         or the connection timeout for <see cref="OncRpcProtocol.OncRpcTcp"/>. </param>
-    public DeviceCoreClient( IPAddress host, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.CoreProgram,
+    public CoreChannelClient( IPAddress host, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.CoreProgram,
                                                                                                    Vxi11ProgramConstants.CoreVersion,
                                                                                                    0, protocol, timeout )
     {
     }
 
     /// <summary>
-    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/> 
+    /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/> 
     /// remote program can be accessed. 
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
@@ -57,14 +57,14 @@ public class DeviceCoreClient : OncRpcClientStubBase
     ///                         calls. </param>
     /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocol.OncRpcUdp"/>
     ///                         or the connection timeout for <see cref="OncRpcProtocol.OncRpcTcp"/>. </param>
-    public DeviceCoreClient( IPAddress host, int port, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.CoreProgram,
+    public CoreChannelClient( IPAddress host, int port, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.CoreProgram,
                                                                                                        Vxi11ProgramConstants.CoreVersion, port,
                                                                                                        protocol, timeout )
     {
     }
 
     /// <summary>
-    /// Constructs a <see cref="DeviceCoreClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
+    /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
     /// remote program can be accessed.
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
@@ -76,7 +76,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     ///                         calls. </param>
     /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocol.OncRpcUdp"/>
     ///                         or the connection timeout for <see cref="OncRpcProtocol.OncRpcTcp"/>. </param>
-    public DeviceCoreClient( IPAddress host, int program, int version, int port, OncRpcProtocol protocol,
+    public CoreChannelClient( IPAddress host, int program, int version, int port, OncRpcProtocol protocol,
                                                                        int timeout ) : base( host, program, version, port, protocol, timeout )
     {
     }
@@ -657,7 +657,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
         if ( reply is null )
             throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
         else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( DeviceCoreClient.DeviceDoCmd)} command.", reply.ErrorCode.ErrorCodeValue );
+            throw new DeviceException( $"; failed sending the {nameof( CoreChannelClient.DeviceDoCmd )} command.", reply.ErrorCode.ErrorCodeValue );
 
         XdrBufferDecodingStream decoder = new( reply.GetDataOut() );
         decoder.BeginDecoding();
@@ -689,13 +689,13 @@ public class DeviceCoreClient : OncRpcClientStubBase
     {
         XdrBufferEncodingStream encoder = new( 32 );
         encoder.BeginEncoding();
-        encoder.EncodeBoolean ( value );
+        encoder.EncodeBoolean( value );
 
         DeviceDoCmdResp reply = this.DeviceDoCmd( link, new DeviceFlags( flags ), lockTimeout, ioTimeout, cmd, dataSize, encoder.GetEncodedData() );
         if ( reply is null )
             throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
         else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( DeviceCoreClient.DeviceDoCmd )} command.", reply.ErrorCode.ErrorCodeValue );
+            throw new DeviceException( $"; failed sending the {nameof( CoreChannelClient.DeviceDoCmd )} command.", reply.ErrorCode.ErrorCodeValue );
 
         XdrBufferDecodingStream decoder = new( reply.GetDataOut() );
         decoder.BeginDecoding();
@@ -817,10 +817,8 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// <para>
     /// 
     /// The <c>create_intr_chan</c> RPC is used to identify the host or port that can service the
-    /// interrupt. The
-    /// <c>device_enable_srq</c> RPC is used to enable or disable an interrupt. The <c>
-    /// destroy_intr_chan</c> RPC is used to
-    /// close the interrupt channel. </para><para>
+    /// interrupt. The <c>device_enable_srq</c> RPC is used to enable or disable an interrupt. The <c>
+    /// destroy_intr_chan</c> RPC is used to close the interrupt channel. </para><para>
     /// 
     /// Renamed from <c>create_intr_chan_1</c>  </para>
     /// </remarks>
@@ -830,7 +828,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError CreateIntrChan( int hostAddress, int hostPort, TransportProtocol transportProtocol = TransportProtocol.Tcp )
+    public DeviceError CreateIntrChan( uint hostAddress, int hostPort, TransportProtocol transportProtocol = TransportProtocol.Tcp )
     {
         DeviceRemoteFunc request = new() {
             HostAddr = hostAddress,
@@ -863,7 +861,7 @@ public class DeviceCoreClient : OncRpcClientStubBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError CreateIntrChan( int hostAddress, int hostPort, int programNumber, int programVersion, TransportProtocol transportProtocol  )
+    public DeviceError CreateIntrChan( uint hostAddress, int hostPort, int programNumber, int programVersion, TransportProtocol transportProtocol )
     {
         DeviceRemoteFunc request = new() {
             HostAddr = hostAddress,

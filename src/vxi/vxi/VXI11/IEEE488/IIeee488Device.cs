@@ -12,29 +12,29 @@ public interface IIeee488Device
 
     /// <summary>   Aborts and returns the <see cref="DeviceError"/>. </summary>
     /// <remarks>
-    /// To successfully complete a device_abort RPC, a network instrument server SHALL: <para>
+    /// To successfully complete a <c>device_abort</c> RPC, a network instrument server SHALL: <para>
     /// 
     /// 1. Initiate termination of any core channel, in-progress RPC associated with the link except
     /// destroy_link, device_enable_srq, and device_unlock. </para><para>
     /// 
     /// 2. Return with error set to 0, no error, to indicate successful completion </para><para>
     /// 
-    /// The intent of this rule is to handle the device_abort RPC ahead of the other operations, but
+    /// The intent of this rule is to handle the <c>device_abort</c> RPC ahead of the other operations, but
     /// due to operating system specific implementation details the timeliness cannot be guaranteed. </para>
     /// <para>
     /// 
-    /// The device_abort RPC only aborts an in-progress RPC, not a queued RPC. </para><para>
+    /// The <c>device_abort</c> RPC only aborts an in-progress RPC, not a queued RPC. </para><para>
     /// 
-    /// After replying to the device_abort call, the network instrument server SHALL reply to the
+    /// After replying to the <c>device_abort</c> call, the network instrument server SHALL reply to the
     /// original in-progress call which was aborted with error set to 23, aborted.  </para><para>
     /// 
     /// Receiving 0 on the abort call at the network instrument client only means that the abort was
     /// successfully delivered to the network instrument server. </para><para>
     /// 
-    /// The lid parameter is compared against the active link identifiers . If none match,
-    /// device_abort SHALL terminate with error set to 4 invalid link identifier.  </para><para>
+    /// The <c>link id</c> parameter is compared against the active link identifiers . If none match,
+    /// <c>device_abort</c> SHALL terminate with error set to 4 invalid link identifier.  </para><para>
     /// 
-    /// The operation of device_abort SHALL NOT be affected by locking  </para>
+    /// The operation of <c>device_abort</c> SHALL NOT be affected by locking  </para>
     /// </remarks>
     DeviceError Abort();
 
@@ -119,7 +119,7 @@ public interface IIeee488Device
     /// 140 (4 + 8 + 128). for example, *SRE 24 enables bits 3 and 4 in the enable register. To
     /// enable specific bits, specify the decimal value corresponding to the binary-weighted sum of
     /// the bits in the register.The selected bits are summarized in the "Master Summary" bit (bit 6)
-    /// of the Status Byte Register.If any of the selected bits change from 0 to 1, the instrument
+    /// of the Status Byte Register. If any of the selected bits change from 0 to 1, the instrument
     /// generates a Service Request signal.
     /// *CLS clears the event register, but not the enable register.
     /// *PSC (power-on status clear) determines whether Status Byte enable register is cleared at

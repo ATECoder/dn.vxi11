@@ -8,7 +8,7 @@ public class Vxi11EventCodec : IXdrCodec
 {
 
     /// <summary>   Default constructor. </summary>
-    public Vxi11EventCodec() : this( new byte[40] )   
+    public Vxi11EventCodec() : this( new byte[40] )
     {
     }
 
@@ -35,7 +35,7 @@ public class Vxi11EventCodec : IXdrCodec
     public static Vxi11EventCodec DecodeInstance( byte[] handle )
     {
         Vxi11EventCodec codec = new Vxi11EventCodec( handle );
-        XdrBufferDecodingStream decoder  = new XdrBufferDecodingStream( handle );
+        XdrBufferDecodingStream decoder = new XdrBufferDecodingStream( handle );
         codec.Decode( decoder );
         return codec;
     }
@@ -47,7 +47,7 @@ public class Vxi11EventCodec : IXdrCodec
     public static Vxi11EventCodec EncodeInstance( Vxi11EventType eventType )
     {
         Vxi11EventCodec codec = new Vxi11EventCodec( eventType );
-        XdrBufferEncodingStream encoder = new ( codec._handle );
+        XdrBufferEncodingStream encoder = new( codec._handle );
         encoder.EncodeInt( ( int ) eventType );
         codec.SetHandle( encoder.GetEncodedData() );
         return codec;

@@ -12,7 +12,7 @@ namespace cc.isr.VXI11.IEEE488;
 /// <remarks>   
 /// Closing a client connected to the Mock local server no longer throws an exception when destroying the link.
 /// </remarks>
-public abstract partial class Ieee488ServerBase : DeviceCoreServerStubBase
+public abstract partial class Ieee488ServerBase : CoreChannelServerBase
 {
     #region " construction and cleanup "
 
@@ -30,7 +30,7 @@ public abstract partial class Ieee488ServerBase : DeviceCoreServerStubBase
     /// <summary>   Constructor. </summary>
     /// <param name="bindAddr"> The local Internet Address the server will bind to. </param>
     /// <param name="port">     The port number where the server will wait for incoming calls. </param>
-    public Ieee488ServerBase( IPAddress bindAddr, int port ) : base( bindAddr, port ) 
+    public Ieee488ServerBase( IPAddress bindAddr, int port ) : base( bindAddr, port )
     {
         this._interfaceDeviceString = string.Empty;
         this._readMessage = string.Empty;
