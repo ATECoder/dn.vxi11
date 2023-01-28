@@ -46,7 +46,7 @@ public partial class Ieee488Client : IDisposable
     private DeviceErrorCode ConnectDevice( string hostAddress, string interfaceDeviceString, int connectTimeout )
     {
         // First destroy the link if not destroyed. 
-        if ( this.Connected ) { _ = this.Close(); }
+        if ( this.Connected ) { this.Close(); }
 
         this.ConnectTimeout = connectTimeout;
         this.DeviceLink = null;
@@ -104,7 +104,7 @@ public partial class Ieee488Client : IDisposable
         {
             try
             {
-                _ = this.Close();
+                this.Close();
             }
             catch ( Exception )
             {
@@ -126,7 +126,7 @@ public partial class Ieee488Client : IDisposable
     }
 
     /// <summary>   Closes this object. </summary>
-    public DeviceError Close()
+    public virtual void Close()
     {
         DeviceError? deviceError = new();
         List<Exception> exceptions = new();
@@ -135,6 +135,12 @@ public partial class Ieee488Client : IDisposable
             try
             {
                 deviceError = this.CoreClient?.DestroyLink( this.DeviceLink );
+                if ( deviceError is null )
+                    throw new DeviceException( $"; failed destroying the link to the {InterfaceDeviceString} device at {IPAddress}.",
+                        DeviceErrorCodeValue.IOError );
+                if ( deviceError.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+                    throw new DeviceException( $"; failed destroying the link to the {InterfaceDeviceString} device at {IPAddress}.",
+                        deviceError.ErrorCode.ErrorCodeValue );
             }
             catch ( Exception ex )
             {
@@ -158,7 +164,7 @@ public partial class Ieee488Client : IDisposable
         }
         finally
         {
-            this.CoreClient = null;
+            // leave thos to the dispose method: this.CoreClient = null;
         }
 
         try
@@ -171,7 +177,7 @@ public partial class Ieee488Client : IDisposable
         }
         finally
         {
-            this.AbortClient = null;
+            // leave thos to the dispose method: this.AbortClient = null;
         }
 
         if ( exceptions.Any() )
@@ -179,7 +185,6 @@ public partial class Ieee488Client : IDisposable
             AggregateException aggregateException = new( exceptions );
             throw aggregateException;
         }
-        return deviceError ?? new DeviceError();
     }
 
     #region " disposable implementation "
@@ -215,7 +220,7 @@ public partial class Ieee488Client : IDisposable
     /// </summary>
     /// <param name="disposing">    True to release both managed and unmanaged resources; false to
     ///                             release only unmanaged resources. </param>
-    private void Dispose( bool disposing )
+    protected virtual void Dispose( bool disposing )
     {
         if ( disposing )
         {
@@ -224,7 +229,7 @@ public partial class Ieee488Client : IDisposable
 
         // free unmanaged resources and override finalizer
         // I am assuming that the socket used in the derived classes include unmanaged resources.
-        _ = this.Close();
+        this.Close();
 
         this.CoreClient?.Dispose();
         this.AbortClient?.Dispose();

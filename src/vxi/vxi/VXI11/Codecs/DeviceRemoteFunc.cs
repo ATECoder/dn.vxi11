@@ -1,3 +1,5 @@
+using System.Net;
+
 using cc.isr.VXI11.EnumExtensions;
 
 namespace cc.isr.VXI11.Codecs;
@@ -32,11 +34,12 @@ public class DeviceRemoteFunc : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public DeviceRemoteFunc()
     {
+        this.HostAddr = IPAddress.Loopback;
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceRemoteFunc( XdrDecodingStreamBase decoder )
+    public DeviceRemoteFunc( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
     }
@@ -51,7 +54,7 @@ public class DeviceRemoteFunc : IXdrCodec
 
     /// <summary>   Gets or sets the host address. </summary>
     /// <value> The host address. </value>
-    public uint HostAddr { get; set; }
+    public IPAddress HostAddr { get; set; }
 
     /// <summary>   Gets or sets the host port. </summary>
     /// <value> The host port. </value>
@@ -84,7 +87,7 @@ public class DeviceRemoteFunc : IXdrCodec
         this.HostPort.Encode( encoder );
         this.ProgNum.Encode( encoder );
         this.ProgVers.Encode( encoder );
-        (( int ) this.TransportProtocol).Encode( encoder );
+        this.TransportProtocol.Encode( encoder );
     }
 
     /// <summary>
@@ -93,7 +96,7 @@ public class DeviceRemoteFunc : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.HostAddr = decoder.DecodeUInt();
+        this.HostAddr = decoder.DecodeIPAddress();
         this.HostPort = decoder.DecodeInt();
         this.ProgNum = decoder.DecodeInt();
         this.ProgVers = decoder.DecodeInt();

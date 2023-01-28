@@ -4,6 +4,7 @@ using System.Reflection;
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.Visa;
 using cc.isr.VXI11.Logging;
+using cc.isr.ONC.RPC.Client;
 
 namespace cc.isr.VXI11.IEEE488.Mock;
 
@@ -47,6 +48,7 @@ public partial class Ieee488MockServer : CoreChannelServerBase
         this._writeMessage = string.Empty;
         this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
         this.MaxReceiveLength = Ieee488Client.MaxReceiveLengthDefault;
+        this.InterruptAddress = IPAddress.None;
     }
 
     /// <summary>   Close all transports listed in a set of server transports. </summary>
@@ -62,9 +64,7 @@ public partial class Ieee488MockServer : CoreChannelServerBase
 
         try
         {
-            this.AbortServer?.StopRpcProcessing();
-            // todo: wait for the server to stop running and then close. 
-            this.AbortServer?.Close();
+            this.DisableAbortServer();
         }
         catch ( Exception ex )
         {
@@ -72,7 +72,7 @@ public partial class Ieee488MockServer : CoreChannelServerBase
         }
         finally
         {
-            this.AbortServer = null;
+            // leave this to Dispose: this.AbortServer = null;
         }
 
         try
@@ -91,6 +91,25 @@ public partial class Ieee488MockServer : CoreChannelServerBase
             AggregateException aggregateException = new( exceptions );
             throw aggregateException;
         }
+    }
+
+    protected override void Dispose( bool disposing )
+    {
+        if ( disposing )
+        {
+            // dispose managed state (managed objects)
+        }
+
+        try
+        {
+            this.AbortServer?.Dispose();
+        }
+        finally
+        {
+            this.AbortServer = null;
+            base.Dispose( disposing );
+        }
+
     }
 
     #endregion
@@ -118,7 +137,7 @@ public partial class Ieee488MockServer : CoreChannelServerBase
 
     protected AbortChannelServer? AbortServer { get; set; }
 
-    /// <summary>   Device abort. </summary>
+    /// <summary>   Starts the abort server. </summary>
     /// <remarks>
     /// To successfully complete a <c>device_abort</c> RPC, a network instrument server SHALL: <para>
     /// 
@@ -146,13 +165,124 @@ public partial class Ieee488MockServer : CoreChannelServerBase
     /// </remarks>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
     /// <returns>   A DeviceErrorCode. </returns>
-    public virtual void EnableAbortServer()
+    protected virtual void StartAbortServer()
     {
         if ( this.AbortServer is null )
         {
             this.AbortServer = new AbortChannelServer( this.IPv4Address, this.AbortPortNumber );
             this.AbortServer.AbortRequested += this.HandleAbortRequest;
             this.AbortServer.Run();
+        }
+    }
+
+    /// <summary>   Enables (starts) the abort server thread. </summary>
+    public virtual void EnableAbortServer()
+    {
+        if ( this.AbortServer is not null ) return;
+
+        Thread listenThread = new( new ThreadStart( () => this.StartAbortServer() ) ) {
+            Name = "VXI-11 Async (Abort) Channel Server Thread",
+            IsBackground = true
+        };
+        listenThread.Start();
+    }
+
+    /// <summary>   The default time for waiting the abort server to stop listening. </summary>
+    public static int AbortServerDisableTimeoutDefault = 500;
+
+    /// <summary>   The abort server disable loop delay default. </summary>
+    public static int AbortServerDisableLoopDelayDefault = 50;
+
+    /// <summary>   Stops abort server. </summary>
+    /// <param name="timeout">      (Optional) The timeout. </param>
+    /// <param name="loopDelay">    The loop delay. </param>
+    protected virtual void StopAbortServer( int timeout = 500, int loopDelay = 50 )
+    {
+        if ( this.AbortServer is not null && this.AbortServer.Running )
+        {
+            this.AbortServer.AbortRequested -= this.HandleAbortRequest;
+            this.AbortServer.StopRpcProcessing();
+            DateTime endT= DateTime.Now.AddMilliseconds( timeout );
+            while ( endT > DateTime.Now && this.AbortServer.Running )
+            {
+                // allow the thread time to address the request
+                Task.Delay( 50 ).Wait();
+            }
+            this.AbortServer.Close();
+            this.AbortServer = null;
+        }
+    }
+
+    /// <summary>   Disables (stops) the abort server thread. </summary>
+    /// <remarks>   2023-01-28. </remarks>
+    /// <param name="timeout">      (Optional) The timeout. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay. </param>
+    public virtual void DisableAbortServer( int timeout = 500, int loopDelay = 50 )
+    {
+        if ( this.AbortServer is not null ) return;
+
+        Thread listenThread = new( new ThreadStart( () => this.StopAbortServer( timeout, loopDelay ) ) ) {
+            Name = "VXI-11 Async (Abort) Channel Server Disabling Thread",
+            IsBackground = true
+        };
+        listenThread.Start();
+    }
+
+    #endregion
+
+    #region " Interrupt port and client "
+
+    /// <summary>   The interrupt address as set when getting the <see cref="CreateIntrChan(DeviceRemoteFunc)"/> RPC. </summary>
+    private IPAddress InterruptAddress { get; set; }
+
+    private bool InterruptEnabled { get; set; }
+
+    /// <summary>   the Handle of the interrupt as received when getting the <see cref="DeviceEnableSrq(DeviceEnableSrqParms)"/> RPC. </summary>
+    private byte[] _interruptHandle = new byte[40];
+
+    private int InterruptTransmitTimeout { get; set; }
+
+    /// <summary>   Gets or sets the interrupt connect timeout. </summary>
+    /// <value> The interrupt connect timeout. </value>
+    public int InterruptConnectTimeout { get; set; }
+
+    /// <summary>   Gets or sets the interrupt i/o timeout. </summary>
+    /// <value> The interrupt i/o timeout. </value>
+    public int InterruptIOTimeout { get; set; }
+
+    /// <summary>   Gets or sets the Interrupt port. </summary>
+    /// <value> The Interrupt port. </value>
+    private int InterruptPort { get; set; }
+
+    /// <summary>   Gets or sets the interrupt protocol. </summary>
+    /// <value> The interrupt protocol. </value>
+    private TransportProtocol InterruptProtocol { get; set; }
+
+    /// <summary>   Gets or sets the <see cref="InterruptChannelClient"/> Interrupt client. </summary>
+    /// <value> The Interrupt client. </value>
+    protected InterruptChannelClient? InterruptClient { get; set; }
+
+    /// <summary>   Asynchronous Interrupt an in-progress call. </summary>
+    /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
+    public virtual void Interrupt()
+    {
+        if ( this.InterruptClient is null && this.InterruptEnabled && this.InterruptAddress is not null && this.InterruptAddress != IPAddress.None )
+        {
+            if ( this.InterruptConnectTimeout == 0 ) this.InterruptConnectTimeout = OncRpcTcpClient.ConnectTimeoutDefault;
+            if ( this.InterruptTransmitTimeout == 0 ) this.InterruptTransmitTimeout = OncRpcTcpClient.TransmitTimeoutDefault;
+            if ( this.InterruptIOTimeout == 0 ) this.InterruptIOTimeout = OncRpcTcpClient.IOTimeoutDefault;
+
+            this.InterruptClient = new InterruptChannelClient( this.InterruptAddress, this.InterruptPort,
+                                                               this.InterruptProtocol == TransportProtocol.Udp ? OncRpcProtocol.OncRpcUdp : OncRpcProtocol.OncRpcTcp ,
+                                                               this.InterruptConnectTimeout );
+            
+            // set the timeouts of the client.
+            this.InterruptClient.Client!.TransmitTimeout = this.InterruptTransmitTimeout;
+            this.InterruptClient.Client!.IOTimeout = this.InterruptIOTimeout;
+        }
+        if ( this.InterruptEnabled )
+        {
+            this.InterruptClient?.DeviceIntrSrq( this._interruptHandle );
         }
     }
 
@@ -357,6 +487,9 @@ public partial class Ieee488MockServer : CoreChannelServerBase
     /// <returns>   The new interrupt channel 1. </returns>
     public override DeviceError CreateIntrChan( DeviceRemoteFunc request )
     {
+        this.InterruptAddress = request.HostAddr;
+        this.InterruptPort = request.HostPort;
+        this.InterruptProtocol = request.TransportProtocol;
         DeviceError result = new() { ErrorCode = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
         return result;
     }
@@ -367,7 +500,19 @@ public partial class Ieee488MockServer : CoreChannelServerBase
     /// </returns>
     public override DeviceError DestroyIntrChan()
     {
-        throw new NotImplementedException();
+        try
+        {
+            this.InterruptClient?.Dispose();
+            return new DeviceError();
+        }
+        catch ( Exception )
+        {
+            return new DeviceError( new DeviceErrorCode( DeviceErrorCodeValue.IOError )  );
+        }
+        finally
+        {
+            this.InterruptClient = null;
+        }
     }
 
     /// <summary>   Device clear. </summary>
@@ -429,7 +574,9 @@ public partial class Ieee488MockServer : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
     {
-        throw new NotImplementedException();
+        this.InterruptEnabled = request.Enable;
+        this._interruptHandle = request.GetHandle();
+        return new DeviceError();
     }
 
     /// <summary>   Enables device local control. </summary>

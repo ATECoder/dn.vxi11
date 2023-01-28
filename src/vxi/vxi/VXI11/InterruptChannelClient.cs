@@ -151,7 +151,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
     /// <param name="request">  The request of type <see cref="Codecs.DeviceSrqParms"/> to send to
     ///                         the remote procedure call. </param>
     ///
-    /// ### <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
+    /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
     public void DeviceIntrSrq( DeviceSrqParms request )
     {
         VoidXdrCodec result = VoidXdrCodec.VoidXdrCodecInstance;

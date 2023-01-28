@@ -828,16 +828,9 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError CreateIntrChan( uint hostAddress, int hostPort, TransportProtocol transportProtocol = TransportProtocol.Tcp )
+    public DeviceError CreateIntrChan( IPAddress hostAddress, int hostPort, TransportProtocol transportProtocol = TransportProtocol.Tcp )
     {
-        DeviceRemoteFunc request = new() {
-            HostAddr = hostAddress,
-            HostPort = hostPort,
-            ProgNum = Vxi11ProgramConstants.InterruptProgram,
-            ProgVers = Vxi11ProgramConstants.InterruptVersion,
-            TransportProtocol = transportProtocol
-        };
-        return this.CreateIntrChan( request );
+        return this.CreateIntrChan( hostAddress, hostPort, Vxi11ProgramConstants.InterruptProgram, Vxi11ProgramConstants.InterruptVersion, transportProtocol ); 
     }
 
     /// <summary>
@@ -861,7 +854,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError CreateIntrChan( uint hostAddress, int hostPort, int programNumber, int programVersion, TransportProtocol transportProtocol )
+    public DeviceError CreateIntrChan( IPAddress hostAddress, int hostPort, int programNumber, int programVersion, TransportProtocol transportProtocol )
     {
         DeviceRemoteFunc request = new() {
             HostAddr = hostAddress,

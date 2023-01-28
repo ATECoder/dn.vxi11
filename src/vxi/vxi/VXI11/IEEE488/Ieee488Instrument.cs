@@ -1,3 +1,5 @@
+using System.Net;
+
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.IEEE488
@@ -6,19 +8,89 @@ namespace cc.isr.VXI11.IEEE488
     public class Ieee488Instrument : Ieee488Client
     {
 
+        #region " construction and cleanup "
+
+        /// <summary>   Closes this object. </summary>
+        /// <exception cref="AggregateException">   Thrown when an Aggregate error condition occurs. </exception>
+        public override void Close()
+        {
+
+            List<Exception> exceptions = new();
+
+            try
+            {
+                this.DisableInterruptServer();
+            }
+            catch ( Exception ex )
+            {
+                exceptions.Add( ex );
+            }
+            finally
+            {
+                // leave this to the dispose: this.InterruptServer = null;
+            }
+
+            try
+            {
+                base.Close();
+            }
+            catch ( Exception ex )
+            {
+                exceptions.Add( ex );
+            }
+
+            if ( exceptions.Any() )
+            {
+                AggregateException aggregateException = new( exceptions );
+                throw aggregateException;
+            }
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
+        /// resources.
+        /// </summary>
+        /// <remarks>   2023-01-28. </remarks>
+        /// <param name="disposing">    True to release both managed and unmanaged resources; false to
+        ///                             release only unmanaged resources. </param>
+        protected override void Dispose( bool disposing )
+        {
+            if ( disposing )
+            {
+                // dispose managed state (managed objects)
+            }
+
+            try
+            {
+                this.InterruptServer?.Dispose();
+                this.InterruptServer = null;
+            }
+            finally
+            {
+                base.Dispose( disposing );
+            }
+        }
+
+        #endregion
+
+
         #region " VXI-11 call implementations: Instrument "
 
+        /// <summary>
+        /// Creates interrupt channel and starts the <see cref="InterruptChannelServer"/>.
+        /// </summary>
+        /// <remarks>   2023-01-28. </remarks>
+        /// <param name="hostPort"> The host port. </param>
         public virtual void CreateInterruptChannel( int hostPort )
         {
-            this.CreateInterruptChannel(  this.IPAddress.ToUInt(), hostPort );
+            this.CreateInterruptChannel(  this.IPAddress, hostPort );
         }
 
         /// <summary>   Creates interrupt channel and starts the <see cref="InterruptChannelServer"/>. </summary>
-        /// <remarks>   2023-01-24. </remarks>
         /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
         /// <param name="hostAddress">  The host device IPv4 address. </param>
         /// <param name="hostPort">     The host port. </param>
-        public virtual void CreateInterruptChannel( uint hostAddress, int hostPort )
+        public virtual void CreateInterruptChannel( IPAddress hostAddress, int hostPort )
         {
             if ( !this.Connected ) this.Reconnect();
 
@@ -165,7 +237,7 @@ namespace cc.isr.VXI11.IEEE488
             }
         }
 
-        /// <summary>   Enables the interrupt server. </summary>
+        /// <summary>   Enables (starts) the interrupt server thread. </summary>
         /// <remarks>   2023-01-26. </remarks>
         public virtual void EnableInterruptServer()
         {
@@ -173,6 +245,47 @@ namespace cc.isr.VXI11.IEEE488
 
             Thread listenThread = new( new ThreadStart( () => this.StartInterruptServer() ) ) {
                 Name = "VXI-11 Interrupt Channel Server Thread",
+                IsBackground = true
+            };
+            listenThread.Start();
+        }
+
+        /// <summary>   The default time for waiting the Interrupt server to stop listening. </summary>
+        public static int InterruptServerDisableTimeoutDefault = 500;
+
+        /// <summary>   The Interrupt server disable loop delay default. </summary>
+        public static int InterruptServerDisableLoopDelayDefault = 50;
+
+        /// <summary>   Stops Interrupt server. </summary>
+        /// <param name="timeout">      (Optional) The timeout. </param>
+        /// <param name="loopDelay">    The loop delay. </param>
+        protected virtual void StopInterruptServer( int timeout = 500, int loopDelay = 50 )
+        {
+            if ( this.InterruptServer is not null && this.InterruptServer.Running )
+            {
+                this.InterruptServer.ServiceRequested -= this.HandleServiceRequest;
+                this.InterruptServer.StopRpcProcessing();
+                DateTime endT = DateTime.Now.AddMilliseconds( timeout );
+                while ( endT > DateTime.Now && this.InterruptServer.Running )
+                {
+                    // allow the thread time to address the request
+                    Task.Delay( 50 ).Wait();
+                }
+                this.InterruptServer.Close();
+                this.InterruptServer = null;
+            }
+        }
+
+        /// <summary>   Disables (stops) the Interrupt server thread. </summary>
+        /// <remarks>   2023-01-28. </remarks>
+        /// <param name="timeout">      (Optional) The timeout. </param>
+        /// <param name="loopDelay">    (Optional) The loop delay. </param>
+        public virtual void DisableInterruptServer( int timeout = 500, int loopDelay = 50 )
+        {
+            if ( this.InterruptServer is not null ) return;
+
+            Thread listenThread = new( new ThreadStart( () => this.StopInterruptServer( timeout, loopDelay ) ) ) {
+                Name = "VXI-11 Interrupt Channel Server Disabling Thread",
                 IsBackground = true
             };
             listenThread.Start();

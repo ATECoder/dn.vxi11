@@ -50,7 +50,8 @@ else
     SendCommand( command );
 
     Console.WriteLine( $"closing {ipv4Address}" );
-    _ = ieee488Client.Close();
+
+    ieee488Client.Close();
 
 }
 
