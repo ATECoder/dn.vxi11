@@ -50,8 +50,8 @@ namespace cc.isr.VXI11.IEEE488
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
         /// resources.
         /// </summary>
-        /// <param name="disposing">    True to release both managed and unmanaged resources; false to
-        ///                             release only unmanaged resources. </param>
+        /// <param name="disposing">    True to release large objects and managed and unmanaged resources;
+        ///                             false to release only unmanaged resources and large objects. </param>
         protected override void Dispose( bool disposing )
         {
             if ( disposing )

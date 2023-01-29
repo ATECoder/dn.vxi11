@@ -6,7 +6,7 @@ using cc.isr.VXI11.Codecs;
 namespace cc.isr.VXI11.IEEE488;
 
 /// <summary>   An IEEE 488 VXI-11 client. </summary>
-public partial class Ieee488Client : IDisposable
+public partial class Ieee488Client : ICloseable
 {
 
     #region " construction, connection and cleanup "
@@ -125,65 +125,26 @@ public partial class Ieee488Client : IDisposable
         this.Connect( this.Host, this.InterfaceDeviceString, this.ConnectTimeout );
     }
 
-    /// <summary>   Closes this object. </summary>
-    public virtual void Close()
+    /// <summary>
+    /// Closes the connection to an VXI-11 server and free all network-related resources.
+    /// </summary>
+    /// <remarks> This implementation of close and dispose follows the implementation of
+    /// the <see cref="System.Net.Sockets.TcpClient"/> at
+    /// <see href="https://github.com/microsoft/referencesource/blob/master/System/net/System/Net/Sockets/TCPClient.cs"/>
+    /// with the following modifications:
+    /// <list type="bullet"> <item>
+    /// <see cref="Close()"/> is not <see langword="virtual"/> </item><item>
+    /// <see cref="Close()"/> calls <see cref="Dispose()"/> </item><item>
+    /// Consequently, <see cref="Close()"/> need not be overridden. </item><item>
+    /// <see cref="Close()"/> does not hide any exception that might be thrown by <see cref="Dispose()"/> </item></list>
+    /// <list type="bullet"> <item>
+    /// The <see cref="Dispose()"/> method skips if <see cref="IsDisposed"/> is <see langword="true"/>; </item><item>
+    /// The <see cref="Dispose(bool)"/> accumulates and throws an aggregate exception </item><item>
+    /// The <see cref="Dispose()"/> method throws the aggregate exception from <see cref="Dispose(bool)"/>. </item></list>
+    /// </remarks>
+    public void Close()
     {
-        List<Exception> exceptions = new();
-        if ( this.Connected && this.DeviceLink is not null )
-        {
-            try
-            {
-                DeviceError? deviceError = this.CoreClient?.DestroyLink( this.DeviceLink );
-                if ( deviceError is null )
-                    throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
-                        DeviceErrorCodeValue.IOError );
-                if ( deviceError.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-                    throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
-                        deviceError.ErrorCode.ErrorCodeValue );
-            }
-            catch ( Exception ex )
-            {
-
-                exceptions.Add( ex );
-            }
-            finally
-            {
-                this.DeviceLink = null;
-
-            }
-        }
-
-        try
-        {
-            this.CoreClient?.Close();
-        }
-        catch ( Exception ex )
-        {
-            exceptions.Add( ex );
-        }
-        finally
-        {
-            // leave those to the dispose method: this.CoreClient = null;
-        }
-
-        try
-        {
-            this.AbortClient?.Close();
-        }
-        catch ( Exception ex )
-        {
-            exceptions.Add( ex );
-        }
-        finally
-        {
-            // leave thos to the dispose method: this.AbortClient = null;
-        }
-
-        if ( exceptions.Any() )
-        {
-            AggregateException aggregateException = new( exceptions );
-            throw aggregateException;
-        }
+        (( IDisposable ) this).Dispose();
     }
 
     #region " disposable implementation "
@@ -196,20 +157,27 @@ public partial class Ieee488Client : IDisposable
     /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
     /// resources.
     /// </summary>
-    void IDisposable.Dispose()
+    /// <remarks> 
+    /// Takes account of and updates <see cref="IsDisposed"/>.
+    /// Encloses <see cref="Dispose(bool)"/> within a try...finaly block.
+    /// </remarks>
+    public void Dispose()
     {
         if ( this.IsDisposed ) { return; }
         try
         {
             // Do not change this code.  Put cleanup code in Dispose(disposing As Boolean) above.
+
             this.Dispose( true );
 
-            // uncomment the following line if Finalize() is overridden above.
-            GC.SuppressFinalize( this );
         }
-        catch ( Exception ex ) { Logger.Writer.LogMemberError( "Exception disposing", ex ); }
+        catch { throw; }
         finally
         {
+            // uncomment the following line if Finalize() is overridden above.
+
+            GC.SuppressFinalize( this );
+
         }
     }
 
@@ -217,13 +185,71 @@ public partial class Ieee488Client : IDisposable
     /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
     /// resources.
     /// </summary>
-    /// <param name="disposing">    True to release both managed and unmanaged resources; false to
-    ///                             release only unmanaged resources. </param>
+    /// <param name="disposing">    True to release large objects and managed and unmanaged resources;
+    ///                             false to release only unmanaged resources and large objects. </param>
     protected virtual void Dispose( bool disposing )
     {
+        List<Exception> exceptions = new();
         if ( disposing )
         {
             // dispose managed state (managed objects)
+            if ( this.Connected && this.DeviceLink is not null )
+            {
+                try
+                {
+                    DeviceError? deviceError = this.CoreClient?.DestroyLink( this.DeviceLink );
+                    if ( deviceError is null )
+                        throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
+                            DeviceErrorCodeValue.IOError );
+                    if ( deviceError.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+                        throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
+                            deviceError.ErrorCode.ErrorCodeValue );
+                }
+                catch ( Exception ex )
+                {
+                    exceptions.Add( ex );
+                }
+                finally
+                {
+                    this.DeviceLink = null;
+
+                }
+            }
+
+            try
+            {
+                CoreChannelClient? coreClient = this.CoreClient;
+                this.CoreClient?.Close();
+            }
+            catch ( Exception ex )
+            {
+                exceptions.Add( ex );
+            }
+            finally
+            {
+                this.CoreClient = null;
+            }
+
+            try
+            {
+                this.AbortClient?.Close();
+            }
+            catch ( Exception ex )
+            {
+                exceptions.Add( ex );
+            }
+            finally
+            {
+                this.AbortClient = null;
+            }
+
+            if ( exceptions.Any() )
+            {
+                AggregateException aggregateException = new( exceptions );
+                throw aggregateException;
+            }
+
+
         }
 
         // free unmanaged resources and override finalizer
