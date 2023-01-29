@@ -15,6 +15,8 @@ namespace cc.isr.VXI11.Codecs;
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
+/// typedef long Device_Flags;
+/// typedef long Device_Link;
 /// struct <c>device_write</c> Parms {
 ///    Device_Link lid;             /* link id from create_link */
 ///    unsigned long io_timeout;    /* time to wait for I/O */

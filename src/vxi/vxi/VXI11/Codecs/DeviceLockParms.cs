@@ -15,6 +15,7 @@ namespace cc.isr.VXI11.Codecs;
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
+/// typedef long Device_Flags;
 /// struct Device_LockParms {
 ///    Device_Link lid;             /* link id from create_link */
 ///    Device_Flags flags;          /* Contains the wait lock flag */

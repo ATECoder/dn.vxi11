@@ -50,7 +50,6 @@ namespace cc.isr.VXI11.IEEE488
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
         /// resources.
         /// </summary>
-        /// <remarks>   2023-01-28. </remarks>
         /// <param name="disposing">    True to release both managed and unmanaged resources; false to
         ///                             release only unmanaged resources. </param>
         protected override void Dispose( bool disposing )
@@ -62,8 +61,23 @@ namespace cc.isr.VXI11.IEEE488
 
             try
             {
-                this.InterruptServer?.Dispose();
-                this.InterruptServer = null;
+                try
+                {
+                    this.AbortClient?.Dispose();
+                    this.AbortClient = null;
+                }
+                catch ( Exception )
+                {
+                }
+
+                try
+                {
+                    this.InterruptServer?.Dispose();
+                    this.InterruptServer = null;
+                }
+                catch ( Exception )
+                {
+                }
             }
             finally
             {
@@ -108,7 +122,14 @@ namespace cc.isr.VXI11.IEEE488
         /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
         public virtual void DestroyInterruptChannel()
         {
+            if ( this.InterruptServer is null || !this.InterruptServer.Running ) return;
+
+            // disable the interrupt server
+            this.DisableInterruptServer();
+
             if ( !this.Connected ) this.Reconnect();
+
+            // send a message to the server to end the interrupt service.
 
             var reply = this.CoreClient!.DestroyIntrChan();
 
@@ -116,6 +137,19 @@ namespace cc.isr.VXI11.IEEE488
                 throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
             else if ( reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError )
                 throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.DestroyInterruptChannel )} command", reply.ErrorCode.ErrorCodeValue );
+        }
+
+        /// <summary>   Enables/disables sending of service requests. </summary>
+        /// <param name="enable">   True to enable, false to disable. </param>
+        public virtual void EnableSrq( bool enable )
+        {
+            if ( this.DeviceLink is null || this.CoreClient is null ) return;
+
+            // use the VXI11 Event Codec to build the handle.
+
+            Vxi11EventCodec serviceRequestCodec = Vxi11EventCodec.EncodeInstance( this.ClientId, Vxi11EventType.ServiceRequest );
+
+            this.EnableSrq( enable, serviceRequestCodec.GetHandle() );
         }
 
         /// <summary>   Enables/disables sending of service requests. </summary>
@@ -164,7 +198,7 @@ namespace cc.isr.VXI11.IEEE488
         /// <summary>   Reads status byte. </summary>
         /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
         /// <returns>   The status byte. </returns>
-        public virtual byte ReadStatusByte()
+        public virtual int ReadStatusByte()
         {
             if ( !this.Connected ) this.Reconnect();
 
@@ -189,12 +223,18 @@ namespace cc.isr.VXI11.IEEE488
             set => _ = this.SetProperty( ref this._interruptPortNumber, value );
         }
 
-        /// <summary>   Handles the service request. </summary>
-        /// <remarks>   2023-01-26. </remarks>
+        /// <summary>   Override this method to handler the VXI-11 event. </summary>
+        /// <param name="e">    Event information to send to registered event handlers. </param>
+        protected virtual void OnServiceRequested( Vxi11EventArgs e )
+        {
+        }
+
+        /// <summary>   Filters and passes on the service request. </summary>
         /// <param name="sender">   Source of the event. </param>
         /// <param name="e">        VXI-11 event information. </param>
-        protected virtual void HandleServiceRequest( object sender, Vxi11EventArgs e )
+        private void HandleServiceRequest( object sender, Vxi11EventArgs e )
         {
+            if ( e.ServiceRequestCodec.ClientId == this.ClientId ) { this.OnServiceRequested( e );  }
         }
 
         protected InterruptChannelServer? InterruptServer { get; set; }

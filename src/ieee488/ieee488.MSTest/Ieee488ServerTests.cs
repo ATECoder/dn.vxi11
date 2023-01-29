@@ -39,13 +39,13 @@ public class Ieee488ServerTests
                 _server.Run();
             } );
 
-            Logger.Writer.LogInformation( $"{nameof( Ieee488MockServer )} waiting running {DateTime.Now:ss.fff}" );
+            Logger.Writer.LogInformation( $"{nameof( Ieee488SingleClientMockServer )} waiting running {DateTime.Now:ss.fff}" );
 
             // wait till the server is running.
 
             _ = _server.ServerStarted( 2 * Ieee488ServerTests.ServerStartTimeTypical, Ieee488ServerTests.ServerStartLoopDelay );
 
-            Logger.Writer.LogInformation( $"{nameof( Ieee488MockServer )} is {(_server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
+            Logger.Writer.LogInformation( $"{nameof( Ieee488SingleClientMockServer )} is {(_server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
         }
         catch ( Exception ex )
         {
@@ -81,7 +81,7 @@ public class Ieee488ServerTests
     private static readonly string? _ipv4Address = "127.0.0.1";
 
     private static readonly string _identity = "Ieee488 mock device";
-    private static Ieee488MockServer? _server;
+    private static Ieee488SingleClientMockServer? _server;
     private static Ieee488Device? _device;
 
     private static void OnServerPropertyChanged( object? sender, PropertyChangedEventArgs e )
@@ -89,19 +89,19 @@ public class Ieee488ServerTests
         if ( _server is null ) { return; }
         switch ( e.PropertyName )
         {
-            case nameof( Ieee488MockServer.ReadMessage ):
+            case nameof( Ieee488SingleClientMockServer.ReadMessage ):
                 Logger.Writer.LogInformation( _server.ReadMessage );
                 break;
-            case nameof( Ieee488MockServer.WriteMessage ):
+            case nameof( Ieee488SingleClientMockServer.WriteMessage ):
                 Logger.Writer.LogInformation( _server.WriteMessage );
                 break;
-            case nameof( Ieee488MockServer.PortNumber ):
+            case nameof( Ieee488SingleClientMockServer.PortNumber ):
                 Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.PortNumber}" );
                 break;
-            case nameof( Ieee488MockServer.IPv4Address ):
+            case nameof( Ieee488SingleClientMockServer.IPv4Address ):
                 Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.IPv4Address}" );
                 break;
-            case nameof( Ieee488MockServer.Running ):
+            case nameof( Ieee488SingleClientMockServer.Running ):
                 Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.Running}" );
                 break;
         }

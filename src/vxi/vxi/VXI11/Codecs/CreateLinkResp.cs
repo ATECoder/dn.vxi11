@@ -15,6 +15,7 @@ namespace cc.isr.VXI11.Codecs;
 ///  
 /// VXI-11 Specifications: </para>
 /// <code>
+/// typedef long Device_Link;
 /// struct Create_LinkResp {
 ///    Device_ErrorCode error;
 ///    Device_Link lid;
@@ -66,28 +67,33 @@ public class CreateLinkResp : IXdrCodec
     /// <value> The link to the device. </value>
     public DeviceLink DeviceLink { get => this._link; set => this._link = value ?? new(); }
 
-    /// <summary>   Gets or sets the abort port for the <see cref="AbortChannelClient.DeviceAbort(DeviceLink)"/>
-    /// <remarks> 
-    /// The <see cref="AbortPort"/> is returned from the network instrument is used by the 
-    /// <see cref="AbortChannelClient"/> for implementing the <see cref="Vxi11Message.DeviceAbortProcedure">Device Abort</see>/> RPC.
+    /// <summary>
+    /// Gets or sets the abort port for the <see cref="AbortChannelClient.DeviceAbort(DeviceLink)"/>
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="AbortPort"/> is returned from the network instrument is used by the
+    /// <see cref="AbortChannelClient"/> for implementing the <see cref="Vxi11Message.DeviceAbortProcedure">
+    /// Device Abort</see>/&gt; RPC.
     /// <para>
     /// 
-    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for using an 
-    /// unsigned short because XDR encodes <see cref="short"/>s as <see cref="int"/>s. </para>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned short because XDR encodes <see cref="short"/>s as <see cref="int"/>s. </para>
     /// </remarks>
-    ///  </summary>
     /// <value> The abort port. </value>
-    public short AbortPort { get; set; }
+    public int AbortPort { get; set; }
 
     /// <summary>   Gets or sets the max data size in bytes device will accept on a write. </summary>
-    /// <remarks> This is the size of the largest data set the network instrument server can
-    /// accept in a <see cref="Vxi11Message.DeviceWriteProcedure"/> RPC. This value is at least 1024. <para>
+    /// <remarks>
+    /// This is the size of the largest data set the network instrument server can accept in a <see cref="Vxi11Message.DeviceWriteProcedure"/>
+    /// RPC. This value is at least 1024. <para>
     /// 
-    /// The value is returned from the network instrument is used by the <see cref="CoreChannelClient"/> for 
-    /// implementing the <see cref="Vxi11Message.DeviceWriteProcedure">Device Write</see>/> RPC. </para><para>
+    /// The value is returned from the network instrument is used by the <see cref="CoreChannelClient"/>
+    /// for implementing the <see cref="Vxi11Message.DeviceWriteProcedure">Device Write</see>/&gt;
+    /// RPC. </para><para>
     /// 
-    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for using an 
-    /// unsigned short because the value is not expected to exceed that maximum <see cref="int"/> value. </para>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned short because the value is not expected to exceed that maximum <see cref="int"/>
+    /// value. </para>
     /// </remarks>
     /// <value> The maximum <see cref="Vxi11Message.DeviceWriteProcedure"/> data size. </value>
     public int MaxReceiveSize { get; set; }

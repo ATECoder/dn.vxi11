@@ -354,7 +354,5 @@ namespace cc.isr.VXI11.IEEE488
 
         #endregion
 
-
-
     }
 }

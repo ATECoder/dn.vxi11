@@ -24,6 +24,7 @@ namespace cc.isr.VXI11.Codecs;
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
+/// typedef long Device_ErrorCode;
 /// struct Device_Error
 /// {
 ///     Device_ErrorCode error;

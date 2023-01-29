@@ -43,7 +43,7 @@ public partial class Ieee488Client : IDisposable
     /// <param name="connectTimeout">           The connect timeout. This timeout overrides the 
     ///                                         <see cref="ONC.RPC.Client.OncRpcClientBase.TransmitTimeout"/></param>
     /// <returns>   A DeviceErrorCode. </returns>
-    private DeviceErrorCode ConnectDevice( string hostAddress, string interfaceDeviceString, int connectTimeout )
+    protected virtual DeviceErrorCode ConnectDevice( string hostAddress, string interfaceDeviceString, int connectTimeout )
     {
         // First destroy the link if not destroyed. 
         if ( this.Connected ) { this.Close(); }
@@ -128,18 +128,17 @@ public partial class Ieee488Client : IDisposable
     /// <summary>   Closes this object. </summary>
     public virtual void Close()
     {
-        DeviceError? deviceError = new();
         List<Exception> exceptions = new();
         if ( this.Connected && this.DeviceLink is not null )
         {
             try
             {
-                deviceError = this.CoreClient?.DestroyLink( this.DeviceLink );
+                DeviceError? deviceError = this.CoreClient?.DestroyLink( this.DeviceLink );
                 if ( deviceError is null )
-                    throw new DeviceException( $"; failed destroying the link to the {InterfaceDeviceString} device at {IPAddress}.",
+                    throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
                         DeviceErrorCodeValue.IOError );
                 if ( deviceError.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-                    throw new DeviceException( $"; failed destroying the link to the {InterfaceDeviceString} device at {IPAddress}.",
+                    throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
                         deviceError.ErrorCode.ErrorCodeValue );
             }
             catch ( Exception ex )
@@ -164,7 +163,7 @@ public partial class Ieee488Client : IDisposable
         }
         finally
         {
-            // leave thos to the dispose method: this.CoreClient = null;
+            // leave those to the dispose method: this.CoreClient = null;
         }
 
         try
@@ -246,6 +245,8 @@ public partial class Ieee488Client : IDisposable
 
     #endregion
 
+    #endregion
+
     #region " default values "
 
     /// <summary>
@@ -310,7 +311,42 @@ public partial class Ieee488Client : IDisposable
 
     #endregion
 
+    #region " abort port and client "
+
+    /// <summary>   Gets or sets the abort port. </summary>
+    /// <value> The abort port. </value>
+    private int AbortPort { get; set; }
+
+    /// <summary>   Gets or sets the <see cref="AbortChannelClient"/> abort client. </summary>
+    /// <value> The abort client. </value>
+    protected AbortChannelClient? AbortClient { get; set; }
+
+    /// <summary>   Asynchronous abort an in-progress call. </summary>
+    /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
+    public virtual void Abort()
+    {
+        if ( !this.Connected )
+        {
+            this.Connect( this.Host, this.InterfaceDeviceString );
+        }
+
+        if ( this.AbortClient is null )
+        {
+            this.AbortClient = new AbortChannelClient( IPAddress.Parse( this.Host ), this.AbortPort, OncRpcProtocol.OncRpcTcp, this.ConnectTimeout );
+            // set the timeouts of the client.
+            this.TransmitTimeout = this.TransmitTimeout;
+            this.IOTimeout = this.IOTimeout;
+        }
+        DeviceError reply = this.AbortClient.DeviceAbort( this.DeviceLink! );
+        if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+        {
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Abort )} command.", reply.ErrorCode.ErrorCodeValue );
+        }
+    }
+
     #endregion
+
+
 
     #region " VXI-11 members "
 
@@ -326,14 +362,16 @@ public partial class Ieee488Client : IDisposable
     protected DeviceLink? DeviceLink { get; set; }
 
     /// <summary>   Gets or sets the max data size in bytes device will accept on a write. </summary>
-    /// <remarks> This is the size of the largest data set the network instrument server can
-    /// accept in a <see cref="Vxi11Message.DeviceWriteProcedure"/> RPC. This value is at least 1024. <para>
+    /// <remarks>
+    /// This is the size of the largest data set the network instrument server can accept in a <see cref="Vxi11Message.DeviceWriteProcedure"/>
+    /// RPC. This value is at least 1024. <para>
     /// 
-    /// The value is returned from the network instrument is used by the <see cref="CoreChannelClient"/> for 
-    /// implementing the <see cref="Vxi11Message.DeviceWriteProcedure">Device Write</see>/> RPC. </para><para>
+    /// The value is returned from the network instrument is used by the <see cref="CoreChannelClient"/>
+    /// for implementing the <see cref="Vxi11Message.DeviceWriteProcedure">Device Write</see>/&gt;
+    /// RPC. </para><para>
     /// 
-    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for using an 
-    /// unsigned short because XDR encodes <see cref="short"/>s as <see cref="int"/>s. </para>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned short because XDR encodes <see cref="short"/>s as <see cref="int"/>s. </para>
     /// </remarks>
     /// <value> The maximum <see cref="Vxi11Message.DeviceWriteProcedure"/> data size. </value>
     public int MaxReceiveSize { get; private set; }
@@ -935,41 +973,6 @@ public partial class Ieee488Client : IDisposable
         if ( string.IsNullOrEmpty( message ) ) return 0;
         _ = this.WriteLine( message );
         return this.Read( offset, count, ref values );
-    }
-
-    #endregion
-
-    #region " abort port and client "
-
-    /// <summary>   Gets or sets the abort port. </summary>
-    /// <value> The abort port. </value>
-    private int AbortPort { get; set; }
-
-    /// <summary>   Gets or sets the <see cref="AbortChannelClient"/> abort client. </summary>
-    /// <value> The abort client. </value>
-    protected AbortChannelClient? AbortClient { get; set; }
-
-    /// <summary>   Asynchronous abort an in-progress call. </summary>
-    /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
-    public virtual void Abort()
-    {
-        if ( !this.Connected )
-        {
-            this.Connect( this.Host, this.InterfaceDeviceString );
-        }
-
-        if ( this.AbortClient is null )
-        {
-            this.AbortClient = new AbortChannelClient( IPAddress.Parse( this.Host ), this.AbortPort, OncRpcProtocol.OncRpcTcp, this.ConnectTimeout );
-            // set the timeouts of the client.
-            this.TransmitTimeout = this.TransmitTimeout;
-            this.IOTimeout = this.IOTimeout;
-        }
-        DeviceError reply = this.AbortClient.DeviceAbort( this.DeviceLink! );
-        if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-        {
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Abort )} command.", reply.ErrorCode.ErrorCodeValue );
-        }
     }
 
     #endregion

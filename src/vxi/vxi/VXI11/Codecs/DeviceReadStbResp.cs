@@ -18,7 +18,7 @@ namespace cc.isr.VXI11.Codecs;
 /// struct Device_ReadStbResp
 /// {
 ///     Device_ErrorCode error; /* error code */
-///     unsigned char stb; /* the returned status byte */
+///     unsigned char stb;      /* the returned status byte */
 /// };
 /// </code>
 /// </remarks>
@@ -52,8 +52,12 @@ public class DeviceReadStbResp : IXdrCodec
     public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
 
     /// <summary>   Gets or sets the status byte. </summary>
+    /// <remarks>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned byte because the unsigned in encoded as integer in the XDR stream.
+    /// </remarks>
     /// <value> The status byte. </value>
-    public byte Stb { get; set; }
+    public int Stb { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.

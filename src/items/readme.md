@@ -42,6 +42,7 @@ For information on using [ISR's VXI-11] see the repository [ISR's VXI-11 IEEE488
 * Getters and setters, such as Get and Set Character Encoding, where changed to properties where possible.
 * Static constant classes where converted to Enum constructs.
 * Added connect timeout to the constructors of the VXI-11 clients. 
+* `Device_Flags` and `Device_ErrorCode` were replaced by `int`.
 
 ## Feedback
 

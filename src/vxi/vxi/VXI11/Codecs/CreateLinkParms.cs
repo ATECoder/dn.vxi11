@@ -59,14 +59,15 @@ public class CreateLinkParms : IXdrCodec
     public bool LockDevice { get; set; }
 
     /// <summary>   Gets or sets the lock timeout. </summary>
-    /// <remarks> 
-    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a lock
-    /// to be released. If the device is locked by another link and the <see cref="LockTimeout"/> is non-zero,
-    /// the network instrument server allows at least <see cref="LockTimeout"/> milliseconds for a lock to be 
-    /// released. <para>
+    /// <remarks>
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
+    /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
+    /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
+    /// milliseconds for a lock to be released. <para>
     /// 
-    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for using an 
-    /// unsigned integer because the timeout value is unlikely to exceed the maximum integer value.
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value.
     /// </para>
     /// </remarks>
     /// <value> The time to wait on a lock. </value>

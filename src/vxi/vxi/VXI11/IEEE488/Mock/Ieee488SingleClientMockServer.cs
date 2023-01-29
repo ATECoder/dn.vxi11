@@ -8,31 +8,31 @@ using cc.isr.ONC.RPC.Client;
 
 namespace cc.isr.VXI11.IEEE488.Mock;
 
-/// <summary>   An IEEE488 Mock server. </summary>
+/// <summary>   An IEEE488 Mock server capable of serving a single client. </summary>
 /// <remarks>   
 /// Closing a client connected to the Mock local server no longer throws an exception when destroying the link.
 /// </remarks>
-public partial class Ieee488MockServer : CoreChannelServerBase
+public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
 {
 
     #region " construction and cleanup "
 
     /// <summary>   Default constructor. </summary>
-    public Ieee488MockServer() : this( null, 0 )
+    public Ieee488SingleClientMockServer() : this( null, 0 )
     {
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port number where the server will wait for incoming calls. </param>
-    public Ieee488MockServer( int port ) : this( null, port )
+    public Ieee488SingleClientMockServer( int port ) : this( null, port )
     {
     }
 
-    public Ieee488MockServer( IPAddress? bindAddr, int port ) : this( new Ieee488Device(), bindAddr, port )
+    public Ieee488SingleClientMockServer( IPAddress? bindAddr, int port ) : this( new Ieee488Device(), bindAddr, port )
     {
     }
 
-    public Ieee488MockServer( Ieee488Device device ) : this( device, null, 0 )
+    public Ieee488SingleClientMockServer( Ieee488Device device ) : this( device, null, 0 )
     {
     }
 
@@ -40,7 +40,7 @@ public partial class Ieee488MockServer : CoreChannelServerBase
     /// <param name="device">   current device. </param>
     /// <param name="bindAddr"> The local Internet Address the server will bind to. </param>
     /// <param name="port">     The port number where the server will wait for incoming calls. </param>
-    public Ieee488MockServer( Ieee488Device device, IPAddress? bindAddr, int port ) : base( bindAddr ?? IPAddress.Any, port )
+    public Ieee488SingleClientMockServer( Ieee488Device device, IPAddress? bindAddr, int port ) : base( bindAddr ?? IPAddress.Any, port )
     {
         this._device = device;
         this._interfaceDeviceString = string.Empty;
@@ -49,6 +49,7 @@ public partial class Ieee488MockServer : CoreChannelServerBase
         this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
         this.MaxReceiveLength = Ieee488Client.MaxReceiveLengthDefault;
         this.InterruptAddress = IPAddress.None;
+        this.DeviceLink = new DeviceLink();
     }
 
     /// <summary>   Close all transports listed in a set of server transports. </summary>
@@ -60,8 +61,20 @@ public partial class Ieee488MockServer : CoreChannelServerBase
     public override void Close()
     {
 
+        this._device = null;
+        this.DeviceLink = new DeviceLink();
+
         List<Exception> exceptions = new();
 
+        try
+        {
+            this.InterruptClient?.Close();
+            this.InterruptClient = null;
+        }
+        catch ( Exception ex )
+        {
+            exceptions.Add( ex );
+        }
         try
         {
             this.DisableAbortServer();
@@ -84,8 +97,6 @@ public partial class Ieee488MockServer : CoreChannelServerBase
             exceptions.Add( ex );
         }
 
-        this._device = null;
-
         if ( exceptions.Any() )
         {
             AggregateException aggregateException = new( exceptions );
@@ -102,7 +113,22 @@ public partial class Ieee488MockServer : CoreChannelServerBase
 
         try
         {
-            this.AbortServer?.Dispose();
+            try
+            {
+                this.AbortServer?.Dispose();
+            }
+            catch ( Exception )
+            {
+            }
+
+            try
+            {
+                this.InterruptClient?.Dispose();
+            }
+            catch ( Exception )
+            {
+            }
+
         }
         finally
         {
@@ -202,7 +228,7 @@ public partial class Ieee488MockServer : CoreChannelServerBase
         {
             this.AbortServer.AbortRequested -= this.HandleAbortRequest;
             this.AbortServer.StopRpcProcessing();
-            DateTime endT= DateTime.Now.AddMilliseconds( timeout );
+            DateTime endT = DateTime.Now.AddMilliseconds( timeout );
             while ( endT > DateTime.Now && this.AbortServer.Running )
             {
                 // allow the thread time to address the request
@@ -273,9 +299,9 @@ public partial class Ieee488MockServer : CoreChannelServerBase
             if ( this.InterruptIOTimeout == 0 ) this.InterruptIOTimeout = OncRpcTcpClient.IOTimeoutDefault;
 
             this.InterruptClient = new InterruptChannelClient( this.InterruptAddress, this.InterruptPort,
-                                                               this.InterruptProtocol == TransportProtocol.Udp ? OncRpcProtocol.OncRpcUdp : OncRpcProtocol.OncRpcTcp ,
+                                                               this.InterruptProtocol == TransportProtocol.Udp ? OncRpcProtocol.OncRpcUdp : OncRpcProtocol.OncRpcTcp,
                                                                this.InterruptConnectTimeout );
-            
+
             // set the timeouts of the client.
             this.InterruptClient.Client!.TransmitTimeout = this.InterruptTransmitTimeout;
             this.InterruptClient.Client!.IOTimeout = this.InterruptIOTimeout;
@@ -366,7 +392,7 @@ public partial class Ieee488MockServer : CoreChannelServerBase
 
     #endregion
 
-    #region " mock device "
+    #region " mock single device "
 
     /// <summary>
     /// current device
@@ -387,7 +413,20 @@ public partial class Ieee488MockServer : CoreChannelServerBase
 
     #region " LXI-11 ONC/RPC Calls "
 
-    private int _linkId = 0;
+    /// <summary>   Gets or sets the device link to the actual single device. </summary>
+    /// <value> The device link. </value>
+    private DeviceLink DeviceLink { get; set; }
+
+    /// <summary>
+    /// Query if the server can create a new device link given that this is a
+    /// single device server.
+    /// </summary>
+    /// <remarks>   2023-01-28. </remarks>
+    /// <returns>   True if device free, false if not. </returns>
+    public bool CanCreateNewDeviceLink()
+    {
+        return this.DeviceLink is null || this.DeviceLink.LinkId == 0;
+    }
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>
@@ -437,19 +476,26 @@ public partial class Ieee488MockServer : CoreChannelServerBase
     /// </returns>
     public override CreateLinkResp CreateLink( CreateLinkParms request )
     {
-        CreateLinkResp reply = new() {
-            DeviceLink = new DeviceLink() { LinkId = this._linkId++ },
-            MaxReceiveSize = this.MaxReceiveLength,
-            AbortPort = ( short ) this.AbortPortNumber
-        };
+        if ( this.CanCreateNewDeviceLink() )
+        {
+            this.DeviceLink = new DeviceLink() { LinkId = 1 };
 
-        Logger.Writer.LogVerbose( $"creating link to {request.Device}" );
+            CreateLinkResp reply = new() {
+                DeviceLink = this.DeviceLink,
+                MaxReceiveSize = this.MaxReceiveLength,
+                AbortPort = this.AbortPortNumber
+            };
 
-        this.InterfaceDevice = new DeviceAddress( request.Device );
-        reply.ErrorCode = this.InterfaceDevice.IsValid()
-            ? new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.NoError }
-            : new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.InvalidLinkIdentifier };
-        return reply;
+            Logger.Writer.LogVerbose( $"creating link to {request.Device}" );
+
+            this.InterfaceDevice = new DeviceAddress( request.Device );
+            reply.ErrorCode = this.InterfaceDevice.IsValid()
+                ? new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.NoError }
+                : new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.InvalidLinkIdentifier };
+            return reply;
+        }
+        else
+            return new CreateLinkResp() { ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.DeviceNotAccessible ) };
     }
 
     /// <summary>   Destroy a connection. </summary>
@@ -477,7 +523,18 @@ public partial class Ieee488MockServer : CoreChannelServerBase
     /// </returns>
     public override DeviceError DestroyLink( DeviceLink request )
     {
-        throw new NotImplementedException();
+        try
+        {
+            this.DeviceLink = new DeviceLink();
+            this.InterruptClient?.Close();
+            this.InterruptClient = null;
+            this.DisableAbortServer();
+            return new DeviceError();
+        }
+        catch ( Exception )
+        {
+            return new DeviceError( new DeviceErrorCode( DeviceErrorCodeValue.IOError ) );
+        }
     }
 
     /// <summary>   Create an interrupt channel. </summary>

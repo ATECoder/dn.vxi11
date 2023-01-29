@@ -15,6 +15,7 @@ namespace cc.isr.VXI11.Codecs;
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
+/// typedef long Device_ErrorCode;
 /// struct <c>device_write</c> Resp {
 ///    Device_ErrorCode error;
 ///    unsigned long size; /* Number of bytes written */
@@ -51,6 +52,11 @@ public class DeviceWriteResp : IXdrCodec
     public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
 
     /// <summary>   Gets or sets the size; the number of bytes written. </summary>
+    /// <remarks>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the written size is not expected to exceed the maximum
+    /// integer value.
+    /// </remarks>
     /// <value> The number of bytes written. </value>
     public int Size { get; set; }
 

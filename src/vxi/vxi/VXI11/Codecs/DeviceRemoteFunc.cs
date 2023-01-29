@@ -19,6 +19,7 @@ namespace cc.isr.VXI11.Codecs;
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
+/// enum Device_AddrFamily {DEVICE_TCP, DEVICE_UDP};/* used by interrupts*
 /// struct Device_RemoteFunc {
 ///    unsigned long hostAddr;       /* Host servicing Interrupt */
 ///    unsigned short hostPort;      /* valid port # on client */
@@ -53,26 +54,53 @@ public class DeviceRemoteFunc : IXdrCodec
     }
 
     /// <summary>   Gets or sets the host address. </summary>
+    /// <remarks> 
+    /// This value is defined as <see cref="IPAddress"/> type in spite of the specifications' call
+    /// for using an unsigned integer because the address is encoded as opaque bytes in the XDR
+    /// stream. 
+    /// </remarks>
     /// <value> The host address. </value>
     public IPAddress HostAddr { get; set; }
 
     /// <summary>   Gets or sets the host port. </summary>
+    /// <remarks>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned short because the value is encoded as integer in the XRD stream.
+    /// </remarks>
     /// <value> The host port. </value>
     public int HostPort { get; set; }
 
-    /// <summary>   Gets or sets the program number, should be <see cref="Vxi11ProgramConstants.InterruptProgram"/>. </summary>
+    /// <summary>
+    /// Gets or sets the program number, should be <see cref="Vxi11ProgramConstants.InterruptProgram"/>
+    /// .
+    /// </summary>
+    /// <remarks>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the program number does not exceed the maximum integer
+    /// value.
+    /// </remarks>
     /// <value> The program number. </value>
     public int ProgNum { get; set; }
 
-    /// <summary>   Gets or sets the program version; should be <see cref="Vxi11ProgramConstants.InterruptVersion"/>. </summary>
+    /// <summary>
+    /// Gets or sets the program version; should be <see cref="Vxi11ProgramConstants.InterruptVersion"/>.
+    /// </summary>
+    /// <remarks>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the program version does not exceed the maximum integer
+    /// value.
+    /// </remarks>
     /// <value> The program version. </value>
     public int ProgVers { get; set; }
 
     /// <summary>   Gets or sets the <see cref="VXI11.TransportProtocol"/> . </summary>
     /// <remarks>
     /// Using UDP for the interrupt channel generally provides higher performance, but with the risks
-    /// that some <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPCs might not
-    /// arrive at all or that they might arrive out of order.
+    /// that some <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPCs might not arrive at all
+    /// or that they might arrive out of order. <para>
+    /// 
+    /// The VXI specifications defines this value as an Enum called `Device_AddrFamily`.
+    /// </para>
     /// </remarks>
     /// <value> The <see cref="VXI11.TransportProtocol"/>. </value>
     public TransportProtocol TransportProtocol { get; set; }

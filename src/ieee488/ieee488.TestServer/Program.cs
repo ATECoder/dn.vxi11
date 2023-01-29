@@ -5,7 +5,7 @@ using cc.isr.ONC.RPC.Portmap;
 
 try
 {
-    cc.isr.VXI11.IEEE488.Mock.Ieee488MockServer server = new();
+    cc.isr.VXI11.IEEE488.Mock.Ieee488SingleClientMockServer server = new();
     // TestServer.Ieee488Server server = new();
     // Vxi11Server server = new Vxi11Server();
     Logger.Writer.LogInformation( "Starting the embedded port map service" );

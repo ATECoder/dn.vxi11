@@ -22,9 +22,12 @@ public class Vxi11EventCodec : IXdrCodec
 
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-01-26. </remarks>
+    /// <param name="clientId">     The identifier that uniquely identifies the client sending the
+    ///                             event. This value is encoded into the <see cref="_handle"/> </param>
     /// <param name="eventType">    The event type. </param>
-    public Vxi11EventCodec( Vxi11EventType eventType ) : this()
+    public Vxi11EventCodec( int clientId, Vxi11EventType eventType ) : this()
     {
+        this.ClientId = clientId;
         this.EventType = eventType;
     }
 
@@ -34,19 +37,27 @@ public class Vxi11EventCodec : IXdrCodec
     /// <returns>   The <see cref="Vxi11EventCodec"/>. </returns>
     public static Vxi11EventCodec DecodeInstance( byte[] handle )
     {
-        Vxi11EventCodec codec = new Vxi11EventCodec( handle );
-        XdrBufferDecodingStream decoder = new XdrBufferDecodingStream( handle );
+        Vxi11EventCodec codec = new ( handle );
+        XdrBufferDecodingStream decoder = new ( handle );
         codec.Decode( decoder );
         return codec;
     }
 
     /// <summary>   Encodes an instance of a <see cref="Vxi11EventCodec"/>. </summary>
-    /// <remarks>   2023-01-26. </remarks>
+    /// <remarks>   This is used to add a unique id to the handle in order to allow the server
+    /// to identify the sender and to allow the client to filter the replies as these could be
+    /// directed to other clients. 
+    ///
+    /// The network instrument client should send in the handle parameter a unique link identifier. This will
+    /// allow the network instrument client to identify the link associated with subsequent
+    /// . </remarks>
+    /// <param name="clientId">     The identifier that uniquely identifies the client sending the
+    ///                             event. This value is encoded into the <see cref="_handle"/> </param>
     /// <param name="eventType">    The event type. </param>
     /// <returns>   A Vxi11EventCodec. </returns>
-    public static Vxi11EventCodec EncodeInstance( Vxi11EventType eventType )
+    public static Vxi11EventCodec EncodeInstance( int clientId, Vxi11EventType eventType )
     {
-        Vxi11EventCodec codec = new Vxi11EventCodec( eventType );
+        Vxi11EventCodec codec = new ( clientId, eventType );
         XdrBufferEncodingStream encoder = new( codec._handle );
         encoder.EncodeInt( ( int ) eventType );
         codec.SetHandle( encoder.GetEncodedData() );
@@ -118,7 +129,7 @@ public class Vxi11EventCodec : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.ClientId.Encode( encoder );
-        ( ( int) this.EventType).Encode( encoder );
+        this.EventType.Encode( encoder );
     }
 
     /// <summary>
