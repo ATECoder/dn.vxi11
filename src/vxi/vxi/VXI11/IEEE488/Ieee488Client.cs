@@ -60,7 +60,6 @@ public partial class Ieee488Client : ICloseable
         this.IOTimeout = this.IOTimeout;
         this.TransmitTimeout = this.TransmitTimeout;
 
-
         // override the client transmit timeout during the connection to allow longer timeout periods.
         this.CoreClient.Client!.TransmitTimeout = connectTimeout;
 
@@ -122,7 +121,10 @@ public partial class Ieee488Client : ICloseable
     /// <summary>   Reconnects this object. </summary>
     public void Reconnect()
     {
-        this.Connect( this.Host, this.InterfaceDeviceString, this.ConnectTimeout );
+        if ( this.IsDisposed ) {
+            throw new InvalidOperationException( $"{nameof(Ieee488Client)} @ {this.IPAddress} cannot reconnected because it is disposed." );
+        }
+            this.Connect( this.Host, this.InterfaceDeviceString, this.ConnectTimeout );
     }
 
     /// <summary>
@@ -157,9 +159,20 @@ public partial class Ieee488Client : ICloseable
     /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
     /// resources.
     /// </summary>
-    /// <remarks> 
-    /// Takes account of and updates <see cref="IsDisposed"/>.
-    /// Encloses <see cref="Dispose(bool)"/> within a try...finaly block.
+    /// <remarks>
+    /// Takes account of and updates <see cref="IsDisposed"/>. Encloses <see cref="Dispose(bool)"/>
+    /// within a try...finaly block. <para>
+    ///
+    /// Because this class is implementing <see cref="IDisposable"/> and is not sealed, then it
+    /// should include the call to <see cref="GC.SuppressFinalize(object)"/> even if it does not
+    /// include a user-defined finalizer. This is necessary to ensure proper semantics for derived
+    /// types that add a user-defined finalizer but only override the protected <see cref="Dispose(bool)"/>
+    /// method. </para> <para>
+    /// 
+    /// To this end, call <see cref="GC.SuppressFinalize(object)"/>, where <see langword="Object"/> = <see langword="this"/> in the <see langword="Finally"/> segment of
+    /// the <see langword="try"/>...<see langword="catch"/> clause. </para><para>
+    ///
+    /// If releasing unmanaged code or freeing large objects then override <see cref="Object.Finalize()"/>. </para>
     /// </remarks>
     public void Dispose()
     {
@@ -174,7 +187,7 @@ public partial class Ieee488Client : ICloseable
         catch { throw; }
         finally
         {
-            // uncomment the following line if Finalize() is overridden above.
+            // this is included because this class is not sealed.
 
             GC.SuppressFinalize( this );
 
@@ -193,11 +206,14 @@ public partial class Ieee488Client : ICloseable
         if ( disposing )
         {
             // dispose managed state (managed objects)
-            if ( this.Connected && this.DeviceLink is not null )
+
+            CoreChannelClient? coreClient = this.CoreClient;
+            DeviceLink? link = this.DeviceLink;
+            try
             {
-                try
+                if ( coreClient is not null && link is not null )
                 {
-                    DeviceError? deviceError = this.CoreClient?.DestroyLink( this.DeviceLink );
+                    DeviceError? deviceError = coreClient.DestroyLink( link );
                     if ( deviceError is null )
                         throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
                             DeviceErrorCodeValue.IOError );
@@ -205,21 +221,19 @@ public partial class Ieee488Client : ICloseable
                         throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
                             deviceError.ErrorCode.ErrorCodeValue );
                 }
-                catch ( Exception ex )
-                {
-                    exceptions.Add( ex );
-                }
-                finally
-                {
-                    this.DeviceLink = null;
-
-                }
+            }
+            catch ( Exception ex )
+            {
+                exceptions.Add( ex );
+            }
+            finally
+            {
+                this.DeviceLink = null;
             }
 
             try
             {
-                CoreChannelClient? coreClient = this.CoreClient;
-                this.CoreClient?.Close();
+                coreClient?.Close();
             }
             catch ( Exception ex )
             {
@@ -230,9 +244,10 @@ public partial class Ieee488Client : ICloseable
                 this.CoreClient = null;
             }
 
+            AbortChannelClient? abortClient = this.AbortClient;
             try
             {
-                this.AbortClient?.Close();
+                    abortClient?.Close();
             }
             catch ( Exception ex )
             {
@@ -243,23 +258,18 @@ public partial class Ieee488Client : ICloseable
                 this.AbortClient = null;
             }
 
-            if ( exceptions.Any() )
-            {
-                AggregateException aggregateException = new( exceptions );
-                throw aggregateException;
-            }
-
-
         }
 
         // free unmanaged resources and override finalizer
-        // I am assuming that the socket used in the derived classes include unmanaged resources.
-        this.Close();
-
-        this.CoreClient?.Dispose();
-        this.AbortClient?.Dispose();
 
         // set large fields to null
+
+        if ( exceptions.Any() )
+        {
+            AggregateException aggregateException = new( exceptions );
+            throw aggregateException;
+        }
+
     }
 
     /// <summary>   Finalizer. </summary>
@@ -270,6 +280,23 @@ public partial class Ieee488Client : ICloseable
     }
 
     #endregion
+
+    #endregion
+
+    #region " thread exception handler "
+
+    /// <summary>
+    /// Event queue for all listeners interested in ThreadExceptionOccurred events.
+    /// </summary>
+    public event ThreadExceptionEventHandler? ThreadExceptionOccurred;
+
+    /// <summary>   Executes the <see cref="ThreadExceptionOccurred"/> event. </summary>
+    /// <param name="e">    Event information to send to registered event handlers. </param>
+    protected virtual void OnThreadException( ThreadExceptionEventArgs e )
+    {
+        var handler = this.ThreadExceptionOccurred;
+        handler?.Invoke( this, e );
+    }
 
     #endregion
 

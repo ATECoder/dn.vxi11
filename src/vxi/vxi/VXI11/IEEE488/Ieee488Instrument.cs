@@ -1,4 +1,6 @@
+using System;
 using System.Net;
+using System.Runtime.CompilerServices;
 
 using cc.isr.VXI11.Codecs;
 
@@ -10,42 +12,6 @@ namespace cc.isr.VXI11.IEEE488
 
         #region " construction and cleanup "
 
-        /// <summary>   Closes this object. </summary>
-        /// <exception cref="AggregateException">   Thrown when an Aggregate error condition occurs. </exception>
-        public override void Close()
-        {
-
-            List<Exception> exceptions = new();
-
-            try
-            {
-                this.DisableInterruptServer();
-            }
-            catch ( Exception ex )
-            {
-                exceptions.Add( ex );
-            }
-            finally
-            {
-                // leave this to the dispose: this.InterruptServer = null;
-            }
-
-            try
-            {
-                base.Close();
-            }
-            catch ( Exception ex )
-            {
-                exceptions.Add( ex );
-            }
-
-            if ( exceptions.Any() )
-            {
-                AggregateException aggregateException = new( exceptions );
-                throw aggregateException;
-            }
-        }
-
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
         /// resources.
@@ -54,34 +20,48 @@ namespace cc.isr.VXI11.IEEE488
         ///                             false to release only unmanaged resources and large objects. </param>
         protected override void Dispose( bool disposing )
         {
+            List<Exception> exceptions = new();
             if ( disposing )
             {
                 // dispose managed state (managed objects)
+
+                InterruptChannelServer? interruptServer = this.InterruptServer;
+                try
+                {
+                    if ( interruptServer is not null )
+                        this.DisableInterruptServerSync();
+                }
+                catch ( Exception ex )
+                {
+                    { exceptions.Add( ex ); }
+                }
+                finally
+                {
+                    this.InterruptServer = null;
+                }
+
             }
+
+            // free unmanaged resources and override finalizer
+
+            // set large fields to null
+
+            // call base dispose( bool ).
 
             try
             {
-                try
-                {
-                    this.AbortClient?.Dispose();
-                    this.AbortClient = null;
-                }
-                catch ( Exception )
-                {
-                }
-
-                try
-                {
-                    this.InterruptServer?.Dispose();
-                    this.InterruptServer = null;
-                }
-                catch ( Exception )
-                {
-                }
+                base.Dispose( disposing );
             }
+            catch ( Exception ex )
+            { exceptions.Add( ex ); }
             finally
             {
-                base.Dispose( disposing );
+            }
+
+            if ( exceptions.Any() )
+            {
+                AggregateException aggregateException = new( exceptions );
+                throw aggregateException;
             }
         }
 
@@ -95,16 +75,16 @@ namespace cc.isr.VXI11.IEEE488
         /// </summary>
         /// <remarks>   2023-01-28. </remarks>
         /// <param name="hostPort"> The host port. </param>
-        public virtual void CreateInterruptChannel( int hostPort )
+        public virtual async Task CreateInterruptChannel( int hostPort )
         {
-            this.CreateInterruptChannel(  this.IPAddress, hostPort );
+            await this.CreateInterruptChannel(  this.IPAddress, hostPort );
         }
 
         /// <summary>   Creates interrupt channel and starts the <see cref="InterruptChannelServer"/>. </summary>
         /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
         /// <param name="hostAddress">  The host device IPv4 address. </param>
         /// <param name="hostPort">     The host port. </param>
-        public virtual void CreateInterruptChannel( IPAddress hostAddress, int hostPort )
+        public virtual async Task CreateInterruptChannel( IPAddress hostAddress, int hostPort )
         {
             if ( !this.Connected ) this.Reconnect();
 
@@ -115,17 +95,17 @@ namespace cc.isr.VXI11.IEEE488
             else if ( reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError )
                 throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.CreateInterruptChannel )} command", reply.ErrorCode.ErrorCodeValue );
             else
-                this.EnableInterruptServer();
+                await this.EnableInterruptServerAsync();
         }
 
         /// <summary>   Destroys the interrupt channel. </summary>
         /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
-        public virtual void DestroyInterruptChannel()
+        public virtual async Task DestroyInterruptChannel()
         {
             if ( this.InterruptServer is null || !this.InterruptServer.Running ) return;
 
             // disable the interrupt server
-            this.DisableInterruptServer();
+            await this.DisableInterruptServerAsync();
 
             if ( !this.Connected ) this.Reconnect();
 
@@ -279,15 +259,10 @@ namespace cc.isr.VXI11.IEEE488
 
         /// <summary>   Enables (starts) the interrupt server thread. </summary>
         /// <remarks>   2023-01-26. </remarks>
-        public virtual void EnableInterruptServer()
+        public virtual async Task EnableInterruptServerAsync()
         {
-            if ( this.InterruptServer is not null ) return;
-
-            Thread listenThread = new( new ThreadStart( () => this.StartInterruptServer() ) ) {
-                Name = "VXI-11 Interrupt Channel Server Thread",
-                IsBackground = true
-            };
-            listenThread.Start();
+            await Task.Factory.StartNew( () => { this.StartInterruptServer(); } )
+                .ContinueWith( failedTask => this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) ), TaskContinuationOptions.OnlyOnFaulted );
         }
 
         /// <summary>   The default time for waiting the Interrupt server to stop listening. </summary>
@@ -301,18 +276,40 @@ namespace cc.isr.VXI11.IEEE488
         /// <param name="loopDelay">    The loop delay. </param>
         protected virtual void StopInterruptServer( int timeout = 500, int loopDelay = 50 )
         {
-            if ( this.InterruptServer is not null && this.InterruptServer.Running )
+            InterruptChannelServer? interruptServer = this.InterruptServer;
+            if ( interruptServer is not null && interruptServer.Running )
             {
-                this.InterruptServer.ServiceRequested -= this.HandleServiceRequest;
-                this.InterruptServer.StopRpcProcessing();
-                DateTime endT = DateTime.Now.AddMilliseconds( timeout );
-                while ( endT > DateTime.Now && this.InterruptServer.Running )
+                try
                 {
-                    // allow the thread time to address the request
-                    Task.Delay( 50 ).Wait();
+                    try
+                    {
+                        interruptServer.ServiceRequested -= this.HandleServiceRequest;
+                        interruptServer.StopRpcProcessing();
+                        DateTime startTime = DateTime.Now;
+                        DateTime endT = DateTime.Now.AddMilliseconds( timeout );
+                        while ( endT > DateTime.Now && interruptServer.Running )
+                        {
+                            // allow the thread time to address the request
+                            Task.Delay( 50 ).Wait();
+                        }
+                        if ( interruptServer.Running )
+                            throw new InvalidOperationException(
+                                $"{nameof( Ieee488Instrument )}.{nameof( StopInterruptServer )} failed stopping {nameof( InterruptChannelServer )} in {(DateTime.Now - startTime).TotalMilliseconds:0}" );
+                    }
+                    catch { throw; }
+                    finally
+                    {
+                        interruptServer.Close();
+                    }
                 }
-                this.InterruptServer.Close();
-                this.InterruptServer = null;
+                catch ( Exception )
+                {
+                    throw;
+                }
+                finally
+                {
+                    this.InterruptServer = null;
+                }
             }
         }
 
@@ -320,15 +317,38 @@ namespace cc.isr.VXI11.IEEE488
         /// <remarks>   2023-01-28. </remarks>
         /// <param name="timeout">      (Optional) The timeout. </param>
         /// <param name="loopDelay">    (Optional) The loop delay. </param>
-        public virtual void DisableInterruptServer( int timeout = 500, int loopDelay = 50 )
+        public virtual async Task DisableInterruptServerAsync( int timeout = 500, int loopDelay = 50 )
         {
-            if ( this.InterruptServer is not null ) return;
+            await Task.Factory.StartNew( () => { this.StopInterruptServer( timeout, loopDelay ); } )
+                .ContinueWith( failedTask => this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) ), TaskContinuationOptions.OnlyOnFaulted );
 
-            Thread listenThread = new( new ThreadStart( () => this.StopInterruptServer( timeout, loopDelay ) ) ) {
-                Name = "VXI-11 Interrupt Channel Server Disabling Thread",
-                IsBackground = true
-            };
-            listenThread.Start();
+        }
+
+        /// <summary>   Disables the interrupt server synchronously. </summary>
+        /// <remarks>   2023-01-30. </remarks>
+        /// <param name="timeout">      (Optional) The timeout. </param>
+        /// <param name="loopDelay">    (Optional) The loop delay. </param>
+        /// <returns>   A Task. </returns>
+        public virtual void DisableInterruptServerSync( int timeout = 500, int loopDelay = 50 )
+        {
+            InterruptChannelServer? interruptServer = this.InterruptServer;
+            try
+            {
+                if ( interruptServer is not null )
+                {
+                    using Task? task = this.DisableInterruptServerAsync();
+                    task.Wait();
+                    if ( task.IsFaulted ) throw task.Exception;
+                }
+            }
+            catch ( Exception )
+            {
+                throw;
+            }
+            finally
+            {
+                this.InterruptServer = null;
+            }
         }
 
         #endregion

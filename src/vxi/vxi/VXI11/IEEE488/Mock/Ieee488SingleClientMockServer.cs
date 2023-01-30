@@ -5,6 +5,7 @@ using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.Visa;
 using cc.isr.VXI11.Logging;
 using cc.isr.ONC.RPC.Client;
+using System;
 
 namespace cc.isr.VXI11.IEEE488.Mock;
 
@@ -52,49 +53,77 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         this.DeviceLink = new DeviceLink();
     }
 
-    /// <summary>   Close all transports listed in a set of server transports. </summary>
+    /// <summary>
+    /// Terminates listening if active and closes the  all transports listed in a set of server
+    /// transports. Performs application-defined tasks associated with freeing, releasing, or
+    /// resetting unmanaged resources.
+    /// </summary>
     /// <remarks>
-    /// Only by calling this method processing of remote procedure calls by individual transports can
-    /// be stopped. This is because every server transport is handled by its own thread.
+    /// Allows a timeout of <see cref="P:cc.isr.ONC.RPC.Server.OncRpcServerStubBase.ShutdownTimeout" />
+    /// milliseconds for the server to stop listening before raising an exception to that effect.
     /// </remarks>
     /// <exception cref="AggregateException">   Thrown when an Aggregate error condition occurs. </exception>
-    public override void Close()
+    /// <param name="disposing">    True to release both managed and unmanaged resources; false to
+    ///                             release only unmanaged resources. </param>
+    protected override void Dispose( bool disposing )
     {
-
-        this._device = null;
-        this.DeviceLink = new DeviceLink();
-
         List<Exception> exceptions = new();
+        if ( disposing )
+        {
+            // dispose managed state (managed objects)
+
+            this._device = null;
+            this.DeviceLink = new DeviceLink();
+
+            AbortChannelServer? abortServer = this.AbortServer;
+            try
+            {
+                if ( abortServer is not null )
+                {
+                    using Task? task = this.DisableAbortServerAsync();
+                    task.Wait();
+                    if ( task.IsFaulted ) exceptions.Add( task.Exception );
+                }
+            }
+            catch ( Exception ex )
+            {
+                { exceptions.Add( ex ); }
+            }
+            finally
+            {
+                this.AbortServer = null;
+            }
+
+            InterruptChannelClient? interruptClient = this.InterruptClient;
+            try
+            {
+                interruptClient?.Close();
+            }
+            catch ( Exception ex )
+            {
+                exceptions.Add( ex );
+            }
+            finally
+            {
+                this.InterruptClient = null;
+            }
+
+        }
+
+        // free unmanaged resources and override finalizer
+
+        // set large fields to null
+
+        // call base dispose( bool ).
 
         try
         {
-            this.InterruptClient?.Close();
-            this.InterruptClient = null;
+            base.Dispose( disposing );
         }
         catch ( Exception ex )
-        {
-            exceptions.Add( ex );
-        }
-        try
-        {
-            this.DisableAbortServer();
-        }
-        catch ( Exception ex )
-        {
-            exceptions.Add( ex );
-        }
+        { exceptions.Add( ex ); }
         finally
         {
-            // leave this to Dispose: this.AbortServer = null;
-        }
-
-        try
-        {
-            base.Close();
-        }
-        catch ( Exception ex )
-        {
-            exceptions.Add( ex );
         }
 
         if ( exceptions.Any() )
@@ -102,40 +131,6 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
             AggregateException aggregateException = new( exceptions );
             throw aggregateException;
         }
-    }
-
-    protected override void Dispose( bool disposing )
-    {
-        if ( disposing )
-        {
-            // dispose managed state (managed objects)
-        }
-
-        try
-        {
-            try
-            {
-                this.AbortServer?.Dispose();
-            }
-            catch ( Exception )
-            {
-            }
-
-            try
-            {
-                this.InterruptClient?.Dispose();
-            }
-            catch ( Exception )
-            {
-            }
-
-        }
-        finally
-        {
-            this.AbortServer = null;
-            base.Dispose( disposing );
-        }
-
     }
 
     #endregion
@@ -201,16 +196,13 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         }
     }
 
-    /// <summary>   Enables (starts) the abort server thread. </summary>
-    public virtual void EnableAbortServer()
+    /// <summary>   Enables (start) the abort server asynchronously. </summary>
+    /// <remarks>   2023-01-30. </remarks>
+    /// <returns>   A Task. </returns>
+    public virtual async Task EnableAbortServerAsync()
     {
-        if ( this.AbortServer is not null ) return;
-
-        Thread listenThread = new( new ThreadStart( () => this.StartAbortServer() ) ) {
-            Name = "VXI-11 Async (Abort) Channel Server Thread",
-            IsBackground = true
-        };
-        listenThread.Start();
+        await Task.Factory.StartNew( () => { this.StartAbortServer(); } )
+                .ContinueWith( failedTask => this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) ), TaskContinuationOptions.OnlyOnFaulted );
     }
 
     /// <summary>   The default time for waiting the abort server to stop listening. </summary>
@@ -226,32 +218,64 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     {
         if ( this.AbortServer is not null && this.AbortServer.Running )
         {
-            this.AbortServer.AbortRequested -= this.HandleAbortRequest;
-            this.AbortServer.StopRpcProcessing();
-            DateTime endT = DateTime.Now.AddMilliseconds( timeout );
-            while ( endT > DateTime.Now && this.AbortServer.Running )
+            try
             {
-                // allow the thread time to address the request
-                Task.Delay( 50 ).Wait();
+                this.AbortServer.AbortRequested -= this.HandleAbortRequest;
+                this.AbortServer.StopRpcProcessing();
+                DateTime endT = DateTime.Now.AddMilliseconds( timeout );
+                while ( endT > DateTime.Now && this.AbortServer.Running )
+                {
+                    // allow the thread time to address the request
+                    Task.Delay( 50 ).Wait();
+                }
             }
-            this.AbortServer.Close();
-            this.AbortServer = null;
+            catch ( Exception )
+            {
+                throw;
+            }
+            finally
+            {
+                this.AbortServer.Close();
+                this.AbortServer = null;
+            }
         }
     }
 
-    /// <summary>   Disables (stops) the abort server thread. </summary>
+    /// <summary>   Disables (stops) the abort server asynchronously. </summary>
     /// <remarks>   2023-01-28. </remarks>
     /// <param name="timeout">      (Optional) The timeout. </param>
     /// <param name="loopDelay">    (Optional) The loop delay. </param>
-    public virtual void DisableAbortServer( int timeout = 500, int loopDelay = 50 )
+    public virtual async Task DisableAbortServerAsync( int timeout = 500, int loopDelay = 50 )
     {
-        if ( this.AbortServer is not null ) return;
+        await Task.Factory.StartNew( () => { this.StopAbortServer( timeout, loopDelay ); } )
+                .ContinueWith( failedTask => this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) ), TaskContinuationOptions.OnlyOnFaulted );
+    }
 
-        Thread listenThread = new( new ThreadStart( () => this.StopAbortServer( timeout, loopDelay ) ) ) {
-            Name = "VXI-11 Async (Abort) Channel Server Disabling Thread",
-            IsBackground = true
-        };
-        listenThread.Start();
+    /// <summary>   Disables the abort server synchronously. </summary>
+    /// <remarks>   2023-01-30. </remarks>
+    /// <exception cref="Exception">    Thrown when an exception error condition occurs. </exception>
+    /// <param name="timeout">      (Optional) The timeout. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay. </param>
+    public virtual void DisableAbortServerSync( int timeout = 500, int loopDelay = 50 )
+    {
+        AbortChannelServer? abortServer = this.AbortServer;
+        try
+        {
+            if ( abortServer is not null )
+            {
+                using Task? task = this.DisableAbortServerAsync( timeout, loopDelay );
+                task.Wait();
+                if ( task.IsFaulted ) throw task.Exception;
+            }
+        }
+        catch ( Exception )
+        {
+            throw;
+        }
+        finally
+        {
+            this.AbortServer = null;
+        }
     }
 
     #endregion
@@ -526,9 +550,11 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         try
         {
             this.DeviceLink = new DeviceLink();
-            this.InterruptClient?.Close();
+
+            InterruptChannelClient? interruptClient = this.InterruptClient;
+            interruptClient?.Close();
             this.InterruptClient = null;
-            this.DisableAbortServer();
+            this.DisableAbortServerSync();
             return new DeviceError();
         }
         catch ( Exception )
