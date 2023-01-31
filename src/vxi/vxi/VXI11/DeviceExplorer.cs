@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using cc.isr.ONC.RPC.Client;
 using cc.isr.ONC.RPC.Codecs;
 using cc.isr.ONC.RPC.Portmap;
+using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11;
 
@@ -13,11 +14,23 @@ public class DeviceExplorer
 
     #region " embedded port mapper "
 
+
+    /// <summary>   Executes the <see cref="ONC.RPC.Server.OncRpcServerStubBase.ThreadExceptionOccurred"/> event. </summary>
+    /// <param name="sender">   Source of the event. </param>
+    /// <param name="e">        Event information to send to registered event handlers. </param>
+    private static void OnThreadException( object sender, ThreadExceptionEventArgs e )
+    {
+        Logger.Writer.LogError( $"Thread exception", e.Exception );
+    }
+
     /// <summary>   Starts embedded portmap service. </summary>
     public static OncRpcEmbeddedPortmapServiceStub StartEmbeddedPortmapService()
     {
         // start the embedded service.
-        return OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
+        var epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
+        if ( epm.EmbeddedPortmapService is not null )
+            epm.EmbeddedPortmapService.ThreadExceptionOccurred += OnThreadException;
+        return epm;
     }
 
     /// <summary>   Ping the host using the <see cref="OncRpcPortmapClient"/> service. </summary>
@@ -55,7 +68,7 @@ public class DeviceExplorer
     /// Lists the VXI-11 Core devices that are listening on the specified <paramref name="hosts"/>.
     /// </summary>
     /// <param name="hosts">    The hosts. </param>
-    /// <param name="connectTimeout">  The timeout. </param>
+    /// <param name="connectTimeout">  The timeout in milliseconds. </param>
     /// <returns>   The List{(IPAddress host,int port)}; </returns>
     public static List<(IPAddress host, int port)> ListCoreDevices( IEnumerable<IPAddress> hosts, int connectTimeout )
     {
@@ -72,7 +85,7 @@ public class DeviceExplorer
     /// Gets the port of any VXI-11 Core device that is listening on the specific <paramref name="host"/> address.
     /// </summary>
     /// <param name="host">     The host. </param>
-    /// <param name="connectTimeout">  The timeout. </param>
+    /// <param name="connectTimeout">  The timeout in milliseconds. </param>
     /// <returns>   The port on which a device is listening (if value > 0 ). </returns>
     public static int GetCoreDevicePortNumber( IPAddress host, int connectTimeout )
     {
@@ -93,7 +106,7 @@ public class DeviceExplorer
     /// Enumerate the registered servers on the specified <paramref name="hosts"/>.
     /// </summary>
     /// <param name="hosts">                        The hosts. </param>
-    /// <param name="timeout">                      The timeout. </param>
+    /// <param name="timeout">                      The timeout in milliseconds. </param>
     /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
     /// <returns>   The List{(IPAddress host,int port)} </returns>
     public static List<(IPAddress host, int port)> EnumerateRegisteredServers( IEnumerable<IPAddress> hosts, int timeout, bool startEmbeddedPortmapService )
@@ -110,7 +123,7 @@ public class DeviceExplorer
     /// Enumerate the registered servers on the specified <paramref name="hosts"/>.
     /// </summary>
     /// <param name="hosts">    The hosts. </param>
-    /// <param name="timeout">  The timeout. </param>
+    /// <param name="timeout">  The timeout in milliseconds. </param>
     /// <returns>   The List{(IPAddress host,int port)} </returns>
     public static List<(IPAddress host, int port)> EnumerateRegisteredServers( IEnumerable<IPAddress> hosts, int timeout )
     {
@@ -129,7 +142,7 @@ public class DeviceExplorer
 
     /// <summary>   Enumerate the registered servers on the specified <paramref name="host"/>. </summary>
     /// <param name="host">     The host. </param>
-    /// <param name="connectTimeout">  The timeout. </param>
+    /// <param name="connectTimeout">  The timeout in milliseconds. </param>
     /// <returns>   The List{(IPAddress host,int port)} </returns>
     public static List<(IPAddress host, int port)> EnumerateRegisteredServers( IPAddress host, int connectTimeout )
     {

@@ -267,12 +267,12 @@ namespace cc.isr.VXI11.IEEE488
         public static int InterruptServerDisableTimeoutDefault = 500;
 
         /// <summary>   The Interrupt server disable loop delay default. </summary>
-        public static int InterruptServerDisableLoopDelayDefault = 50;
+        public static int InterruptServerDisableLoopDelayDefault = 5;
 
         /// <summary>   Stops Interrupt server. </summary>
-        /// <param name="timeout">      (Optional) The timeout. </param>
-        /// <param name="loopDelay">    The loop delay. </param>
-        protected virtual void StopInterruptServer( int timeout = 500, int loopDelay = 50 )
+        /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+        /// <param name="loopDelay">    The loop delay in milliseconds. </param>
+        protected virtual void StopInterruptServer( int timeout = 500, int loopDelay = 5 )
         {
             InterruptChannelServer? interruptServer = this.InterruptServer;
             if ( interruptServer is not null && interruptServer.Running )
@@ -288,7 +288,7 @@ namespace cc.isr.VXI11.IEEE488
                         while ( endT > DateTime.Now && interruptServer.Running )
                         {
                             // allow the task time to address the request
-                            Task.Delay( 50 ).Wait();
+                            Task.Delay( loopDelay ).Wait();
                         }
                         if ( interruptServer.Running )
                             throw new InvalidOperationException(
@@ -313,9 +313,9 @@ namespace cc.isr.VXI11.IEEE488
 
         /// <summary>   Disables (stops) the Interrupt server task. </summary>
         /// <remarks>   2023-01-28. </remarks>
-        /// <param name="timeout">      (Optional) The timeout. </param>
-        /// <param name="loopDelay">    (Optional) The loop delay. </param>
-        public virtual async Task DisableInterruptServerAsync( int timeout = 500, int loopDelay = 50 )
+        /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+        /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
+        public virtual async Task DisableInterruptServerAsync( int timeout = 500, int loopDelay = 5 )
         {
             await Task.Factory.StartNew( () => { this.StopInterruptServer( timeout, loopDelay ); } )
                 .ContinueWith( failedTask => this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) ), TaskContinuationOptions.OnlyOnFaulted );
@@ -324,10 +324,10 @@ namespace cc.isr.VXI11.IEEE488
 
         /// <summary>   Disables the interrupt server synchronously. </summary>
         /// <remarks>   2023-01-30. </remarks>
-        /// <param name="timeout">      (Optional) The timeout. </param>
-        /// <param name="loopDelay">    (Optional) The loop delay. </param>
+        /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+        /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
         /// <returns>   A Task. </returns>
-        public virtual void DisableInterruptServerSync( int timeout = 500, int loopDelay = 50 )
+        public virtual void DisableInterruptServerSync( int timeout = 500, int loopDelay = 5 )
         {
             InterruptChannelServer? interruptServer = this.InterruptServer;
             try

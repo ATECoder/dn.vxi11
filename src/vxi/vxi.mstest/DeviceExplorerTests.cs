@@ -106,7 +106,7 @@ public class DeviceExplorerTests
     /// <summary>   Adds a host if ping portmap service to 'timeout'. </summary>
     /// <remarks> This causes an issue with subsequent port map operations. </remarks>
     /// <param name="host">     The host. </param>
-    /// <param name="timeout">  The timeout. </param>
+    /// <param name="timeout">  The timeout in milliseconds. </param>
     private static void AddHostIfPingPortmapService( string host, int timeout )
     {
         Stopwatch sw = Stopwatch.StartNew();

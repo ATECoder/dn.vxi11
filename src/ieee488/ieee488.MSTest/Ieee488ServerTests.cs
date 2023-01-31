@@ -82,13 +82,6 @@ public class Ieee488ServerTests
         }
     }
 
-    /// <summary>   Uses a task to delay execution without blocking the current thread. </summary>
-    /// <param name="delayTime">    The delay time. </param>
-    private static async void Delay( int delayTime )
-    {
-        await Task.Delay( delayTime );
-    }
-
     private static readonly string? _ipv4Address = "127.0.0.1";
 
     private static readonly string _identity = "Ieee488 mock device";

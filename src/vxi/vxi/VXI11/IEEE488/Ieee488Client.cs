@@ -646,15 +646,6 @@ public partial class Ieee488Client : ICloseable
         return this.CoreClient.DeviceRead( readParam );
     }
 
-    /// <summary>   Uses a task to delay execution without blocking the current thread. </summary>
-    /// <param name="delayTime">    The delay time. </param>
-    private static async void Delay( int delayTime )
-    {
-        await Task.Delay( delayTime );
-    }
-
-
-
     /// <summary>   Send and receive if query. </summary>
     /// <param name="data">                     . </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay. </param>
@@ -665,7 +656,7 @@ public partial class Ieee488Client : ICloseable
         if ( writeResponse.ErrorCode.ErrorCodeValue == DeviceErrorCodeValue.NoError )
             if ( this.IsQuery( data ) )
             {
-                Ieee488Client.Delay( millisecondsReadDelay );
+                if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
                 DeviceReadResp readResponse = this.Receive();
                 return (writeResponse, readResponse);
             }
@@ -794,7 +785,7 @@ public partial class Ieee488Client : ICloseable
     public virtual (int SentCount, byte[] Received) QueryRaw( string data, int byteCount = -1, int millisecondsReadDelay = 3 )
     {
         int sentCount = this.WriteRaw( data );
-        Ieee488Client.Delay( millisecondsReadDelay );
+        if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
         return (sentCount, this.ReadRaw( byteCount ));
     }
 

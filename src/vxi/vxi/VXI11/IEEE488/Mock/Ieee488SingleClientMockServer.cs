@@ -208,12 +208,12 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     public static int AbortServerDisableTimeoutDefault = 500;
 
     /// <summary>   The abort server disable loop delay default. </summary>
-    public static int AbortServerDisableLoopDelayDefault = 50;
+    public static int AbortServerDisableLoopDelayDefault = 5;
 
     /// <summary>   Stops abort server. </summary>
-    /// <param name="timeout">      (Optional) The timeout. </param>
-    /// <param name="loopDelay">    The loop delay. </param>
-    protected virtual void StopAbortServer( int timeout = 500, int loopDelay = 50 )
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    The loop delay in milliseconds. </param>
+    protected virtual void StopAbortServer( int timeout = 500, int loopDelay = 5 )
     {
         if ( this.AbortServer is not null && this.AbortServer.Running )
         {
@@ -225,7 +225,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
                 while ( endT > DateTime.Now && this.AbortServer.Running )
                 {
                     // allow the thread time to address the request
-                    Task.Delay( 50 ).Wait();
+                    Task.Delay( loopDelay ).Wait();
                 }
             }
             catch ( Exception )
@@ -242,9 +242,9 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
 
     /// <summary>   Disables (stops) the abort server asynchronously. </summary>
     /// <remarks>   2023-01-28. </remarks>
-    /// <param name="timeout">      (Optional) The timeout. </param>
-    /// <param name="loopDelay">    (Optional) The loop delay. </param>
-    public virtual async Task DisableAbortServerAsync( int timeout = 500, int loopDelay = 50 )
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
+    public virtual async Task DisableAbortServerAsync( int timeout = 500, int loopDelay = 5 )
     {
         await Task.Factory.StartNew( () => { this.StopAbortServer( timeout, loopDelay ); } )
                 .ContinueWith( failedTask => this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) ), TaskContinuationOptions.OnlyOnFaulted );
@@ -253,9 +253,9 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <summary>   Disables the abort server synchronously. </summary>
     /// <remarks>   2023-01-30. </remarks>
     /// <exception cref="Exception">    Thrown when an exception error condition occurs. </exception>
-    /// <param name="timeout">      (Optional) The timeout. </param>
-    /// <param name="loopDelay">    (Optional) The loop delay. </param>
-    public virtual void DisableAbortServerSync( int timeout = 500, int loopDelay = 50 )
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
+    public virtual void DisableAbortServerSync( int timeout = 500, int loopDelay = 5 )
     {
         AbortChannelServer? abortServer = this.AbortServer;
         try
