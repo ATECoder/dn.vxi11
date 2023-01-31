@@ -1,10 +1,6 @@
 using System.Net;
-using System.Reflection;
 
-using cc.isr.ONC.RPC.Portmap;
-using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.Visa;
-using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.IEEE488;
 

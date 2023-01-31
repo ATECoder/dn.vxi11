@@ -1,6 +1,5 @@
 using System.Net;
 
-using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.IEEE488;

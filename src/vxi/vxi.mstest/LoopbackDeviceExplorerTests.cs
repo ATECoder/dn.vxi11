@@ -26,6 +26,7 @@ public class LoopbackDeviceExplorerTests
             Logger.Writer.LogInformation( $"starting the embedded portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
+
             Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.ElapsedMilliseconds:0} ms" );
         }
         catch ( Exception ex )
@@ -43,8 +44,24 @@ public class LoopbackDeviceExplorerTests
     [ClassCleanup]
     public static void CleanupFixture()
     {
-        _embeddedPortMapService?.Dispose();
-        _embeddedPortMapService = null;
+        OncRpcEmbeddedPortmapServiceStub? service = _embeddedPortMapService;
+        if ( service is not null )
+        {
+            try
+            {
+                service.Dispose();
+                // service.ThreadExceptionOccurred -= OnThreadExceptionOccurred;
+            }
+            catch ( Exception ex )
+            {
+                Logger.Writer.LogError( "Exception cleaning up fixture", ex );
+            }
+            finally
+            {
+                _embeddedPortMapService = null;
+                _classTestContext = null;
+            }
+        }
     }
 
     private static OncRpcEmbeddedPortmapServiceStub? _embeddedPortMapService;

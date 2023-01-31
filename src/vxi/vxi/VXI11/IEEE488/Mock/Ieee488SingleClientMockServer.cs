@@ -5,7 +5,6 @@ using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.Visa;
 using cc.isr.VXI11.Logging;
 using cc.isr.ONC.RPC.Client;
-using System;
 
 namespace cc.isr.VXI11.IEEE488.Mock;
 

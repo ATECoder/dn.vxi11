@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Reflection;
 
 using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.IEEE488.Mock;
@@ -32,6 +31,7 @@ public class Ieee488ServerTests
             _server = new( _device );
 
             _server.PropertyChanged += OnServerPropertyChanged;
+            _server.ThreadExceptionOccurred += OnThreadExceptionOccurred;
             _ = Task.Factory.StartNew( () => {
                 Logger.Writer.LogInformation( "starting the embedded port map service; this takes ~3.5 seconds." );
                 using OncRpcEmbeddedPortmapServiceStub epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
@@ -61,13 +61,24 @@ public class Ieee488ServerTests
     [ClassCleanup]
     public static void CleanupFixture()
     {
-        if ( _server is not null )
+        Ieee488SingleClientMockServer? server = _server;
+        if ( server is not null )
         {
-            if ( _server.Running )
+            try
             {
-                _server.StopRpcProcessing();
+                server.Dispose();
+                server.PropertyChanged -= OnServerPropertyChanged;
+                server.ThreadExceptionOccurred -= OnThreadExceptionOccurred;
             }
-            _server = null;
+            catch ( Exception ex )
+            {
+                Logger.Writer.LogError( _identity, ex );
+            }
+            finally
+            {
+                _server = null;
+                _classTestContext = null;
+            }
         }
     }
 
@@ -83,6 +94,16 @@ public class Ieee488ServerTests
     private static readonly string _identity = "Ieee488 mock device";
     private static Ieee488SingleClientMockServer? _server;
     private static Ieee488Device? _device;
+
+    private static void OnThreadExceptionOccurred( object? sender, ThreadExceptionEventArgs e )
+    {
+        string name = "unknown";
+        if ( _server is Ieee488SingleClientMockServer )
+        {
+            name = nameof( Ieee488SingleClientMockServer );
+        }
+        Logger.Writer.LogError( $"Thread exception occurred at {name} instance", e.Exception );
+    }
 
     private static void OnServerPropertyChanged( object? sender, PropertyChangedEventArgs e )
     {
@@ -119,7 +140,8 @@ public class Ieee488ServerTests
     /// <param name="repeatCount">  Number of repeats. </param>
     private static void AssertIdentityShouldQuery( string ipv4Address, int repeatCount )
     {
-        Ieee488Client ieee488Client = new();
+        using Ieee488Client ieee488Client = new();
+        ieee488Client.ThreadExceptionOccurred += OnThreadExceptionOccurred;
 
         string identity = Ieee488ServerTests._identity;
         string command = "*IDN?";
@@ -133,8 +155,6 @@ public class Ieee488ServerTests
             Assert.AreEqual( identity, response, $"@count = {count - repeatCount}" );
         }
 
-        // presently, the mock serve does not support the destroy link RPC. 
-        // ieee488Client.Close();
     }
 
     /// <summary>   (Unit Test Method) identity should query. </summary>

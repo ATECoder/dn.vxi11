@@ -1,5 +1,7 @@
 // See https://aka.ms/new-console-template for more information
 
+using cc.isr.ONC.RPC.Logging;
+
 Console.WriteLine( "VXI-11 Test!" );
 
 string ipv4Address = "192.168.0.144"; // "127.0.0.1";
@@ -16,8 +18,9 @@ while ( !ready )
     ready = yesno.KeyChar == 'y' || yesno.KeyChar == 'Y';
 }
 
-cc.isr.VXI11.IEEE488.Ieee488Client ieee488Client = new();
+using cc.isr.VXI11.IEEE488.Ieee488Client ieee488Client = new();
 
+ieee488Client.ThreadExceptionOccurred += onThreadExcetionOccurred;
 Console.WriteLine();
 Console.Write( $"Press key to Connect to {ipv4Address}: " );
 Console.ReadKey();
@@ -67,4 +70,9 @@ void SendCommand( string command )
         Console.WriteLine( $"{command} sent{(string.IsNullOrEmpty( response ) ? string.Empty : $"; received: {response}")}" );
     else
         Console.WriteLine( response );
+}
+
+static void onThreadExcetionOccurred( object sender, ThreadExceptionEventArgs e )
+{
+    Logger.Writer.LogError( "Thread exception occurred", e.Exception );
 }

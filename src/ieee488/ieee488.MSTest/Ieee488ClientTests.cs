@@ -33,6 +33,7 @@ public class Ieee488ClientTests
     [ClassCleanup]
     public static void CleanupFixture()
     {
+        _classTestContext = null;
     }
 
     #endregion

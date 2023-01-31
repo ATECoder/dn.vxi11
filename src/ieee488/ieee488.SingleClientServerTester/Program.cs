@@ -5,9 +5,9 @@ using cc.isr.ONC.RPC.Portmap;
 
 try
 {
-    cc.isr.VXI11.IEEE488.Mock.Ieee488SingleClientMockServer server = new();
-    // TestServer.Ieee488Server server = new();
-    // Vxi11Server server = new Vxi11Server();
+    using cc.isr.VXI11.IEEE488.Mock.Ieee488SingleClientMockServer server = new();
+    server.ThreadExceptionOccurred += onThreadExcetionOccurred;
+
     Logger.Writer.LogInformation( "Starting the embedded port map service" );
     using OncRpcEmbeddedPortmapServiceStub epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
 
@@ -21,3 +21,7 @@ catch ( System.Exception e )
 //server.stopRpcProcessing();// stop the service
 Console.WriteLine( "VXI-11 IEEE 488 Server stopped." );
 
+static void onThreadExcetionOccurred( object sender, ThreadExceptionEventArgs e )
+{
+    Logger.Writer.LogError( "Thread exception occurred", e.Exception );
+}

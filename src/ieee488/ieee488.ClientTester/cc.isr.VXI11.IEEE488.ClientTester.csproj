@@ -1,12 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+ <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>cc.isr.VXI11.IEEE488.TestServer</RootNamespace>
-    <AssemblyName>cc.isr.VXI11.IEEE488.TestServer</AssemblyName>
+    <RootNamespace>cc.isr.VXI11.IEEE488.ClientTester</RootNamespace>
+    <AssemblyName>cc.isr.VXI11.IEEE488.ClientTester</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
