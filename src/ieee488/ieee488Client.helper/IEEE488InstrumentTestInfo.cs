@@ -83,12 +83,12 @@ public static class IEEE488InstrumentTestInfo
         _ = builder.Append( $"{command}: {response}\n" );
 
         command = "*CLS";
-        if ( interQueryDelayMs > 0 ) System.Threading.Thread.Sleep( interQueryDelayMs );
+        if ( interQueryDelayMs > 0 ) Thread.Sleep( interQueryDelayMs );
         response = WriteDevice( vxi11Client, command );
         _ = builder.Append( $"{command}: {response}\n" );
 
         command = "SYST:CLE";
-        if ( interQueryDelayMs > 0 ) System.Threading.Thread.Sleep( interQueryDelayMs );
+        if ( interQueryDelayMs > 0 ) Thread.Sleep( interQueryDelayMs );
         response = WriteDevice( vxi11Client, command );
         _ = builder.Append( $"{command}: {response}\n" );
 
@@ -125,11 +125,11 @@ public static class IEEE488InstrumentTestInfo
         string response = QueryDevice( vxi11Client, command, true );
         _ = builder.Append( $"a: {response}\n" );
 
-        if ( interQueryDelayMs > 0 ) System.Threading.Thread.Sleep( interQueryDelayMs );
+        if ( interQueryDelayMs > 0 ) Thread.Sleep( interQueryDelayMs );
         response = QueryDevice( vxi11Client, command, true );
         _ = builder.Append( $"b: {response}\n" );
 
-        if ( interQueryDelayMs > 0 ) System.Threading.Thread.Sleep( interQueryDelayMs );
+        if ( interQueryDelayMs > 0 ) Thread.Sleep( interQueryDelayMs );
         response = QueryDevice( vxi11Client, command, true );
         _ = builder.Append( $"c: {response}\n" );
 
@@ -192,7 +192,7 @@ public static class IEEE488InstrumentTestInfo
                 socket.Shutdown( SocketShutdown.Both );
                 socket.Close();
                 // this is required for the server to recover after the socket is closed.
-                System.Threading.Thread.Sleep( 1 );
+                Thread.Sleep( 1 );
                 return true;
             }
             else

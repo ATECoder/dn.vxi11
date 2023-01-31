@@ -120,10 +120,11 @@ public partial class Ieee488Client : ICloseable
     /// <summary>   Reconnects this object. </summary>
     public void Reconnect()
     {
-        if ( this.IsDisposed ) {
-            throw new InvalidOperationException( $"{nameof(Ieee488Client)} @ {this.IPAddress} cannot reconnected because it is disposed." );
+        if ( this.IsDisposed )
+        {
+            throw new InvalidOperationException( $"{nameof( Ieee488Client )} @ {this.IPAddress} cannot reconnected because it is disposed." );
         }
-            this.Connect( this.Host, this.InterfaceDeviceString, this.ConnectTimeout );
+        this.Connect( this.Host, this.InterfaceDeviceString, this.ConnectTimeout );
     }
 
     /// <summary>
@@ -246,7 +247,7 @@ public partial class Ieee488Client : ICloseable
             AbortChannelClient? abortClient = this.AbortClient;
             try
             {
-                    abortClient?.Close();
+                abortClient?.Close();
             }
             catch ( Exception ex )
             {

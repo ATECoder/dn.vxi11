@@ -829,7 +829,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </returns>
     public DeviceError CreateIntrChan( IPAddress hostAddress, int hostPort, TransportProtocol transportProtocol = TransportProtocol.Tcp )
     {
-        return this.CreateIntrChan( hostAddress, hostPort, Vxi11ProgramConstants.InterruptProgram, Vxi11ProgramConstants.InterruptVersion, transportProtocol ); 
+        return this.CreateIntrChan( hostAddress, hostPort, Vxi11ProgramConstants.InterruptProgram, Vxi11ProgramConstants.InterruptVersion, transportProtocol );
     }
 
     /// <summary>

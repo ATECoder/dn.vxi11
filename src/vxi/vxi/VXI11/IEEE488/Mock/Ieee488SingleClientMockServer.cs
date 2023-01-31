@@ -589,7 +589,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         }
         catch ( Exception )
         {
-            return new DeviceError( new DeviceErrorCode( DeviceErrorCodeValue.IOError )  );
+            return new DeviceError( new DeviceErrorCode( DeviceErrorCodeValue.IOError ) );
         }
         finally
         {

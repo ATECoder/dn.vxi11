@@ -75,7 +75,7 @@ namespace cc.isr.VXI11.IEEE488
         /// <param name="hostPort"> The host port. </param>
         public virtual async Task CreateInterruptChannel( int hostPort )
         {
-            await this.CreateInterruptChannel(  this.IPAddress, hostPort );
+            await this.CreateInterruptChannel( this.IPAddress, hostPort );
         }
 
         /// <summary>   Creates interrupt channel and starts the <see cref="InterruptChannelServer"/>. </summary>
@@ -212,7 +212,7 @@ namespace cc.isr.VXI11.IEEE488
         /// <param name="e">        VXI-11 event information. </param>
         private void HandleServiceRequest( object sender, Vxi11EventArgs e )
         {
-            if ( e.ServiceRequestCodec.ClientId == this.ClientId ) { this.OnServiceRequested( e );  }
+            if ( e.ServiceRequestCodec.ClientId == this.ClientId ) { this.OnServiceRequested( e ); }
         }
 
         protected InterruptChannelServer? InterruptServer { get; set; }
@@ -255,7 +255,7 @@ namespace cc.isr.VXI11.IEEE488
             }
         }
 
-        /// <summary>   Enables (starts) the interrupt server thread. </summary>
+        /// <summary>   Enables (starts) the interrupt server task. </summary>
         /// <remarks>   2023-01-26. </remarks>
         public virtual async Task EnableInterruptServerAsync()
         {
@@ -287,7 +287,7 @@ namespace cc.isr.VXI11.IEEE488
                         DateTime endT = DateTime.Now.AddMilliseconds( timeout );
                         while ( endT > DateTime.Now && interruptServer.Running )
                         {
-                            // allow the thread time to address the request
+                            // allow the task time to address the request
                             Task.Delay( 50 ).Wait();
                         }
                         if ( interruptServer.Running )
@@ -311,7 +311,7 @@ namespace cc.isr.VXI11.IEEE488
             }
         }
 
-        /// <summary>   Disables (stops) the Interrupt server thread. </summary>
+        /// <summary>   Disables (stops) the Interrupt server task. </summary>
         /// <remarks>   2023-01-28. </remarks>
         /// <param name="timeout">      (Optional) The timeout. </param>
         /// <param name="loopDelay">    (Optional) The loop delay. </param>
