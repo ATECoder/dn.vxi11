@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using System.Threading;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.ONC.RPC.Codecs;
@@ -47,7 +49,6 @@ public class DeviceExplorer
     }
 
     #endregion 
-
 
     #region " enumerate core devices "
 
@@ -183,6 +184,7 @@ public class DeviceExplorer
     /// <returns>   True if it succeeds, false if it fails. </returns>
     public static bool Paping( string ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
     {
+        bool pinged = false;
         try
         {
             using Socket socket = new( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
@@ -193,21 +195,13 @@ public class DeviceExplorer
             {
                 socket.EndConnect( result );
                 socket.Shutdown( SocketShutdown.Both );
-                socket.Close();
-                // this is required for the server to recover after the socket is closed.
-                System.Threading.Thread.Sleep( 1 );
-                return true;
-            }
-            else
-            {
-                socket.Close();
-                return false;
+                pinged = true;
             }
         }
-        catch
+        catch ( Exception )
         {
-            return false;
         }
+        return pinged;
     }
 
     /// <summary>   Ping host. </summary>
@@ -249,7 +243,6 @@ public class DeviceExplorer
         }
         return pingable;
     }
-
 
     #endregion
 

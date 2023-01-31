@@ -92,7 +92,7 @@ public class LoopbackDeviceExplorerTests
         Stopwatch sw = Stopwatch.StartNew();
         IPAddress host = IPAddress.Loopback;
         Assert.IsTrue( DeviceExplorer.PortmapPingHost( host ), $"port map at {IPAddress.Loopback} should reply to a ping" );
-        Logger.Writer.LogInformation( $"Portmap service pinged {host} in {sw.ElapsedMilliseconds:0} ms." );
+        Logger.Writer.LogInformation( $"{host} portmap pinged in {sw.ElapsedMilliseconds:0} ms." );
     }
 
     #endregion

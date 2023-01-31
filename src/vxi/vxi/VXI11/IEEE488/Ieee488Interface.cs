@@ -263,9 +263,10 @@ namespace cc.isr.VXI11.IEEE488
         /// <summary>   Find devices. </summary>
         /// <remarks>   2023-01-24. </remarks>
         /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
-        /// <param name="address_list"> (Optional) List of address. </param>
+        /// <param name="address_list">         (Optional) List of address. </param>
+        /// <param name="readAfterWriteDelay">  (Optional) The read after write delay in milliseconds. </param>
         /// <returns>   The found listeners. </returns>
-        public virtual List<(int Primary, int Secondary)> FindListeners( List<int>? address_list = null )
+        public virtual List<(int Primary, int Secondary)> FindListeners( List<int>? address_list = null, int readAfterWriteDelay = 15 )
         {
             if ( this.DeviceLink is null || this.CoreClient is null ) return new List<(int, int)>();
 
@@ -297,7 +298,8 @@ namespace cc.isr.VXI11.IEEE488
 
                     _ = this.SetAtnLine( false );
 
-                    Thread.Sleep( 15 );
+                    Task.Delay( readAfterWriteDelay ).Wait();
+
                     if ( 0 != this.ReadNdacLine() )
                     {
                         found.Add( (addr, 0) );
@@ -318,7 +320,8 @@ namespace cc.isr.VXI11.IEEE488
                         }
                         _ = this.SendCommand( cmd.ToArray() );
                         _ = this.SetAtnLine( false );
-                        Thread.Sleep( 15 );
+                        Task.Delay( readAfterWriteDelay ).Wait();
+
                         if ( 0 != this.ReadNdacLine() )
                         {
                             // find specific sub-address
@@ -334,7 +337,8 @@ namespace cc.isr.VXI11.IEEE488
 
                                 _ = this.SendCommand( cmd.ToArray() );
                                 _ = this.SetAtnLine( false );
-                                Thread.Sleep( 15 );
+                                Task.Delay( readAfterWriteDelay ).Wait();
+
                                 if ( 0 != this.ReadNdacLine() )
                                     found.Add( (addr, sa) );
                             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 using cc.isr.VXI11.Logging;
 namespace cc.isr.VXI11.IEEE488Client.Helper;
@@ -45,7 +46,7 @@ public static class IEEE488InstrumentTestInfo
 
         string instrument = instrumentId == InstrumentId.None ? "Echo" : instrumentId.ToString();
         string ipv4Address = _instrumentInfo[instrument].IPv4Address;
-        if ( !Paping( ipv4Address, portNumber, ( int ) connectionTimeout.TotalMilliseconds ) )
+        if ( !DeviceExplorer.Paping( ipv4Address, portNumber, ( int ) connectionTimeout.TotalMilliseconds ) )
         {
             QueryInfo = $"Attempt to establish a TCP connection with the {instrument} at {ipv4Address}:{portNumber} aborted after {connectionTimeout.TotalMilliseconds:0}ms";
             return false;
@@ -83,12 +84,12 @@ public static class IEEE488InstrumentTestInfo
         _ = builder.Append( $"{command}: {response}\n" );
 
         command = "*CLS";
-        if ( interQueryDelayMs > 0 ) Thread.Sleep( interQueryDelayMs );
+        if ( interQueryDelayMs > 0 ) Task.Delay( interQueryDelayMs ).Wait();
         response = WriteDevice( vxi11Client, command );
         _ = builder.Append( $"{command}: {response}\n" );
 
         command = "SYST:CLE";
-        if ( interQueryDelayMs > 0 ) Thread.Sleep( interQueryDelayMs );
+        if ( interQueryDelayMs > 0 ) Task.Delay( interQueryDelayMs ).Wait();
         response = WriteDevice( vxi11Client, command );
         _ = builder.Append( $"{command}: {response}\n" );
 
@@ -125,11 +126,11 @@ public static class IEEE488InstrumentTestInfo
         string response = QueryDevice( vxi11Client, command, true );
         _ = builder.Append( $"a: {response}\n" );
 
-        if ( interQueryDelayMs > 0 ) Thread.Sleep( interQueryDelayMs );
+        if ( interQueryDelayMs > 0 ) Task.Delay( interQueryDelayMs ).Wait();
         response = QueryDevice( vxi11Client, command, true );
         _ = builder.Append( $"b: {response}\n" );
 
-        if ( interQueryDelayMs > 0 ) Thread.Sleep( interQueryDelayMs );
+        if ( interQueryDelayMs > 0 ) Task.Delay( interQueryDelayMs ).Wait();
         response = QueryDevice( vxi11Client, command, true );
         _ = builder.Append( $"c: {response}\n" );
 
@@ -171,59 +172,6 @@ public static class IEEE488InstrumentTestInfo
             Logger.Writer.LogMemberError( "Exception writing to the device.", ex );
         }
         return "Exception occurred";
-    }
-
-    /// <summary>   Pings port. </summary>
-    /// <param name="ipv4Address">          The IPv4 address. </param>
-    /// <param name="portNumber">           (Optional) The port number. </param>
-    /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
-    public static bool Paping( string ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
-    {
-        try
-        {
-            using Socket socket = new( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
-            socket.Blocking = true;
-            IAsyncResult result = socket.BeginConnect( ipv4Address, portNumber, null, null );
-            bool success = result.AsyncWaitHandle.WaitOne( timeoutMilliseconds, true );
-            if ( socket.Connected )
-            {
-                socket.EndConnect( result );
-                socket.Shutdown( SocketShutdown.Both );
-                socket.Close();
-                // this is required for the server to recover after the socket is closed.
-                Thread.Sleep( 1 );
-                return true;
-            }
-            else
-            {
-                socket.Close();
-                return false;
-            }
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    /// <summary>   Ping host. </summary>
-    /// <param name="nameOrAddress">    The name or address. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
-    public static bool PingHost( string nameOrAddress )
-    {
-        bool pingable = false;
-        try
-        {
-            using Ping pinger = new();
-            PingReply reply = pinger.Send( nameOrAddress );
-            pingable = reply.Status == IPStatus.Success;
-        }
-        catch ( PingException )
-        {
-            // Discard PingExceptions and return false;
-        }
-        return pingable;
     }
 
 }

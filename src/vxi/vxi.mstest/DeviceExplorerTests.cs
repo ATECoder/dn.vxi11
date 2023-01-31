@@ -114,7 +114,7 @@ public class DeviceExplorerTests
         if ( DeviceExplorer.PortmapPingHost( IPAddress.Parse( host ), timeout ) )
         {
             _pingedHosts.Add( IPAddress.Parse( host ) );
-            Logger.Writer.LogInformation( $"    added {host} in {sw.ElapsedMilliseconds:0} ms." );
+            Logger.Writer.LogInformation( $"Added {host}; portmap pinged in {sw.ElapsedMilliseconds:0} ms." );
         }
     }
 
@@ -164,7 +164,7 @@ public class DeviceExplorerTests
                 Logger.Writer.LogInformation( $"Pinging {host}" );
                 Stopwatch sw = Stopwatch.StartNew();
                 Assert.IsTrue( DeviceExplorer.PortmapPingHost( host, 10 ), $"port map at {host} should reply to a ping" );
-                Logger.Writer.LogInformation( $"   done in {sw.ElapsedMilliseconds:0} ms." );
+                Logger.Writer.LogInformation( $"{host} portmap pinged in {sw.ElapsedMilliseconds:0} ms." );
             }
             else
             {
@@ -202,7 +202,7 @@ public class DeviceExplorerTests
             Logger.Writer.LogInformation( $"Pinging {address}:{port}" );
             sw.Start();
             Assert.IsTrue( DeviceExplorer.Paping( address, port ) );
-            Logger.Writer.LogInformation( $"    in {sw.ElapsedMilliseconds:0} ms" );
+            Logger.Writer.LogInformation( $"{address}:{port} pinged in {sw.ElapsedMilliseconds:0} ms" );
         }
         Assert.AreEqual( _pingedHosts.Count, devices.Count, "Device count is expected to equal pinged hosts count." );
     }
@@ -235,7 +235,7 @@ public class DeviceExplorerTests
             Logger.Writer.LogInformation( $"Pinging {address}:{port}" );
             sw.Start();
             Assert.IsTrue( DeviceExplorer.Paping( address, port ) );
-            Logger.Writer.LogInformation( $"    in {sw.ElapsedMilliseconds:0} ms" );
+            Logger.Writer.LogInformation( $"{address}:{port} pinged in {sw.ElapsedMilliseconds:0} ms" );
 
             if ( port == 111 ) { actualCount++; }
         }
