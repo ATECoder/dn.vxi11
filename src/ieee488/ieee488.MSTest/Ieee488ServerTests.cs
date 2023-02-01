@@ -3,6 +3,8 @@ using System.ComponentModel;
 using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.IEEE488.Mock;
 using cc.isr.ONC.RPC.Portmap;
+using System.Reflection;
+using cc.isr.ONC.RPC.Server;
 
 namespace cc.isr.VXI11.IEEE488.MSTest;
 
@@ -31,19 +33,25 @@ public class Ieee488ServerTests
             _server = new( _device );
 
             _server.PropertyChanged += OnServerPropertyChanged;
-            _server.ThreadExceptionOccurred += OnThreadExceptionOccurred;
+            _server.ThreadExceptionOccurred += OnThreadException;
+
             _ = Task.Factory.StartNew( () => {
+
                 Logger.Writer.LogInformation( "starting the embedded port map service; this takes ~3.5 seconds." );
                 using OncRpcEmbeddedPortmapServiceStub epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
+                epm.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
+
                 Logger.Writer.LogInformation( "starting the server task; this takes ~2.5 seconds." );
                 _server.Run();
-            } );
+            } ).ContinueWith( failedTask => Ieee488ServerTests.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception! ) ),
+                                                                                 TaskContinuationOptions.OnlyOnFaulted );
 
             Logger.Writer.LogInformation( $"{nameof( Ieee488SingleClientMockServer )} waiting running {DateTime.Now:ss.fff}" );
 
-            // wait till the server is running.
+            // because the initializing task is not awaited, we need to wait for the server to start here.
 
-            _ = _server.ServerStarted( 2 * Ieee488ServerTests.ServerStartTimeTypical, Ieee488ServerTests.ServerStartLoopDelay );
+            if ( !_server.ServerStarted( 2 * Ieee488ServerTests.ServerStartTimeTypical, Ieee488ServerTests.ServerStartLoopDelay ) )
+                throw new InvalidOperationException( "failed starting the ONC/RPC server." );
 
             Logger.Writer.LogInformation( $"{nameof( Ieee488SingleClientMockServer )} is {(_server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
         }
@@ -68,7 +76,7 @@ public class Ieee488ServerTests
             {
                 server.Dispose();
                 server.PropertyChanged -= OnServerPropertyChanged;
-                server.ThreadExceptionOccurred -= OnThreadExceptionOccurred;
+                server.ThreadExceptionOccurred -= OnThreadException;
             }
             catch ( Exception ex )
             {
@@ -77,9 +85,9 @@ public class Ieee488ServerTests
             finally
             {
                 _server = null;
-                _classTestContext = null;
             }
         }
+        _classTestContext = null;
     }
 
     private static readonly string? _ipv4Address = "127.0.0.1";
@@ -88,35 +96,39 @@ public class Ieee488ServerTests
     private static Ieee488SingleClientMockServer? _server;
     private static Ieee488Device? _device;
 
-    private static void OnThreadExceptionOccurred( object? sender, ThreadExceptionEventArgs e )
+    internal static void OnThreadException( ThreadExceptionEventArgs e )
+    {
+        Logger.Writer.LogError( $"Thread exception occurred", e.Exception );
+    }
+
+    internal static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
     {
         string name = "unknown";
-        if ( _server is Ieee488SingleClientMockServer )
-        {
-            name = nameof( Ieee488SingleClientMockServer );
-        }
+        if ( sender is Ieee488SingleClientMockServer ) name = nameof( Ieee488SingleClientMockServer );
+        if ( sender is OncRpcServerStubBase ) name = nameof( OncRpcServerStubBase );
+
         Logger.Writer.LogError( $"Thread exception occurred at {name} instance", e.Exception );
     }
 
     private static void OnServerPropertyChanged( object? sender, PropertyChangedEventArgs e )
     {
-        if ( _server is null ) { return; }
+        if ( sender is not Ieee488SingleClientMockServer ) { return; }
         switch ( e.PropertyName )
         {
             case nameof( Ieee488SingleClientMockServer.ReadMessage ):
-                Logger.Writer.LogInformation( _server.ReadMessage );
+                Logger.Writer.LogInformation( ( ( Ieee488SingleClientMockServer ) sender).ReadMessage );
                 break;
             case nameof( Ieee488SingleClientMockServer.WriteMessage ):
-                Logger.Writer.LogInformation( _server.WriteMessage );
+                Logger.Writer.LogInformation( (( Ieee488SingleClientMockServer ) sender).WriteMessage );
                 break;
             case nameof( Ieee488SingleClientMockServer.PortNumber ):
-                Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.PortNumber}" );
+                Logger.Writer.LogInformation( $"{e.PropertyName} set to {(( Ieee488SingleClientMockServer ) sender).PortNumber}" );
                 break;
             case nameof( Ieee488SingleClientMockServer.IPv4Address ):
-                Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.IPv4Address}" );
+                Logger.Writer.LogInformation( $"{e.PropertyName} set to {(( Ieee488SingleClientMockServer ) sender).IPv4Address}" );
                 break;
             case nameof( Ieee488SingleClientMockServer.Running ):
-                Logger.Writer.LogInformation( $"{e.PropertyName} set to {_server?.Running}" );
+                Logger.Writer.LogInformation( $"{e.PropertyName} set to {(( Ieee488SingleClientMockServer ) sender).Running}" );
                 break;
         }
     }
@@ -134,7 +146,7 @@ public class Ieee488ServerTests
     private static void AssertIdentityShouldQuery( string ipv4Address, int repeatCount )
     {
         using Ieee488Client ieee488Client = new();
-        ieee488Client.ThreadExceptionOccurred += OnThreadExceptionOccurred;
+        ieee488Client.ThreadExceptionOccurred += OnThreadException;
 
         string identity = Ieee488ServerTests._identity;
         string command = "*IDN?";
