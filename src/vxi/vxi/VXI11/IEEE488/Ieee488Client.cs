@@ -399,8 +399,6 @@ public partial class Ieee488Client : ICloseable
 
     #endregion
 
-
-
     #region " VXI-11 members "
 
     /// <summary>   Gets or sets the Core client. </summary>
@@ -559,13 +557,26 @@ public partial class Ieee488Client : ICloseable
 
     #endregion
 
-    #region " send and receive "
+    #region " termination "
 
-    /// <summary>   Query if 'data' is write terminated. </summary>
-    /// <param name="data">         . </param>
+    /// <summary>   Gets the termination bytes of a query command. </summary>
+    /// <returns>   An array of byte. </returns>
+    public byte[] QueryTermination()
+    {
+        byte[] queryTermination = new byte[this.WriteTermination.Length + 1];
+        queryTermination[0] = ( byte ) '?';
+        Array.Copy( this.WriteTermination, 0, queryTermination, 1, this.WriteTermination.Length );
+        return queryTermination;
+    }
+
+    /// <summary>
+    /// Query if <paramref name="data"/> ends with the specified <paramref name="termination"/>.
+    /// </summary>
+    /// <remarks>   2023-02-01. </remarks>
+    /// <param name="data">         The data. </param>
     /// <param name="termination">  The termination. </param>
-    /// <returns>   True if write terminated, false if not. </returns>
-    private static bool IsWriteTerminated( byte[] data, byte[] termination )
+    /// <returns>   True if ends with the termination, false if not. </returns>
+    private static bool EndsWith( byte[] data, byte[] termination )
     {
         bool terminated = data is not null && termination is not null && termination.Length > 0 && data.Length > termination.Length;
         if ( !terminated ) return terminated;
@@ -574,21 +585,75 @@ public partial class Ieee488Client : ICloseable
         return terminated;
     }
 
-    /// <summary>   Query if 'data' is write terminated. </summary>
+    /// <summary>   Query if <paramref name="data"/> is write terminated. </summary>
     /// <param name="data"> . </param>
     /// <returns>   True if write terminated, false if not. </returns>
     private bool IsWriteTerminated( byte[] data )
     {
-        return IsWriteTerminated( data, this.WriteTermination );
+        return EndsWith( data, this.WriteTermination );
     }
 
-    /// <summary>   Query if 'data' is query. </summary>
-    /// <param name="data"> . </param>
+    /// <summary>
+    /// Query if <paramref name="data"/> is as query which ends with a '?' and is write terminated.
+    /// </summary>
+    /// <param name="data"> The data. </param>
     /// <returns>   True if query, false if not. </returns>
-    private bool IsQuery( byte[] data )
+    public bool IsWriteTerminatedQuery( byte[] data )
     {
-        return data is not null && data.Length > 1 && this.IsWriteTerminated( data ) && Array.IndexOf( data, ( byte ) '?' ) > -1;
+        return EndsWith( data, this.QueryTermination() );
     }
+
+    /// <summary>   Query if <paramref name="data"/> ends with a '?'. </summary>
+    /// <param name="data"> The data. </param>
+    /// <returns>   True if query, false if not. </returns>
+    public bool IsQuery( byte[] data )
+    {
+        return data[^1] == ( byte ) '?';
+    }
+
+    /// <summary>   Query if <paramref name="message"/> ends with the specific <paramref name="termination"/>. </summary>
+    /// <param name="message">      The message. </param>
+    /// <param name="termination">  The termination. </param>
+    /// <returns>   True if ends with the termination, false if not. </returns>
+    private static bool EndsWith( string message, byte[] termination )
+    {
+        bool terminated = !String.IsNullOrWhiteSpace( message ) && termination is not null && termination.Length > 0 && message.Length > termination.Length;
+        if ( !terminated ) return terminated;
+        for ( int i = 0; i < termination!.Length; i++ )
+            terminated &= message![^(i + 1)] == termination[i];
+        return terminated;
+    }
+
+    /// <summary>   Query if the <paramref name="message"/> is write terminated. </summary>
+    /// <param name="message">  The message. </param>
+    /// <returns>   True if write terminated, false if not. </returns>
+    private bool IsWriteTerminated( string message )
+    {
+        return EndsWith( message, this.WriteTermination );
+    }
+
+    /// <summary>
+    /// Query if <paramref name="message"/> is as query which ends with a '?' and is write terminated.
+    /// </summary>
+    /// <remarks>   2023-02-01. </remarks>
+    /// <param name="message">  The message. </param>
+    /// <returns>   True if query, false if not. </returns>
+    public bool IsWriteTerminatedQuery( string message )
+    {
+        return EndsWith( message, this.QueryTermination() );
+    }
+
+    /// <summary>   Query if 'message' ends with a '?'. </summary>
+    /// <param name="message">  The message. </param>
+    /// <returns>   True if query, false if not. </returns>
+    public bool IsQuery( string message )
+    {
+        return message[^1] == '?';
+    }
+
+    #endregion
+
+    #region " send and receive "
 
     /// <summary>   Send this message. </summary>
     /// <param name="data"> . </param>
@@ -654,7 +719,7 @@ public partial class Ieee488Client : ICloseable
     {
         DeviceWriteResp writeResponse = this.Send( data );
         if ( writeResponse.ErrorCode == DeviceErrorCode.NoError )
-            if ( this.IsQuery( data ) )
+            if ( this.IsWriteTerminatedQuery( data ) )
             {
                 if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
                 DeviceReadResp readResponse = this.Receive();
@@ -692,9 +757,10 @@ public partial class Ieee488Client : ICloseable
     /// <returns>   The total amount of data that was written. </returns>
     public virtual int WriteRaw( string data, bool appendTermination = true )
     {
-        if ( this.DeviceLink is null || this.CoreClient is null || data is null || data.Length == 0 ) return 0;
+        if ( this.DeviceLink is null || this.CoreClient is null || string.IsNullOrWhiteSpace( data ) ) return 0;
 
-        data += this.CharacterEncoding.GetString( this.WriteTermination );
+        if ( appendTermination ) 
+            data += this.CharacterEncoding.GetString( this.WriteTermination );
 
         int total = 0;
         int remaining = data.Length;
@@ -702,17 +768,17 @@ public partial class Ieee488Client : ICloseable
         while ( remaining > 0 )
         {
             this.Eoi = remaining <= this.MaxReceiveSize;
-            var block = data.Substring( offset, this.MaxReceiveSize );
+            var block = data.Substring( offset, Math.Min( remaining , this.MaxReceiveSize ) );
 
-            DeviceWriteResp reply = this.Send( this.CharacterEncoding.GetBytes( data ) );
+            DeviceWriteResp reply = this.Send( this.CharacterEncoding.GetBytes( block ) );
 
             if ( reply.ErrorCode != DeviceErrorCode.NoError )
             {
-                throw new DeviceException( $"; failed writing in raw mode", reply.ErrorCode );
+                throw new DeviceException( $"; {nameof( WriteRaw )}({nameof( data )}: {data}, {nameof( appendTermination )}: {appendTermination} ) block '{block}' failed.", reply.ErrorCode );
             }
             else if ( reply.Size < block.Length )
             {
-                throw new DeviceException( $"; incomplete block {reply.Size} or {block.Length} was written in raw mode", DeviceErrorCode.IOError );
+                throw new DeviceException( $"; {nameof( WriteRaw )}({nameof( data )}: {data}, {nameof( appendTermination )}: {appendTermination} ) incomplete block '{block}' {reply.Size}/{block.Length} was written", DeviceErrorCode.IOError );
             }
             offset += reply.Size;
             remaining -= reply.Size;
@@ -754,7 +820,7 @@ public partial class Ieee488Client : ICloseable
 
             if ( reply.ErrorCode != DeviceErrorCode.NoError )
             {
-                throw new DeviceException( $"; failed reading in raw mode", reply.ErrorCode );
+                throw new DeviceException( $"; {nameof( ReadRaw )}({nameof( byteCount )}: {byteCount}) failed reading", reply.ErrorCode );
             }
 
             // extend the data by the amount of data received
@@ -789,7 +855,6 @@ public partial class Ieee488Client : ICloseable
         return (sentCount, this.ReadRaw( byteCount ));
     }
 
-
     #endregion
 
     #region " Write "
@@ -800,6 +865,8 @@ public partial class Ieee488Client : ICloseable
     /// <returns>   An int. </returns>
     public int Write( string message )
     {
+        return this.WriteRaw( message, false );
+#if false
         if ( string.IsNullOrEmpty( message ) ) return 0;
 
         (DeviceWriteResp writeResponse, _) = this.SendReceive( this.CharacterEncoding.GetBytes( message ) );
@@ -810,6 +877,7 @@ public partial class Ieee488Client : ICloseable
             : writeResponse.ErrorCode != DeviceErrorCode.NoError
                 ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode )
                 : writeResponse.Size;
+#endif
     }
 
     /// <summary>   Sends a message with termination to the VXI-11 server. </summary>
@@ -817,7 +885,10 @@ public partial class Ieee488Client : ICloseable
     /// <returns>   An int. </returns>
     public int WriteLine( string message )
     {
+        return this.WriteRaw( message, true );
+#if false
         return this.Write( $"{message}{this.WriteTermination}" );
+#endif
     }
 
     /// <summary>
@@ -848,9 +919,9 @@ public partial class Ieee488Client : ICloseable
         return this.TryWrite( $"{message}{this.WriteTermination}" );
     }
 
-    #endregion
+#endregion
 
-    #region " Read "
+#region " Read "
 
     /// <summary>   Receives a message from the VXI-11 server. </summary>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
@@ -858,6 +929,12 @@ public partial class Ieee488Client : ICloseable
     /// <returns>   A string. </returns>
     public string Read( bool trimEnd = false )
     {
+        byte[] data = this.ReadRaw();
+        int len = data is null ? 0 : data.Length - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
+        return len > 0
+            ? this.CharacterEncoding.GetString( data, 0, len )
+            : string.Empty;
+#if false
         DeviceReadResp readResponse = this.Receive();
 
         if ( readResponse is null )
@@ -872,6 +949,7 @@ public partial class Ieee488Client : ICloseable
                 ? this.CharacterEncoding.GetString( readResponse.GetData(), 0, length )
                 : string.Empty;
         }
+#endif
     }
 
     /// <summary>   Tries to receive a message from the VXI-11 server. </summary>
@@ -890,31 +968,60 @@ public partial class Ieee488Client : ICloseable
     }
 
     /// <summary>   Receives single-precision values from the VXI-11 server. </summary>
+    /// <remarks>   2023-02-01. </remarks>
+    /// <exception cref="InvalidOperationException">    Thrown when the requested operation is
+    ///                                                 invalid. </exception>
     /// <param name="offset">   The offset into the received bytes. </param>
     /// <param name="count">    Number of single precision values. </param>
     /// <param name="values">   [in,out] the single precision values. </param>
-    /// <returns>   The number of received bytes. </returns>
+    /// <returns>
+    /// The number of output bytes, which will be the minimum of <paramref name="count"/>
+    /// and length of <paramref name="values"/>.
+    /// </returns>
     public int Read( int offset, int count, ref float[] values )
     {
+        if ( count == 0 ) return 0;
+        int length = count * 4 + offset + 1;
+        byte[] data = this.ReadRaw( length );
+        int receivedLen = data.Length;
+        int outputLen = Math.Min( count, values.Length ) * 4;
+        if ( receivedLen < outputLen )
+            throw new InvalidOperationException( $"{nameof(Read)}(int, int, ref float[]) received {receivedLen} of the requested byte output {outputLen}" );
+        Buffer.BlockCopy( data, offset, values, 0, outputLen );
+        return outputLen;
+#if false
         DeviceReadResp readResponse = this.Receive( count * 4 + offset + 1 );
         // Need to convert to the byte array into single
         Buffer.BlockCopy( readResponse.GetData(), offset, values, 0, values.Length * 4 );
         return readResponse.GetData().Length;
+#endif
     }
-
 
     #endregion
 
     #region " Query "
 
     /// <summary>   Sends a query message to and receives a message from the VXI-11 server. </summary>
+    /// <remarks>   2023-02-01. </remarks>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay . </param>
     /// <param name="trimEnd">                  (Optional) True to trim end. </param>
-    /// <returns>   A Tuple. </returns>
+    /// <returns>
+    /// A Tuple ( success: <see langword="true"/> if data was sent and read; otherwise, <see langword="false"/>
+    /// , data).
+    /// </returns>
     public (bool success, string response) Query( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
+        int sentCount = this.Write( message );
+        if ( sentCount > 0)
+        {
+            if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
+            return (true, this.Read( trimEnd ));
+        }
+        return (false, string.Empty);
+
+#if false
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
 
         (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( this.CharacterEncoding.GetBytes( message ), millisecondsReadDelay );
@@ -935,6 +1042,7 @@ public partial class Ieee488Client : ICloseable
                 ? (true, this.CharacterEncoding.GetString( readResponse.GetData(), 0, length ))
                 : (true, string.Empty);
         }
+#endif
     }
 
     /// <summary>   Sends a query message with termination to the VXI-11 server and returns the reply message. </summary>
@@ -944,7 +1052,13 @@ public partial class Ieee488Client : ICloseable
     /// <returns>   The line. </returns>
     public (bool success, string response) QueryLine( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
-        return this.Query( $"{message}{this.WriteTermination}", millisecondsReadDelay, trimEnd );
+        int sentCount = this.WriteLine( message );
+        if ( sentCount > 0 )
+        {
+            if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
+            return (true, this.Read( trimEnd ));
+        }
+        return (false, string.Empty);
     }
 
 
@@ -1007,9 +1121,9 @@ public partial class Ieee488Client : ICloseable
         return this.Read( offset, count, ref values );
     }
 
-    #endregion
+#endregion
 
-    #region " VXI-11 call implementations: Client "
+#region " VXI-11 call implementations: Client "
 
     /// <summary>   Sends the Clear command. </summary>
     public virtual void Clear()
@@ -1059,6 +1173,6 @@ public partial class Ieee488Client : ICloseable
             throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Trigger )} command.", reply.ErrorCode );
     }
 
-    #endregion
+#endregion
 
 }

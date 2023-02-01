@@ -1,5 +1,7 @@
 // See https://aka.ms/new-console-template for more information
 
+using System.Runtime.InteropServices;
+
 using cc.isr.ONC.RPC.Logging;
 
 Console.WriteLine( $"VXI-11 {nameof( cc.isr.VXI11.IEEE488.Ieee488Instrument)} Tester" );
@@ -59,18 +61,23 @@ else
 
 }
 
-Console.Write( "\nPress key to end" );
+Console.Write( "\n Press key to end" );
 Console.ReadKey();
 
 void SendCommand( string command )
 {
     Console.WriteLine( $"Hit any key to send {command} to {ipv4Address}" );
     _ = Console.ReadKey();
-    (bool success, string response) = instrument.Query( $"{command}\n", 0 );
-    if ( success )
+    int sentCount = instrument.WriteLine( command );
+    if ( sentCount == 0 )
+        Console.WriteLine( $"{command} not sent" );
+    else if ( instrument.IsQuery( command ) )
+    {
+        string response = instrument.Read();
         Console.WriteLine( $"{command} sent{(string.IsNullOrEmpty( response ) ? string.Empty : $"; received: {response}")}" );
+    }
     else
-        Console.WriteLine( response );
+        Console.WriteLine( $"{command} sent" );
 }
 
 static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )

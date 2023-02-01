@@ -65,7 +65,6 @@ namespace cc.isr.VXI11.IEEE488
 
         #endregion
 
-
         #region " VXI-11 call implementations: Instrument "
 
         /// <summary>
