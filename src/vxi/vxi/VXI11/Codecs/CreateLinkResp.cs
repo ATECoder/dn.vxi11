@@ -23,6 +23,12 @@ namespace cc.isr.VXI11.Codecs;
 ///    unsigned long maxRecvSize; /* specifies max data size in bytes device will accept on a write */
 /// };
 /// </code>
+/// 
+/// DeviceFlagsCodec and DeviceErrorCodec are represented as integers, which simplifies the code
+/// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
+/// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
+/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCodeValue"/>
+/// are only included as members of codec classes. 
 /// </remarks>
 public class CreateLinkResp : IXdrCodec
 {

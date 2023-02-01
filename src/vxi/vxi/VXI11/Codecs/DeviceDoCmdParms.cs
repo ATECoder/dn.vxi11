@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -34,7 +36,6 @@ public class DeviceDoCmdParms : IXdrCodec
     public DeviceDoCmdParms()
     {
         this._link = new();
-        this._flags = new();
         this._dataIn = Array.Empty<byte>();
         this.NetworkOrder = true;
     }
@@ -62,13 +63,12 @@ public class DeviceDoCmdParms : IXdrCodec
     /// <value> The identifier of the device link. </value>
     public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }
 
-    private DeviceFlags _flags;
     /// <summary>
-    /// Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
+    /// Gets or sets the <see cref="DeviceOperationFlags"/>
     /// options.
     /// </summary>
     /// <value> The flags. </value>
-    public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
+    public DeviceOperationFlags Flags { get; set; }
 
     /// <summary>   Gets or sets the i/o timeout. </summary>
     /// <remarks>
@@ -173,7 +173,7 @@ public class DeviceDoCmdParms : IXdrCodec
     public void Decode( XdrDecodingStreamBase decoder )
     {
         this.Link = new DeviceLink( decoder );
-        this.Flags = new DeviceFlags( decoder );
+        this.Flags =  decoder.DecodeInt().ToDeviceOperationFlags();
         this.IOTimeout = decoder.DecodeInt();
         this.LockTimeout = decoder.DecodeInt();
         this.Cmd = decoder.DecodeInt();

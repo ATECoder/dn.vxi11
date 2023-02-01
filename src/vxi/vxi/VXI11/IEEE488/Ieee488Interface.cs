@@ -27,10 +27,10 @@ namespace cc.isr.VXI11.IEEE488
         {
             if ( this.DeviceLink is null || this.CoreClient is null ) return Array.Empty<byte>();
 
-            DeviceDoCmdResp reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, new DeviceFlags( DeviceOperationFlags.None ), this.LockTimeout, this.IOTimeout,
+            DeviceDoCmdResp reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout,
                                                                 ( int ) Ieee488InterfaceCommand.SendCommand, true, 1, data );
             if ( reply is null )
-                throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+                throw new DeviceException( DeviceErrorCodeValue.IOError );
             else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
                 throw new DeviceException( $"; failed sending the {nameof( Ieee488Interface.SendCommand )} command.", reply.ErrorCode.ErrorCodeValue );
             return reply.GetDataOut();
@@ -251,10 +251,10 @@ namespace cc.isr.VXI11.IEEE488
         {
             if ( this.DeviceLink is null || this.CoreClient is null ) return Array.Empty<byte>();
 
-            DeviceDoCmdResp reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, new DeviceFlags( DeviceOperationFlags.None ), this.LockTimeout, this.IOTimeout,
+            DeviceDoCmdResp reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout,
                                                                 ( int ) Ieee488InterfaceCommand.InterfaceClearControl, true, 1, Array.Empty<byte>() );
             if ( reply is null )
-                throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+                throw new DeviceException( DeviceErrorCodeValue.IOError );
             else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
                 throw new DeviceException( $"; failed sending the {nameof( Ieee488Interface.SendInterfaceClear )} command.", reply.ErrorCode.ErrorCodeValue );
             return reply.GetDataOut();

@@ -89,8 +89,8 @@ namespace cc.isr.VXI11.IEEE488
             var reply = this.CoreClient!.CreateIntrChan( hostAddress, hostPort );
 
             if ( reply is null )
-                throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError )
+                throw new DeviceException( DeviceErrorCodeValue.IOError );
+            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
                 throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.CreateInterruptChannel )} command", reply.ErrorCode.ErrorCodeValue );
             else
                 await this.EnableInterruptServerAsync();
@@ -112,8 +112,8 @@ namespace cc.isr.VXI11.IEEE488
             var reply = this.CoreClient!.DestroyIntrChan();
 
             if ( reply is null )
-                throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError )
+                throw new DeviceException( DeviceErrorCodeValue.IOError );
+            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
                 throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.DestroyInterruptChannel )} command", reply.ErrorCode.ErrorCodeValue );
         }
 
@@ -140,7 +140,7 @@ namespace cc.isr.VXI11.IEEE488
             DeviceError reply = this.CoreClient.DeviceEnableSrq( this.DeviceLink, enable, handle );
 
             if ( reply is null )
-                throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+                throw new DeviceException( DeviceErrorCodeValue.IOError );
             else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
                 throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.EnableSrq )} command.", reply.ErrorCode.ErrorCodeValue );
         }
@@ -151,11 +151,11 @@ namespace cc.isr.VXI11.IEEE488
         {
             if ( !this.Connected ) this.Reconnect();
 
-            var reply = this.CoreClient!.DeviceLocal( this.DeviceLink!, Codecs.DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
+            var reply = this.CoreClient!.DeviceLocal( this.DeviceLink!, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
 
             if ( reply is null )
-                throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError )
+                throw new DeviceException( DeviceErrorCodeValue.IOError );
+            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
                 throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.Local )} command", reply.ErrorCode.ErrorCodeValue );
         }
 
@@ -165,11 +165,11 @@ namespace cc.isr.VXI11.IEEE488
         {
             if ( !this.Connected ) this.Reconnect();
 
-            var reply = this.CoreClient!.DeviceRemote( this.DeviceLink!, Codecs.DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
+            var reply = this.CoreClient!.DeviceRemote( this.DeviceLink!, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
 
             if ( reply is null )
-                throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError )
+                throw new DeviceException( DeviceErrorCodeValue.IOError );
+            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
                 throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.Remote )} command", reply.ErrorCode.ErrorCodeValue );
         }
 
@@ -180,10 +180,10 @@ namespace cc.isr.VXI11.IEEE488
         {
             if ( !this.Connected ) this.Reconnect();
 
-            DeviceReadStbResp? reply = this.CoreClient!.DeviceReadStb( this.DeviceLink!, Codecs.DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
+            DeviceReadStbResp? reply = this.CoreClient!.DeviceReadStb( this.DeviceLink!, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
             return reply is null
-                ? throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError )
-                : reply.ErrorCode.ErrorCodeValue != Codecs.DeviceErrorCodeValue.NoError
+                ? throw new DeviceException( DeviceErrorCodeValue.IOError )
+                : reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError
                     ? throw new DeviceException( $"; failed {nameof( Ieee488Instrument.ReadStatusByte )} reading the status byte.", reply.ErrorCode.ErrorCodeValue )
                     : reply.Stb;
         }

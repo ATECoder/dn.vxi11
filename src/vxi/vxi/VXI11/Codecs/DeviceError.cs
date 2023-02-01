@@ -30,6 +30,18 @@ namespace cc.isr.VXI11.Codecs;
 ///     Device_ErrorCode error;
 /// };
 /// </code>
+/// 
+/// The result of any remote procedure call is a data structure whose first element has the type
+/// of <see cref="DeviceErrorCode"/>. A value of <see cref="DeviceErrorCodeValue.NoError"/> (0)
+/// indicates that the call was successfully completed and the results are valid. Any other value
+/// indicates that during the execution of the call, the network instrument server detected an
+/// error. All other error codes are reserved. <para>
+///
+/// DeviceFlagsCodec and DeviceErrorCodec are represented as integers, which simplifies the code
+/// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
+/// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
+/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCodeValue"/>
+/// are only included as members of codec classes. </para>
 /// </remarks>
 public class DeviceError : IXdrCodec
 {

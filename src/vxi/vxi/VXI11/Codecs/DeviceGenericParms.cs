@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs
 {
 
@@ -38,7 +40,6 @@ namespace cc.isr.VXI11.Codecs
         public DeviceGenericParms()
         {
             this._link = new();
-            this._flags = new();
         }
 
         /// <summary>   Constructor. </summary>
@@ -61,10 +62,9 @@ namespace cc.isr.VXI11.Codecs
         /// <value> The identifier of the device link. </value>
         public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }
 
-        private DeviceFlags _flags;
-        /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
+        /// <summary>   Gets or sets the <see cref="DeviceOperationFlags"/> options. </summary>
         /// <value> The flags. </value>
-        public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
+        public DeviceOperationFlags Flags { get; set; }
 
         /// <summary>   Gets or sets the lock timeout. </summary>
         /// <remarks>
@@ -114,7 +114,7 @@ namespace cc.isr.VXI11.Codecs
         public void Decode( XdrDecodingStreamBase decoder )
         {
             this.Link = new DeviceLink( decoder );
-            this.Flags = new DeviceFlags( decoder );
+            this.Flags = decoder.DecodeInt().ToDeviceOperationFlags();
             this.LockTimeout = decoder.DecodeInt();
             this.IOTimeout = decoder.DecodeInt();
         }

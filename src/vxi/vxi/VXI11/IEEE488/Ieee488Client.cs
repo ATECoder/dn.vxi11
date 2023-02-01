@@ -604,7 +604,7 @@ public partial class Ieee488Client : ICloseable
             Link = this.DeviceLink,
             IOTimeout = this.IOTimeout, // in ms
             LockTimeout = this.LockTimeout, // in ms
-            Flags = new DeviceFlags( this.Eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None ),
+            Flags = this.Eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None,
         };
         writeParam.SetData( data );
         return this.CoreClient.DeviceWrite( writeParam );
@@ -640,7 +640,7 @@ public partial class Ieee488Client : ICloseable
             RequestSize = byteCount,
             IOTimeout = this.IOTimeout,
             LockTimeout = this.LockTimeout,
-            Flags = new DeviceFlags( this.ReadTermination > 0 ? DeviceOperationFlags.TerminationCharacterSet : DeviceOperationFlags.None ),
+            Flags = this.ReadTermination > 0 ? DeviceOperationFlags.TerminationCharacterSet : DeviceOperationFlags.None,
             TermChar = this.ReadTermination
         };
         return this.CoreClient.DeviceRead( readParam );
@@ -1030,7 +1030,7 @@ public partial class Ieee488Client : ICloseable
         DeviceError reply = this.CoreClient.DeviceClear( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
 
         if ( reply is null )
-            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+            throw new DeviceException( DeviceErrorCodeValue.IOError );
         else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
             throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Clear )} command.", reply.ErrorCode.ErrorCodeValue );
     }
@@ -1042,7 +1042,7 @@ public partial class Ieee488Client : ICloseable
         DeviceError reply = this.CoreClient.DeviceLock( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout );
 
         if ( reply is null )
-            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+            throw new DeviceException( DeviceErrorCodeValue.IOError );
         else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
             throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Lock )} command.", reply.ErrorCode.ErrorCodeValue );
     }
@@ -1054,7 +1054,7 @@ public partial class Ieee488Client : ICloseable
         DeviceError reply = this.CoreClient.DeviceUnlock( this.DeviceLink );
 
         if ( reply is null )
-            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+            throw new DeviceException( DeviceErrorCodeValue.IOError );
         else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
             throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Unlock )} command.", reply.ErrorCode.ErrorCodeValue );
     }
@@ -1066,7 +1066,7 @@ public partial class Ieee488Client : ICloseable
         DeviceError reply = this.CoreClient.DeviceTrigger( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
 
         if ( reply is null )
-            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+            throw new DeviceException( DeviceErrorCodeValue.IOError );
         else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
             throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Trigger )} command.", reply.ErrorCode.ErrorCodeValue );
     }

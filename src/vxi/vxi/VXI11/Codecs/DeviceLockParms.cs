@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -22,6 +24,12 @@ namespace cc.isr.VXI11.Codecs;
 ///    unsigned long lock_timeout;  /* time to wait to acquire lock */
 /// };
 /// </code>
+/// 
+/// DeviceFlagsCodec and DeviceErrorCodec are represented as integers, which simplifies the code
+/// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
+/// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
+/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCodeValue"/>
+/// are only included as members of codec classes.
 /// </remarks>
 public class DeviceLockParms : IXdrCodec
 {
@@ -30,7 +38,6 @@ public class DeviceLockParms : IXdrCodec
     public DeviceLockParms()
     {
         this._link = new();
-        this._flags = new();
     }
 
     /// <summary>   Constructor. </summary>
@@ -56,10 +63,9 @@ public class DeviceLockParms : IXdrCodec
     /// <value> The identifier of the device link. </value>
     public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }
 
-    private DeviceFlags _flags;
-    /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
+    /// <summary>   Gets or sets the <see cref="DeviceOperationFlags"/> options. </summary>
     /// <value> The flags. </value>
-    public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
+    public DeviceOperationFlags Flags { get; set; }
 
     /// <summary>   Gets or sets the lock timeout; time to wait to acquire lock. </summary>
     /// <remarks>
@@ -93,7 +99,7 @@ public class DeviceLockParms : IXdrCodec
     public void Decode( XdrDecodingStreamBase decoder )
     {
         this.Link = new DeviceLink( decoder );
-        this.Flags = new DeviceFlags( decoder );
+        this.Flags = decoder.DecodeInt().ToDeviceOperationFlags();
         this.LockTimeout = decoder.DecodeInt();
     }
 

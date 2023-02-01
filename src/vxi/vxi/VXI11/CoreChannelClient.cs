@@ -157,13 +157,12 @@ public class CoreChannelClient : OncRpcClientStubBase
     ///                             server allows an I/O operation to take. </param>
     /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
     ///                             server will wait for a lock to be released. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="data">         The data to send. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceWriteResp"/>.
     /// </returns>
-    public DeviceWriteResp DeviceWrite( DeviceLink link, int ioTimeout, int lockTimeout, DeviceFlags flags, byte[] data )
+    public DeviceWriteResp DeviceWrite( DeviceLink link, int ioTimeout, int lockTimeout, DeviceOperationFlags flags, byte[] data )
     {
         DeviceWriteParms request = new() {
             Link = link,
@@ -203,14 +202,13 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
     ///                             server allows an I/O operation to take. </param>
     /// <param name="lockTimeout">  The lock timeout. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="termChar">     The termination character; valid if flags <see cref="DeviceOperationFlags.TerminationCharacterSet"/>
     ///                             is set. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceReadResp"/>.
     /// </returns>
-    public DeviceReadResp DeviceRead( DeviceLink link, int requestSize, int ioTimeout, int lockTimeout, DeviceFlags flags, byte termChar )
+    public DeviceReadResp DeviceRead( DeviceLink link, int requestSize, int ioTimeout, int lockTimeout, DeviceOperationFlags flags, byte termChar )
     {
         DeviceReadParms request = new() {
             Link = link,
@@ -246,8 +244,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
     ///                             server will wait for a lock to be released. </param>
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
@@ -259,7 +256,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     {
         DeviceGenericParms request = new() {
             Link = link,
-            Flags = new DeviceFlags( flags ),
+            Flags = flags,
             LockTimeout = lockTimeout,
             IOTimeout = ioTimeout
         };
@@ -296,8 +293,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
     ///                             server will wait for a lock to be released. </param>
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
@@ -309,7 +305,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     {
         DeviceGenericParms request = new() {
             Link = link,
-            Flags = new DeviceFlags( flags ),
+            Flags = flags,
             LockTimeout = lockTimeout,
             IOTimeout = ioTimeout
         };
@@ -346,8 +342,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
     ///                             server will wait for a lock to be released. </param>
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
@@ -359,7 +354,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     {
         DeviceGenericParms request = new() {
             Link = link,
-            Flags = new DeviceFlags( flags ),
+            Flags = flags,
             LockTimeout = lockTimeout,
             IOTimeout = ioTimeout
         };
@@ -396,8 +391,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
     ///                             server will wait for a lock to be released. </param>
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
@@ -409,7 +403,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     {
         DeviceGenericParms request = new() {
             Link = link,
-            Flags = new DeviceFlags( flags ),
+            Flags = flags,
             LockTimeout = lockTimeout,
             IOTimeout = ioTimeout
         };
@@ -446,8 +440,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
     ///                             server will wait for a lock to be released. </param>
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
@@ -459,7 +452,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     {
         DeviceGenericParms request = new() {
             Link = link,
-            Flags = new DeviceFlags( flags ),
+            Flags = flags,
             LockTimeout = lockTimeout,
             IOTimeout = ioTimeout
         };
@@ -496,8 +489,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Renamed from <c>device_lock_1</c> </para></remarks>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="lockTimeout">  The lock timeout, which determines how long a network instrument
     ///                             server will wait for a lock to be released. </param>
     /// <returns>
@@ -507,7 +499,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     {
         DeviceLockParms request = new() {
             Link = link,
-            Flags = new DeviceFlags( flags ),
+            Flags = flags,
             LockTimeout = lockTimeout
         };
         return this.DeviceLock( request );
@@ -635,8 +627,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="lockTimeout">  The lock timeout. </param>
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
     ///                             server allows an I/O operation to take. </param>
@@ -652,9 +643,9 @@ public class CoreChannelClient : OncRpcClientStubBase
         encoder.BeginEncoding();
         encoder.EncodeInt( value );
 
-        DeviceDoCmdResp reply = this.DeviceDoCmd( link, new DeviceFlags( flags ), lockTimeout, ioTimeout, cmd, dataSize, encoder.GetEncodedData() );
+        DeviceDoCmdResp reply = this.DeviceDoCmd( link, flags, lockTimeout, ioTimeout, cmd, dataSize, encoder.GetEncodedData() );
         if ( reply is null )
-            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+            throw new DeviceException( DeviceErrorCodeValue.IOError );
         else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
             throw new DeviceException( $"; failed sending the {nameof( CoreChannelClient.DeviceDoCmd )} command.", reply.ErrorCode.ErrorCodeValue );
 
@@ -673,8 +664,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="lockTimeout">  The lock timeout. </param>
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
     ///                             server allows an I/O operation to take. </param>
@@ -690,9 +680,9 @@ public class CoreChannelClient : OncRpcClientStubBase
         encoder.BeginEncoding();
         encoder.EncodeBoolean( value );
 
-        DeviceDoCmdResp reply = this.DeviceDoCmd( link, new DeviceFlags( flags ), lockTimeout, ioTimeout, cmd, dataSize, encoder.GetEncodedData() );
+        DeviceDoCmdResp reply = this.DeviceDoCmd( link, flags, lockTimeout, ioTimeout, cmd, dataSize, encoder.GetEncodedData() );
         if ( reply is null )
-            throw new DeviceException( Codecs.DeviceErrorCodeValue.IOError );
+            throw new DeviceException( DeviceErrorCodeValue.IOError );
         else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
             throw new DeviceException( $"; failed sending the {nameof( CoreChannelClient.DeviceDoCmd )} command.", reply.ErrorCode.ErrorCodeValue );
 
@@ -711,8 +701,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="lockTimeout">  The lock timeout. </param>
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
     ///                             server allows an I/O operation to take. </param>
@@ -722,7 +711,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
     /// </returns>
-    public DeviceDoCmdResp DeviceDoCmd( DeviceLink link, DeviceFlags flags, int lockTimeout, int ioTimeout,
+    public DeviceDoCmdResp DeviceDoCmd( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout,
                                         int cmd, int dataSize, byte[] dataIn )
     {
         return this.DeviceDoCmd( link, flags, lockTimeout, ioTimeout, cmd, true, dataSize, dataIn );
@@ -738,8 +727,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Renamed from <c>device_docmd_1</c> </para></remarks>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
-    /// <param name="flags">        The <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/>
-    ///                             options. </param>
+    /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
     /// <param name="lockTimeout">  The lock timeout. </param>
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
     ///                             server allows an I/O operation to take. </param>
@@ -752,7 +740,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
     /// </returns>
-    public DeviceDoCmdResp DeviceDoCmd( DeviceLink link, DeviceFlags flags, int lockTimeout, int ioTimeout,
+    public DeviceDoCmdResp DeviceDoCmd( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout,
                                         int cmd, bool netWorkOrder, int dataSize, byte[] dataIn )
     {
         DeviceDoCmdParms request = new() {

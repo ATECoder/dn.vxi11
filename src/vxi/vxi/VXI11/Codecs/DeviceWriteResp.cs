@@ -1,15 +1,15 @@
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
-/// The <see cref="DeviceWriteResp"/> class defines the response XDR
-/// codec for the <see cref="Vxi11Message.DeviceWriteProcedure"/> RPC message.
+/// The <see cref="DeviceWriteResp"/> class defines the response XDR codec for the <see cref="Vxi11Message.DeviceWriteProcedure"/>
+/// RPC message.
 /// </summary>
-/// <remarks> 
-/// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
-/// have different integer representations. <para>
+/// <remarks>
+/// The XDR encoding and decoding allows for integers to be passed between hosts, even when those
+/// hosts have different integer representations. <para>
 /// 
-/// All integers defined by the VXI-11 specification are passed over the
-/// network as 32-bit integers, either signed or unsigned as defined. </para><para>
+/// All integers defined by the VXI-11 specification are passed over the network as 32-bit
+/// integers, either signed or unsigned as defined. </para><para>
 /// 
 /// Renamed from <c>Device_WriteResp</c>. </para> <para>
 /// 
@@ -21,6 +21,12 @@ namespace cc.isr.VXI11.Codecs;
 ///    unsigned long size; /* Number of bytes written */
 /// };
 /// </code>
+/// 
+/// DeviceFlagsCodec and DeviceErrorCodec are represented as integers, which simplifies the code
+/// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
+/// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
+/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCodeValue"/>
+/// are only included as members of codec classes.
 /// </remarks>
 public class DeviceWriteResp : IXdrCodec
 {

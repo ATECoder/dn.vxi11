@@ -17,11 +17,19 @@ namespace cc.isr.VXI11.Codecs;
 /// <code>
 /// typedef long Device_Link;
 /// </code>
+/// 
 /// The network instrument server returns an identifier of type <see cref="DeviceLink"/> as a
 /// result of the <see cref="Vxi11Message.CreateLinkProcedure"/> call. This identifier
 /// is handed back to the network instrument server by the network instrument client on each
 /// subsequent call. The network instrument server verifies the validity of the identifier on
-/// each call. The <see cref="DeviceLink"/> data is not modified by the controller.
+/// each call. The <see cref="DeviceLink"/> data is not modified by the controller. <para>
+/// 
+/// DeviceFlagsCodec and DeviceErrorCodec are represented as integers, which simplifies the code
+/// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
+/// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
+/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCodeValue"/>
+/// are only included as members of codec classes.
+/// </para>
 /// </remarks>
 public class DeviceLink : IXdrCodec
 {

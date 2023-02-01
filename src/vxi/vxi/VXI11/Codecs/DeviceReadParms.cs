@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -26,6 +28,12 @@ namespace cc.isr.VXI11.Codecs;
 ///    char termChar;              /* valid if flags and 'Term Char Set' */
 /// };
 /// </code>
+/// 
+/// DeviceFlagsCodec and DeviceErrorCodec are represented as integers, which simplifies the code
+/// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
+/// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
+/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCodeValue"/>
+/// are only included as members of codec classes.
 /// </remarks>
 public class DeviceReadParms : IXdrCodec
 {
@@ -34,7 +42,6 @@ public class DeviceReadParms : IXdrCodec
     public DeviceReadParms()
     {
         this._link = new();
-        this._flags = new();
     }
 
     /// <summary>   Constructor. </summary>
@@ -90,10 +97,9 @@ public class DeviceReadParms : IXdrCodec
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
 
-    private DeviceFlags _flags;
-    /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
+    /// <summary>   Gets or sets the <see cref="DeviceOperationFlags"/> options. </summary>
     /// <value> The flags. </value>
-    public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
+    public DeviceOperationFlags Flags { get; set; }
 
     /// <summary>
     /// Gets or sets the termination character; valid if flags <see cref="DeviceOperationFlags.TerminationCharacterSet"/>
@@ -126,7 +132,7 @@ public class DeviceReadParms : IXdrCodec
         this.RequestSize = decoder.DecodeInt();
         this.IOTimeout = decoder.DecodeInt();
         this.LockTimeout = decoder.DecodeInt();
-        this.Flags = new DeviceFlags( decoder );
+        this.Flags = decoder.DecodeInt().ToDeviceOperationFlags();
         this.TermChar = decoder.DecodeByte();
     }
 

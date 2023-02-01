@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -25,6 +27,7 @@ namespace cc.isr.VXI11.Codecs;
 ///    opaque data;                 /* the data length and the data itself */
 /// };
 /// </code>
+/// 
 /// The network instrument server has indirect control over the maximum size of data through the
 /// value of <see cref="CreateLinkResp.MaxReceiveSize"/> returned in <see cref="Vxi11Message.CreateLinkProcedure"/>.
 /// If a controller needs to send greater than <see cref="CreateLinkResp.MaxReceiveSize"/> bytes
@@ -33,7 +36,14 @@ namespace cc.isr.VXI11.Codecs;
 /// bytes in a single <see cref="Vxi11Message.DeviceWriteProcedure"/> call. <para>
 /// 
 /// The variable length data, which is sent to the server is encoded as 
-/// <see cref="XdrEncodingStreamBase.EncodeDynamicOpaque(byte[])"/> </para>
+/// <see cref="XdrEncodingStreamBase.EncodeDynamicOpaque(byte[])"/> </para><para>
+/// 
+/// DeviceFlagsCodec and DeviceErrorCodec are represented as integers, which simplifies the code
+/// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
+/// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
+/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCodeValue"/>
+/// are only included as members of codec classes.
+/// </para>
 /// </remarks>
 public class DeviceWriteParms : IXdrCodec
 {
@@ -41,7 +51,6 @@ public class DeviceWriteParms : IXdrCodec
     public DeviceWriteParms()
     {
         this._link = new DeviceLink();
-        this._flags = new DeviceFlags();
         this._data = Array.Empty<byte>();
     }
 
@@ -97,10 +106,9 @@ public class DeviceWriteParms : IXdrCodec
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
 
-    private DeviceFlags _flags;
-    /// <summary>   Gets or sets the <see cref="IXdrCodec"/> specifying the <see cref="DeviceOperationFlags"/> options. </summary>
+    /// <summary>   Gets or sets the <see cref="DeviceOperationFlags"/> options. </summary>
     /// <value> The flags. </value>
-    public DeviceFlags Flags { get => this._flags; set => this._flags = value ?? new(); }
+    public DeviceOperationFlags Flags { get; set; }
 
     private byte[] _data;
 
@@ -138,7 +146,7 @@ public class DeviceWriteParms : IXdrCodec
         this.Link = new DeviceLink( decoder );
         this.IOTimeout = decoder.DecodeInt();
         this.LockTimeout = decoder.DecodeInt();
-        this.Flags = new DeviceFlags( decoder );
+        this.Flags = decoder.DecodeInt().ToDeviceOperationFlags();
         this._data = decoder.DecodeDynamicOpaque();
     }
 
