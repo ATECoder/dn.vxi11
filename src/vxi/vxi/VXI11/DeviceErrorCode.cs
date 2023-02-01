@@ -2,10 +2,12 @@ using System.ComponentModel;
 
 namespace cc.isr.VXI11;
 
-/// <summary>   Values that represent device error code values. </summary>
-/// <remarks>   Negative values added outside the VXI-11 specifications to represent
-/// exceptions such as <see cref="NotImplementedException"/>. </remarks>
-public enum DeviceErrorCodeValue
+/// <summary>   Values that represent device error codes. </summary>
+/// <remarks>
+/// Negative values were added to address errors not defined by the VXI-11 specifications for
+/// exceptions such as <see cref="NotImplementedException"/>.
+/// </remarks>
+public enum DeviceErrorCode
 {
     /// <summary>   An enum constant representing the no error option. </summary>
     [Description( "No error." )] NoError = 0,

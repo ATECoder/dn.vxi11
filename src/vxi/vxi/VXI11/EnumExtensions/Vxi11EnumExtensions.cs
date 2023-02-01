@@ -24,16 +24,16 @@ public static class Vxi11EnumExtensions
             ?? value.ToString();
     }
 
-    /// <summary>   An int extension method that converts a value to a <see cref="DeviceErrorCodeValue"/>. </summary>
+    /// <summary>   An int extension method that converts a value to a <see cref="DeviceErrorCode"/>. </summary>
     /// <exception cref="ArgumentException">    Thrown when one or more arguments have unsupported or
     ///                                         illegal values. </exception>
     /// <param name="value">    An enum constant representing the enum value. </param>
-    /// <returns>   Value as the DeviceErrorCodeValue. </returns>
-    public static DeviceErrorCodeValue ToDeviceErrorCodeValue( this int value )
+    /// <returns>   Value as the <see cref="DeviceErrorCode"/>. </returns>
+    public static DeviceErrorCode ToDeviceErrorCode( this int value )
     {
-        return Enum.IsDefined( typeof( DeviceErrorCodeValue ), value )
-            ? ( DeviceErrorCodeValue ) value
-            : throw new ArgumentException( $"{typeof( int )} value of {value} cannot be cast to {nameof( DeviceErrorCodeValue )}" );
+        return Enum.IsDefined( typeof( DeviceErrorCode ), value )
+            ? ( DeviceErrorCode ) value
+            : throw new ArgumentException( $"{typeof( int )} value of {value} cannot be cast to {nameof( DeviceErrorCode )}" );
     }
 
     /// <summary>   An int extension method that converts a value to a <see cref="Vxi11EventType"/>. </summary>

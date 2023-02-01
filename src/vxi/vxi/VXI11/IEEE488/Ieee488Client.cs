@@ -20,7 +20,7 @@ public partial class Ieee488Client : ICloseable
         // initialize some values 
         this.MaxReadRawLength = Ieee488Client.MaxReadRawLengthDefault;
         this.MaxReceiveSize = 0;
-        this.LastDeviceError = new DeviceErrorCode();
+        this.LastDeviceError = DeviceErrorCode.NoError;
         this._host = string.Empty;
         this._interfaceDeviceString = string.Empty;
         this.Eoi = Ieee488Client.EoiEnabledDefault;
@@ -68,7 +68,7 @@ public partial class Ieee488Client : ICloseable
             LockTimeout = this.LockTimeout,
         };
         CreateLinkResp linkResp = this.CoreClient.CreateLink( createLinkParam );
-        if ( linkResp.ErrorCode.ErrorCodeValue == DeviceErrorCodeValue.NoError )
+        if ( linkResp.ErrorCode == DeviceErrorCode.NoError )
         {
             this.DeviceLink = linkResp.DeviceLink;
             this.MaxReceiveSize = linkResp.MaxReceiveSize;
@@ -93,9 +93,9 @@ public partial class Ieee488Client : ICloseable
         {
             this.LastDeviceError = this.ConnectDevice( hostAddress, interfaceDeviceString, connectTimeout );
 
-            if ( this.LastDeviceError.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+            if ( this.LastDeviceError != DeviceErrorCode.NoError )
             {
-                throw new VXI11.DeviceException( this.LastDeviceError.ErrorCodeValue );
+                throw new VXI11.DeviceException( this.LastDeviceError );
             }
         }
         catch
@@ -216,10 +216,10 @@ public partial class Ieee488Client : ICloseable
                     DeviceError? deviceError = coreClient.DestroyLink( link );
                     if ( deviceError is null )
                         throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
-                            DeviceErrorCodeValue.IOError );
-                    if ( deviceError.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+                            DeviceErrorCode.IOError );
+                    if ( deviceError.ErrorCode != DeviceErrorCode.NoError )
                         throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
-                            deviceError.ErrorCode.ErrorCodeValue );
+                            deviceError.ErrorCode );
                 }
             }
             catch ( Exception ex )
@@ -391,9 +391,9 @@ public partial class Ieee488Client : ICloseable
             this.IOTimeout = this.IOTimeout;
         }
         DeviceError reply = this.AbortClient.DeviceAbort( this.DeviceLink! );
-        if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+        if ( reply.ErrorCode != DeviceErrorCode.NoError )
         {
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Abort )} command.", reply.ErrorCode.ErrorCodeValue );
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Abort )} command.", reply.ErrorCode );
         }
     }
 
@@ -598,7 +598,7 @@ public partial class Ieee488Client : ICloseable
         if ( this.DeviceLink is null || this.CoreClient is null ) return new DeviceWriteResp();
         if ( data is null || data.Length == 0 ) return new DeviceWriteResp();
         if ( data.Length > this.MaxReceiveSize )
-            throw new DeviceException( $"Data size {data.Length} exceed {nameof( this.MaxReceiveSize )}({this.MaxReceiveSize})", DeviceErrorCodeValue.IOError );
+            throw new DeviceException( $"Data size {data.Length} exceed {nameof( this.MaxReceiveSize )}({this.MaxReceiveSize})", DeviceErrorCode.IOError );
 
         DeviceWriteParms writeParam = new() {
             Link = this.DeviceLink,
@@ -653,7 +653,7 @@ public partial class Ieee488Client : ICloseable
     public (DeviceWriteResp writeResponse, DeviceReadResp readResponse) SendReceive( byte[] data, int millisecondsReadDelay = 3 )
     {
         DeviceWriteResp writeResponse = this.Send( data );
-        if ( writeResponse.ErrorCode.ErrorCodeValue == DeviceErrorCodeValue.NoError )
+        if ( writeResponse.ErrorCode == DeviceErrorCode.NoError )
             if ( this.IsQuery( data ) )
             {
                 if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
@@ -706,13 +706,13 @@ public partial class Ieee488Client : ICloseable
 
             DeviceWriteResp reply = this.Send( this.CharacterEncoding.GetBytes( data ) );
 
-            if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+            if ( reply.ErrorCode != DeviceErrorCode.NoError )
             {
-                throw new DeviceException( $"; failed writing in raw mode", reply.ErrorCode.ErrorCodeValue );
+                throw new DeviceException( $"; failed writing in raw mode", reply.ErrorCode );
             }
             else if ( reply.Size < block.Length )
             {
-                throw new DeviceException( $"; incomplete block {reply.Size} or {block.Length} was written in raw mode", DeviceErrorCodeValue.IOError );
+                throw new DeviceException( $"; incomplete block {reply.Size} or {block.Length} was written in raw mode", DeviceErrorCode.IOError );
             }
             offset += reply.Size;
             remaining -= reply.Size;
@@ -752,9 +752,9 @@ public partial class Ieee488Client : ICloseable
 
             // on error, throw and exception 
 
-            if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
+            if ( reply.ErrorCode != DeviceErrorCode.NoError )
             {
-                throw new DeviceException( $"; failed reading in raw mode", reply.ErrorCode.ErrorCodeValue );
+                throw new DeviceException( $"; failed reading in raw mode", reply.ErrorCode );
             }
 
             // extend the data by the amount of data received
@@ -806,13 +806,10 @@ public partial class Ieee488Client : ICloseable
 
         return writeResponse is null
             ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )} is null.",
-                                       DeviceErrorCodeValue.IOError )
-            : writeResponse.ErrorCode is null
-                ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )}.{nameof( DeviceWriteResp.ErrorCode )} is null.",
-                                       DeviceErrorCodeValue.IOError )
-                : writeResponse.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError
-                    ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode.ErrorCodeValue )
-                    : writeResponse.Size;
+                                       DeviceErrorCode.IOError )
+            : writeResponse.ErrorCode != DeviceErrorCode.NoError
+                ? throw new DeviceException( $"; {nameof( Write )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode )
+                : writeResponse.Size;
     }
 
     /// <summary>   Sends a message with termination to the VXI-11 server. </summary>
@@ -865,12 +862,9 @@ public partial class Ieee488Client : ICloseable
 
         if ( readResponse is null )
             throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed; {nameof( DeviceReadResp )} is null.",
-                                       DeviceErrorCodeValue.IOError );
-        else if ( readResponse.ErrorCode is null )
-            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed; {nameof( DeviceReadResp )}.{nameof( DeviceReadResp.ErrorCode )} is null.",
-                                       DeviceErrorCodeValue.IOError );
-        else if ( readResponse.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed.", readResponse.ErrorCode.ErrorCodeValue );
+                                       DeviceErrorCode.IOError );
+        else if ( readResponse.ErrorCode != DeviceErrorCode.NoError )
+            throw new DeviceException( $"; {nameof( Read )}({nameof( System.Boolean )}) failed.", readResponse.ErrorCode );
         else
         {
             int length = readResponse.GetData().Length - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
@@ -926,20 +920,14 @@ public partial class Ieee488Client : ICloseable
         (DeviceWriteResp writeResponse, DeviceReadResp readResponse) = this.SendReceive( this.CharacterEncoding.GetBytes( message ), millisecondsReadDelay );
         if ( writeResponse is null )
             throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )} is null.",
-                                       DeviceErrorCodeValue.IOError );
-        else if ( writeResponse.ErrorCode is null )
-            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed; {nameof( DeviceWriteResp )}.{nameof( DeviceWriteResp.ErrorCode )} is null.",
-                                       DeviceErrorCodeValue.IOError );
-        else if ( writeResponse.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode.ErrorCodeValue );
+                                       DeviceErrorCode.IOError );
+        else if ( writeResponse.ErrorCode != DeviceErrorCode.NoError )
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) write failed.", writeResponse.ErrorCode );
         else if ( readResponse is null )
             throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed; {nameof( DeviceReadResp )} is null.",
-                                       DeviceErrorCodeValue.IOError );
-        else if ( readResponse.ErrorCode is null )
-            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed; {nameof( DeviceReadResp )}.{nameof( DeviceReadResp.ErrorCode )} is null.",
-                                       DeviceErrorCodeValue.IOError );
-        else if ( readResponse.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed.", readResponse.ErrorCode.ErrorCodeValue );
+                                       DeviceErrorCode.IOError );
+        else if ( readResponse.ErrorCode != DeviceErrorCode.NoError )
+            throw new DeviceException( $"; {nameof( Query )}({nameof( message )}: {message}) read failed.", readResponse.ErrorCode );
         else
         {
             int length = readResponse.GetData().Length - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
@@ -1030,9 +1018,9 @@ public partial class Ieee488Client : ICloseable
         DeviceError reply = this.CoreClient.DeviceClear( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
 
         if ( reply is null )
-            throw new DeviceException( DeviceErrorCodeValue.IOError );
-        else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Clear )} command.", reply.ErrorCode.ErrorCodeValue );
+            throw new DeviceException( DeviceErrorCode.IOError );
+        else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Clear )} command.", reply.ErrorCode );
     }
 
     /// <summary>   Sends the Lock command. </summary>
@@ -1042,9 +1030,9 @@ public partial class Ieee488Client : ICloseable
         DeviceError reply = this.CoreClient.DeviceLock( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout );
 
         if ( reply is null )
-            throw new DeviceException( DeviceErrorCodeValue.IOError );
-        else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Lock )} command.", reply.ErrorCode.ErrorCodeValue );
+            throw new DeviceException( DeviceErrorCode.IOError );
+        else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Lock )} command.", reply.ErrorCode );
     }
 
     /// <summary>   Sends the Unlock command. </summary>
@@ -1054,9 +1042,9 @@ public partial class Ieee488Client : ICloseable
         DeviceError reply = this.CoreClient.DeviceUnlock( this.DeviceLink );
 
         if ( reply is null )
-            throw new DeviceException( DeviceErrorCodeValue.IOError );
-        else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Unlock )} command.", reply.ErrorCode.ErrorCodeValue );
+            throw new DeviceException( DeviceErrorCode.IOError );
+        else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Unlock )} command.", reply.ErrorCode );
     }
 
     /// <summary>   Sends the Trigger command. </summary>
@@ -1066,9 +1054,9 @@ public partial class Ieee488Client : ICloseable
         DeviceError reply = this.CoreClient.DeviceTrigger( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
 
         if ( reply is null )
-            throw new DeviceException( DeviceErrorCodeValue.IOError );
-        else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Trigger )} command.", reply.ErrorCode.ErrorCodeValue );
+            throw new DeviceException( DeviceErrorCode.IOError );
+        else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Trigger )} command.", reply.ErrorCode );
     }
 
     #endregion

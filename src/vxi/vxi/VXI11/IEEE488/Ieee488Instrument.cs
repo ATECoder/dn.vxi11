@@ -89,9 +89,9 @@ namespace cc.isr.VXI11.IEEE488
             var reply = this.CoreClient!.CreateIntrChan( hostAddress, hostPort );
 
             if ( reply is null )
-                throw new DeviceException( DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.CreateInterruptChannel )} command", reply.ErrorCode.ErrorCodeValue );
+                throw new DeviceException( DeviceErrorCode.IOError );
+            else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.CreateInterruptChannel )} command", reply.ErrorCode );
             else
                 await this.EnableInterruptServerAsync();
         }
@@ -112,9 +112,9 @@ namespace cc.isr.VXI11.IEEE488
             var reply = this.CoreClient!.DestroyIntrChan();
 
             if ( reply is null )
-                throw new DeviceException( DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.DestroyInterruptChannel )} command", reply.ErrorCode.ErrorCodeValue );
+                throw new DeviceException( DeviceErrorCode.IOError );
+            else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.DestroyInterruptChannel )} command", reply.ErrorCode );
         }
 
         /// <summary>   Enables/disables sending of service requests. </summary>
@@ -140,9 +140,9 @@ namespace cc.isr.VXI11.IEEE488
             DeviceError reply = this.CoreClient.DeviceEnableSrq( this.DeviceLink, enable, handle );
 
             if ( reply is null )
-                throw new DeviceException( DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.EnableSrq )} command.", reply.ErrorCode.ErrorCodeValue );
+                throw new DeviceException( DeviceErrorCode.IOError );
+            else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.EnableSrq )} command.", reply.ErrorCode );
         }
 
         /// <summary>   Send local command. </summary>
@@ -154,9 +154,9 @@ namespace cc.isr.VXI11.IEEE488
             var reply = this.CoreClient!.DeviceLocal( this.DeviceLink!, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
 
             if ( reply is null )
-                throw new DeviceException( DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.Local )} command", reply.ErrorCode.ErrorCodeValue );
+                throw new DeviceException( DeviceErrorCode.IOError );
+            else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.Local )} command", reply.ErrorCode );
         }
 
         /// <summary>   Send remote command. </summary>
@@ -168,9 +168,9 @@ namespace cc.isr.VXI11.IEEE488
             var reply = this.CoreClient!.DeviceRemote( this.DeviceLink!, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
 
             if ( reply is null )
-                throw new DeviceException( DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.Remote )} command", reply.ErrorCode.ErrorCodeValue );
+                throw new DeviceException( DeviceErrorCode.IOError );
+            else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Instrument.Remote )} command", reply.ErrorCode );
         }
 
         /// <summary>   Reads status byte. </summary>
@@ -182,9 +182,9 @@ namespace cc.isr.VXI11.IEEE488
 
             DeviceReadStbResp? reply = this.CoreClient!.DeviceReadStb( this.DeviceLink!, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout );
             return reply is null
-                ? throw new DeviceException( DeviceErrorCodeValue.IOError )
-                : reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError
-                    ? throw new DeviceException( $"; failed {nameof( Ieee488Instrument.ReadStatusByte )} reading the status byte.", reply.ErrorCode.ErrorCodeValue )
+                ? throw new DeviceException( DeviceErrorCode.IOError )
+                : reply.ErrorCode != DeviceErrorCode.NoError
+                    ? throw new DeviceException( $"; failed {nameof( Ieee488Instrument.ReadStatusByte )} reading the status byte.", reply.ErrorCode )
                     : reply.Stb;
         }
 

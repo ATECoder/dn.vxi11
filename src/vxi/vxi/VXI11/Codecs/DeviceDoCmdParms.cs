@@ -103,7 +103,7 @@ public class DeviceDoCmdParms : IXdrCodec
     /// <remarks>
     /// The value of <see cref="Cmd"/> is compared against the values supported by the network
     /// instrument server. If the particular value is not supported, the server returns error code
-    /// <see cref="DeviceErrorCodeValue.OperationNotSupported"/> (8). <para>
+    /// <see cref="DeviceErrorCode.OperationNotSupported"/> (8). <para>
     /// 
     /// Commands, such as interface commands, are enumerated in <see cref="IEEE488.Ieee488InterfaceCommand"/>
     /// and <see cref="IEEE488.GpibCommandArgument"/>.

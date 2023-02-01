@@ -31,7 +31,6 @@ public class DeviceReadResp : IXdrCodec
     public DeviceReadResp()
     {
         this._data = Array.Empty<byte>();
-        this._errorCode = new();
     }
 
     /// <summary>   Constructor. </summary>
@@ -49,10 +48,9 @@ public class DeviceReadResp : IXdrCodec
         return new DeviceReadResp( decoder );
     }
 
-    private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
-    /// <value> The error. </value>
-    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
+    /// <value> The error as <see cref="DeviceErrorCode"/>. </value>
+    public DeviceErrorCode ErrorCode { get; set; }
 
     /// <summary>   Gets or sets the reason(s) read completed as defined in <see cref="DeviceReadReasons"/>. </summary>
     /// <remarks>
@@ -104,17 +102,18 @@ public class DeviceReadResp : IXdrCodec
     public void Encode( XdrEncodingStreamBase encoder )
     {
         this.ErrorCode.Encode( encoder );
-        (( int ) this.Reason).Encode( encoder );
+        this.Reason.Encode( encoder );
         this._data.EncodeDynamicOpaque( encoder );
     }
 
     /// <summary>
     /// Decodes -- that is: deserializes -- an object from an XDR stream in compliance to RFC 1832.
     /// </summary>
+    /// <remarks>   2023-01-31. </remarks>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.ErrorCode = new DeviceErrorCode( decoder );
+        this.ErrorCode = decoder.DecodeInt().ToDeviceErrorCode();
         this.Reason = decoder.DecodeInt().ToDeviceReadReasons();
         this._data = decoder.DecodeDynamicOpaque();
     }

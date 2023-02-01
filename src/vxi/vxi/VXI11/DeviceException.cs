@@ -20,7 +20,7 @@ public class DeviceException : Exception
     /// </summary>
     /// <param name="reason">  The detail reason. </param>
     /// <param name="message"> The detail message. </param>
-    public DeviceException( DeviceErrorCodeValue reason, string message ) : base( message )
+    public DeviceException( DeviceErrorCode reason, string message ) : base( message )
     {
         this.Reason = reason;
     }
@@ -31,7 +31,7 @@ public class DeviceException : Exception
     /// <remarks>   The detail message is derived automatically from the <paramref name="reason"/>. </remarks>
     /// <param name="reason">   The reason. This can be one of the constants -- oops, that should be
     ///                         "public final static integers" -- defined in this interface. </param>
-    public DeviceException( DeviceErrorCodeValue reason ) : base( Support.GetDescription( reason ) )
+    public DeviceException( DeviceErrorCode reason ) : base( Support.GetDescription( reason ) )
     {
         this.Reason = reason;
     }
@@ -41,7 +41,7 @@ public class DeviceException : Exception
     /// </summary>
     /// <param name="reason">           The detail reason. </param>
     /// <param name="innerException">   The inner exception. </param>
-    public DeviceException( DeviceErrorCodeValue reason, Exception innerException ) : base( Support.GetDescription( reason ), innerException )
+    public DeviceException( DeviceErrorCode reason, Exception innerException ) : base( Support.GetDescription( reason ), innerException )
     {
         this.Reason = reason;
     }
@@ -52,7 +52,7 @@ public class DeviceException : Exception
     /// <param name="suffixMessage">    Message describing the suffix. </param>
     /// <param name="reason">           The detail reason. </param>
     /// <param name="innerException">   The inner exception. </param>
-    public DeviceException( string suffixMessage, DeviceErrorCodeValue reason,
+    public DeviceException( string suffixMessage, DeviceErrorCode reason,
                             Exception innerException ) : base( Support.GetDescription( reason ) + suffixMessage, innerException )
     {
         this.Reason = reason;
@@ -63,7 +63,7 @@ public class DeviceException : Exception
     /// </summary>
     /// <param name="suffixMessage">    Message describing the suffix. </param>
     /// <param name="reason">           The detail reason. </param>
-    public DeviceException( string suffixMessage, DeviceErrorCodeValue reason ) : base( Support.GetDescription( reason ) + suffixMessage )
+    public DeviceException( string suffixMessage, DeviceErrorCode reason ) : base( Support.GetDescription( reason ) + suffixMessage )
     {
         this.Reason = reason;
     }
@@ -75,6 +75,6 @@ public class DeviceException : Exception
     /// <value>
     /// The error reason of this <see cref="DeviceException"/> object.
     /// </value>
-    public DeviceErrorCodeValue Reason { get; private set; }
+    public DeviceErrorCode Reason { get; private set; }
 
 }

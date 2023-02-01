@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -32,30 +34,29 @@ namespace cc.isr.VXI11.Codecs;
 /// </code>
 /// 
 /// The result of any remote procedure call is a data structure whose first element has the type
-/// of <see cref="DeviceErrorCode"/>. A value of <see cref="DeviceErrorCodeValue.NoError"/> (0)
+/// of <see cref="DeviceErrorCode"/>. A value of <see cref="DeviceErrorCode.NoError"/> (0)
 /// indicates that the call was successfully completed and the results are valid. Any other value
 /// indicates that during the execution of the call, the network instrument server detected an
 /// error. All other error codes are reserved. <para>
 ///
-/// DeviceFlagsCodec and DeviceErrorCodec are represented as integers, which simplifies the code
+/// DeviceFlagsCodec and DeviceErrorCodeCodec are represented as integers, which simplifies the code
 /// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
 /// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
-/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCodeValue"/>
+/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCode"/>
 /// are only included as members of codec classes. </para>
 /// </remarks>
 public class DeviceError : IXdrCodec
 {
 
     /// <summary>   Default constructor. </summary>
-    public DeviceError() : this( new DeviceErrorCode() )
+    public DeviceError() : this( DeviceErrorCode.NoError )
     { }
 
     /// <summary>   Constructor. </summary>
-    /// <remarks>   2023-01-26. </remarks>
-    /// <param name="deviceErrorCode">    The <see cref="DeviceErrorCode"/> codec. </param>
+    /// <param name="deviceErrorCode">    The <see cref="DeviceErrorCode"/>. </param>
     public DeviceError( DeviceErrorCode deviceErrorCode )
     {
-        this._errorCode = deviceErrorCode;
+        this.ErrorCode = deviceErrorCode;
     }
 
     /// <summary>   Constructor. </summary>
@@ -73,10 +74,9 @@ public class DeviceError : IXdrCodec
         return new DeviceError( decoder );
     }
 
-    private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
-    /// <value> The error. </value>
-    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
+    /// <value> The error as <see cref="DeviceErrorCode"/>. </value>
+    public DeviceErrorCode ErrorCode { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
@@ -93,6 +93,6 @@ public class DeviceError : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.ErrorCode = new DeviceErrorCode( decoder );
+        this.ErrorCode = decoder.DecodeInt().ToDeviceErrorCode();
     }
 }

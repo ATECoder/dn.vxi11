@@ -5,6 +5,7 @@ using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.Visa;
 using cc.isr.VXI11.Logging;
 using cc.isr.ONC.RPC.Client;
+using cc.isr.VXI11.EnumExtensions;
 
 namespace cc.isr.VXI11.IEEE488.Mock;
 
@@ -152,7 +153,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     private void HandleAbortRequest( object sender, DeviceErrorEventArgs e )
     {
         if ( this._device is null ) return;
-        e.ErrorCodeValue = this._device.Abort().ErrorCode.ErrorCodeValue;
+        e.ErrorCodeValue = this._device.Abort().ErrorCode;
     }
 
     protected AbortChannelServer? AbortServer { get; set; }
@@ -513,12 +514,12 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
 
             this.InterfaceDevice = new DeviceAddress( request.Device );
             reply.ErrorCode = this.InterfaceDevice.IsValid()
-                ? new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.NoError }
-                : new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.InvalidLinkIdentifier };
+                ? DeviceErrorCode.NoError
+                : DeviceErrorCode.InvalidLinkIdentifier;
             return reply;
         }
         else
-            return new CreateLinkResp() { ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.DeviceNotAccessible ) };
+            return new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
     }
 
     /// <summary>   Destroy a connection. </summary>
@@ -558,7 +559,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         }
         catch ( Exception )
         {
-            return new DeviceError( new DeviceErrorCode( DeviceErrorCodeValue.IOError ) );
+            return new DeviceError( DeviceErrorCode.IOError );
         }
     }
 
@@ -572,7 +573,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         this.InterruptAddress = request.HostAddr;
         this.InterruptPort = request.HostPort;
         this.InterruptProtocol = request.TransportProtocol;
-        DeviceError result = new() { ErrorCode = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
+        DeviceError result = new ();
         return result;
     }
 
@@ -589,7 +590,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         }
         catch ( Exception )
         {
-            return new DeviceError( new DeviceErrorCode( DeviceErrorCodeValue.IOError ) );
+            return new DeviceError( DeviceErrorCode.IOError );
         }
         finally
         {
@@ -932,7 +933,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         if ( !this._asyncLocker.WaitOne( this.WaitOnOutTime ) )
         {
             readRes.SetData( this._readBuffer );
-            readRes.ErrorCode = new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.IOError }; // timeout
+            readRes.ErrorCode = DeviceErrorCode.IOTimeout; // timeout
             readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
             return readRes;
         }
@@ -940,7 +941,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         if ( this.CurrentOperationType == Ieee488OperationType.Read )
         {
             readRes.SetData( this._readBuffer );
-            readRes.ErrorCode = new DeviceErrorCode() { ErrorCodeValue = DeviceErrorCodeValue.NoError };
+            readRes.ErrorCode = DeviceErrorCode.NoError;
             readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
         }
         this.CurrentOperationType = Ieee488OperationType.None; //Reset the action type
@@ -1020,7 +1021,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         // get the write command.
         string cmd = this.CharacterEncoding.GetString( deviceWriteParameters.GetData() );
         Logger.Writer.LogVerbose( $"link ID: {deviceWriteParameters.Link.LinkId} -> Received：{cmd}" );
-        DeviceWriteResp result = new() { ErrorCode = new DeviceErrorCode( ( int ) OncRpcExceptionReason.OncRpcSuccess ) };
+        DeviceWriteResp result = new();
 
         // holds one or more SCPI commands each with its arguments
         string[] scpiCommands = cmd.Split( new char[] { '\n', '\r', ';' }, StringSplitOptions.RemoveEmptyEntries );
@@ -1028,7 +1029,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         if ( scpiCommands.Length == 0 )
         {
             // The instruction is incorrect or undefined
-            result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError );
+            result.ErrorCode = DeviceErrorCode.SyntaxError;
             return result;
         }
 
@@ -1078,7 +1079,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
                             this.WriteMessage = scpiCommands[n];
                             // invoke the corresponding method
                             res = method.Invoke( this._device, scpiArgs );
-                            result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.NoError );
+                            result.ErrorCode = DeviceErrorCode.NoError;
                             break;
                         case Ieee488OperationType.Read://Query instructions
                             this.WriteMessage = scpiCommands[n];
@@ -1093,7 +1094,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
                             {
                                 this.ReadMessage = "null";
                                 Logger.Writer.LogVerbose( "Query results：NULL。" );
-                                result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.NoError );
+                                result.ErrorCode = DeviceErrorCode.NoError;
                             }
                             break;
                     }
@@ -1102,13 +1103,13 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
                 {
                     Logger.Writer.LogMemberError( $"An error occurred when the method was called：{method}", ex );
                     // Parameter error
-                    result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.ParameterError );
+                    result.ErrorCode = DeviceErrorCode.ParameterError;
                 }
             }
             else
             {
                 Logger.Writer.LogMemberWarning( $"No method found： {spciCommand}" );
-                result.ErrorCode = new DeviceErrorCode( DeviceErrorCodeValue.SyntaxError ); // The instruction is incorrect or undefined
+                result.ErrorCode = DeviceErrorCode.SyntaxError; // The instruction is incorrect or undefined
                 this.CurrentOperationType = Ieee488OperationType.None;
             }
             _ = this._asyncLocker.Set();//Reset block

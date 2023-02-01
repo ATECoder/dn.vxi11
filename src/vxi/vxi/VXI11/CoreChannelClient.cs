@@ -645,9 +645,9 @@ public class CoreChannelClient : OncRpcClientStubBase
 
         DeviceDoCmdResp reply = this.DeviceDoCmd( link, flags, lockTimeout, ioTimeout, cmd, dataSize, encoder.GetEncodedData() );
         if ( reply is null )
-            throw new DeviceException( DeviceErrorCodeValue.IOError );
-        else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( CoreChannelClient.DeviceDoCmd )} command.", reply.ErrorCode.ErrorCodeValue );
+            throw new DeviceException( DeviceErrorCode.IOError );
+        else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( CoreChannelClient.DeviceDoCmd )} command.", reply.ErrorCode );
 
         XdrBufferDecodingStream decoder = new( reply.GetDataOut() );
         decoder.BeginDecoding();
@@ -682,9 +682,9 @@ public class CoreChannelClient : OncRpcClientStubBase
 
         DeviceDoCmdResp reply = this.DeviceDoCmd( link, flags, lockTimeout, ioTimeout, cmd, dataSize, encoder.GetEncodedData() );
         if ( reply is null )
-            throw new DeviceException( DeviceErrorCodeValue.IOError );
-        else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( CoreChannelClient.DeviceDoCmd )} command.", reply.ErrorCode.ErrorCodeValue );
+            throw new DeviceException( DeviceErrorCode.IOError );
+        else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+            throw new DeviceException( $"; failed sending the {nameof( CoreChannelClient.DeviceDoCmd )} command.", reply.ErrorCode );
 
         XdrBufferDecodingStream decoder = new( reply.GetDataOut() );
         decoder.BeginDecoding();
@@ -827,7 +827,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <remarks>
     /// <para>
     /// If a protocol other than UDP or TCP is specified, <c>create_intr_chan</c> terminates and set
-    /// error to <see cref="DeviceErrorCodeValue.OperationNotSupported"/> (8), operation not
+    /// error to <see cref="DeviceErrorCode.OperationNotSupported"/> (8), operation not
     /// supported. </para><para>
     /// 
     /// Renamed from <c>create_intr_chan_1</c> </para>

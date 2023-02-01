@@ -25,10 +25,10 @@ namespace cc.isr.VXI11.Codecs;
 /// };
 /// </code>
 /// 
-/// DeviceFlagsCodec and DeviceErrorCodec are represented as integers, which simplifies the code
+/// DeviceFlagsCodec and DeviceErrorCodeCodec are represented as integers, which simplifies the code
 /// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
 /// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
-/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCodeValue"/>
+/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCode"/>
 /// are only included as members of codec classes.
 /// </remarks>
 public class DeviceLockParms : IXdrCodec

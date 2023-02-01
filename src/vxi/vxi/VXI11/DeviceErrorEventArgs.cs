@@ -18,14 +18,14 @@ public class DeviceErrorEventArgs : EventArgs
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-01-26. </remarks>
     /// <param name="deviceLinkId"> Identifier for the device link. </param>
-    public DeviceErrorEventArgs( int deviceLinkId ) : this( DeviceErrorCodeValue.NoError, deviceLinkId )
+    public DeviceErrorEventArgs( int deviceLinkId ) : this( DeviceErrorCode.NoError, deviceLinkId )
     { }
 
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-01-26. </remarks>
     /// <param name="errorCodeValue">   The error code value. </param>
     /// <param name="deviceLinkId">     Identifier for the device link. </param>
-    public DeviceErrorEventArgs( DeviceErrorCodeValue errorCodeValue, int deviceLinkId )
+    public DeviceErrorEventArgs( DeviceErrorCode errorCodeValue, int deviceLinkId )
     {
         this.ErrorCodeValue = errorCodeValue;
         this.DeviceLinkId = deviceLinkId;
@@ -33,7 +33,7 @@ public class DeviceErrorEventArgs : EventArgs
 
     /// <summary>   Gets or sets the error code value. </summary>
     /// <value> The error code value. </value>
-    public DeviceErrorCodeValue ErrorCodeValue { get; set; }
+    public DeviceErrorCode ErrorCodeValue { get; set; }
 
     public int DeviceLinkId { get; private set; }
 }

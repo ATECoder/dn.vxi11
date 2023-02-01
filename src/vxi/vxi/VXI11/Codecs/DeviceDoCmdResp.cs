@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -27,7 +29,6 @@ public class DeviceDoCmdResp : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public DeviceDoCmdResp()
     {
-        this._errorCode = new();
         this._dataOut = Array.Empty<byte>();
     }
 
@@ -46,10 +47,9 @@ public class DeviceDoCmdResp : IXdrCodec
         return new DeviceDoCmdResp( decoder );
     }
 
-    private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
-    /// <value> The error. </value>
-    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
+    /// <value> The error as <see cref="DeviceErrorCode"/>. </value>
+    public DeviceErrorCode ErrorCode { get; set; }
 
     private byte[] _dataOut;
 
@@ -83,7 +83,7 @@ public class DeviceDoCmdResp : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.ErrorCode = new DeviceErrorCode( decoder );
+        this.ErrorCode = decoder.DecodeInt().ToDeviceErrorCode();
         this._dataOut = decoder.DecodeDynamicOpaque();
     }
 

@@ -48,7 +48,7 @@ public partial class Ieee488Device : IIeee488Device
     /// <returns>   A DeviceError. </returns>
     public DeviceError Abort()
     {
-        return new DeviceError( new DeviceErrorCode( DeviceErrorCodeValue.NoError ) );
+        return new DeviceError();
     }
 
     #endregion

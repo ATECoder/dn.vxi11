@@ -126,7 +126,7 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     {
         var handler = this.AbortRequested;
         handler?.Invoke( this, e );
-        return new DeviceError( new DeviceErrorCode( e.ErrorCodeValue ) );
+        return new DeviceError( e.ErrorCodeValue );
     }
 
     #endregion

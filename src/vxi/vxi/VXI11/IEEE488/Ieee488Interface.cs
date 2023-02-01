@@ -30,9 +30,9 @@ namespace cc.isr.VXI11.IEEE488
             DeviceDoCmdResp reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout,
                                                                 ( int ) Ieee488InterfaceCommand.SendCommand, true, 1, data );
             if ( reply is null )
-                throw new DeviceException( DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Interface.SendCommand )} command.", reply.ErrorCode.ErrorCodeValue );
+                throw new DeviceException( DeviceErrorCode.IOError );
+            else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Interface.SendCommand )} command.", reply.ErrorCode );
             return reply.GetDataOut();
         }
 
@@ -53,7 +53,7 @@ namespace cc.isr.VXI11.IEEE488
                     {
                         if ( addr[i] < 0 || addr[i] > 30 )
                         {
-                            throw new DeviceException( $"; {nameof( CreateSetup )} failed because {i}-th address {addr[i]} is an invalid bus address.", DeviceErrorCodeValue.InvalidAddress );
+                            throw new DeviceException( $"; {nameof( CreateSetup )} failed because {i}-th address {addr[i]} is an invalid bus address.", DeviceErrorCode.InvalidAddress );
                         }
                         data.Add( ( byte ) (addr[i] | ( byte ) (i == 0 ? GpibCommandArgument.ListenAddress : GpibCommandArgument.SecondaryAddress)) );
                     }
@@ -211,7 +211,7 @@ namespace cc.isr.VXI11.IEEE488
         {
             return this.DeviceLink is not null && this.CoreClient is not null
                     && (addr < 0 || addr > 30
-                        ? throw new DeviceException( $"; {nameof( PassControl )} failed because {addr} is an invalid bus address.", DeviceErrorCodeValue.ParameterError )
+                        ? throw new DeviceException( $"; {nameof( PassControl )} failed because {addr} is an invalid bus address.", DeviceErrorCode.ParameterError )
                         : addr == this.CoreClient.DeviceDoCmd( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout,
                                                        ( int ) Ieee488InterfaceCommand.PassControl, 4, addr ));
         }
@@ -231,7 +231,7 @@ namespace cc.isr.VXI11.IEEE488
 
             if ( addr < 0 || addr > 30 )
             {
-                throw new DeviceException( $"; {nameof( PassControl )} failed because {addr} is an invalid bus address.", DeviceErrorCodeValue.ParameterError );
+                throw new DeviceException( $"; {nameof( PassControl )} failed because {addr} is an invalid bus address.", DeviceErrorCode.ParameterError );
             }
 
             int reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout,
@@ -254,9 +254,9 @@ namespace cc.isr.VXI11.IEEE488
             DeviceDoCmdResp reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout,
                                                                 ( int ) Ieee488InterfaceCommand.InterfaceClearControl, true, 1, Array.Empty<byte>() );
             if ( reply is null )
-                throw new DeviceException( DeviceErrorCodeValue.IOError );
-            else if ( reply.ErrorCode.ErrorCodeValue != DeviceErrorCodeValue.NoError )
-                throw new DeviceException( $"; failed sending the {nameof( Ieee488Interface.SendInterfaceClear )} command.", reply.ErrorCode.ErrorCodeValue );
+                throw new DeviceException( DeviceErrorCode.IOError );
+            else if ( reply.ErrorCode != DeviceErrorCode.NoError )
+                throw new DeviceException( $"; failed sending the {nameof( Ieee488Interface.SendInterfaceClear )} command.", reply.ErrorCode );
             return reply.GetDataOut();
         }
 
@@ -290,7 +290,7 @@ namespace cc.isr.VXI11.IEEE488
 
                     if ( addr < 0 || addr > 30 )
                     {
-                        throw new DeviceException( $"; {nameof( FindListeners )} failed because {addr} is an invalid bus address.", DeviceErrorCodeValue.InvalidAddress );
+                        throw new DeviceException( $"; {nameof( FindListeners )} failed because {addr} is an invalid bus address.", DeviceErrorCode.InvalidAddress );
                     }
                     cmd.Add( ( byte ) (addr | ( byte ) GpibCommandArgument.ListenAddress) );
 

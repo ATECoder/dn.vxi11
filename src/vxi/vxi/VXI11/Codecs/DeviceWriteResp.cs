@@ -1,3 +1,5 @@
+using cc.isr.VXI11.EnumExtensions;
+
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -22,10 +24,10 @@ namespace cc.isr.VXI11.Codecs;
 /// };
 /// </code>
 /// 
-/// DeviceFlagsCodec and DeviceErrorCodec are represented as integers, which simplifies the code
+/// DeviceFlagsCodec and DeviceErrorCodeCodec are represented as integers, which simplifies the code
 /// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
 /// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
-/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCodeValue"/>
+/// some of the RPC calls whereas <see cref="DeviceOperationFlags"/> and <see cref="DeviceErrorCode"/>
 /// are only included as members of codec classes.
 /// </remarks>
 public class DeviceWriteResp : IXdrCodec
@@ -34,7 +36,6 @@ public class DeviceWriteResp : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public DeviceWriteResp()
     {
-        this._errorCode = new DeviceErrorCode();
     }
 
     /// <summary>   Constructor. </summary>
@@ -52,10 +53,9 @@ public class DeviceWriteResp : IXdrCodec
         return new DeviceWriteResp( decoder );
     }
 
-    private DeviceErrorCode _errorCode;
     /// <summary>   Gets or sets the <see cref="DeviceErrorCode"/> (return status). </summary>
-    /// <value> The error. </value>
-    public DeviceErrorCode ErrorCode { get => this._errorCode; set => this._errorCode = value ?? new(); }
+    /// <value> The error as <see cref="DeviceErrorCode"/>. </value>
+    public DeviceErrorCode ErrorCode { get; set; }
 
     /// <summary>   Gets or sets the size; the number of bytes written. </summary>
     /// <remarks>
@@ -82,7 +82,7 @@ public class DeviceWriteResp : IXdrCodec
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public void Decode( XdrDecodingStreamBase decoder )
     {
-        this.ErrorCode = new DeviceErrorCode( decoder );
+        this.ErrorCode = decoder.DecodeInt().ToDeviceErrorCode();
         this.Size = decoder.DecodeInt();
     }
 

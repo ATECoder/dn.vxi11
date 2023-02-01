@@ -96,7 +96,7 @@ public class SupportTests
     /// <summary>   Assert should get description. </summary>
     /// <param name="value">                The value. </param>
     /// <param name="expectedDescription">  Information describing the expected. </param>
-    private static void AssertShouldGetDescription( DeviceErrorCodeValue value, string expectedDescription )
+    private static void AssertShouldGetDescription( DeviceErrorCode value, string expectedDescription )
     {
         string actual = value.GetDescription();
         Assert.AreEqual( expectedDescription, actual );
@@ -106,24 +106,24 @@ public class SupportTests
     [TestMethod]
     public void DeviceErrorCodeValueShouldGetDescription()
     {
-        AssertShouldGetDescription( DeviceErrorCodeValue.NoError, "No error." );
+        AssertShouldGetDescription( DeviceErrorCode.NoError, "No error." );
     }
 
-    /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceErrorCodeValue"/>. </summary>
+    /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceErrorCode"/>. </summary>
     /// <param name="expected"> The expected value. </param>
     private static void AssertIntShouldCastToDeviceErrorCodeValue( int expected )
     {
-        DeviceErrorCodeValue actual = expected.ToDeviceErrorCodeValue();
+        DeviceErrorCode actual = expected.ToDeviceErrorCode();
         Assert.AreEqual( expected, ( int ) actual );
     }
 
-    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="DeviceErrorCodeValue"/>. </summary>
+    /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="DeviceErrorCode"/>. </summary>
     [TestMethod]
     public void IntShouldCastToDeviceErrorCodeValue()
     {
         int value = 0;
         int maxValue = 0;
-        foreach ( var enumValue in Enum.GetValues( typeof( DeviceErrorCodeValue ) ) )
+        foreach ( var enumValue in Enum.GetValues( typeof( DeviceErrorCode ) ) )
         {
             value = ( int ) enumValue;
             maxValue = value > maxValue ? value : maxValue;
