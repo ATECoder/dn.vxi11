@@ -3,8 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
     <RootNamespace>cc.isr.VXI11.IEEE488</RootNamespace>
     <AssemblyName>cc.isr.VXI11.IEEE488.Cli</AssemblyName>
 
@@ -13,10 +16,6 @@
 
     <!-- App Identifier -->
     <ApplicationId>cc.isr.vxi11.ieee488.cli</ApplicationId>
-
-    <!-- Versions -->
-    <ApplicationDisplayVersion>1.0.8370</ApplicationDisplayVersion>
-    <ApplicationVersion>1</ApplicationVersion>
 
   </PropertyGroup>
 

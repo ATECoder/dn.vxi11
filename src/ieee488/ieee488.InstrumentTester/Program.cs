@@ -2,7 +2,7 @@
 
 using cc.isr.ONC.RPC.Logging;
 
-Console.WriteLine( $"VXI-11 {nameof( cc.isr.VXI11.IEEE488.Ieee488Client )} Tester" );
+Console.WriteLine( $"VXI-11 {nameof( cc.isr.VXI11.IEEE488.Ieee488Instrument)} Tester" );
 
 string ipv4Address = "192.168.0.144"; // "127.0.0.1";
 
@@ -18,9 +18,9 @@ while ( !ready )
     ready = yesno.KeyChar == 'y' || yesno.KeyChar == 'Y';
 }
 
-using cc.isr.VXI11.IEEE488.Ieee488Client ieee488Client = new();
+using cc.isr.VXI11.IEEE488.Ieee488Instrument instrument = new();
 
-ieee488Client.ThreadExceptionOccurred += OnThreadExcetion;
+instrument.ThreadExceptionOccurred += OnThreadExcetion;
 
 Console.WriteLine();
 Console.Write( $"Press key to Connect to {ipv4Address}: " );
@@ -29,7 +29,7 @@ Console.ReadKey();
 // client.connect("127.0.0.1", "inst0");
 Console.WriteLine( $"Connecting to {ipv4Address}" );
 
-ieee488Client.Connect( ipv4Address, "inst0" );
+instrument.Connect( ipv4Address, "inst0" );
 
 if ( ipv4Address == "127.0.0.1" )
 {
@@ -55,7 +55,7 @@ else
 
     Console.WriteLine( $"closing {ipv4Address}" );
 
-    ieee488Client.Close();
+    instrument.Close();
 
 }
 
@@ -66,7 +66,7 @@ void SendCommand( string command )
 {
     Console.WriteLine( $"Hit any key to send {command} to {ipv4Address}" );
     _ = Console.ReadKey();
-    (bool success, string response) = ieee488Client.Query( $"{command}\n", 0 );
+    (bool success, string response) = instrument.Query( $"{command}\n", 0 );
     if ( success )
         Console.WriteLine( $"{command} sent{(string.IsNullOrEmpty( response ) ? string.Empty : $"; received: {response}")}" );
     else
@@ -76,7 +76,7 @@ void SendCommand( string command )
 static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
 {
     string name = "unknown";
-    if ( sender is cc.isr.VXI11.IEEE488.Ieee488Client ) name = nameof( cc.isr.VXI11.IEEE488.Ieee488Client );
+    if ( sender is cc.isr.VXI11.IEEE488.Ieee488Instrument ) name = nameof( cc.isr.VXI11.IEEE488.Ieee488Instrument );
 
     Logger.Writer.LogError( $"Thread exception occurred in {name}", e.Exception );
 }

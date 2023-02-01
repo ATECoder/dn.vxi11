@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 using cc.isr.VXI11.Logging;
 namespace cc.isr.VXI11.IEEE488Client.Helper;
@@ -34,6 +29,7 @@ public static class IEEE488InstrumentTestInfo
         { InstrumentId.K7510.ToString(), (0, 0, "192.168.0.144") }
         };
         CancellationTokenSource = new();
+        QueryInfo = string.Empty;
     }
 
     /// <summary>   Attempts to TCP connection a TimeSpan from the given InstrumentId. </summary>

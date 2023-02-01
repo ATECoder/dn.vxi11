@@ -1,8 +1,6 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Threading.Tasks;
-using System.Threading;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.ONC.RPC.Codecs;

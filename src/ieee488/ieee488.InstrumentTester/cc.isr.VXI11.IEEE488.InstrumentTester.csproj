@@ -1,4 +1,4 @@
- <Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,14 +8,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <RootNamespace>cc.isr.VXI11.IEEE488.ClientTester</RootNamespace>
-    <AssemblyName>cc.isr.VXI11.IEEE488.ClientTester</AssemblyName>
+    <RootNamespace>cc.isr.VXI11.IEEE488.InstrumentTester</RootNamespace>
+    <AssemblyName>cc.isr.VXI11.IEEE488.InstrumentTester</AssemblyName>
 
     <!-- Display name -->
-    <ApplicationTitle>cc.isr.VXI11.IEEE488.ClientTester</ApplicationTitle>
+    <ApplicationTitle>cc.isr.VXI11.IEEE488.InstrumentTester</ApplicationTitle>
 
     <!-- App Identifier -->
-    <ApplicationId>cc.isr.vxi11.ieee488.ClientTester</ApplicationId>
+    <ApplicationId>cc.isr.vxi11.ieee488.InstrumentTester</ApplicationId>
 
   </PropertyGroup>
 
