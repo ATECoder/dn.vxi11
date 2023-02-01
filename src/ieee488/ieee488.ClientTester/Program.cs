@@ -20,7 +20,8 @@ while ( !ready )
 
 using cc.isr.VXI11.IEEE488.Ieee488Client ieee488Client = new();
 
-ieee488Client.ThreadExceptionOccurred += onThreadExcetionOccurred;
+ieee488Client.ThreadExceptionOccurred += OnThreadExcetion;
+
 Console.WriteLine();
 Console.Write( $"Press key to Connect to {ipv4Address}: " );
 Console.ReadKey();
@@ -72,7 +73,10 @@ void SendCommand( string command )
         Console.WriteLine( response );
 }
 
-static void onThreadExcetionOccurred( object sender, ThreadExceptionEventArgs e )
+static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
 {
-    Logger.Writer.LogError( "Thread exception occurred", e.Exception );
+    string name = "unknown";
+    if ( sender is cc.isr.VXI11.IEEE488.Ieee488Client ) name = nameof( cc.isr.VXI11.IEEE488.Ieee488Client );
+
+    Logger.Writer.LogError( $"Thread exception occurred in {name}", e.Exception );
 }
