@@ -1,8 +1,6 @@
 // See https://aka.ms/new-console-template for more information
 
-using System.Diagnostics.Metrics;
-
-using cc.isr.ONC.RPC.Logging;
+using cc.isr.VXI11.Logging;
 
 Console.WriteLine( $"VXI-11 {nameof( cc.isr.VXI11.IEEE488.Ieee488Client )} Tester" );
 

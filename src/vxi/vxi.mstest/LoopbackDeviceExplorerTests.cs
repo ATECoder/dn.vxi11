@@ -3,6 +3,8 @@ using System.Net;
 using System.Net.Sockets;
 using cc.isr.VXI11.Logging;
 using cc.isr.ONC.RPC.Portmap;
+using cc.isr.ONC.RPC.Server;
+using cc.isr.VXI11.IEEE488.Mock;
 
 namespace cc.isr.VXI11.MSTest;
 
@@ -26,6 +28,7 @@ public class LoopbackDeviceExplorerTests
             Logger.Writer.LogInformation( $"starting the embedded portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
+            _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
 
             Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.ElapsedMilliseconds:0} ms" );
         }
@@ -65,6 +68,15 @@ public class LoopbackDeviceExplorerTests
     }
 
     private static OncRpcEmbeddedPortmapServiceStub? _embeddedPortMapService;
+    internal static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
+    {
+        string name = "unknown";
+        if ( sender is Ieee488SingleClientMockServer ) name = nameof( Ieee488SingleClientMockServer );
+        if ( sender is OncRpcServerStubBase ) name = nameof( OncRpcServerStubBase );
+
+        Logger.Writer.LogError( $"Thread exception occurred at {name} instance", e.Exception );
+    }
+
 
     #endregion
 

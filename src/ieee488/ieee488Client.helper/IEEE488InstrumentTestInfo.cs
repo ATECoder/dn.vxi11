@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 using cc.isr.VXI11.Logging;
 namespace cc.isr.VXI11.IEEE488Client.Helper;
 

@@ -4,6 +4,8 @@ using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.EnumExtensions;
 using cc.isr.VXI11.Logging;
 
+using Newtonsoft.Json.Linq;
+
 namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a support tests. </summary>
@@ -88,6 +90,49 @@ public class SupportTests
         SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "1.1.1.1" ) );
         SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "1.1.1.0" ) );
     }
+
+    /// <summary>   Gets local broadcast addresses. </summary>
+    /// <returns>   An array of IP address. </returns>
+    public static IPAddress[] GetLocalBroadcastAddresses()
+    {
+        IPAddress[] localIPs = Dns.GetHostAddresses( Dns.GetHostName() );
+        List<IPAddress> ipv4s = new();
+        foreach ( IPAddress ip in localIPs )
+        {
+            if ( ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork )
+            {
+                byte[] bytes = ip.GetAddressBytes();
+                bytes[3] = 255;
+                ipv4s.Add( new IPAddress( bytes ) );
+            }
+        }
+        return ipv4s.ToArray();
+    }
+
+    [TestMethod]
+    public void IPAddressShouldGetLocalBroadcastAddresses()
+    {
+        IPAddress[] localIPs = GetLocalBroadcastAddresses();
+        foreach ( IPAddress ip in localIPs )
+        {
+            Logger.Writer.LogVerbose( ip.ToString() );
+        }
+    }
+
+    [TestMethod]
+    public void IPAddressShouldGetLocalIPv4Addresses()
+    {
+        IPAddress[] localIPs = Dns.GetHostAddresses( Dns.GetHostName() );
+        foreach ( IPAddress ip in localIPs)
+        {
+            if ( ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork )
+                Logger.Writer.LogVerbose( ip.ToString() );
+
+        }
+    }
+
+
+
 
     #endregion
 

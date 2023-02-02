@@ -50,34 +50,126 @@ public class DeviceExplorer
 
     #region " enumerate core devices "
 
-    /// <summary>
-    /// Lists the VXI-11 Core devices that are listening on the specified <paramref name="hosts"/>.
-    /// </summary>
-    public static List<(IPAddress host, int port)> ListCoreDevices( IEnumerable<IPAddress> hosts, int connectTimeout, bool startEmbeddedPortmapService )
+    /// <summary>   Enumerate addresses. </summary>
+    /// <param name="host"> The host. </param>
+    /// <returns>   An array of <see cref="IPAddress"/>s. </returns>
+    public static IPAddress[] EnumerateAddresses( IPAddress host )
     {
+        List<IPAddress> addresses = new ();
 
-        // start the embedded service.
-        if ( startEmbeddedPortmapService ) _ = DeviceExplorer.StartEmbeddedPortmapService();
+        byte[] bytes = host.GetAddressBytes();
+        byte[][] byteRange = new byte[bytes.Length][];
+        for ( int i = 0; i <= 3; i++ )
+            byteRange[i] = new byte[] { bytes[i] == 255 ? ( byte ) 1 : bytes[i], bytes[i] == 255 ? ( byte ) 254 : bytes[i] };
 
-        // enumerate the listening devices.
-        return ListCoreDevices( hosts, connectTimeout );
+        for ( byte i = byteRange[0][0]; i < byteRange[0][1]; i++ )
+        {
+            bytes[0] = i;
+            for ( byte j = byteRange[1][0]; j < byteRange[1][1]; j++ )
+            {
+                bytes[1] = j;
+                for ( byte k = byteRange[2][0]; k < byteRange[2][1]; k++ )
+                {
+                    bytes[2] = k;
+                    for ( byte l = byteRange[3][0]; l < byteRange[2][1]; l++ )
+                    {
+                        bytes[3] = l;
+                        IPAddress address = new( bytes );
+                        addresses.Add( address );
+                    }
+                }
+            }
+        }
+        return addresses.ToArray();
     }
 
     /// <summary>
-    /// Lists the VXI-11 Core devices that are listening on the specified <paramref name="hosts"/>.
+    /// Lists the <see cref="IPEndPoint"/>s of the VXI-11 Core devices that are listening on the
+    /// addresses spanned by the specified <paramref name="broadcastAddress"/>
+    /// which might include a broadcast address (255) as a host address, such as in 192.168.1.255.
     /// </summary>
-    /// <param name="hosts">    The hosts. </param>
-    /// <param name="connectTimeout">  The timeout in milliseconds. </param>
-    /// <returns>   The List{(IPAddress host,int port)}; </returns>
-    public static List<(IPAddress host, int port)> ListCoreDevices( IEnumerable<IPAddress> hosts, int connectTimeout )
+    /// <remarks>   2023-02-01. </remarks>
+    /// <param name="broadcastAddress">             The broadcast address. </param>
+    /// <param name="connectTimeout">               The timeout in milliseconds. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
+    public static List<IPEndPoint> ListCoreDevicesEndpoints( IPAddress broadcastAddress, int connectTimeout, bool startEmbeddedPortmapService )
     {
-        List<(IPAddress host, int port)> devices = new();
-        foreach ( IPAddress host in hosts )
+        IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
+        return ListCoreDevicesEndpoints( addresses, connectTimeout, startEmbeddedPortmapService, true );
+    }
+
+    /// <summary>
+    /// Lists the <see cref="IPAddress"/>s of the VXI-11 Core devices that are listening on the.
+    /// addresses spanned by the specified <paramref name="broadcastAddress"/>
+    /// which might include a broadcast address (255) as a host address, such as in 192.168.1.255.
+    /// </summary>
+    /// <remarks>   2023-02-01. </remarks>
+    /// <param name="broadcastAddress">             The broadcast address. </param>
+    /// <param name="connectTimeout">               The timeout in milliseconds. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPAddress"/> </returns>
+    public static List<IPAddress> ListCoreDevicesAddresses( IPAddress broadcastAddress, int connectTimeout, bool startEmbeddedPortmapService )
+    {
+        IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
+        return ListCoreDevicesAddresses( addresses, connectTimeout, startEmbeddedPortmapService );
+    }
+
+    /// <summary>
+    /// Lists the <see cref="IPAddress"/>s of the VXI-11 Core devices that are listening on the
+    /// specified <paramref name="addresses"/>.
+    /// </summary>
+    /// <param name="addresses">                    The hosts. </param>
+    /// <param name="connectTimeout">               The timeout in milliseconds. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPAddress"/> </returns>
+    public static List<IPAddress> ListCoreDevicesAddresses( IEnumerable<IPAddress> addresses, int connectTimeout, bool startEmbeddedPortmapService )
+    {
+        // start the embedded service.
+        if ( startEmbeddedPortmapService )
         {
-            int port = GetCoreDevicePortNumber( host, connectTimeout );
-            if ( port > 0 ) { devices.Add( (host, port) ); }
+            using OncRpcEmbeddedPortmapServiceStub epm = DeviceExplorer.StartEmbeddedPortmapService();
         }
-        return devices;
+
+        List<IPAddress> ipAddresses = new();
+        foreach ( IPAddress address in addresses )
+        {
+            if ( DeviceExplorer.PortmapPingHost( address, connectTimeout ) )
+                ipAddresses.Add( address );
+        }
+        return ipAddresses;
+    }
+
+    /// <summary>
+    /// Lists the <see cref="IPEndPoint"/>s of the VXI-11 Core devices that are listening on the
+    /// specified <paramref name="addresses"/>.
+    /// </summary>
+    /// <param name="addresses">                    The hosts. </param>
+    /// <param name="connectTimeout">               The timeout in milliseconds. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <param name="pmapPing">                     True to use the Portmap service to ping each
+    ///                                             address before getting its port number thus
+    ///                                             validating the address as a VXI-11 code
+    ///                                             device."/> . </param>
+    /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
+    public static List<IPEndPoint> ListCoreDevicesEndpoints( IEnumerable<IPAddress> addresses, int connectTimeout, bool startEmbeddedPortmapService, bool pmapPing )
+    {
+        // start the embedded service.
+        if ( startEmbeddedPortmapService )
+        {
+            using OncRpcEmbeddedPortmapServiceStub epm = DeviceExplorer.StartEmbeddedPortmapService();
+        }
+
+        List<IPEndPoint> endpoints = new();
+        foreach ( IPAddress address in addresses )
+        {
+            if ( pmapPing && DeviceExplorer.PortmapPingHost( address, connectTimeout ) )
+            {
+                int port = GetCoreDevicePortNumber( address, connectTimeout );
+                if ( port > 0 ) { endpoints.Add( new IPEndPoint( address, port ) ); }
+            }
+        }
+        return endpoints;
     }
 
     /// <summary>
@@ -102,20 +194,23 @@ public class DeviceExplorer
     #region " enumerate registered servers "
 
     /// <summary>
-    /// Enumerate the registered servers on the specified <paramref name="hosts"/>.
+    /// Enumerate the endpoints or registered servers on the specified <paramref name="addresses"/>.
     /// </summary>
-    /// <param name="hosts">                        The hosts. </param>
+    /// <param name="addresses">                        The hosts. </param>
     /// <param name="timeout">                      The timeout in milliseconds. </param>
     /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
-    /// <returns>   The List{(IPAddress host,int port)} </returns>
-    public static List<(IPAddress host, int port)> EnumerateRegisteredServers( IEnumerable<IPAddress> hosts, int timeout, bool startEmbeddedPortmapService )
+    /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
+    public static List<IPEndPoint> EnumerateRegisteredServers( IEnumerable<IPAddress> addresses, int timeout, bool startEmbeddedPortmapService )
     {
 
         // start the embedded service.
-        if ( startEmbeddedPortmapService ) _ = DeviceExplorer.StartEmbeddedPortmapService();
+        if ( startEmbeddedPortmapService )
+        {
+            using OncRpcEmbeddedPortmapServiceStub epn = DeviceExplorer.StartEmbeddedPortmapService();
+        }
 
         // enumerate the listening devices.
-        return EnumerateRegisteredServers( hosts, timeout );
+        return EnumerateRegisteredServers( addresses, timeout );
     }
 
     /// <summary>
@@ -123,10 +218,10 @@ public class DeviceExplorer
     /// </summary>
     /// <param name="hosts">    The hosts. </param>
     /// <param name="timeout">  The timeout in milliseconds. </param>
-    /// <returns>   The List{(IPAddress host,int port)} </returns>
-    public static List<(IPAddress host, int port)> EnumerateRegisteredServers( IEnumerable<IPAddress> hosts, int timeout )
+    /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
+    public static List<IPEndPoint> EnumerateRegisteredServers( IEnumerable<IPAddress> hosts, int timeout )
     {
-        List<(IPAddress host, int port)> registeredDevices = new();
+        List<IPEndPoint> registeredDevices = new();
 
         foreach ( IPAddress host in hosts )
         {
@@ -142,10 +237,11 @@ public class DeviceExplorer
     /// <summary>   Enumerate the registered servers on the specified <paramref name="host"/>. </summary>
     /// <param name="host">     The host. </param>
     /// <param name="connectTimeout">  The timeout in milliseconds. </param>
-    /// <returns>   The List{(IPAddress host,int port)} </returns>
-    public static List<(IPAddress host, int port)> EnumerateRegisteredServers( IPAddress host, int connectTimeout )
+    /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> 
+    /// </returns>
+    public static List<IPEndPoint> EnumerateRegisteredServers( IPAddress host, int connectTimeout )
     {
-        List<(IPAddress host, int port)> registeredDevices = new();
+        List<IPEndPoint> endpoints = new();
 
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
@@ -156,9 +252,9 @@ public class DeviceExplorer
         OncRpcServerIdentifierCodec[] registeredServers = pmapClient.ListRegisteredServers(); ;
         foreach ( OncRpcServerIdentifierCodec registeredServer in registeredServers )
         {
-            if ( registeredServer.Port > 0 ) { registeredDevices.Add( (host, registeredServer.Port) ); }
+            if ( registeredServer.Port > 0 ) { endpoints.Add( new IPEndPoint(host, registeredServer.Port) ); }
         }
-        return registeredDevices;
+        return endpoints;
     }
 
     #endregion
@@ -182,12 +278,22 @@ public class DeviceExplorer
     /// <returns>   True if it succeeds, false if it fails. </returns>
     public static bool Paping( string ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
     {
+        return Paping( new IPEndPoint( IPAddress.Parse( ipv4Address ), portNumber), timeoutMilliseconds );
+    }
+    
+
+    /// <summary>   Pings port. </summary>
+    /// <param name="endpoint">             The endpoint. </param>
+    /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public static bool Paping( IPEndPoint endpoint, int timeoutMilliseconds = 10 )
+    {
         bool pinged = false;
         try
         {
             using Socket socket = new( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
             socket.Blocking = true;
-            IAsyncResult result = socket.BeginConnect( ipv4Address, portNumber, null, null );
+            IAsyncResult result = socket.BeginConnect( endpoint, null, null );
             bool success = result.AsyncWaitHandle.WaitOne( timeoutMilliseconds, true );
             if ( socket.Connected )
             {
@@ -198,9 +304,11 @@ public class DeviceExplorer
         }
         catch ( Exception )
         {
+            // Discard Ping Exceptions and return false;
         }
-        return pinged;
+    return pinged;
     }
+
 
     /// <summary>   Ping host. </summary>
     /// <param name="nameOrAddress">        The name or address. </param>

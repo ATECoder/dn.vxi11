@@ -2,6 +2,9 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
+using cc.isr.ONC.RPC.Portmap;
+using cc.isr.ONC.RPC.Server;
+using cc.isr.VXI11.IEEE488.Mock;
 using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.MSTest;
@@ -24,6 +27,13 @@ public class DeviceExplorerTests
             _classTestContext = context;
             Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             DeviceExplorerTests.EnumerateHosts();
+
+            Logger.Writer.LogInformation( $"starting the embedded portmap service" );
+            Stopwatch sw = Stopwatch.StartNew();
+            _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
+            _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
+
+            Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.ElapsedMilliseconds:0} ms" );
         }
         catch ( Exception ex )
         {
@@ -40,7 +50,37 @@ public class DeviceExplorerTests
     [ClassCleanup]
     public static void CleanupFixture()
     {
+        OncRpcEmbeddedPortmapServiceStub? service = _embeddedPortMapService;
+        if ( service is not null )
+        {
+            try
+            {
+                service.Dispose();
+                // service.ThreadExceptionOccurred -= OnThreadExceptionOccurred;
+            }
+            catch ( Exception ex )
+            {
+                Logger.Writer.LogError( "Exception cleaning up fixture", ex );
+            }
+            finally
+            {
+                _embeddedPortMapService = null;
+                _classTestContext = null;
+            }
+        }
     }
+
+    private static OncRpcEmbeddedPortmapServiceStub? _embeddedPortMapService;
+
+    internal static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
+    {
+        string name = "unknown";
+        if ( sender is Ieee488SingleClientMockServer ) name = nameof( Ieee488SingleClientMockServer );
+        if ( sender is OncRpcServerStubBase ) name = nameof( OncRpcServerStubBase );
+
+        Logger.Writer.LogError( $"Thread exception occurred at {name} instance", e.Exception );
+    }
+
 
     #endregion
 
@@ -175,9 +215,9 @@ public class DeviceExplorerTests
 
     #endregion
 
-    #region " devices "
+    #region " list devices "
 
-    /// <summary>    (Unit Test Method) device explorer should list devices. </summary>
+    /// <summary>    (Unit Test Method) device explorer should list the endpoints of all pinged device addresses. </summary>
     /// <remarks>    
     /// <list type="bullet">2450 (152), 6510 (154), 7510 (144) are on <item>
     /// cc.isr.VXI11.MSTest.DeviceExplorerTests.DeviceExplorerTests </item><item>
@@ -190,21 +230,48 @@ public class DeviceExplorerTests
     /// </remarks>
     [TestMethod]
     [TestCategory( "192.168.0.xxx" )]
-    public void DeviceExplorerShouldListDevices()
+    public void DeviceExplorerShouldListPingedDevicesEndpoints()
     {
         Stopwatch sw = Stopwatch.StartNew();
-        var devices = DeviceExplorer.ListCoreDevices( _pingedHosts, 100 );
-        Assert.IsNotNull( devices );
-        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevices )} found {devices.Count} Core VXI-11 device(s) in {sw.ElapsedMilliseconds:0} ms:" );
 
-        foreach ( (IPAddress address, int port) in devices )
+        var devices = DeviceExplorer.ListCoreDevicesEndpoints( _pingedHosts, 100,false, true );
+        Assert.IsNotNull( devices );
+        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevicesEndpoints )} found {devices.Count} Core VXI-11 device(s) in {sw.ElapsedMilliseconds:0} ms:" );
+
+        foreach ( IPEndPoint endpoint in devices )
         {
-            Logger.Writer.LogInformation( $"Pinging {address}:{port}" );
+            Logger.Writer.LogInformation( $"Pinging {endpoint}" );
             sw.Start();
-            Assert.IsTrue( DeviceExplorer.Paping( address, port ) );
-            Logger.Writer.LogInformation( $"{address}:{port} pinged in {sw.ElapsedMilliseconds:0} ms" );
+            Assert.IsTrue( DeviceExplorer.Paping( endpoint ) );
+            Logger.Writer.LogInformation( $"{endpoint} pinged in {sw.ElapsedMilliseconds:0} ms" );
         }
         Assert.AreEqual( _pingedHosts.Count, devices.Count, "Device count is expected to equal pinged hosts count." );
+    }
+
+    [TestMethod]
+    [TestCategory( "192.168.0.255" )]
+    public void DeviceExplorerShouldListDevicesEndpoints()
+    {
+        DateTime startTime = DateTime.Now;
+        Stopwatch sw = Stopwatch.StartNew();
+        List<IPEndPoint>? endpoints = DeviceExplorer.ListCoreDevicesEndpoints( IPAddress.Parse( "192.168.0.255"), 100, false );
+        Assert.IsNotNull( endpoints );
+        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevicesEndpoints )} found {endpoints.Count} Core VXI-11 device(s) in {sw.ElapsedMilliseconds:0} ms:" );
+        Assert.AreEqual( _pingedHosts.Count, endpoints.Count, "Device count is expected to equal pinged hosts count." );
+        Logger.Writer.LogInformation( $"It took {(DateTime.Now - startTime).Milliseconds:0} to list {endpoints.Count} endpoints." );
+    }
+
+    [TestMethod]
+    [TestCategory( "192.168.0.255" )]
+    public void DeviceExplorerShouldListDevicesAddresses()
+    {
+        DateTime startTime = DateTime.Now;
+        Stopwatch sw = Stopwatch.StartNew();
+        List<IPAddress>? addresses = DeviceExplorer.ListCoreDevicesAddresses( IPAddress.Parse( "192.168.0.255" ), 100, false );
+        Assert.IsNotNull( addresses );
+        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevicesEndpoints )} found {addresses.Count} Core VXI-11 device(s) in {sw.ElapsedMilliseconds:0} ms:" );
+        Assert.AreEqual( _pingedHosts.Count, addresses.Count, "Device count is expected to equal pinged hosts count." );
+        Logger.Writer.LogInformation( $"It took {(DateTime.Now - startTime).Milliseconds:0} to list {addresses.Count} endpoints." );
     }
 
     #endregion
@@ -230,14 +297,14 @@ public class DeviceExplorerTests
         Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.EnumerateRegisteredServers )} found {servers.Count} VXI-11 registered servers(s) in {sw.ElapsedMilliseconds:0} ms:" );
 
         int actualCount = 0;
-        foreach ( (IPAddress address, int port) in servers )
+        foreach ( IPEndPoint endpoint in servers )
         {
-            Logger.Writer.LogInformation( $"Pinging {address}:{port}" );
+            Logger.Writer.LogInformation( $"Pinging {endpoint}" );
             sw.Start();
-            Assert.IsTrue( DeviceExplorer.Paping( address, port ) );
-            Logger.Writer.LogInformation( $"{address}:{port} pinged in {sw.ElapsedMilliseconds:0} ms" );
+            Assert.IsTrue( DeviceExplorer.Paping( endpoint ) );
+            Logger.Writer.LogInformation( $"{endpoint} pinged in {sw.ElapsedMilliseconds:0} ms" );
 
-            if ( port == 111 ) { actualCount++; }
+            if ( endpoint.Port == 111 ) { actualCount++; }
         }
 
         int expectedCount = 0;
