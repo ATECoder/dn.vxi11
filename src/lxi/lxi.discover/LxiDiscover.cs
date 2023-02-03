@@ -1,4 +1,8 @@
+using System.Diagnostics.Metrics;
 using System.Net;
+using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
 
 using cc.isr.VXI11.Logging;
 
@@ -25,14 +29,15 @@ Command Line: {CommandLineParser.Usage}
 
 Default command line: {CommandLineParser.DefaultArgs}
 
-Specify an empty broadcast address (e.g., {CommandLineParser.IPKey}) to discover
-all the instruments listening on all the local IPs of this machine.
+Specify an empty broadcast address (e.g., {CommandLineParser.IPKey}) or
+{IPAddress.Any} (e.g., {CommandLineParser.IPKey}{CommandLineParser.EqualsSign}{IPAddress.Any})
+to discover all the instruments listening on the local IPs of this machine.
 
 ";
 
     public static void DiscoverEndpoints( string ip, int timeout )
     {
-        Console.WriteLine( $"Discovering instruments on {ip}....\n" );
+        Console.WriteLine( $"\nDiscovering instruments on {ip}...." );
 
         List<IPEndPoint> endpoints = cc.isr.VXI11.DeviceExplorer.ListCoreDevicesEndpoints( IPAddress.Parse( ip ), timeout, true );
 
@@ -44,7 +49,7 @@ all the instruments listening on all the local IPs of this machine.
 
     public static void DiscoverAddresses( string ip, int timeout )
     {
-        Console.WriteLine( $"Discovering instruments on {ip}....\n" );
+        Console.WriteLine( $"\nDiscovering instruments on {ip}...." );
 
         List<IPAddress> addresses = cc.isr.VXI11.DeviceExplorer.ListCoreDevicesAddresses( IPAddress.Parse( ip ), timeout, true );
 
@@ -56,15 +61,20 @@ all the instruments listening on all the local IPs of this machine.
 
     public static void Discover( string ip, int timeout )
     {
-        if ( string.IsNullOrWhiteSpace(ip ) )
+
+        Console.WriteLine( $"Discovering devices on IP={ip} with a timeout of {timeout} ms\n" );
+
+        // IPAddress does not override '==', which implements reference equality. Must use Equals()
+
+        if ( string.IsNullOrWhiteSpace(ip ) || IPAddress.Parse( ip ).Equals( IPAddress.Any ) )
         {
             double totalTimeout = 0;
             foreach ( IPAddress address in GetLocalBroadcastAddresses() )
             {
-                IPAddress[] ips = DeviceExplorer.EnumerateAddresses( IPAddress.Parse( ip ) );
+                IPAddress[] ips = DeviceExplorer.EnumerateAddresses( address );
                 totalTimeout += ips.Length * ( double ) timeout;
             }
-            Console.WriteLine( $"Please wait some {totalTimeout / 1000} seconds while discovering instruments\n" );
+            Console.WriteLine( $"Discovery is estimated to take {totalTimeout / 1000} seconds\nDiscovering...\n" );
             foreach ( IPAddress address in GetLocalBroadcastAddresses() )
             {
                 DiscoverAddresses( address.ToString(), timeout );
@@ -73,14 +83,18 @@ all the instruments listening on all the local IPs of this machine.
         else
         {
             IPAddress[] ips = DeviceExplorer.EnumerateAddresses( IPAddress.Parse( ip ) );
-            Console.WriteLine( $"Please wait some {ips.Length * ( double ) timeout / 1000} seconds while discovering instruments....\n" );
+            Console.WriteLine( $"Discovery is estimated to take {ips.Length * ( double ) timeout / 1000} seconds\nDiscovering...\n" );
             DiscoverAddresses( ip, timeout );
         }
-        Console.WriteLine( "\nLXI Instruments Discovery complete. If you did not find your instrument\nthen try increasing the timeout value and try again." );
-        Console.WriteLine( "Also sometimes devices are not detected properly when the computer/Laptop\nin which you are running this script is connected" );
-        Console.WriteLine( "To network with WIFI instead of LAN. So it is recommended to connect LAN\nto your Computer/Laptop before running this Script/Program" );
-        Console.WriteLine( $"For help try {CommandLineParser.HelpUsage}" );
-        Console.WriteLine( "press Enter to exit" );
+        StringBuilder builder = new();
+        _ = builder.AppendLine( "LXI Instruments Discovery complete. If you did not find your instrument" );
+        _ = builder.AppendLine( "then try increasing the timeout value and try again.\n" );
+        _ = builder.AppendLine( "Sometimes devices are not detected properly when the computer/Laptop" );
+        _ = builder.AppendLine( "in which you are running this the discovery program is connected" );
+        _ = builder.AppendLine( "is on WIFI instead of Ethernet. So it is recommended to connect discover" );
+        _ = builder.AppendLine( "the instruments when connected to Ethernet.\n" );
+        _ = builder.AppendLine( $"For help try {CommandLineParser.HelpUsage}\n" );
+        Console.Write( builder.ToString() );
     }
 
     public static string QueryInstrumet( string ipv4Address )
@@ -91,12 +105,11 @@ all the instruments listening on all the local IPs of this machine.
         return instrument.QueryLine( "*IDN?" ).response;
     }
 
-    static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
+    internal static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
     {
         string name = "unknown";
         if ( sender is cc.isr.VXI11.IEEE488.Ieee488Instrument ) name = nameof( cc.isr.VXI11.IEEE488.Ieee488Instrument );
-
-        Logger.Writer.LogError( $"Thread exception occurred in {name}", e.Exception );
+        Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
     }
 
     /// <summary>   Gets local broadcast addresses. </summary>

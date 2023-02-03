@@ -1,6 +1,8 @@
+using System;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.ONC.RPC.Codecs;
@@ -48,7 +50,7 @@ public class DeviceExplorer
 
     #endregion 
 
-    #region " enumerate core devices "
+    #region " local inter network "
 
     /// <summary>   Enumerate addresses. </summary>
     /// <param name="host"> The host. </param>
@@ -58,22 +60,25 @@ public class DeviceExplorer
         List<IPAddress> addresses = new ();
 
         byte[] bytes = host.GetAddressBytes();
-        byte[][] byteRange = new byte[bytes.Length][];
-        for ( int i = 0; i <= 3; i++ )
-            byteRange[i] = new byte[] { bytes[i] == 255 ? ( byte ) 1 : bytes[i], bytes[i] == 255 ? ( byte ) 254 : bytes[i] };
+        (byte from, byte to)[] range = new (byte from, byte to)[bytes.Length];
+        for ( int i = 0; i < bytes.Length; i++ )
+            range[i] = ( bytes[i] == 255 ? ( byte ) 1 : bytes[i], bytes[i] == 255 ? ( byte ) 254 : bytes[i] );
+        int[] idx = new int[bytes.Length];
+        for ( int i = 0; i < bytes.Length; i++ )
+            idx[i] = BitConverter.IsLittleEndian ? i : bytes.Length - 1 - i;
 
-        for ( byte i = byteRange[0][0]; i < byteRange[0][1]; i++ )
+        for ( byte i = range[idx[0]].from; i <= range[idx[0]].to; i++ )
         {
-            bytes[0] = i;
-            for ( byte j = byteRange[1][0]; j < byteRange[1][1]; j++ )
+            bytes[idx[0]] = i;
+            for ( byte j = range[idx[1]].from; j <= range[idx[1]].to; j++ )
             {
-                bytes[1] = j;
-                for ( byte k = byteRange[2][0]; k < byteRange[2][1]; k++ )
+                bytes[idx[1]] = j;
+                for ( byte k = range[idx[2]].from; k <= range[idx[2]].to; k++ )
                 {
-                    bytes[2] = k;
-                    for ( byte l = byteRange[3][0]; l < byteRange[2][1]; l++ )
+                    bytes[idx[2]] = k;
+                    for ( byte l = range[idx[3]].from; l <= range[idx[3]].to; l++ )
                     {
-                        bytes[3] = l;
+                        bytes[idx[3]] = l;
                         IPAddress address = new( bytes );
                         addresses.Add( address );
                     }
@@ -83,20 +88,80 @@ public class DeviceExplorer
         return addresses.ToArray();
     }
 
+    private static IPAddress[] _localInterNetworkAddresses = Array.Empty<IPAddress>();
+
+    /// <summary>   Gets local inter network (IPv4) addresses. </summary>
+    /// <returns>   An array of IPv4 addresses. </returns>
+    public static IPAddress[] GetLocalInterNetworkAddresses()
+    {
+        if (_localInterNetworkAddresses == null || _localInterNetworkAddresses.Length == 0 )
+        {
+            IPAddress[] localIPs = Dns.GetHostAddresses( Dns.GetHostName() );
+            _localInterNetworkAddresses = localIPs.Where( ip => ip.AddressFamily == AddressFamily.InterNetwork ).ToArray();
+        }
+        return _localInterNetworkAddresses;
+    }
+
+    private static IPAddress[] _localBroadcastAddresses = Array.Empty<IPAddress>();
+
+    /// <summary>   Gets local broadcast addresses. </summary>
+    /// <returns>   An array of IPv4 broadcast addresses. </returns>
+    public static IPAddress[] GetLocalBroadcastAddresses()
+    {
+        if ( _localBroadcastAddresses == null || _localBroadcastAddresses.Length == 0 )
+        {
+            List<IPAddress> ipv4s = new();
+            foreach ( IPAddress ip in GetLocalInterNetworkAddresses() )
+            {
+                if ( ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork )
+                {
+                    byte[] bytes = ip.GetAddressBytes();
+                    bytes[BitConverter.IsLittleEndian ? 3 : 0 ] = 255;
+                    ipv4s.Add( new IPAddress( bytes ) );
+                }
+            }
+            _localBroadcastAddresses = ipv4s.ToArray();
+        }
+        return _localBroadcastAddresses;
+    }
+
+    #endregion 
+
+    #region " core devices on the network "
+
     /// <summary>
     /// Lists the <see cref="IPEndPoint"/>s of the VXI-11 Core devices that are listening on the
     /// addresses spanned by the specified <paramref name="broadcastAddress"/>
     /// which might include a broadcast address (255) as a host address, such as in 192.168.1.255.
     /// </summary>
-    /// <remarks>   2023-02-01. </remarks>
-    /// <param name="broadcastAddress">             The broadcast address. </param>
+    /// <param name="broadcastAddress">             The broadcast address or <see langword="null"/>
+    ///                                             or <see cref="IPAddress.Any"/>(0.0.0.0) to scan all local
+    ///                                             inter networks. </param>
     /// <param name="connectTimeout">               The timeout in milliseconds. </param>
     /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
     /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
     public static List<IPEndPoint> ListCoreDevicesEndpoints( IPAddress broadcastAddress, int connectTimeout, bool startEmbeddedPortmapService )
     {
-        IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
-        return ListCoreDevicesEndpoints( addresses, connectTimeout, startEmbeddedPortmapService, true );
+        // IPAddress does not override '==', which implements reference equality. Must use Equals()
+
+        if ( broadcastAddress is null || broadcastAddress.Equals( IPAddress.Any ))
+        {
+            List<IPEndPoint> endpoints = new();
+            foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
+            {
+                IPAddress[] addresses = EnumerateAddresses( broadcastIP );
+                Logger.Writer.LogVerbose( $"{nameof( ListCoreDevicesEndpoints )} scanning {addresses.Length} addresses at {broadcastIP}" );
+                endpoints.AddRange( ListCoreDevicesEndpoints( addresses, connectTimeout, startEmbeddedPortmapService, true ) );
+                startEmbeddedPortmapService = false;
+            }
+            return endpoints;
+        }
+        else
+        {
+            IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
+            Logger.Writer.LogVerbose( $"{nameof( ListCoreDevicesEndpoints )} scanning {addresses.Length} addresses at {broadcastAddress}" );
+            return ListCoreDevicesEndpoints( addresses, connectTimeout, startEmbeddedPortmapService, true );
+        }
     }
 
     /// <summary>
@@ -105,14 +170,34 @@ public class DeviceExplorer
     /// which might include a broadcast address (255) as a host address, such as in 192.168.1.255.
     /// </summary>
     /// <remarks>   2023-02-01. </remarks>
-    /// <param name="broadcastAddress">             The broadcast address. </param>
+    /// <param name="broadcastAddress">             The broadcast address or <see langword="null"/>
+    ///                                             or <see cref="IPAddress.Any"/>(0.0.0.0) to scan all local
+    ///                                             inter networks. </param>
     /// <param name="connectTimeout">               The timeout in milliseconds. </param>
     /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
     /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPAddress"/> </returns>
     public static List<IPAddress> ListCoreDevicesAddresses( IPAddress broadcastAddress, int connectTimeout, bool startEmbeddedPortmapService )
     {
-        IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
-        return ListCoreDevicesAddresses( addresses, connectTimeout, startEmbeddedPortmapService );
+        // IPAddress does not override '==', which implements reference equality. Must use Equals()
+
+        if ( broadcastAddress is null || broadcastAddress.Equals( IPAddress.Any ))
+        {
+            List<IPAddress> ips = new();
+            foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
+            {
+                IPAddress[] addresses = EnumerateAddresses( broadcastIP );
+                Logger.Writer.LogVerbose( $"{nameof( ListCoreDevicesAddresses )} scanning {addresses.Length} addresses at {broadcastIP}" );
+                ips.AddRange( ListCoreDevicesAddresses( addresses, connectTimeout, startEmbeddedPortmapService ) );
+                startEmbeddedPortmapService = false;
+            }
+            return ips;
+        }
+        else
+        {
+            IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
+            Logger.Writer.LogVerbose( $"{nameof( ListCoreDevicesAddresses )} scanning {addresses.Length} addresses at {broadcastAddress}" );
+            return ListCoreDevicesAddresses( addresses, connectTimeout, startEmbeddedPortmapService );
+        }
     }
 
     /// <summary>
@@ -131,13 +216,18 @@ public class DeviceExplorer
             using OncRpcEmbeddedPortmapServiceStub epm = DeviceExplorer.StartEmbeddedPortmapService();
         }
 
-        List<IPAddress> ipAddresses = new();
+        List<IPAddress> ips = new();
         foreach ( IPAddress address in addresses )
         {
             if ( DeviceExplorer.PortmapPingHost( address, connectTimeout ) )
-                ipAddresses.Add( address );
+                ips.Add( address );
         }
-        return ipAddresses;
+        foreach ( IPAddress host in GetLocalInterNetworkAddresses() )
+        {
+            if ( ips.Contains( host ) ) _ = ips.Remove( host );
+        }
+
+        return ips;
     }
 
     /// <summary>
@@ -180,6 +270,9 @@ public class DeviceExplorer
     /// <returns>   The port on which a device is listening (if value > 0 ). </returns>
     public static int GetCoreDevicePortNumber( IPAddress host, int connectTimeout )
     {
+        // exclude the host addresses
+        if ( GetLocalInterNetworkAddresses().Contains( host ) ) return 0;
+
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
         using OncRpcPortmapClient pmapClient = new( host, OncRpcProtocol.OncRpcTcp, connectTimeout );
@@ -191,12 +284,46 @@ public class DeviceExplorer
 
     #endregion 
 
-    #region " enumerate registered servers "
+    #region " registered servers on the network "
+
+    /// <summary>
+    /// Enumerate the endpoints or registered servers on the specified <paramref name="broadcastAddress"/>
+    /// which might include a broadcast address (255) as a host address, such as in 192.168.1.255.
+    /// </summary>
+    /// <param name="broadcastAddress">             The broadcast address or <see langword="null"/>
+    ///                                             or <see cref="IPAddress.Any"/>(0.0.0.0) to scan all local
+    ///                                             inter networks. </param>
+    /// <param name="timeout">                      The timeout in milliseconds. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
+    public static List<IPEndPoint> EnumerateRegisteredServers( IPAddress broadcastAddress, int timeout, bool startEmbeddedPortmapService )
+    {
+        // IPAddress does not override '==', which implements reference equality. Must use Equals()
+
+        if ( broadcastAddress is null || broadcastAddress.Equals( IPAddress.Any ) )
+        {
+            List<IPEndPoint> endpoints = new();
+            foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
+            {
+                IPAddress[] addresses = EnumerateAddresses( broadcastIP );
+                Logger.Writer.LogVerbose( $"{nameof( EnumerateRegisteredServers )} scanning {addresses.Length} addresses at {broadcastIP}" );
+                endpoints.AddRange( EnumerateRegisteredServers( addresses, timeout, startEmbeddedPortmapService ) );
+                startEmbeddedPortmapService = false;
+            }
+            return endpoints;
+        }
+        else
+        {
+            IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
+            Logger.Writer.LogVerbose( $"{nameof( EnumerateRegisteredServers )} scanning {addresses.Length} addresses at {broadcastAddress}" );
+            return EnumerateRegisteredServers( addresses, timeout, startEmbeddedPortmapService );
+        }
+    }
 
     /// <summary>
     /// Enumerate the endpoints or registered servers on the specified <paramref name="addresses"/>.
     /// </summary>
-    /// <param name="addresses">                        The hosts. </param>
+    /// <param name="addresses">                    The addresses. </param>
     /// <param name="timeout">                      The timeout in milliseconds. </param>
     /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
     /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
@@ -209,26 +336,11 @@ public class DeviceExplorer
             using OncRpcEmbeddedPortmapServiceStub epn = DeviceExplorer.StartEmbeddedPortmapService();
         }
 
-        // enumerate the listening devices.
-        return EnumerateRegisteredServers( addresses, timeout );
-    }
-
-    /// <summary>
-    /// Enumerate the registered servers on the specified <paramref name="hosts"/>.
-    /// </summary>
-    /// <param name="hosts">    The hosts. </param>
-    /// <param name="timeout">  The timeout in milliseconds. </param>
-    /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
-    public static List<IPEndPoint> EnumerateRegisteredServers( IEnumerable<IPAddress> hosts, int timeout )
-    {
         List<IPEndPoint> registeredDevices = new();
 
-        foreach ( IPAddress host in hosts )
+        foreach ( IPAddress host in addresses )
         {
-            foreach ( var registeredDevice in EnumerateRegisteredServers( host, timeout ) )
-            {
-                registeredDevices.Add( registeredDevice );
-            }
+            registeredDevices.AddRange( EnumerateRegisteredServers( host, timeout ) );
         }
 
         return registeredDevices;
@@ -243,13 +355,24 @@ public class DeviceExplorer
     {
         List<IPEndPoint> endpoints = new();
 
+        // exclude the host addresses
+
+        if ( GetLocalInterNetworkAddresses().Contains( host ) ) return endpoints;
+
+        // skip if the portmap service is not registered on the host
+
+        if ( !Paping( new IPEndPoint( host, OncRpcPortmapConstants.OncRpcPortmapPortNumber ) ) )
+            return endpoints;
+
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
-        using OncRpcPortmapClient pmapClient = new( host, OncRpcProtocol.OncRpcTcp, connectTimeout );
-        pmapClient.OncRpcClient!.IOTimeout = OncRpcTcpClient.IOTimeoutDefault;
+
+        using OncRpcPortmapClient tcpPmapClient = new( host, OncRpcProtocol.OncRpcTcp, connectTimeout );
+        tcpPmapClient.OncRpcClient!.IOTimeout = OncRpcTcpClient.IOTimeoutDefault;
 
         // Now dump the current list of registered servers.
-        OncRpcServerIdentifierCodec[] registeredServers = pmapClient.ListRegisteredServers(); ;
+
+        OncRpcServerIdentifierCodec[] registeredServers = tcpPmapClient.ListRegisteredServers(); ;
         foreach ( OncRpcServerIdentifierCodec registeredServer in registeredServers )
         {
             if ( registeredServer.Port > 0 ) { endpoints.Add( new IPEndPoint(host, registeredServer.Port) ); }
@@ -257,14 +380,14 @@ public class DeviceExplorer
         return endpoints;
     }
 
-    #endregion
+#endregion
 
-    #region " socket "
+#region " socket "
 
     /// <summary>   Pings port. </summary>
     /// <param name="ipv4Address">          The IPv4 address. </param>
-    /// <param name="portNumber">           (Optional) The port number. </param>
-    /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds. </param>
+    /// <param name="portNumber">           (Optional) The port number [5025]. </param>
+    /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds [10]. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     public static bool Paping( IPAddress ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
     {
@@ -273,8 +396,8 @@ public class DeviceExplorer
 
     /// <summary>   Pings port. </summary>
     /// <param name="ipv4Address">          The IPv4 address. </param>
-    /// <param name="portNumber">           (Optional) The port number. </param>
-    /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds. </param>
+    /// <param name="portNumber">           (Optional) The port number [5025]. </param>
+    /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds [10]. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     public static bool Paping( string ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
     {
@@ -350,7 +473,7 @@ public class DeviceExplorer
         return pingable;
     }
 
-    #endregion
+#endregion
 
 }
 

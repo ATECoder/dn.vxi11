@@ -30,7 +30,7 @@ public class LoopbackDeviceExplorerTests
             _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
             _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
 
-            Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.ElapsedMilliseconds:0} ms" );
+            Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
         }
         catch ( Exception ex )
         {
@@ -74,7 +74,7 @@ public class LoopbackDeviceExplorerTests
         if ( sender is Ieee488SingleClientMockServer ) name = nameof( Ieee488SingleClientMockServer );
         if ( sender is OncRpcServerStubBase ) name = nameof( OncRpcServerStubBase );
 
-        Logger.Writer.LogError( $"Thread exception occurred at {name} instance", e.Exception );
+        Logger.Writer.LogError( $"{name}  encountered an exception during an asynchronous operation", e.Exception );
     }
 
 
@@ -104,7 +104,7 @@ public class LoopbackDeviceExplorerTests
         Stopwatch sw = Stopwatch.StartNew();
         IPAddress host = IPAddress.Loopback;
         Assert.IsTrue( DeviceExplorer.PortmapPingHost( host ), $"port map at {IPAddress.Loopback} should reply to a ping" );
-        Logger.Writer.LogInformation( $"{host} portmap pinged in {sw.ElapsedMilliseconds:0} ms." );
+        Logger.Writer.LogInformation( $"{host} portmap pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms." );
     }
 
     #endregion

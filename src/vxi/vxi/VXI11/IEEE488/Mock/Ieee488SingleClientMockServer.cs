@@ -48,7 +48,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         this._writeMessage = string.Empty;
         this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
         this.MaxReceiveLength = Ieee488Client.MaxReceiveLengthDefault;
-        this.InterruptAddress = IPAddress.None;
+        this.InterruptAddress = IPAddress.Any;
         this.DeviceLink = new DeviceLink();
     }
 
@@ -315,7 +315,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
     public virtual void Interrupt()
     {
-        if ( this.InterruptClient is null && this.InterruptEnabled && this.InterruptAddress is not null && this.InterruptAddress != IPAddress.None )
+        if ( this.InterruptClient is null && this.InterruptEnabled && this.InterruptAddress is not null && this.InterruptAddress != IPAddress.Any )
         {
             if ( this.InterruptConnectTimeout == 0 ) this.InterruptConnectTimeout = OncRpcTcpClient.ConnectTimeoutDefault;
             if ( this.InterruptTransmitTimeout == 0 ) this.InterruptTransmitTimeout = OncRpcTcpClient.TransmitTimeoutDefault;
@@ -1020,7 +1020,9 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         // get the write command.
         string cmd = this.CharacterEncoding.GetString( deviceWriteParameters.GetData() );
         Logger.Writer.LogVerbose( $"link ID: {deviceWriteParameters.Link.LinkId} -> Received：{cmd}" );
-        DeviceWriteResp result = new();
+        DeviceWriteResp result = new() {
+            Size = deviceWriteParameters.GetData().Length
+        };
 
         // holds one or more SCPI commands each with its arguments
         string[] scpiCommands = cmd.Split( new char[] { '\n', '\r', ';' }, StringSplitOptions.RemoveEmptyEntries );

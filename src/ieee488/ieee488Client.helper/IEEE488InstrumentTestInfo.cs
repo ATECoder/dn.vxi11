@@ -42,7 +42,7 @@ public static class IEEE488InstrumentTestInfo
         string ipv4Address = _instrumentInfo[instrument].IPv4Address;
         if ( !DeviceExplorer.Paping( ipv4Address, portNumber, ( int ) connectionTimeout.TotalMilliseconds ) )
         {
-            QueryInfo = $"Attempt to establish a TCP connection with the {instrument} at {ipv4Address}:{portNumber} aborted after {connectionTimeout.TotalMilliseconds:0}ms";
+            QueryInfo = $"Attempt to establish a TCP connection with the {instrument} at {ipv4Address}:{portNumber} aborted after {connectionTimeout.TotalMilliseconds:0.0} ms";
             return false;
         }
         return true;
@@ -67,7 +67,7 @@ public static class IEEE488InstrumentTestInfo
         int interQueryDelayMs = _instrumentInfo[instrument].InterQueryDelay;
         string ipv4Address = _instrumentInfo[instrument].IPv4Address;
 
-        QueryInfo = $"{instrument} Delays: Read: {readAfterWriteDelay.TotalMilliseconds:0}ms; Write: {interQueryDelayMs}ms";
+        QueryInfo = $"{instrument} Delays: Read: {readAfterWriteDelay.TotalMilliseconds:0.0} ms; Write: {interQueryDelayMs}ms";
 
         System.Text.StringBuilder builder = new();
         using var vxi11Client = new isr.VXI11.IEEE488.Ieee488Client();
@@ -110,7 +110,7 @@ public static class IEEE488InstrumentTestInfo
         int interQueryDelayMs = _instrumentInfo[instrument].InterQueryDelay;
         string ipv4Address = _instrumentInfo[instrument].IPv4Address;
 
-        QueryInfo = $"{instrument} Delays: Read: {readAfterWriteDelay.TotalMilliseconds:0}ms; Write: {interQueryDelayMs}ms";
+        QueryInfo = $"{instrument} Delays: Read: {readAfterWriteDelay.TotalMilliseconds:0.0} ms; Write: {interQueryDelayMs}ms";
 
         System.Text.StringBuilder builder = new();
         using var vxi11Client = new isr.VXI11.IEEE488.Ieee488Client();

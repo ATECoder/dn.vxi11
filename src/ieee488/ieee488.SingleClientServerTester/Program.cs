@@ -39,7 +39,7 @@ static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
     if ( sender is cc.isr.VXI11.IEEE488.Mock.Ieee488SingleClientMockServer ) name = nameof( cc.isr.VXI11.IEEE488.Mock.Ieee488SingleClientMockServer );
     if ( sender is cc.isr.ONC.RPC.Server.OncRpcServerStubBase ) name = nameof( cc.isr.ONC.RPC.Server.OncRpcServerStubBase );
 
-    Logger.Writer.LogError( $"Thread exception occurred in {name}", e.Exception );
+    Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
 }
 
 static bool KeyDone( char doneKey )

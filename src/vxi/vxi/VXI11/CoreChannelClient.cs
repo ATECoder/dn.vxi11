@@ -183,6 +183,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceWriteResp"/>. </returns>
     public DeviceWriteResp DeviceWrite( DeviceWriteParms request )
     {
+        this.Client!.IOTimeout = 30000;
         DeviceWriteResp result = new();
         this.Client?.Call( ( int ) Vxi11Message.DeviceWriteProcedure, Vxi11ProgramConstants.CoreVersion, request, result );
         return result;

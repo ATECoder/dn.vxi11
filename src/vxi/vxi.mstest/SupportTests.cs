@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Sockets;
 
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.EnumExtensions;
@@ -91,13 +92,20 @@ public class SupportTests
         SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "1.1.1.0" ) );
     }
 
-    /// <summary>   Gets local broadcast addresses. </summary>
-    /// <returns>   An array of IP address. </returns>
-    public static IPAddress[] GetLocalBroadcastAddresses()
+    /// <summary>   Gets local inter network (IPv4) addresses. </summary>
+    /// <returns>   An array of IPv4 addresses. </returns>
+    public static IPAddress[] GetLocalInterNetworkAddresses()
     {
         IPAddress[] localIPs = Dns.GetHostAddresses( Dns.GetHostName() );
+        return localIPs.Where( ip => ip.AddressFamily == AddressFamily.InterNetwork ).ToArray();
+    }
+
+    /// <summary>   Gets local broadcast addresses. </summary>
+    /// <returns>   An array of IPv4 broadcast addresses. </returns>
+    public static IPAddress[] GetLocalBroadcastAddresses()
+    {
         List<IPAddress> ipv4s = new();
-        foreach ( IPAddress ip in localIPs )
+        foreach ( IPAddress ip in GetLocalInterNetworkAddresses() )
         {
             if ( ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork )
             {
@@ -109,30 +117,60 @@ public class SupportTests
         return ipv4s.ToArray();
     }
 
+    /// <summary>   (Unit Test Method) IP address should get local broadcast addresses. </summary>
+    /// <remarks> 
+    /// <code>
+    /// Standard Output: 
+    ///    2023-02-02 17:38:03.191,cc.isr.VXI11.MSTest.SupportTests.SupportTests
+    ///    192.168.4.255
+    ///    192.168.0.255
+    /// </code>
+    /// </remarks>
     [TestMethod]
     public void IPAddressShouldGetLocalBroadcastAddresses()
     {
         IPAddress[] localIPs = GetLocalBroadcastAddresses();
-        foreach ( IPAddress ip in localIPs )
-        {
-            Logger.Writer.LogVerbose( ip.ToString() );
-        }
+        var s = string.Join( Environment.NewLine, localIPs.Select( x => $"{x}" ).ToArray() );
+        Console.WriteLine( s );
     }
 
+    /// <summary>   (Unit Test Method) IP address should get local IPv4 addresses. </summary>
+    /// <remarks>   
+    /// <code>
+    /// Standard Output: 
+    ///    2023-02-02 17:40:42.287,cc.isr.VXI11.MSTest.SupportTests.SupportTests
+    ///    192.168.4.28
+    ///    192.168.0.40
+    /// </code>
+    /// </remarks>
     [TestMethod]
     public void IPAddressShouldGetLocalIPv4Addresses()
     {
-        IPAddress[] localIPs = Dns.GetHostAddresses( Dns.GetHostName() );
-        foreach ( IPAddress ip in localIPs)
-        {
-            if ( ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork )
-                Logger.Writer.LogVerbose( ip.ToString() );
-
-        }
+        IPAddress[] localIPs = GetLocalInterNetworkAddresses();
+        var s = string.Join( Environment.NewLine, localIPs.Select( x => $"{x}" ).ToArray() );
+        Console.WriteLine( s );
     }
 
-
-
+    /// <summary>   (Unit Test Method) IP address should get local addresses. </summary>
+    /// <remarks>   
+    /// <code>
+    /// Standard Output: 
+    ///    2023-02-02 17:41:13.178,cc.isr.VXI11.MSTest.SupportTests.SupportTests
+    ///    fe80::a91e:10bb:6315:822c%7
+    ///    fe80::fcf9:d92f:1f6c:7cf%8
+    ///    192.168.4.28
+    ///    192.168.0.40
+    ///    fdf9:18a3:7260:1:441d:91e7:3481:2638
+    ///    fdf9:18a3:7260:1:1206:b71a:bb4f:334
+    /// </code>
+    /// </remarks>
+    [TestMethod]
+    public void IPAddressShouldGetLocalAddresses()
+    {
+        IPAddress[] localIPs = Dns.GetHostAddresses( Dns.GetHostName() );
+        var s = string.Join( Environment.NewLine, localIPs.Select( x => $"{x}" ).ToArray() );
+        Console.WriteLine( s );
+    }
 
     #endregion
 

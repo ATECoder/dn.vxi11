@@ -1,4 +1,6 @@
 
+using System.Net;
+
 namespace cc.isr.VXI11.LXI.Discover;
 
 /// <summary>   Command line arguments parser. </summary>
@@ -20,7 +22,7 @@ internal class CommandLineParser
 
     public static int TimeoutDefault { get; set; } = 100;
 
-    public static string BroadcastAddressDefault { get; set; } = "192.168.0.255";
+    public static string BroadcastAddressDefault { get; set; } = IPAddress.Any.ToString();
 
     public static string DefaultArgs = $"{CommandLineParser.TimeoutKey}{EqualsSign}{TimeoutDefault};{CommandLineParser.IPKey}{EqualsSign}{BroadcastAddressDefault}";
     public static string Usage => $"Usage: ./{nameof( LxiDiscover )} {CommandLineParser.TimeoutKey}{EqualsSign}<timeout_milliseconds>{Delimiter}{CommandLineParser.IPKey}{EqualsSign}<address>{Delimiter}{CommandLineParser.HelpKey}";
@@ -41,7 +43,7 @@ internal class CommandLineParser
     /// <returns>   The string. </returns>
     public string GetString( string key )
     {
-        return this._argumentDix.ContainsKey( key ) ? this._argumentDix[key] : string.Empty;
+        return this._argumentDix.TryGetValue( key, out string? value ) ? value : string.Empty;
     }
 
     /// <summary>   Gets a long. </summary>
@@ -49,7 +51,7 @@ internal class CommandLineParser
     /// <returns>   The long. </returns>
     public long GetLong( string key )
     {
-        return this._argumentDix.ContainsKey( key ) ? Convert.ToInt64( this._argumentDix[key] ) : 0;
+        return this._argumentDix.TryGetValue( key, out string? value ) ? Convert.ToInt64( value ) : 0;
     }
 
     /// <summary>   Gets a double. </summary>
@@ -57,7 +59,7 @@ internal class CommandLineParser
     /// <returns>   The double. </returns>
     public double GetDouble( string key )
     {
-        return this._argumentDix.ContainsKey( key ) ? Convert.ToDouble( this._argumentDix[key] ) : 0;
+        return this._argumentDix.TryGetValue( key, out string? value ) ? Convert.ToDouble( value ) : 0;
     }
 
     /// <summary>   Parse arguments. </summary>

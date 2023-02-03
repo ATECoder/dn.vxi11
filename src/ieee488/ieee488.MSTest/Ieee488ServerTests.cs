@@ -97,7 +97,7 @@ public class Ieee488ServerTests
 
     internal static void OnThreadException( ThreadExceptionEventArgs e )
     {
-        Logger.Writer.LogError( $"Thread exception occurred", e.Exception );
+        Logger.Writer.LogError( $"An exception occurred during an asynchronous operation", e.Exception );
     }
 
     internal static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
@@ -106,7 +106,7 @@ public class Ieee488ServerTests
         if ( sender is Ieee488SingleClientMockServer ) name = nameof( Ieee488SingleClientMockServer );
         if ( sender is OncRpcServerStubBase ) name = nameof( OncRpcServerStubBase );
 
-        Logger.Writer.LogError( $"Thread exception occurred at {name} instance", e.Exception );
+        Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
     }
 
     private static void OnServerPropertyChanged( object? sender, PropertyChangedEventArgs e )

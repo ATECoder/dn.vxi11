@@ -83,5 +83,5 @@ static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
     string name = "unknown";
     if ( sender is cc.isr.VXI11.IEEE488.Ieee488Client ) name = nameof( cc.isr.VXI11.IEEE488.Ieee488Client );
 
-    Logger.Writer.LogError( $"Thread exception occurred in {name}", e.Exception );
+    Logger.Writer.LogError( $"{name}  encountered an exception during an asynchronous operation", e.Exception );
 }

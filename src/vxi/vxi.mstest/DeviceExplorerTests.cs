@@ -11,7 +11,6 @@ namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a device explorer tests. </summary>
 [TestClass]
-[TestCategory( "192.168.0.xxx" )]
 public class DeviceExplorerTests
 {
 
@@ -28,12 +27,12 @@ public class DeviceExplorerTests
             Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             DeviceExplorerTests.EnumerateHosts();
 
-            Logger.Writer.LogInformation( $"starting the embedded portmap service" );
+            Logger.Writer.LogInformation( $"Starting the embedded portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
             _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
 
-            Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.ElapsedMilliseconds:0} ms" );
+            Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
         }
         catch ( Exception ex )
         {
@@ -78,24 +77,10 @@ public class DeviceExplorerTests
         if ( sender is Ieee488SingleClientMockServer ) name = nameof( Ieee488SingleClientMockServer );
         if ( sender is OncRpcServerStubBase ) name = nameof( OncRpcServerStubBase );
 
-        Logger.Writer.LogError( $"Thread exception occurred at {name} instance", e.Exception );
+        Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
     }
 
 
-    #endregion
-
-    #region " helpers "
-
-    /// <summary>   Gets the host. </summary>
-    /// <returns>   The host. </returns>
-    internal static IPAddress? GetHost()
-    {
-        IPHostEntry host = Dns.GetHostEntry( Dns.GetHostName() );
-        var ipAddress = host
-            .AddressList
-            .FirstOrDefault( ip => ip.AddressFamily == AddressFamily.InterNetwork );
-        return ipAddress;
-    }
     #endregion
 
     #region " port map tests "
@@ -134,13 +119,19 @@ public class DeviceExplorerTests
                                     "192.168.1.100",
                                     "" };
 
-    private static readonly string[] _nonRespondingHosts = new string[] {
-                                    "192.168.0.152",
-                                    "192.168.1.100",
-                                    "" };
+    /// <summary>   Non responding hosts. </summary>
+    /// <returns>   A string[]. </returns>
+    public static string[] NonRespondingHosts()
+    {
+        return new string[] { "192.168.0.152",
+                              "192.168.1.100",
+                              "" };
+    }
 
 
-    private static readonly List<IPAddress> _pingedHosts = new();
+    /// <summary>   Gets the pinged hosts. </summary>
+    /// <value> The pinged hosts. </value>
+    public static List<IPAddress> PingedHosts { get; } = new();
 
 
     /// <summary>   Adds a host if ping portmap service to 'timeout'. </summary>
@@ -153,15 +144,15 @@ public class DeviceExplorerTests
         Logger.Writer.LogInformation( $"Portmap ping {host}" );
         if ( DeviceExplorer.PortmapPingHost( IPAddress.Parse( host ), timeout ) )
         {
-            _pingedHosts.Add( IPAddress.Parse( host ) );
-            Logger.Writer.LogInformation( $"Added {host}; portmap pinged in {sw.ElapsedMilliseconds:0} ms." );
+            PingedHosts.Add( IPAddress.Parse( host ) );
+            Logger.Writer.LogInformation( $"Added {host}; portmap pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms." );
         }
     }
 
     /// <summary>   Enumerate hosts. </summary>
     public static void EnumerateHosts()
     {
-        Logger.Writer.LogInformation( $"enumerating hosts: " );
+        Logger.Writer.LogInformation( $"Enumerating hosts: " );
         foreach ( string host in _hosts )
         {
             if ( string.IsNullOrEmpty( host ) ) continue;
@@ -170,7 +161,7 @@ public class DeviceExplorerTests
             {
                 if ( DeviceExplorer.PingHost( host, 10 ) )
                 {
-                    _pingedHosts.Add( IPAddress.Parse( host ) );
+                    PingedHosts.Add( IPAddress.Parse( host ) );
                 }
             }
             catch ( Exception )
@@ -187,24 +178,30 @@ public class DeviceExplorerTests
 
     /// <summary>   (Unit Test Method) the device explorer should ping the hosts using the portmap service. </summary>
     /// <remarks>
-    /// <list type="bullet">2450 (152), 6510 (154), 7510 (144) are on <item>
-    /// 2023:01:20:12:01:08.942 pinging Portmap service: </item><item>
-    /// Pinging 192.168.0.144; done in 1 ms. </item><item>
-    /// Pinging 192.168.0.152; done in 0 ms. </item><item>
-    /// Pinging 192.168.0.154; done in 0 ms. </item></list>
+    /// 2450 (152) 6510 (154) and 7510 (144) are on.
+    /// Standard Output: 
+    ///   2023-02-02 18:18:06.677,pinging Portmap service:
+    ///   2023-02-02 18:18:06.678,Pinging 192.168.0.144
+    ///   2023-02-02 18:18:06.678,192.168.0.144 portmap pinged in 0.5 ms.
+    ///   2023-02-02 18:18:06.679,Pinging 192.168.0.152
+    ///   2023-02-02 18:18:06.679,192.168.0.152 portmap pinged in 0.4 ms.
+    ///   2023-02-02 18:18:06.680,Pinging 192.168.0.154
+    ///   2023-02-02 18:18:06.680,192.168.0.154 portmap pinged in 0.4 ms.
+    /// </code>
     /// </remarks>
     [TestMethod]
+    [TestCategory( "192.168.0.xxx" )]
     public void DeviceExplorerShouldPingHosts()
     {
         Logger.Writer.LogInformation( $"pinging Portmap service: " );
-        foreach ( IPAddress host in _pingedHosts )
+        foreach ( IPAddress host in PingedHosts )
         {
             if ( DeviceExplorer.PingHost( host, 10 ) )
             {
                 Logger.Writer.LogInformation( $"Pinging {host}" );
                 Stopwatch sw = Stopwatch.StartNew();
                 Assert.IsTrue( DeviceExplorer.PortmapPingHost( host, 10 ), $"port map at {host} should reply to a ping" );
-                Logger.Writer.LogInformation( $"{host} portmap pinged in {sw.ElapsedMilliseconds:0} ms." );
+                Logger.Writer.LogInformation( $"{host} portmap pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms." );
             }
             else
             {
@@ -219,14 +216,25 @@ public class DeviceExplorerTests
 
     /// <summary>    (Unit Test Method) device explorer should list the endpoints of all pinged device addresses. </summary>
     /// <remarks>    
-    /// <list type="bullet">2450 (152), 6510 (154), 7510 (144) are on <item>
-    /// cc.isr.VXI11.MSTest.DeviceExplorerTests.DeviceExplorerTests </item><item>
-    /// 2023:01:20:11:52:01.178 starting cc.isr.VXI11.MSTest.DeviceExplorerTests.DeviceExplorerTests </item><item>
-    /// 2023:01:20:11:52:01.182 enumerating hosts: </item><item>
-    /// DeviceExplorer.ListCoreDevices found 3 Core VXI-11 device(s) in 11 ms:</item><item>
-    /// Pinging 192.168.0.144:1024; in 40 ms </item><item>
-    /// Pinging 192.168.0.152:1024; in 55 ms </item><item>
-    /// Pinging 192.168.0.154:1024; in 85 ms </item></list>
+    /// <code>
+    /// 2450 (152) 6510 (154) and 7510 (144) are on.
+    /// Standard Output: 
+    ///    2023-02-02 18:18:02.289,cc.isr.VXI11.MSTest.DeviceExplorerTests.DeviceExplorerTests
+    ///    2023-02-02 18:18:02.292,Enumerating hosts:
+    ///    2023-02-02 18:18:06.300, Starting the embedded portmap service
+    ///    2023-02-02 18:18:06.302, Checking for portmap service
+    ///    2023-02-02 18:18:06.411, No portmap service available.
+    ///    2023-02-02 18:18:06.411,Creating embedded portmap instance
+    ///    2023-02-02 18:18:06.637, Portmap service started; checked 109.4 ms.
+    ///    2023-02-02 18:18:06.637,OncRpcEmbeddedPortmapServiceStub started in 336.9 ms
+    ///    2023-02-02 18:18:06.651,DeviceExplorer.ListCoreDevicesEndpoints found 3 Core VXI-11 device( s) in 8.9 ms:
+    ///    2023-02-02 18:18:06.651,Pinging 192.168.0.144:1024
+    ///    2023-02-02 18:18:06.652,192.168.0.144:1024 port pinged in 10.3 ms
+    ///    2023-02-02 18:18:06.652,Pinging 192.168.0.152:1024
+    ///    2023-02-02 18:18:06.653,192.168.0.152:1024 port pinged in 11.1 ms
+    ///    2023-02-02 18:18:06.653,Pinging 192.168.0.154:1024
+    ///    2023-02-02 18:18:06.654,192.168.0.154:1024 port pinged in 11.7 ms
+    /// </code>
     /// </remarks>
     [TestMethod]
     [TestCategory( "192.168.0.xxx" )]
@@ -234,90 +242,80 @@ public class DeviceExplorerTests
     {
         Stopwatch sw = Stopwatch.StartNew();
 
-        var devices = DeviceExplorer.ListCoreDevicesEndpoints( _pingedHosts, 100,false, true );
+        var devices = DeviceExplorer.ListCoreDevicesEndpoints( PingedHosts, 100,false, true );
         Assert.IsNotNull( devices );
-        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevicesEndpoints )} found {devices.Count} Core VXI-11 device(s) in {sw.ElapsedMilliseconds:0} ms:" );
+        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevicesEndpoints )} found {devices.Count} Core VXI-11 device(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:" );
 
         foreach ( IPEndPoint endpoint in devices )
         {
             Logger.Writer.LogInformation( $"Pinging {endpoint}" );
             sw.Start();
             Assert.IsTrue( DeviceExplorer.Paping( endpoint ) );
-            Logger.Writer.LogInformation( $"{endpoint} pinged in {sw.ElapsedMilliseconds:0} ms" );
+            Logger.Writer.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
         }
-        Assert.AreEqual( _pingedHosts.Count, devices.Count, "Device count is expected to equal pinged hosts count." );
-    }
-
-    [TestMethod]
-    [TestCategory( "192.168.0.255" )]
-    public void DeviceExplorerShouldListDevicesEndpoints()
-    {
-        DateTime startTime = DateTime.Now;
-        Stopwatch sw = Stopwatch.StartNew();
-        List<IPEndPoint>? endpoints = DeviceExplorer.ListCoreDevicesEndpoints( IPAddress.Parse( "192.168.0.255"), 100, false );
-        Assert.IsNotNull( endpoints );
-        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevicesEndpoints )} found {endpoints.Count} Core VXI-11 device(s) in {sw.ElapsedMilliseconds:0} ms:" );
-        Assert.AreEqual( _pingedHosts.Count, endpoints.Count, "Device count is expected to equal pinged hosts count." );
-        Logger.Writer.LogInformation( $"It took {(DateTime.Now - startTime).Milliseconds:0} to list {endpoints.Count} endpoints." );
-    }
-
-    [TestMethod]
-    [TestCategory( "192.168.0.255" )]
-    public void DeviceExplorerShouldListDevicesAddresses()
-    {
-        DateTime startTime = DateTime.Now;
-        Stopwatch sw = Stopwatch.StartNew();
-        List<IPAddress>? addresses = DeviceExplorer.ListCoreDevicesAddresses( IPAddress.Parse( "192.168.0.255" ), 100, false );
-        Assert.IsNotNull( addresses );
-        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevicesEndpoints )} found {addresses.Count} Core VXI-11 device(s) in {sw.ElapsedMilliseconds:0} ms:" );
-        Assert.AreEqual( _pingedHosts.Count, addresses.Count, "Device count is expected to equal pinged hosts count." );
-        Logger.Writer.LogInformation( $"It took {(DateTime.Now - startTime).Milliseconds:0} to list {addresses.Count} endpoints." );
+        Assert.AreEqual( PingedHosts.Count, devices.Count, "Device count is expected to equal pinged hosts count." );
     }
 
     #endregion
 
-    #region " servers "
+    #region " registered servers "
 
-    /// <summary>   (Unit Test Method) device explorer should list registered servers. </summary>
-    /// <remarks> 
-    /// <list type="bullet">2450 (152), 6510 (154), 7510 (144) are on <item>
-    /// DeviceExplorer.EnumerateRegisteredServers found 4 VXI-11 registered servers(s) in 4 ms: </item><item>
-    /// Pinging 192.168.0.144:111; in 19 ms </item><item>
-    /// Pinging 192.168.0.144:1024; in 44 ms </item><item>
-    /// Pinging 192.168.0.154:111; in 60 ms </item><item>
-    /// Pinging 192.168.0.154:1024; in 75 ms  </item></list>
-    /// </remarks>
-    [TestMethod]
-    [TestCategory( "192.168.0.xxx" )]
-    public void DeviceExplorerShouldListRegisteredServers()
+    /// <summary>   Assert registered servers should ping. </summary>
+    /// <param name="endpoints">    The endpoints. </param>
+    public static void AssertRegisteredServersShouldPing( IEnumerable<IPEndPoint> endpoints )
     {
-        Stopwatch sw = Stopwatch.StartNew();
-        var servers = DeviceExplorer.EnumerateRegisteredServers( _pingedHosts, 100 );
-        Assert.IsNotNull( servers );
-        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.EnumerateRegisteredServers )} found {servers.Count} VXI-11 registered servers(s) in {sw.ElapsedMilliseconds:0} ms:" );
 
         int actualCount = 0;
-        foreach ( IPEndPoint endpoint in servers )
+        foreach ( IPEndPoint endpoint in endpoints )
         {
             Logger.Writer.LogInformation( $"Pinging {endpoint}" );
-            sw.Start();
+            Stopwatch sw = Stopwatch.StartNew();
             Assert.IsTrue( DeviceExplorer.Paping( endpoint ) );
-            Logger.Writer.LogInformation( $"{endpoint} pinged in {sw.ElapsedMilliseconds:0} ms" );
+            Logger.Writer.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
 
             if ( endpoint.Port == 111 ) { actualCount++; }
         }
 
         int expectedCount = 0;
-        foreach ( var host in _pingedHosts )
+        foreach ( var host in PingedHosts )
         {
             // count only hosts that are know to respond to the enumeration of registered servers
-            if ( !_nonRespondingHosts.Contains( host.ToString() ) )
+            if ( !NonRespondingHosts().Contains( host.ToString() ) )
             {
                 expectedCount++;
             }
         }
         Assert.AreEqual( expectedCount, actualCount, $"the number of registered servers must match the expected list or responders" );
 
+    }
+
+    /// <summary>   (Unit Test Method) device explorer should list pinged registered servers. </summary>
+    /// <remarks> 
+    /// Note that the 2450 is not registered.
+    /// <code>
+    /// 2459=0 (152) 6510 (154) and 7510 (144) are on.
+    /// Standard Output: 
+    ///   2023-02-02 18:18:06.673,DeviceExplorer.EnumerateRegisteredServers(addresses ) found 4 VXI-11 registered servers( s) in 4.2 ms
+    ///   2023-02-02 18:18:06.673,Pinging 192.168.0.144:111
+    ///   2023-02-02 18:18:06.674,192.168.0.144:111 port pinged in 0.6 ms
+    ///   2023-02-02 18:18:06.674,Pinging 192.168.0.144:1024
+    ///   2023-02-02 18:18:06.675,192.168.0.144:1024 port pinged in 0.6 ms
+    ///   2023-02-02 18:18:06.675,Pinging 192.168.0.154:111
+    ///   2023-02-02 18:18:06.675,192.168.0.154:111 port pinged in 0.6 ms
+    ///   2023-02-02 18:18:06.675,Pinging 192.168.0.154:1024
+    ///   2023-02-02 18:18:06.676,192.168.0.154:1024 port pinged in 0.5 ms
+    /// </code>
+    /// </remarks>
+    [TestMethod]
+    [TestCategory( "192.168.0.xxx" )]
+    public void DeviceExplorerShouldListPingedRegisteredServers()
+    {
+        Stopwatch sw = Stopwatch.StartNew();
+        var endpoints = DeviceExplorer.EnumerateRegisteredServers( PingedHosts, 100, false );
+        Assert.IsNotNull( endpoints );
+        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.EnumerateRegisteredServers )}( addresses ) found {endpoints.Count} VXI-11 registered servers(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
+
+        AssertRegisteredServersShouldPing( endpoints );
     }
 
     #endregion
