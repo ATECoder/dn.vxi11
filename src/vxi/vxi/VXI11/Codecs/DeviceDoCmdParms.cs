@@ -173,7 +173,7 @@ public class DeviceDoCmdParms : IXdrCodec
     public void Decode( XdrDecodingStreamBase decoder )
     {
         this.Link = new DeviceLink( decoder );
-        this.Flags =  decoder.DecodeInt().ToDeviceOperationFlags();
+        this.Flags = decoder.DecodeInt().ToDeviceOperationFlags();
         this.IOTimeout = decoder.DecodeInt();
         this.LockTimeout = decoder.DecodeInt();
         this.Cmd = decoder.DecodeInt();

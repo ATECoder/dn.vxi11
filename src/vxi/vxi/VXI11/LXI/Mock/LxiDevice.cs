@@ -1,138 +1,42 @@
-using System.Net;
 using System.Reflection;
 
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.Visa;
 using cc.isr.VXI11.Logging;
-using cc.isr.ONC.RPC.Client;
+using System.ComponentModel;
+using cc.isr.VXI11.IEEE488;
+using System.Net;
 
-namespace cc.isr.VXI11.IEEE488.Mock;
+namespace cc.isr.VXI11.LXI.Mock;
 
-/// <summary>   An IEEE488 Mock server capable of serving a single client. </summary>
-/// <remarks>   
-/// Closing a client connected to the Mock local server no longer throws an exception when destroying the link.
-/// </remarks>
-public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
+/// <summary>   A unit test amenable implementation of an LXI Device. </summary>
+public partial class LxiDevice : ILxiDevice
 {
 
     #region " construction and cleanup "
 
-    /// <summary>   Default constructor. </summary>
-    public Ieee488SingleClientMockServer() : this( null, 0 )
-    {
-    }
-
     /// <summary>   Constructor. </summary>
-    /// <param name="port"> The port number where the server will wait for incoming calls. </param>
-    public Ieee488SingleClientMockServer( int port ) : this( null, port )
-    {
-    }
-
-    public Ieee488SingleClientMockServer( IPAddress? bindAddr, int port ) : this( new Ieee488Device(), bindAddr, port )
-    {
-    }
-
-    public Ieee488SingleClientMockServer( Ieee488Device device ) : this( device, null, 0 )
-    {
-    }
-
-    /// <summary>   Constructor. </summary>
-    /// <param name="device">   current device. </param>
-    /// <param name="bindAddr"> The local Internet Address the server will bind to. </param>
-    /// <param name="port">     The port number where the server will wait for incoming calls. </param>
-    public Ieee488SingleClientMockServer( Ieee488Device device, IPAddress? bindAddr, int port ) : base( bindAddr ?? IPAddress.Any, port )
+    /// <param name="device">   An implementation of the <see cref="IEEE488.IIeee488Device"/>. </param>
+    public LxiDevice( IEEE488.IIeee488Device device )
     {
         this._device = device;
-        this.InterfaceDeviceString = string.Empty;
         this._interfaceDeviceString = string.Empty;
         this.ReadMessage = string.Empty;
         this._readMessage = string.Empty;
         this.WriteMessage = string.Empty;
         this._writeMessage = string.Empty;
-        this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
-        this.MaxReceiveLength = Ieee488Client.MaxReceiveLengthDefault;
-        this.InterruptAddress = IPAddress.Any;
+        this.CharacterEncoding = CoreChannelClient.EncodingDefault;
+        this._characterEncoding = CoreChannelClient.EncodingDefault;
         this.DeviceLink = new DeviceLink();
-    }
-
-    /// <summary>
-    /// Terminates listening if active and closes the  all transports listed in a set of server
-    /// transports. Performs application-defined tasks associated with freeing, releasing, or
-    /// resetting unmanaged resources.
-    /// </summary>
-    /// <remarks>
-    /// Allows a timeout of <see cref="P:cc.isr.ONC.RPC.Server.OncRpcServerStubBase.ShutdownTimeout" />
-    /// milliseconds for the server to stop listening before raising an exception to that effect.
-    /// </remarks>
-    /// <exception cref="AggregateException">   Thrown when an Aggregate error condition occurs. </exception>
-    /// <param name="disposing">    True to release both managed and unmanaged resources; false to
-    ///                             release only unmanaged resources. </param>
-    protected override void Dispose( bool disposing )
-    {
-        List<Exception> exceptions = new();
-        if ( disposing )
-        {
-            // dispose managed state (managed objects)
-
-            this._device = null;
-            this.DeviceLink = new DeviceLink();
-
-            AbortChannelServer? abortServer = this.AbortServer;
-            try
-            {
-                if ( abortServer is not null )
-                {
-                    using Task? task = this.DisableAbortServerAsync();
-                    task.Wait();
-                    if ( task.IsFaulted ) exceptions.Add( task.Exception );
-                }
-            }
-            catch ( Exception ex )
-            {
-                { exceptions.Add( ex ); }
-            }
-            finally
-            {
-                this.AbortServer = null;
-            }
-
-            InterruptChannelClient? interruptClient = this.InterruptClient;
-            try
-            {
-                interruptClient?.Close();
-            }
-            catch ( Exception ex )
-            {
-                exceptions.Add( ex );
-            }
-            finally
-            {
-                this.InterruptClient = null;
-            }
-
-        }
-
-        // free unmanaged resources and override finalizer
-
-        // set large fields to null
-
-        // call base dispose( bool ).
-
-        try
-        {
-            base.Dispose( disposing );
-        }
-        catch ( Exception ex )
-        { exceptions.Add( ex ); }
-        finally
-        {
-        }
-
-        if ( exceptions.Any() )
-        {
-            AggregateException aggregateException = new( exceptions );
-            throw aggregateException;
-        }
+        this._deviceLink = new DeviceLink();
+        this.MaxReceiveLength = IEEE488.Ieee488Client.MaxReceiveLengthDefault;
+        this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
+        this.OnDevicePropertiesChanges( this._device );
+        this.Host = string.Empty;
+        this._host = string.Empty;
+        this.ReadTermination = Ieee488Client.ReadTerminationDefault;
+        this.WriteTermination = Ieee488Client.WriteTerminationDefault;
+        this._writeTermination = Ieee488Client.WriteTerminationDefault;
     }
 
     #endregion
@@ -149,193 +53,79 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     }
 
     /// <summary>   Handles abort request. </summary>
-    /// <remarks>   2023-01-26. </remarks>
-    /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        Device error event information. </param>
-    private void HandleAbortRequest( object sender, DeviceErrorEventArgs e )
+    public void HandleAbortRequest( DeviceErrorEventArgs e )
     {
-        if ( this._device is null ) return;
-        e.ErrorCodeValue = this._device.Abort().ErrorCode;
-    }
-
-    protected AbortChannelServer? AbortServer { get; set; }
-
-    /// <summary>   Starts the abort server. </summary>
-    /// <remarks>
-    /// To successfully complete a <c>device_abort</c> RPC, a network instrument server SHALL: <para>
-    /// 
-    /// 1. Initiate termination of any core channel, in-progress RPC associated with the link except
-    /// destroy_link, device_enable_srq, and device_unlock. </para><para>
-    /// 
-    /// 2. Return with error set to 0, no error, to indicate successful completion </para><para>
-    /// 
-    /// The intent of this rule is to handle the <c>device_abort</c> RPC ahead of the other operations, but
-    /// due to operating system specific implementation details the timeliness cannot be guaranteed. </para>
-    /// <para>
-    /// 
-    /// The <c>device_abort</c> RPC only aborts an in-progress RPC, not a queued RPC. </para><para>
-    /// 
-    /// After replying to the <c>device_abort</c> call, the network instrument server SHALL reply to the
-    /// original in-progress call which was aborted with error set to 23, aborted.  </para><para>
-    /// 
-    /// Receiving 0 on the abort call at the network instrument client only means that the abort was
-    /// successfully delivered to the network instrument server. </para><para>
-    /// 
-    /// The <c>link id</c> parameter is compared against the active link identifiers . If none match,
-    /// <c>device_abort</c> SHALL terminate with error set to 4 invalid link identifier.  </para><para>
-    /// 
-    /// The operation of <c>device_abort</c> SHALL NOT be affected by locking  </para>
-    /// </remarks>
-    /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
-    /// <returns>   A DeviceErrorCode. </returns>
-    protected virtual void StartAbortServer()
-    {
-        if ( this.AbortServer is null )
-        {
-            this.AbortServer = new AbortChannelServer( this.IPv4Address, this.AbortPortNumber );
-            this.AbortServer.AbortRequested += this.HandleAbortRequest;
-            this.AbortServer.Run();
-        }
-    }
-
-    /// <summary>   Enables (start) the abort server asynchronously. </summary>
-    /// <remarks>   2023-01-30. </remarks>
-    /// <returns>   A Task. </returns>
-    public virtual async Task EnableAbortServerAsync()
-    {
-        await Task.Factory.StartNew( () => { this.StartAbortServer(); } )
-                .ContinueWith( failedTask => this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) ), TaskContinuationOptions.OnlyOnFaulted );
-    }
-
-    /// <summary>   The default time for waiting the abort server to stop listening. </summary>
-    public static int AbortServerDisableTimeoutDefault = 500;
-
-    /// <summary>   The abort server disable loop delay default. </summary>
-    public static int AbortServerDisableLoopDelayDefault = 5;
-
-    /// <summary>   Stops abort server. </summary>
-    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
-    /// <param name="loopDelay">    The loop delay in milliseconds. </param>
-    protected virtual void StopAbortServer( int timeout = 500, int loopDelay = 5 )
-    {
-        if ( this.AbortServer is not null && this.AbortServer.Running )
-        {
-            try
-            {
-                this.AbortServer.AbortRequested -= this.HandleAbortRequest;
-                this.AbortServer.StopRpcProcessing();
-                DateTime endT = DateTime.Now.AddMilliseconds( timeout );
-                while ( endT > DateTime.Now && this.AbortServer.Running )
-                {
-                    // allow the thread time to address the request
-                    Task.Delay( loopDelay ).Wait();
-                }
-            }
-            catch ( Exception )
-            {
-                throw;
-            }
-            finally
-            {
-                this.AbortServer.Close();
-                this.AbortServer = null;
-            }
-        }
-    }
-
-    /// <summary>   Disables (stops) the abort server asynchronously. </summary>
-    /// <remarks>   2023-01-28. </remarks>
-    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
-    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
-    public virtual async Task DisableAbortServerAsync( int timeout = 500, int loopDelay = 5 )
-    {
-        await Task.Factory.StartNew( () => { this.StopAbortServer( timeout, loopDelay ); } )
-                .ContinueWith( failedTask => this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) ), TaskContinuationOptions.OnlyOnFaulted );
-    }
-
-    /// <summary>   Disables the abort server synchronously. </summary>
-    /// <remarks>   2023-01-30. </remarks>
-    /// <exception cref="Exception">    Thrown when an exception error condition occurs. </exception>
-    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
-    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
-    public virtual void DisableAbortServerSync( int timeout = 500, int loopDelay = 5 )
-    {
-        AbortChannelServer? abortServer = this.AbortServer;
-        try
-        {
-            if ( abortServer is not null )
-            {
-                using Task? task = this.DisableAbortServerAsync( timeout, loopDelay );
-                task.Wait();
-                if ( task.IsFaulted ) throw task.Exception;
-            }
-        }
-        catch ( Exception )
-        {
-            throw;
-        }
-        finally
-        {
-            this.AbortServer = null;
-        }
+        e.ErrorCodeValue = this._device is null ? DeviceErrorCode.DeviceNotAccessible : this._device.Abort().ErrorCode;
     }
 
     #endregion
 
     #region " Interrupt port and client "
 
-    /// <summary>   The interrupt address as set when getting the <see cref="CreateIntrChan(DeviceRemoteFunc)"/> RPC. </summary>
-    private IPAddress InterruptAddress { get; set; }
+    private bool _iInterruptEnabled;
+    /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
+    /// <value> True if interrupt enabled, false if not. </value>
+    public bool InterruptEnabled
+    {
+        get => this._iInterruptEnabled;
+        set => _ = this.SetProperty( ref this._iInterruptEnabled, value );
+    }
 
-    private bool InterruptEnabled { get; set; }
+    /// <summary>   Event queue for all listeners interested in ServiceRequested events. </summary>
+    public event EventHandler<cc.isr.VXI11.Vxi11EventArgs>? ServiceRequested;
 
-    /// <summary>   the Handle of the interrupt as received when getting the <see cref="DeviceEnableSrq(DeviceEnableSrqParms)"/> RPC. </summary>
-    private byte[] _interruptHandle = new byte[40];
+    /// <summary>   Override this method to handler the VXI-11 event. </summary>
+    /// <param name="e">    Event information to send to registered event handlers. </param>
+    protected virtual void OnServiceRequested( Vxi11EventArgs e )
+    {
+        // TODO: add device code here.
 
-    private int InterruptTransmitTimeout { get; set; }
+        if ( e is not null ) ServiceRequested?.Invoke( this, e );
 
-    /// <summary>   Gets or sets the interrupt connect timeout. </summary>
-    /// <value> The interrupt connect timeout. </value>
-    public int InterruptConnectTimeout { get; set; }
+    }
 
-    /// <summary>   Gets or sets the interrupt i/o timeout. </summary>
-    /// <value> The interrupt i/o timeout. </value>
-    public int InterruptIOTimeout { get; set; }
+    /// <summary>   Gets or sets the identifier of the client. </summary>
+    /// <value> The identifier of the client. </value>
+    public int ClientId { get; set; }
 
-    /// <summary>   Gets or sets the Interrupt port. </summary>
-    /// <value> The Interrupt port. </value>
-    private int InterruptPort { get; set; }
+    /// <summary>   Filters and passes on the service request. </summary>
+    /// <param name="sender">   Source of the event. </param>
+    /// <param name="e">        VXI-11 event information. </param>
+    private void HandleServiceRequest( object sender, Vxi11EventArgs e )
+    {
+        if ( e.ServiceRequestCodec.ClientId == this.ClientId ) { this.OnServiceRequested( e ); }
+    }
 
-    /// <summary>   Gets or sets the interrupt protocol. </summary>
-    /// <value> The interrupt protocol. </value>
-    private TransportProtocol InterruptProtocol { get; set; }
+    /// <summary>   Filters and passes on the service request. </summary>
+    /// <remarks>   2023-02-03. </remarks>
+    /// <param name="request">  The request of type <see cref="Codecs.CreateLinkParms"/> to use with
+    ///                         the remote procedure call. </param>
+    public virtual void HandleServiceRequest( DeviceSrqParms request )
+    {
+        if ( request == null ) return;
+        this.OnServiceRequested( new Vxi11EventArgs( request.GetHandle() ) );
+    }
 
-    /// <summary>   Gets or sets the <see cref="InterruptChannelClient"/> Interrupt client. </summary>
-    /// <value> The Interrupt client. </value>
-    protected InterruptChannelClient? InterruptClient { get; set; }
+    /// <summary>
+    /// Emulates calling remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
+    /// </summary>
+    /// <param name="handle">   The handle as it was received from the Core device. </param>
+    public virtual void DeviceIntrSrq( byte[] handle )
+    {
+        DeviceSrqParms request = new( handle ) {
+        };
+        this.OnServiceRequested( new Vxi11EventArgs( request.GetHandle() ) );
+    }
 
     /// <summary>   Asynchronous Interrupt an in-progress call. </summary>
-    /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
-    public virtual void Interrupt()
+    /// <param name="handle">   The handle as it was received from the Core device. </param>
+    public virtual void Interrupt( byte[] handle )
     {
-        if ( this.InterruptClient is null && this.InterruptEnabled && this.InterruptAddress is not null && this.InterruptAddress != IPAddress.Any )
-        {
-            if ( this.InterruptConnectTimeout == 0 ) this.InterruptConnectTimeout = OncRpcTcpClient.ConnectTimeoutDefault;
-            if ( this.InterruptTransmitTimeout == 0 ) this.InterruptTransmitTimeout = OncRpcTcpClient.TransmitTimeoutDefault;
-            if ( this.InterruptIOTimeout == 0 ) this.InterruptIOTimeout = OncRpcTcpClient.IOTimeoutDefault;
+        // emulate the client DeviceIntrSrq( this._interruptHandle );
 
-            this.InterruptClient = new InterruptChannelClient( this.InterruptAddress, this.InterruptPort,
-                                                               this.InterruptProtocol == TransportProtocol.Udp ? OncRpcProtocol.OncRpcUdp : OncRpcProtocol.OncRpcTcp,
-                                                               this.InterruptConnectTimeout );
-
-            // set the timeouts of the client.
-            this.InterruptClient.Client!.TransmitTimeout = this.InterruptTransmitTimeout;
-            this.InterruptClient.Client!.IOTimeout = this.InterruptIOTimeout;
-        }
         if ( this.InterruptEnabled )
-        {
-            this.InterruptClient?.DeviceIntrSrq( this._interruptHandle );
-        }
+            this.DeviceIntrSrq( handle );
     }
 
     #endregion
@@ -345,7 +135,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     private string _writeMessage;
     /// <summary>   Gets or sets a message that was sent to the device. </summary>
     /// <value> The message that was sent to the device. </value>
-    public string WriteMessage
+    public string WriteMessage 
     {
         get => this._writeMessage;
         set => _ = this.SetProperty( ref this._writeMessage, value );
@@ -360,41 +150,158 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         set => _ = this.SetProperty( ref this._readMessage, value );
     }
 
+    private DeviceErrorCode _lastDeviceError;
+    /// <summary>   Gets or sets the last device error. </summary>
+    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
+    public DeviceErrorCode LastDeviceError
+    {
+        get => this._lastDeviceError;
+        set => _ = this.SetProperty( ref this._lastDeviceError, value );
+    }
+
     #endregion
 
     #region " IEEE488 properties "
 
+    private string _host;
+    /// <summary>   Gets or sets the host IPv4 Address. </summary>
+    /// <value> The host. </value>
+    public string Host
+    {
+        get => this._host;
+        set => _ = this.SetProperty( ref this._host, value );
+    }
+
+    /// <summary>   Gets the IP address. </summary>
+    /// <value> The IP address. </value>
+    public IPAddress IPAddress => IPAddress.Parse( this.Host );
+
+    private string _interfaceDeviceString;
+    /// <summary>
+    /// Gets or sets the interface device string, .e.g, inst0, gpib0,5, or usb0[...].
+    /// </summary>
+    /// <value> The interface device string. </value>
+    public string InterfaceDeviceString
+    {
+        get => this._interfaceDeviceString;
+        set => _ = this.SetProperty( ref this._interfaceDeviceString, value );
+    }
+
+    private bool _eoi;
+    /// <summary>
+    /// Gets or sets a value indicating whether the end-or-identify (EOI) terminator is enabled.
+    /// </summary>
+    /// <remarks>
+    /// The driver must be configured so that when talking on the bus it sends a write termination
+    /// string (e.g., a line-feed or line-feed followed by a carriage return) with EOI as the
+    /// terminator, and when listening on the bus it expects a read termination (e.g., a line-feed)
+    /// with EOI as the terminator. The IEEE-488.2 EOI (end-or-identify) message is interpreted as a 
+    /// <c>new line</c> character and can be used to terminate a message in place of a <c>new line</c>
+    /// character. A <c>carriage return</c> followed by a <c>new line</c> is also accepted. Message
+    /// termination will always reset the current SCPI message path to the root level.
+    /// </remarks>
+    /// <value> True if EOI is enabled, false if not. </value>
+    public bool Eoi
+    {
+        get => this._eoi;
+        set => _ = this.SetProperty( ref this._eoi, value );
+    }
+
+    private byte _readTermination;
+    /// <summary>   Gets or sets the read termination. </summary>
+    /// <value> The read termination. </value>
+    public byte ReadTermination
+    {
+        get => this._readTermination;
+        set => _ = this.SetProperty( ref this._readTermination, value );
+    }
+
+    private int _connectTimeout;
+    /// <summary>   Gets or sets the connect timeout. </summary>
+    /// <remarks>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value.
+    /// </remarks>
+    /// <value> The connect timeout. </value>
+    public int ConnectTimeout
+    {
+        get => this._connectTimeout;
+        set => _ = this.SetProperty( ref this._connectTimeout, value );
+    }
+
+    private int _ioTimeout;
+    /// <summary>   Gets or sets the I/O timeout. </summary>
+    /// <value> The I/O timeout. </value>
+    public int IOTimeout
+    {
+        get => this._ioTimeout;
+        set => _ = this.SetProperty( ref this._ioTimeout, value );
+    }
+
+    private int _transmitTimeout;
+    /// <summary>   
+    /// Gets or sets the timeout during the phase where data is sent within RPC calls, or data is
+    /// received within RPC replies. The <see cref="TransmitTimeout"/> timeout must be greater than 0.
+    /// </summary>
+    /// <value> The Transmit timeout. </value>
+    public int TransmitTimeout
+    {
+        get => this._transmitTimeout;
+        set => _ = this.SetProperty( ref this._transmitTimeout, value );
+    }
+
+    private int _lockTimeout;
+    /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
+    /// <remarks>
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
+    /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
+    /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
+    /// milliseconds for a lock to be released. <para>
+    /// 
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value. </para>
+    /// </remarks>
+    /// <value> The lock timeout. </value>
+    public int LockTimeout
+    {
+        get => this._lockTimeout;
+        set => _ = this.SetProperty( ref this._lockTimeout, value );
+    }
+
+    private bool _lockEnabled;
+    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
+    /// <value> True if lock enabled, false if not. </value>
+    public bool LockEnabled
+    {
+        get => this._lockEnabled;
+        set => _ = this.SetProperty( ref this._lockEnabled, value );
+    }
+
+    private byte[] _writeTermination;
+    /// <summary>   Gets or sets the write termination. </summary>
+    /// <value> The write termination. </value>
+    public byte[] WriteTermination
+    {
+        get => this._writeTermination;
+        set => _ = this.SetProperty( ref this._writeTermination, value );
+    }
+
+    /// <summary>   Gets a value indicating whether the VXI Core Client is connected. </summary>
+    /// <value> True if connected, false if not. </value>
+    public bool Connected => this.DeviceLink is not null;
+
+    private Encoding _characterEncoding;
     /// <summary>
     /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
     /// system's default encoding is to be used.
     /// </summary>
     /// <value> The character encoding. </value>
-    public override Encoding CharacterEncoding
+    public Encoding CharacterEncoding
     {
-        get => base.CharacterEncoding;
-        set => _ = this.SetProperty( base.CharacterEncoding!, value, () => base.CharacterEncoding = value );
-    }
-
-    private int _waitOnOutTime = 1000;
-    /// <summary>   Timeout wait time ms. </summary>
-    /// <value> The wait on out time. </value>
-    public int WaitOnOutTime
-    {
-        get => this._waitOnOutTime;
-        set => _ = this.SetProperty( ref this._waitOnOutTime, value );
-    }
-
-    /// <summary>   The current operation instruction type. </summary>
-    /// <value> The type of the current operation. </value>
-    public Ieee488OperationType CurrentOperationType { get; private set; } = Ieee488OperationType.None;
-
-    private string _interfaceDeviceString;
-    /// <summary>   Gets or sets the interface device string. </summary>
-    /// <value> The interface device string. </value>
-    public string InterfaceDeviceString
-    {
-        get => this._interfaceDeviceString;
-        private set => _ = this.SetProperty( ref this._interfaceDeviceString, value );
+        get => this._characterEncoding;
+        set => _ = this.SetProperty( ref this._characterEncoding, value );
     }
 
     private DeviceAddress _interfaceDevice;
@@ -404,8 +311,8 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     {
         get => this._interfaceDevice;
         set {
-            _ = this.SetProperty( ref this._interfaceDevice, value );
-            this.InterfaceDeviceString = this._interfaceDevice.InterfaceDeviceAddress;
+            if ( this.SetProperty( ref this._interfaceDevice, value ) )
+                this.InterfaceDeviceString = this._interfaceDevice.InterfaceDeviceAddress;
         }
     }
 
@@ -425,25 +332,60 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <summary>
     /// current device
     /// </summary>
-    private IIeee488Device? _device = null;
+    private readonly IEEE488.IIeee488Device? _device = null;
 
-    /// <summary>
-    /// Thread synchronization locks
-    /// </summary>
-    private readonly ManualResetEvent _asyncLocker = new( false );
+    private void OnDevicePropertyChanged( object sender, PropertyChangedEventArgs e )
+    {
+        if ( sender is not IEEE488.IIeee488Device ) return;
+        this.OnDevicePropertyChanged( ( IEEE488.IIeee488Device ) sender, e.PropertyName );
+    }
 
-    /// <summary>
-    /// Read cache buffer
-    /// </summary>
-    private byte[] _readBuffer = Array.Empty<byte>();
+    private void OnDevicePropertyChanged( IIeee488Device sender, string propertyName )
+    {
+        if ( sender is not IEEE488.IIeee488Device || string.IsNullOrWhiteSpace( propertyName ) ) return;
+        {
+            switch ( propertyName )
+            {
+                case nameof( IEEE488.IIeee488Device.CharacterEncoding ):
+                    this.CharacterEncoding = sender.CharacterEncoding;
+                    break;
+                case nameof( IEEE488.IIeee488Device.LastDeviceError ):
+                    this.LastDeviceError = sender.LastDeviceError;
+                    break;
+
+                case nameof( IEEE488.IIeee488Device.ReadMessage ):
+                    this.ReadMessage = sender.ReadMessage;
+                    break;
+
+                case nameof( IEEE488.IIeee488Device.WriteMessage ):
+                    this.WriteMessage = sender.WriteMessage;
+                    break;
+
+            }
+        }
+    }
+
+    private void OnDevicePropertiesChanges( IIeee488Device sender )
+    {
+        if ( sender is not IEEE488.IIeee488Device ) return;
+        this.OnDevicePropertyChanged( sender, nameof( IEEE488.IIeee488Device.ReadMessage ) );
+        this.OnDevicePropertyChanged( sender, nameof( IEEE488.IIeee488Device.WriteMessage ) );
+        this.OnDevicePropertyChanged( sender, nameof( IEEE488.IIeee488Device.CharacterEncoding ) );
+        this.OnDevicePropertyChanged( sender, nameof( IEEE488.IIeee488Device.LastDeviceError ) );
+    }
 
     #endregion
 
     #region " LXI-11 ONC/RPC Calls "
 
+    private DeviceLink _deviceLink;
     /// <summary>   Gets or sets the device link to the actual single device. </summary>
     /// <value> The device link. </value>
-    private DeviceLink DeviceLink { get; set; }
+    public DeviceLink DeviceLink
+    {
+        get => this._deviceLink;
+        set => _ = this.SetProperty( ref this._deviceLink, value );
+    }
 
     /// <summary>
     /// Query if the server can create a new device link given that this is a
@@ -502,7 +444,7 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public override CreateLinkResp CreateLink( CreateLinkParms request )
+    public CreateLinkResp CreateLink( CreateLinkParms request )
     {
         if ( this.CanCreateNewDeviceLink() )
         {
@@ -549,16 +491,20 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public override DeviceError DestroyLink( DeviceLink request )
+    public DeviceError DestroyLink( DeviceLink request )
     {
         try
         {
+            if ( this.DeviceLink is null )
+                return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+
+            if ( request.LinkId != this.DeviceLink.LinkId )
+                return new DeviceError( DeviceErrorCode.SyntaxError ); 
+
             this.DeviceLink = new DeviceLink();
 
-            InterruptChannelClient? interruptClient = this.InterruptClient;
-            interruptClient?.Close();
-            this.InterruptClient = null;
-            this.DisableAbortServerSync();
+            // TODO: Add device code here.
+
             return new DeviceError();
         }
         catch ( Exception )
@@ -572,30 +518,24 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <param name="request">  The request of type of type <see cref="Codecs.DeviceRemoteFunc"/> to
     ///                         use with the remote procedure call. </param>
     /// <returns>   The new interrupt channel 1. </returns>
-    public override DeviceError CreateIntrChan( DeviceRemoteFunc request )
+    public DeviceError CreateIntrChan( DeviceRemoteFunc request )
     {
-        if ( this.InterruptEnabled )
-            return new DeviceError( DeviceErrorCode.ChannelAlreadyEstablished );
-        this.InterruptAddress = request.HostAddr;
-        this.InterruptPort = request.HostPort;
-        this.InterruptProtocol = request.TransportProtocol;
-        this.InterruptEnabled = true;
-        DeviceError result = new();
-        return result;
+        // TODO: Add device code
+
+        return this.InterruptEnabled ? new DeviceError( DeviceErrorCode.ChannelAlreadyEstablished ) : new DeviceError();
     }
 
     /// <summary>   Destroy an interrupt channel. </summary>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public override DeviceError DestroyIntrChan()
+    public DeviceError DestroyIntrChan()
     {
         try
         {
-            if ( !this.InterruptEnabled )
-                return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-            this.InterruptClient?.Dispose();
-            return new DeviceError();
+            // TODO: Add device code
+
+            return !this.InterruptEnabled ? new DeviceError( DeviceErrorCode.ChannelNotEstablished ) : new DeviceError();
         }
         catch ( Exception )
         {
@@ -603,7 +543,6 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         }
         finally
         {
-            this.InterruptClient = null;
         }
     }
 
@@ -633,8 +572,10 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public override DeviceError DeviceClear( DeviceGenericParms request )
+    public DeviceError DeviceClear( DeviceGenericParms request )
     {
+        // TODO: Add device code
+
         throw new NotImplementedException();
     }
 
@@ -645,8 +586,10 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
     /// </returns>
-    public override DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
+    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
     {
+        // TODO: Add device code
+
         throw new NotImplementedException();
     }
 
@@ -664,10 +607,11 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public override DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
+    public DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
     {
+        // TODO: Add device code
+
         this.InterruptEnabled = request.Enable;
-        this._interruptHandle = request.GetHandle();
         return new DeviceError();
     }
 
@@ -704,8 +648,10 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// </remarks>
     /// <param name="request">  device generic parameters. </param>
     /// <returns>   A Device_Error. </returns>
-    public override DeviceError DeviceLocal( DeviceGenericParms request )
+    public DeviceError DeviceLocal( DeviceGenericParms request )
     {
+        // TODO: Add device code
+
         throw new NotImplementedException();
     }
 
@@ -741,8 +687,10 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <param name="request">  The request of type of type <see cref="Codecs.DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>   A Device_Error. </returns>
-    public override DeviceError DeviceRemote( DeviceGenericParms request )
+    public DeviceError DeviceRemote( DeviceGenericParms request )
     {
+        // TODO: Add device code
+
         throw new NotImplementedException();
     }
 
@@ -782,8 +730,10 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <param name="request">  The request of type of type <see cref="Codecs.DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>   A Device_ReadStbResp. </returns>
-    public override DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
+    public DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
     {
+        // TODO: Add device code
+
         throw new NotImplementedException();
     }
 
@@ -817,8 +767,10 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// <param name="request">  The request of type of type <see cref="Codecs.DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>   A Device_Error. </returns>
-    public override DeviceError DeviceTrigger( DeviceGenericParms request )
+    public DeviceError DeviceTrigger( DeviceGenericParms request )
     {
+        // TODO: Add device code
+
         throw new NotImplementedException();
     }
 
@@ -856,8 +808,10 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// </remarks>
     /// <param name="request"> Device lock parameters. </param>
     /// <returns>   A Device_Error. </returns>
-    public override DeviceError DeviceLock( DeviceLockParms request )
+    public DeviceError DeviceLock( DeviceLockParms request )
     {
+        // TODO: Add device code
+
         throw new NotImplementedException();
     }
 
@@ -877,8 +831,10 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// </remarks>
     /// <param name="deviceLink">   The device link parameters. </param>
     /// <returns>   A Device_Error. </returns>
-    public override DeviceError DeviceUnlock( DeviceLink deviceLink )
+    public DeviceError DeviceUnlock( DeviceLink deviceLink )
     {
+        // TODO: Add device code
+
         throw new NotImplementedException();
     }
 
@@ -931,30 +887,15 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// </remarks>
     /// <param name="deviceReadParameters"> Device read parameters. </param>
     /// <returns>   A Device_ReadResp. </returns>
-    public override DeviceReadResp DeviceRead( DeviceReadParms deviceReadParameters )
+    public DeviceReadResp DeviceRead( DeviceReadParms deviceReadParameters )
     {
-        DeviceReadResp readRes = new();
-        if ( this.CurrentOperationType == Ieee488OperationType.None || this.CurrentOperationType == Ieee488OperationType.Write )
-        {
-            this._readBuffer = Array.Empty<byte>();
-            _ = this._asyncLocker.Reset();
-        }
-        if ( !this._asyncLocker.WaitOne( this.WaitOnOutTime ) )
-        {
-            readRes.SetData( this._readBuffer );
-            readRes.ErrorCode = DeviceErrorCode.IOTimeout; // timeout
-            readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
-            return readRes;
-        }
-
-        if ( this.CurrentOperationType == Ieee488OperationType.Read )
-        {
-            readRes.SetData( this._readBuffer );
-            readRes.ErrorCode = DeviceErrorCode.NoError;
-            readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
-        }
-        this.CurrentOperationType = Ieee488OperationType.None; //Reset the action type
-        return readRes;
+        return this.DeviceLink is null
+            ? new DeviceReadResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.DeviceLink.LinkId != deviceReadParameters.Link.LinkId
+                ? new DeviceReadResp() { ErrorCode = DeviceErrorCode.InvalidLinkIdentifier }
+                : this._device is null
+                    ? new DeviceReadResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                    : this._device.DeviceRead( deviceReadParameters );
     }
 
     /// <summary>   Process the device write procedure. </summary>
@@ -1025,108 +966,15 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
     /// </remarks>
     /// <param name="deviceWriteParameters">    Device write parameters. </param>
     /// <returns>   A <c>device_write</c> Resp. </returns>
-    public override DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters )
+    public DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters )
     {
-        // get the write command.
-        string cmd = this.CharacterEncoding.GetString( deviceWriteParameters.GetData() );
-        Logger.Writer.LogVerbose( $"link ID: {deviceWriteParameters.Link.LinkId} -> Received：{cmd}" );
-        DeviceWriteResp result = new() {
-            Size = deviceWriteParameters.GetData().Length
-        };
-
-        // holds one or more SCPI commands each with its arguments
-        string[] scpiCommands = cmd.Split( new char[] { '\n', '\r', ';' }, StringSplitOptions.RemoveEmptyEntries );
-
-        if ( scpiCommands.Length == 0 )
-        {
-            // The instruction is incorrect or undefined
-            result.ErrorCode = DeviceErrorCode.SyntaxError;
-            return result;
-        }
-
-        // process all the SCPI commands
-        for ( int n = 0; n < scpiCommands.Length; n++ )
-        {
-            string spciCommand = scpiCommands[n]; // select a complete SCPI command with optional arguments
-            Logger.Writer.LogVerbose( $"Process the instruction： {spciCommand}" );
-            string[] scpiArgs = Array.Empty<string>(); // Holds the SCPI command arguments
-
-            // split the command to the core command and its arguments:
-            string[] scpiCmdElements = scpiCommands[n].Split( new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries );
-            spciCommand = scpiCmdElements[0].Trim();
-
-            _ = this._asyncLocker.Reset(); // Block threads
-            this._readBuffer = Array.Empty<byte>();
-
-            // check if we have a query message (read) or a write message:
-            this.CurrentOperationType = spciCommand[^1] == '?' ? Ieee488OperationType.Read : Ieee488OperationType.Write;
-
-            // get the command arguments
-            if ( scpiCmdElements.Length >= 2 )
-                scpiArgs = scpiCmdElements[1].Split( new char[] { '，' }, StringSplitOptions.RemoveEmptyEntries );
-
-            // find the mock server method that corresponds to the SCPI command.
-            MethodInfo? method = this._device!.GetType().GetMethods().ToList().Find( p => {
-                var att = p.GetCustomAttribute( typeof( Ieee488Attribute ) );
-                if ( att == null || att is not Ieee488Attribute ) return false;
-                Ieee488Attribute scpiAtt = ( Ieee488Attribute ) att;
-
-                // return success if the command matches the method attribute
-                return String.Equals( scpiAtt.Content, spciCommand, StringComparison.OrdinalIgnoreCase );
-            } );
-
-            if ( method is not null )
-            {
-                Ieee488Attribute scpiAtt = ( Ieee488Attribute ) method.GetCustomAttribute( typeof( Ieee488Attribute ) )!;
-                try
-                {
-                    object? res = null;
-                    switch ( scpiAtt.OperationType )
-                    {
-                        case Ieee488OperationType.None:
-                            Logger.Writer.LogMemberWarning( $"The attribute of method {method} is marked incorrectly as {scpiAtt.OperationType}。" );
-                            break;
-                        case Ieee488OperationType.Write:
-                            this.WriteMessage = scpiCommands[n];
-                            // invoke the corresponding method
-                            res = method.Invoke( this._device, scpiArgs );
-                            result.ErrorCode = DeviceErrorCode.NoError;
-                            break;
-                        case Ieee488OperationType.Read://Query instructions
-                            this.WriteMessage = scpiCommands[n];
-                            res = method.Invoke( this._device, scpiArgs );
-                            if ( res is not null )
-                            {
-                                this.ReadMessage = res.ToString();
-                                this._readBuffer = this.CharacterEncoding.GetBytes( res.ToString()! );
-                                Logger.Writer.LogVerbose( $"Query results： {res}。" );
-                            }
-                            else
-                            {
-                                this.ReadMessage = "null";
-                                Logger.Writer.LogVerbose( "Query results：NULL。" );
-                                result.ErrorCode = DeviceErrorCode.NoError;
-                            }
-                            break;
-                    }
-                }
-                catch ( Exception ex )
-                {
-                    Logger.Writer.LogMemberError( $"An error occurred when the method was called：{method}", ex );
-                    // Parameter error
-                    result.ErrorCode = DeviceErrorCode.ParameterError;
-                }
-            }
-            else
-            {
-                Logger.Writer.LogMemberWarning( $"No method found： {spciCommand}" );
-                result.ErrorCode = DeviceErrorCode.SyntaxError; // The instruction is incorrect or undefined
-                this.CurrentOperationType = Ieee488OperationType.None;
-            }
-            _ = this._asyncLocker.Set();//Reset block
-        }
-
-        return result;
+        return this.DeviceLink is null
+            ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.DeviceLink.LinkId != deviceWriteParameters.Link.LinkId
+                ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.InvalidLinkIdentifier }
+                : this._device is null
+                    ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                    : this._device.DeviceWrite( deviceWriteParameters );
     }
 
     #endregion

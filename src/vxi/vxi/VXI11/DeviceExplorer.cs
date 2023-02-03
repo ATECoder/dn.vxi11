@@ -57,12 +57,12 @@ public class DeviceExplorer
     /// <returns>   An array of <see cref="IPAddress"/>s. </returns>
     public static IPAddress[] EnumerateAddresses( IPAddress host )
     {
-        List<IPAddress> addresses = new ();
+        List<IPAddress> addresses = new();
 
         byte[] bytes = host.GetAddressBytes();
         (byte from, byte to)[] range = new (byte from, byte to)[bytes.Length];
         for ( int i = 0; i < bytes.Length; i++ )
-            range[i] = ( bytes[i] == 255 ? ( byte ) 1 : bytes[i], bytes[i] == 255 ? ( byte ) 254 : bytes[i] );
+            range[i] = (bytes[i] == 255 ? ( byte ) 1 : bytes[i], bytes[i] == 255 ? ( byte ) 254 : bytes[i]);
         int[] idx = new int[bytes.Length];
         for ( int i = 0; i < bytes.Length; i++ )
             idx[i] = BitConverter.IsLittleEndian ? i : bytes.Length - 1 - i;
@@ -94,7 +94,7 @@ public class DeviceExplorer
     /// <returns>   An array of IPv4 addresses. </returns>
     public static IPAddress[] GetLocalInterNetworkAddresses()
     {
-        if (_localInterNetworkAddresses == null || _localInterNetworkAddresses.Length == 0 )
+        if ( _localInterNetworkAddresses == null || _localInterNetworkAddresses.Length == 0 )
         {
             IPAddress[] localIPs = Dns.GetHostAddresses( Dns.GetHostName() );
             _localInterNetworkAddresses = localIPs.Where( ip => ip.AddressFamily == AddressFamily.InterNetwork ).ToArray();
@@ -116,7 +116,7 @@ public class DeviceExplorer
                 if ( ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork )
                 {
                     byte[] bytes = ip.GetAddressBytes();
-                    bytes[BitConverter.IsLittleEndian ? 3 : 0 ] = 255;
+                    bytes[BitConverter.IsLittleEndian ? 3 : 0] = 255;
                     ipv4s.Add( new IPAddress( bytes ) );
                 }
             }
@@ -144,7 +144,7 @@ public class DeviceExplorer
     {
         // IPAddress does not override '==', which implements reference equality. Must use Equals()
 
-        if ( broadcastAddress is null || broadcastAddress.Equals( IPAddress.Any ))
+        if ( broadcastAddress is null || broadcastAddress.Equals( IPAddress.Any ) )
         {
             List<IPEndPoint> endpoints = new();
             foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
@@ -180,7 +180,7 @@ public class DeviceExplorer
     {
         // IPAddress does not override '==', which implements reference equality. Must use Equals()
 
-        if ( broadcastAddress is null || broadcastAddress.Equals( IPAddress.Any ))
+        if ( broadcastAddress is null || broadcastAddress.Equals( IPAddress.Any ) )
         {
             List<IPAddress> ips = new();
             foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
@@ -375,14 +375,14 @@ public class DeviceExplorer
         OncRpcServerIdentifierCodec[] registeredServers = tcpPmapClient.ListRegisteredServers(); ;
         foreach ( OncRpcServerIdentifierCodec registeredServer in registeredServers )
         {
-            if ( registeredServer.Port > 0 ) { endpoints.Add( new IPEndPoint(host, registeredServer.Port) ); }
+            if ( registeredServer.Port > 0 ) { endpoints.Add( new IPEndPoint( host, registeredServer.Port ) ); }
         }
         return endpoints;
     }
 
-#endregion
+    #endregion
 
-#region " socket "
+    #region " socket "
 
     /// <summary>   Pings port. </summary>
     /// <param name="ipv4Address">          The IPv4 address. </param>
@@ -401,9 +401,9 @@ public class DeviceExplorer
     /// <returns>   True if it succeeds, false if it fails. </returns>
     public static bool Paping( string ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
     {
-        return Paping( new IPEndPoint( IPAddress.Parse( ipv4Address ), portNumber), timeoutMilliseconds );
+        return Paping( new IPEndPoint( IPAddress.Parse( ipv4Address ), portNumber ), timeoutMilliseconds );
     }
-    
+
 
     /// <summary>   Pings port. </summary>
     /// <param name="endpoint">             The endpoint. </param>
@@ -429,7 +429,7 @@ public class DeviceExplorer
         {
             // Discard Ping Exceptions and return false;
         }
-    return pinged;
+        return pinged;
     }
 
 
@@ -473,7 +473,7 @@ public class DeviceExplorer
         return pingable;
     }
 
-#endregion
+    #endregion
 
 }
 

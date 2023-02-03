@@ -30,6 +30,7 @@ public partial class Ieee488Client : ICloseable
         this.LockEnabled = Ieee488Client.LockEnabledDefault;
         this.ReadTermination = Ieee488Client.ReadTerminationDefault;
         this.WriteTermination = Ieee488Client.WriteTerminationDefault;
+        this._writeTermination = Ieee488Client.WriteTerminationDefault;
         this.AbortPort = 0;
     }
 
@@ -62,22 +63,7 @@ public partial class Ieee488Client : ICloseable
         // override the client transmit timeout during the connection to allow longer timeout periods.
         this.CoreClient.Client!.TransmitTimeout = connectTimeout;
 
-        CreateLinkParms createLinkParam = new() {
-            Device = interfaceDeviceString,
-            LockDevice = this.LockEnabled,
-            LockTimeout = this.LockTimeout,
-        };
-        CreateLinkResp linkResp = this.CoreClient.CreateLink( createLinkParam );
-        if ( linkResp.ErrorCode == DeviceErrorCode.NoError )
-        {
-            this.DeviceLink = linkResp.DeviceLink;
-            this.MaxReceiveSize = linkResp.MaxReceiveSize;
-            this.LastDeviceError = linkResp.ErrorCode;
-            this.AbortPort = linkResp.AbortPort;
-
-            this.Host = hostAddress;
-            this.InterfaceDeviceString = interfaceDeviceString;
-        }
+        CreateLinkResp linkResp = this.CreateLink( this.CoreClient, this.InterfaceDeviceString );
         return linkResp.ErrorCode;
     }
 
@@ -485,6 +471,7 @@ public partial class Ieee488Client : ICloseable
     /// <value> The read termination. </value>
     public byte ReadTermination { get; set; }
 
+    private int _connectTimeout;
     /// <summary>   Gets or sets the connect timeout. </summary>
     /// <remarks>
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
@@ -492,7 +479,11 @@ public partial class Ieee488Client : ICloseable
     /// value.
     /// </remarks>
     /// <value> The connect timeout. </value>
-    public int ConnectTimeout { get; set; }
+    public int ConnectTimeout
+    {
+        get => this._connectTimeout;
+        set => _ = this.SetProperty( ref this._connectTimeout, value );
+    }
 
     private int _ioTimeout;
     /// <summary>   Gets or sets the I/O timeout. </summary>
@@ -501,11 +492,13 @@ public partial class Ieee488Client : ICloseable
     {
         get => this._ioTimeout;
         set {
-            this._ioTimeout = value;
-            if ( this.CoreClient?.Client is not null )
-                this.CoreClient.Client.IOTimeout = value;
-            if ( this.AbortClient?.Client is not null )
-                this.AbortClient.Client.IOTimeout = value;
+            if ( this.SetProperty( ref this._ioTimeout, value ) )
+            {
+                if ( this.CoreClient?.Client is not null )
+                    this.CoreClient.Client.IOTimeout = value;
+                if ( this.AbortClient?.Client is not null )
+                    this.AbortClient.Client.IOTimeout = value;
+            }
         }
     }
 
@@ -521,14 +514,17 @@ public partial class Ieee488Client : ICloseable
     {
         get => this._transmitTimeout;
         set {
-            this._transmitTimeout = value;
-            if ( this.CoreClient?.Client is not null )
-                this.CoreClient.Client.TransmitTimeout = value;
-            if ( this.AbortClient?.Client is not null )
-                this.AbortClient.Client.TransmitTimeout = value;
+            if ( this.SetProperty( ref this._transmitTimeout, value ) )
+            {
+                if ( this.CoreClient?.Client is not null )
+                    this.CoreClient.Client.TransmitTimeout = value;
+                if ( this.AbortClient?.Client is not null )
+                    this.AbortClient.Client.TransmitTimeout = value;
+            }
         }
     }
 
+    private int _lockTimeout;
     /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
     /// <remarks>
     /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
@@ -541,15 +537,29 @@ public partial class Ieee488Client : ICloseable
     /// value. </para>
     /// </remarks>
     /// <value> The lock timeout. </value>
-    public int LockTimeout { get; set; }
+    public int LockTimeout
+    {
+        get => this._lockTimeout;
+        set => _ = this.SetProperty( ref this._lockTimeout, value );
+    }
 
+    private bool _lockEnabled;
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
     /// <value> True if lock enabled, false if not. </value>
-    public bool LockEnabled { get; set; }
+    public bool LockEnabled
+    {
+        get => this._lockEnabled;
+        set => _ = this.SetProperty( ref this._lockEnabled, value );
+    }
 
+    private byte[] _writeTermination;
     /// <summary>   Gets or sets the write termination. </summary>
     /// <value> The write termination. </value>
-    public byte[] WriteTermination { get; set; }
+    public byte[] WriteTermination
+    {
+        get => this._writeTermination;
+        set => _ = this.SetProperty( ref this._writeTermination, value );
+    }
 
     /// <summary>   Gets a value indicating whether the VXI Core Client is connected. </summary>
     /// <value> True if connected, false if not. </value>
@@ -759,7 +769,7 @@ public partial class Ieee488Client : ICloseable
     {
         if ( this.DeviceLink is null || this.CoreClient is null || string.IsNullOrWhiteSpace( data ) ) return 0;
 
-        if ( appendTermination ) 
+        if ( appendTermination )
             data += this.CharacterEncoding.GetString( this.WriteTermination );
 
         int total = 0;
@@ -768,7 +778,7 @@ public partial class Ieee488Client : ICloseable
         while ( remaining > 0 )
         {
             this.Eoi = remaining <= this.MaxReceiveSize;
-            var block = data.Substring( offset, Math.Min( remaining , this.MaxReceiveSize ) );
+            var block = data.Substring( offset, Math.Min( remaining, this.MaxReceiveSize ) );
 
             DeviceWriteResp reply = this.Send( this.CharacterEncoding.GetBytes( block ) );
 
@@ -919,9 +929,9 @@ public partial class Ieee488Client : ICloseable
         return this.TryWrite( $"{message}{this.WriteTermination}" );
     }
 
-#endregion
+    #endregion
 
-#region " Read "
+    #region " Read "
 
     /// <summary>   Receives a message from the VXI-11 server. </summary>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
@@ -986,7 +996,7 @@ public partial class Ieee488Client : ICloseable
         int receivedLen = data.Length;
         int outputLen = Math.Min( count, values.Length ) * 4;
         if ( receivedLen < outputLen )
-            throw new InvalidOperationException( $"{nameof(Read)}(int, int, ref float[]) received {receivedLen} of the requested byte output {outputLen}" );
+            throw new InvalidOperationException( $"{nameof( Read )}(int, int, ref float[]) received {receivedLen} of the requested byte output {outputLen}" );
         Buffer.BlockCopy( data, offset, values, 0, outputLen );
         return outputLen;
 #if false
@@ -1014,7 +1024,7 @@ public partial class Ieee488Client : ICloseable
     public (bool success, string response) Query( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
         int sentCount = this.Write( message );
-        if ( sentCount > 0)
+        if ( sentCount > 0 )
         {
             if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
             return (true, this.Read( trimEnd ));
@@ -1121,9 +1131,37 @@ public partial class Ieee488Client : ICloseable
         return this.Read( offset, count, ref values );
     }
 
-#endregion
+    #endregion
 
-#region " VXI-11 call implementations: Client "
+    #region " VXI-11 call implementations: Client "
+
+    /// <summary>   Creates a link. </summary>
+    /// <param name="coreChannelClient">        The core channel client. </param>
+    /// <param name="interfaceDeviceString">    The interface device string, e.g., inst0 or gpib0,8. </param>
+    /// <returns>   The new link. </returns>
+    private CreateLinkResp CreateLink( CoreChannelClient coreChannelClient, string interfaceDeviceString )
+    {
+        if ( coreChannelClient is null || coreChannelClient.Client is null )
+            return new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
+
+        CreateLinkParms createLinkParam = new() {
+            Device = interfaceDeviceString,
+            LockDevice = this.LockEnabled,
+            LockTimeout = this.LockTimeout,
+        };
+        CreateLinkResp linkResp = coreChannelClient.CreateLink( createLinkParam );
+        if ( linkResp.ErrorCode == DeviceErrorCode.NoError )
+        {
+            this.DeviceLink = linkResp.DeviceLink;
+            this.MaxReceiveSize = linkResp.MaxReceiveSize;
+            this.LastDeviceError = linkResp.ErrorCode;
+            this.AbortPort = linkResp.AbortPort;
+
+            this.Host = coreChannelClient.Client.Host.ToString();
+            this.InterfaceDeviceString = interfaceDeviceString;
+        }
+        return linkResp;
+    }
 
     /// <summary>   Sends the Clear command. </summary>
     public virtual void Clear()
@@ -1173,6 +1211,6 @@ public partial class Ieee488Client : ICloseable
             throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Trigger )} command.", reply.ErrorCode );
     }
 
-#endregion
+    #endregion
 
 }
