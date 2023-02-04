@@ -77,7 +77,7 @@ public abstract partial class Ieee488ServerBase : CoreChannelServerBase
         get => this._interfaceDevice;
         set {
             _ = this.SetProperty( ref this._interfaceDevice, value );
-            this.InterfaceDeviceString = this._interfaceDevice.InterfaceDeviceAddress;
+            this.InterfaceDeviceString = this._interfaceDevice.InterfaceDeviceString;
         }
     }
 

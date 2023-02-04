@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 
+using cc.isr.VXI11.IEEE488;
 using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.LXI.Discover;
@@ -101,8 +102,8 @@ to discover all the instruments listening on the local IPs of this machine.
     {
         using cc.isr.VXI11.IEEE488.Ieee488Instrument instrument = new();
         instrument.ThreadExceptionOccurred += OnThreadExcetion;
-        instrument.Connect( ipv4Address, "inst0" );
-        return instrument.QueryLine( "*IDN?" ).response;
+        instrument.Connect( ipv4Address, Visa.DeviceAddress.BuildInterfaceDeviceString( Visa.DeviceAddress.GenericInterfaceFamily,0 ) );
+        return instrument.QueryLine( Ieee488Commands.IDNRead ).response;
     }
 
     internal static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )

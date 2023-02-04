@@ -63,7 +63,7 @@ public class Ieee488LxiDeviceTests
             return new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
         CreateLinkParms createLinkParam = new() {
-            Device = interfaceDeviceString,
+            InterfaceDeviceString = interfaceDeviceString,
             LockDevice = lockEnabled,
             LockTimeout = lockTimeout,
         };
@@ -206,7 +206,7 @@ public class Ieee488LxiDeviceTests
     {
         if ( _mockDevice is null ) return;         AssertShouldCreateLink();
 
-        string command = "*IDN?\n";
+        string command = $"{Ieee488Commands.IDNRead}\n";
 
         DeviceWriteResp writeResp = Send( _lxiDevice, command );
         Assert.AreEqual( DeviceErrorCode.NoError, writeResp.ErrorCode );

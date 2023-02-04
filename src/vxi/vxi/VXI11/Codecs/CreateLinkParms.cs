@@ -29,7 +29,7 @@ public class CreateLinkParms : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public CreateLinkParms()
     {
-        this.Device = string.Empty;
+        this.InterfaceDeviceString = string.Empty;
     }
 
     /// <summary>   Constructor. </summary>
@@ -75,7 +75,7 @@ public class CreateLinkParms : IXdrCodec
 
     /// <summary>   Gets or sets the interface device string, e.g., inst0, gpib,5 or usb0[...]. </summary>
     /// <value> The interface device string. </value>
-    public string Device { get; set; }
+    public string InterfaceDeviceString { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
@@ -86,7 +86,7 @@ public class CreateLinkParms : IXdrCodec
         encoder.EncodeInt( this.ClientId );
         encoder.EncodeBoolean( this.LockDevice );
         encoder.EncodeInt( this.LockTimeout );
-        encoder.EncodeString( this.Device );
+        encoder.EncodeString( this.InterfaceDeviceString );
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ public class CreateLinkParms : IXdrCodec
         this.ClientId = decoder.DecodeInt();
         this.LockDevice = decoder.DecodeBoolean();
         this.LockTimeout = decoder.DecodeInt();
-        this.Device = decoder.DecodeString();
+        this.InterfaceDeviceString = decoder.DecodeString();
     }
 
 }

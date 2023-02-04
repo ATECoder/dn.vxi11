@@ -121,7 +121,7 @@ public class CoreChannelClient : OncRpcClientStubBase
             ClientId = clientId,
             LockDevice = lockDevice,
             LockTimeout = lockTimeout,
-            Device = interfaceDeviceString
+            InterfaceDeviceString = interfaceDeviceString
         };
         return this.CreateLink( request );
     }

@@ -9,7 +9,7 @@ namespace cc.isr.VXI11.LXI;
 public interface ILxiDevice
 {
 
-    #region " abort server "
+    #region " Abort server "
 
     /// <summary>   Gets or sets the abort port number. </summary>
     /// <value> The abortPort number. </value>
@@ -148,7 +148,7 @@ public interface ILxiDevice
 
     /// <summary>   Gets or sets the interface device. </summary>
     /// <value> The interface device. </value>
-    public DeviceAddress InterfaceDevice { get; set; }
+    public DeviceAddress InterfaceDeviceAddress { get; set; }
 
     /// <summary>   Gets or sets the maximum length of the receive. </summary>
     /// <value> The maximum length of the receive. </value>
@@ -156,7 +156,7 @@ public interface ILxiDevice
 
     #endregion
 
-    #region " device state "
+    #region " Device state "
 
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
     /// <value> True if lock enabled, false if not. </value>
@@ -172,7 +172,7 @@ public interface ILxiDevice
 
     /// <summary>   Gets or sets the device link to the actual single device. </summary>
     /// <value> The device link. </value>
-    DeviceLink DeviceLink { get; set; }
+    DeviceLink? DeviceLink { get; set; }
 
     /// <summary>
     /// Query if the server can create a new device link given that this is a

@@ -1,5 +1,7 @@
 // See https://aka.ms/new-console-template for more information
 
+using System.Runtime.InteropServices;
+
 using cc.isr.VXI11.Logging;
 
 Console.WriteLine( $"VXI-11 {nameof( cc.isr.VXI11.IEEE488.Ieee488Instrument)} Tester" );
@@ -29,11 +31,11 @@ Console.ReadKey();
 // client.connect("127.0.0.1", "inst0");
 Console.WriteLine( $"Connecting to {ipv4Address}" );
 
-instrument.Connect( ipv4Address, "inst0" );
+instrument.Connect( ipv4Address, cc.isr.VXI11.Visa.DeviceAddress.BuildInterfaceDeviceString( cc.isr.VXI11.Visa.DeviceAddress.GenericInterfaceFamily, 0) );
 
 if ( ipv4Address == "127.0.0.1" )
 {
-    string command = "*IDN?";
+    string command = cc.isr.VXI11.IEEE488.Ieee488Commands.IDNRead;
     SendCommand( command );
 
     // closing client throws an exception when using the local mock server.
@@ -41,16 +43,16 @@ if ( ipv4Address == "127.0.0.1" )
 }
 else
 {
-    string command = "*RST";
+    string command = cc.isr.VXI11.IEEE488.Ieee488Commands.RST;
     SendCommand( command );
 
-    command = "*CLS";
+    command = cc.isr.VXI11.IEEE488.Ieee488Commands.CLS;
     SendCommand( command );
 
     command = "SYST:CLE";
     SendCommand( command );
 
-    command = "*IDN?";
+    command = cc.isr.VXI11.IEEE488.Ieee488Commands.IDNRead;
     SendCommand( command );
 
     Console.WriteLine( $"closing {ipv4Address}" );

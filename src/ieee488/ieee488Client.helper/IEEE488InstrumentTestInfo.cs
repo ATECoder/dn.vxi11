@@ -1,3 +1,4 @@
+using cc.isr.VXI11.IEEE488;
 using cc.isr.VXI11.Logging;
 namespace cc.isr.VXI11.IEEE488Client.Helper;
 
@@ -104,7 +105,7 @@ public static class IEEE488InstrumentTestInfo
         if ( !TryTcpConnection( instrumentId, connectionTimeout ) )
             return string.Empty;
 
-        string command = "*IDN?";
+        string command = Ieee488Commands.IDNRead;
         string instrument = instrumentId == InstrumentId.None ? "Echo" : instrumentId.ToString();
         TimeSpan readAfterWriteDelay = TimeSpan.FromMilliseconds( _instrumentInfo[instrument].ReadAfterWriteDelay );
         int interQueryDelayMs = _instrumentInfo[instrument].InterQueryDelay;

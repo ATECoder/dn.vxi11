@@ -48,10 +48,13 @@ public partial class Ieee488Client : ICloseable
         // First destroy the link if not destroyed. 
         if ( this.Connected ) { this.Close(); }
 
-        this.ConnectTimeout = connectTimeout;
+        // clear previous values.
         this.DeviceLink = null;
         this.Host = string.Empty;
         this.InterfaceDeviceString = string.Empty;
+
+        // save for reconnecting.
+        this.ConnectTimeout = connectTimeout;
 
         // instantiate the core client.
         this.CoreClient = new CoreChannelClient( IPAddress.Parse( hostAddress ), OncRpcProtocol.OncRpcTcp, connectTimeout );
@@ -63,7 +66,7 @@ public partial class Ieee488Client : ICloseable
         // override the client transmit timeout during the connection to allow longer timeout periods.
         this.CoreClient.Client!.TransmitTimeout = connectTimeout;
 
-        CreateLinkResp linkResp = this.CreateLink( this.CoreClient, this.InterfaceDeviceString );
+        CreateLinkResp linkResp = this.CreateLink( this.CoreClient, interfaceDeviceString );
         return linkResp.ErrorCode;
     }
 
@@ -1136,12 +1139,7 @@ public partial class Ieee488Client : ICloseable
         if ( coreChannelClient is null || coreChannelClient.Client is null )
             return new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
-        CreateLinkParms createLinkParam = new() {
-            Device = interfaceDeviceString,
-            LockDevice = this.LockEnabled,
-            LockTimeout = this.LockTimeout,
-        };
-        CreateLinkResp linkResp = coreChannelClient.CreateLink( createLinkParam );
+        CreateLinkResp linkResp = coreChannelClient.CreateLink( this.ClientId, this.LockEnabled, this.LockTimeout, interfaceDeviceString );
         if ( linkResp.ErrorCode == DeviceErrorCode.NoError )
         {
             this.DeviceLink = linkResp.DeviceLink;

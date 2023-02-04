@@ -303,15 +303,15 @@ public partial class LxiDevice : ILxiDevice
         } 
     }
 
-    private DeviceAddress _interfaceDevice;
-    /// <summary>   Gets or sets the interface device. </summary>
+    private DeviceAddress _interfaceDeviceAddress;
+    /// <summary>   Gets or sets the interface device address. </summary>
     /// <value> The interface device. </value>
-    public DeviceAddress InterfaceDevice
+    public DeviceAddress InterfaceDeviceAddress
     {
-        get => this._interfaceDevice;
+        get => this._interfaceDeviceAddress;
         set {
-            if ( this.SetProperty( ref this._interfaceDevice, value ) )
-                this.InterfaceDeviceString = this._interfaceDevice.InterfaceDeviceAddress;
+            if ( this.SetProperty( ref this._interfaceDeviceAddress, value ) )
+                this.InterfaceDeviceString = this._interfaceDeviceAddress.InterfaceDeviceString;
         }
     }
 
@@ -477,10 +477,10 @@ public partial class LxiDevice : ILxiDevice
                 AbortPort = this.AbortPortNumber
             };
 
-            Logger.Writer.LogVerbose( $"creating link to {request.Device}" );
+            Logger.Writer.LogVerbose( $"creating link to {request.InterfaceDeviceString}" );
 
-            this.InterfaceDevice = new DeviceAddress( request.Device );
-            reply.ErrorCode = this.InterfaceDevice.IsValid()
+            this.InterfaceDeviceAddress = new DeviceAddress( request.InterfaceDeviceString );
+            reply.ErrorCode = this.InterfaceDeviceAddress.IsValid()
                 ? DeviceErrorCode.NoError
                 : DeviceErrorCode.InvalidLinkIdentifier;
 

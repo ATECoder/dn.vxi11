@@ -8,7 +8,7 @@ public struct DeviceAddress
     /// <param name="interfaceDeviceAddress">  The interface devices string, e.g., <c>gpib0,12,8</c>. </param>
     public DeviceAddress( string interfaceDeviceAddress )
     {
-        this.InterfaceDeviceAddress = interfaceDeviceAddress;
+        this.InterfaceDeviceString = interfaceDeviceAddress;
         this.InterfaceFamily = string.Empty;
         this.InterfaceName = string.Empty;
         this.ManufacturerId = null;
@@ -17,8 +17,8 @@ public struct DeviceAddress
         this.UsbTmcInterfaceNumber = null;
         this._interfaceFamilies = new string[] { GenericInterfaceFamily, GpibInterfaceFamily };
         _ = interfaceDeviceAddress.StartsWith( UsbInterfaceFamily, StringComparison.OrdinalIgnoreCase )
-            ? this.ParseUsbDeviceAddress( interfaceDeviceAddress )
-            : this.ParseDeviceAddress( interfaceDeviceAddress );
+            ? this.ParseUsbInterfaceDeviceString( interfaceDeviceAddress )
+            : this.ParseInterfaceDeviceString( interfaceDeviceAddress );
     }
 
     /// <summary>   (Immutable) the generic interface family. </summary>
@@ -30,7 +30,11 @@ public struct DeviceAddress
     /// <summary>   (Immutable) the USB interface family. </summary>
     public const string UsbInterfaceFamily = "usb";
 
+    /// <summary>   (Immutable) the minimum interface number. </summary>
     public const int MinimumInterfaceNumber = 0;
+
+    /// <summary>   (Immutable) the maximum interface number. </summary>
+    public const int MaximumInterfaceNumber = 127;
 
     /// <summary>   (Immutable) the minimum gpib address. </summary>
     public const int MinimumGpibAddress = 1;
@@ -47,10 +51,13 @@ public struct DeviceAddress
         return this._interfaceFamilies;
     }
 
-    /// <summary>   Gets or sets the interface devices address, e.g., <c>gpib0,12,13</c>, where <c>gpib</c> is the <see cref="InterfaceFamily"/>
-    /// and <c>0</c> is the <see cref="InterfaceNumber"/> and 12 and 13 are the primary and secondary addresses. </summary>
+    /// <summary>
+    /// Gets or sets the interface device string, e.g., <c>gpib0,12,13</c>, where <c>gpib</c> is the <see cref="InterfaceFamily"/>
+    /// and <c>0</c> is the <see cref="InterfaceNumber"/> and 12 and 13 are the primary and secondary
+    /// addresses.
+    /// </summary>
     /// <value> Information describing the device. </value>
-    public string InterfaceDeviceAddress { get; set; }
+    public string InterfaceDeviceString { get; set; }
 
     /// <summary>   Gets or sets the interface family , e.g., <c>gpib</c> or <c>inst</c> </summary>
     /// <value> The interface family. </value>
@@ -91,15 +98,102 @@ public struct DeviceAddress
     /// <value> The USB TMC interface number. </value>
     public int? UsbTmcInterfaceNumber { get; set; }
 
-    /// <summary>   Parses the device address into its components. </summary>
-    /// <param name="interfaceDeviceAddress">    Specifies the device address. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
-    public bool ParseDeviceAddress( string interfaceDeviceAddress )
+    /// <summary>   Builds interface device string. </summary>
+    /// <exception cref="ArgumentNullException">        Thrown when one or more required arguments
+    ///                                                 are null. </exception>
+    /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
+    ///                                                 the required range. </exception>
+    /// <param name="interfaceFamily">  The interface family. </param>
+    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <returns>   A string. </returns>
+    public static string BuildInterfaceDeviceString( string interfaceFamily, int interfaceNumber )
     {
-        if ( string.IsNullOrEmpty( interfaceDeviceAddress ) ) return false;
+        return string.IsNullOrEmpty( interfaceFamily )
+            ? throw new ArgumentNullException( nameof( interfaceFamily ) )
+            : MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
+                ? throw new ArgumentOutOfRangeException(nameof( interfaceNumber ),
+                    $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+                : string.Equals( interfaceFamily, GenericInterfaceFamily, StringComparison.OrdinalIgnoreCase )
+                  || string.Equals( interfaceFamily, GpibInterfaceFamily, StringComparison.OrdinalIgnoreCase )
+                    ? $"{interfaceFamily}{interfaceNumber}"
+                    : throw new ArgumentOutOfRangeException( nameof( interfaceFamily ),
+                        $"{interfaceFamily} must be either {GenericInterfaceFamily} or {GpibInterfaceFamily}");
+    }
+
+    /// <summary>   Builds generic interface device string. </summary>
+    /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
+    ///                                                 the required range. </exception>
+    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <returns>   A string. </returns>
+    public static string BuildGenericInterfaceDeviceString( int interfaceNumber )
+    {
+        return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
+                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
+                        $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+                : $"{GenericInterfaceFamily}{interfaceNumber}";
+    }
+
+    /// <summary>   Builds GPIB interface device string. </summary>
+    /// <remarks>   2023-02-04. </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
+    ///                                                 the required range. </exception>
+    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <returns>   A string. </returns>
+    public static string BuildGpibInterfaceDeviceString( int interfaceNumber )
+    {
+        return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
+                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
+                        $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+                : $"{GpibInterfaceFamily}{interfaceNumber}";
+    }
+
+    /// <summary>   Builds GPIB interface device string. </summary>
+    /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
+    ///                                                 the required range. </exception>
+    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <param name="primaryAddress">   The primary address. </param>
+    /// <returns>   A string. </returns>
+    public static string BuildGpibInterfaceDeviceString( int interfaceNumber, int primaryAddress )
+    {
+        return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
+                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
+                        $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+                : MinimumGpibAddress > primaryAddress || MaximumGpibAddress < primaryAddress
+                    ? throw new ArgumentOutOfRangeException( nameof( primaryAddress ),
+                        $"{primaryAddress} must be within [{MinimumGpibAddress},{MaximumGpibAddress}]." )
+                    : $"{GpibInterfaceFamily}{interfaceNumber},{primaryAddress}";
+    }
+
+    /// <summary>   Builds GPIB interface device string. </summary>
+    /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
+    ///                                                 the required range. </exception>
+    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <param name="primaryAddress">   The primary address. </param>
+    /// <param name="secondaryAddress"> The secondary address. </param>
+    /// <returns>   A string. </returns>
+    public static string BuildGpibInterfaceDeviceString( int interfaceNumber, int primaryAddress, int secondaryAddress )
+    {
+        return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
+                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
+                        $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+                : MinimumGpibAddress > primaryAddress || MaximumGpibAddress < primaryAddress
+                    ? throw new ArgumentOutOfRangeException( nameof( primaryAddress ),
+                        $"{primaryAddress} must be within [{MinimumGpibAddress},{MaximumGpibAddress}]." )
+                    : MinimumGpibAddress > secondaryAddress || MaximumGpibAddress < secondaryAddress
+                        ? throw new ArgumentOutOfRangeException( nameof( secondaryAddress ),
+                            $"{secondaryAddress} must be within [{MinimumGpibAddress},{MaximumGpibAddress}]." )
+                        : $"{GpibInterfaceFamily}{interfaceNumber},{primaryAddress},{secondaryAddress}";
+    }
+
+    /// <summary>   Parses the interface device string into its components. </summary>
+    /// <param name="interfaceDeviceString">    Specifies the interface device string. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public bool ParseInterfaceDeviceString( string interfaceDeviceString )
+    {
+        if ( string.IsNullOrEmpty( interfaceDeviceString ) ) return false;
         this.InterfaceNumber = 0;
-        this.InterfaceDeviceAddress = interfaceDeviceAddress;
-        string[] info = interfaceDeviceAddress.Split( ',' );
+        this.InterfaceDeviceString = interfaceDeviceString;
+        string[] info = interfaceDeviceString.Split( ',' );
         this.InterfaceName = info[0];
         if ( string.IsNullOrEmpty( this.InterfaceName ) ) return false;
         foreach ( string interfaceFamily in this._interfaceFamilies )
@@ -117,23 +211,41 @@ public struct DeviceAddress
         return this.IsValid();
     }
 
-    /// <summary>   Parse the USB device address. </summary>
-    /// <remarks>   For example:
+    /// <summary>   Builds USB interface device string. </summary>
+    /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
+    ///                                                 the required range. </exception>
+    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <param name="manufacturerId">   The identifier of the manufacturer. </param>
+    /// <param name="modelCode">        The model code. </param>
+    /// <param name="serialNumber">     The serial number. </param>
+    /// <returns>   A string. </returns>
+    public static string BuildUsbInterfaceDeviceString( int interfaceNumber, int manufacturerId, int modelCode, string serialNumber )
+    {
+        return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
+                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
+                        $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+                : $"{UsbInterfaceFamily}::0x{manufacturerId:X}::0x{modelCode}::{serialNumber}::{interfaceNumber}";
+    }
+
+    /// <summary>   Parse the USB interface device string. </summary>
+    /// <remarks>
+    /// For example:
     /// <list type="bullet">USB::0x5678::0x33::SN999::1<item>
     /// manufacturer ID 0x5678 </item><item>
+    /// mode code 0x33 </item><item>
     /// serial number SN999 </item><item>
-    /// serial number SN999 </item><item>
-    /// interface number 1 </item> </list> </remarks>
-    /// <param name="interfaceDeviceAddress">   The USB interface device address. </param>
+    /// interface number 1 </item> </list>
+    /// </remarks>
+    /// <param name="interfaceDeviceString">    The USB interface device string. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    public bool ParseUsbDeviceAddress( string interfaceDeviceAddress )
+    public bool ParseUsbInterfaceDeviceString( string interfaceDeviceString )
     {
         this.ManufacturerId = null;
         this.SerialNumber = null;
         this.ModelCode = null;
         this.UsbTmcInterfaceNumber = null;
         this.InterfaceNumber = 0;
-        string[] info = interfaceDeviceAddress.TrimEnd( ']' ).Split( '[' );
+        string[] info = interfaceDeviceString.TrimEnd( ']' ).Split( '[' );
         this.InterfaceName = info[0];
         this.InterfaceFamily = UsbInterfaceFamily;
         if ( this.InterfaceName.Length > this.InterfaceFamily.Length )
@@ -172,7 +284,7 @@ public struct DeviceAddress
     /// <returns>   True if valid, false if not. </returns>
     public bool IsValid()
     {
-        return !string.IsNullOrEmpty( this.InterfaceDeviceAddress )
+        return !string.IsNullOrEmpty( this.InterfaceDeviceString )
             && !string.IsNullOrEmpty( this.InterfaceName )
             && this.InterfaceNumber.HasValue && MinimumInterfaceNumber <= this.InterfaceNumber.Value
             && (this.IsGenericInstrumentDevice()

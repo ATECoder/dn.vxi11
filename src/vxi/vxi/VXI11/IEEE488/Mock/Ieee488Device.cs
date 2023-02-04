@@ -33,19 +33,19 @@ public partial class Ieee488Device : IIeee488Device
     /// </summary>
     public string Identity { get; set; }
 
-    /// <summary>   Clears status: *CLS. </summary>
+    /// <summary>   Clears status: <see cref="Ieee488Commands.CLS"/>. </summary>
     /// <remarks>
     /// Clear Status Command. Clears the event registers in all register groups. Also clears the
     /// error queue.
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    [Ieee488( "*CLS", Ieee488OperationType.Write )]
+    [Ieee488( Ieee488Commands.CLS, Ieee488OperationType.Write )]
     public bool CLS()
     {
         return true;
     }
 
-    /// <summary>   Enables Standard Event Status: *ESE. </summary>
+    /// <summary>   Enables Standard Event Status: <see cref="Ieee488Commands.ESE"/>. </summary>
     /// <remarks>
     /// Enables bits in the enable register for the Standard Event Register group. The selected bits
     /// are then reported to bit 5 of the Status Byte Register. Accepts the decimal sum of the bits
@@ -54,7 +54,7 @@ public partial class Ieee488Device : IIeee488Device
     /// (value 16) and bit 5 (value 32) in the enable register.
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    [Ieee488( "*ESE", Ieee488OperationType.Write )]
+    [Ieee488( Ieee488Commands.ESE, Ieee488OperationType.Write )]
     public bool ESE()
     {
         throw new NotImplementedException();
@@ -63,35 +63,35 @@ public partial class Ieee488Device : IIeee488Device
     /// <summary>
     /// Reads Standard Event Status: *ESE?
     /// </summary>
-    [Ieee488( "*ESE?", Ieee488OperationType.Read )]
+    [Ieee488( Ieee488Commands.ESERead, Ieee488OperationType.Read )]
     public string ESERead()
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>   Standard Event Status Register Query: *ESR?. </summary>
+    /// <summary>   Standard Event Status Register Query: <see cref="Ieee488Commands.ESRRead"/>. </summary>
     /// <remarks>
     /// Queries the event register for the Standard Event Register group. Register is read-only; bits
     /// not cleared when read. Any or all conditions can be reported to the Standard Event summary
     /// bit through the enable register.To set the enable register mask, write a decimal value to the
-    /// register using * ESE. Once a bit is set, it remains set until cleared by this query or *CLS.
+    /// register using *ESE. Once a bit is set, it remains set until cleared by this query or *CLS.
     /// </remarks>
     /// <returns>   A string. </returns>
-    [Ieee488( "*ESR?", Ieee488OperationType.Read )]
+    [Ieee488( Ieee488Commands.ESRRead, Ieee488OperationType.Read )]
     public string ESRRead()
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>   Reads the device identity string: *IDN? </summary>
+    /// <summary>   Reads the device identity string: <see cref="Ieee488Commands.IDNRead"/></summary>
     /// <returns>   A string. </returns>
-    [Ieee488( "*IDN?", Ieee488OperationType.Read )]
+    [Ieee488( Ieee488Commands.IDNRead, Ieee488OperationType.Read )]
     public string IDNRead()
     {
         return this.Identity;
     }
 
-    /// <summary>   Operation completion instruction: *OPC. </summary>
+    /// <summary>   Operation completion instruction: <see cref="Ieee488Commands.OPC"/>. </summary>
     /// <remarks>
     /// Sets "Operation Complete" (bit 0) in the Standard Event register at the completion of the
     /// current operation. The purpose of this command is to synchronize your application with the
@@ -103,13 +103,13 @@ public partial class Ieee488Device : IIeee488Device
     /// after an *OPC? until it has responded. In this way an explicit polling loop can be avoided.
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    [Ieee488( "*OPC", Ieee488OperationType.Write )]
+    [Ieee488( Ieee488Commands.OPC, Ieee488OperationType.Write )]
     public bool OPC()
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>   Reads the operation completion status: *OPC? </summary>
+    /// <summary>   Reads the operation completion status: <see cref="Ieee488Commands.OPCRead"/> </summary>
     /// <remarks>
     /// Returns 1 to the output buffer after all pending commands complete. : The purpose of this
     /// command is to synchronize your application with the instrument. Other commands cannot be
@@ -120,26 +120,26 @@ public partial class Ieee488Device : IIeee488Device
     /// wait for the response.
     /// </remarks>
     /// <returns>   Returns 1 when all previous commands complete. </returns>
-    [Ieee488( "*OPC?", Ieee488OperationType.Read )]
+    [Ieee488( Ieee488Commands.OPCRead, Ieee488OperationType.Read )]
     public string OPCRead()
     {
         return "1";
     }
 
-    /// <summary>   Resets the device: *RST. </summary>
+    /// <summary>   Resets the device: <see cref="Ieee488Commands.RST"/>. </summary>
     /// <remarks>
     /// Resets instrument to factory default state, independent of MEMory:STATe:RECall:AUTO setting.
     /// Does not affect stored instrument states, stored arbitrary waveforms, or I/O settings; these
     /// are stored in non-volatile memory. Aborts a sweep or burst in progress.
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    [Ieee488( "*RST", Ieee488OperationType.Write )]
+    [Ieee488( Ieee488Commands.RST, Ieee488OperationType.Write )]
     public bool RST()
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>   Enables the service request events: *SER. </summary>
+    /// <summary>   Enables the service request events: <see cref="Ieee488Commands.SRE"/>. </summary>
     /// <remarks>
     /// This command enables bits in the enable register for the Status Byte Register group.
     /// Parameters consists of the decimal sum of the bits in the register; default 0. For example,
@@ -155,15 +155,15 @@ public partial class Ieee488Device : IIeee488Device
     /// cycles. Status Byte enable register is not cleared by *RST.
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    [Ieee488( "*SRE", Ieee488OperationType.Write )]
+    [Ieee488( Ieee488Commands.SRE, Ieee488OperationType.Write )]
     public bool SRE()
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>   Reads the service request enabled status: *SER? </summary>
+    /// <summary>   Reads the service request enabled status: <see cref="Ieee488Commands.SRERead"/> </summary>
     /// <returns>   A string. </returns>
-    [Ieee488( "*SRE?", Ieee488OperationType.Read )]
+    [Ieee488( Ieee488Commands.SRERead, Ieee488OperationType.Read )]
     public string SRERead()
     {
         throw new NotImplementedException();
@@ -172,7 +172,7 @@ public partial class Ieee488Device : IIeee488Device
     /// <summary>
     /// Read the status byte: *STB?
     /// </summary>
-    [Ieee488( "*STB?", Ieee488OperationType.Read )]
+    [Ieee488( Ieee488Commands.STBRead, Ieee488OperationType.Read )]
     public string STBRead()
     {
         throw new NotImplementedException();
@@ -185,25 +185,25 @@ public partial class Ieee488Device : IIeee488Device
     /// BUS).
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    [Ieee488( "*TRG", Ieee488OperationType.Write )]
+    [Ieee488( Ieee488Commands.TRG, Ieee488OperationType.Write )]
     public bool TRG()
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>   Runs a self test and reads its status: *TST?. </summary>
+    /// <summary>   Runs a self test and reads its status: <see cref="Ieee488Commands.TSTRead"/>. </summary>
     /// <remarks>
     /// Self-Test Query. Performs a complete instrument self-test. If test fails, one or more error
     /// messages will provide additional information. Use SYSTem:ERRor? to read error queue.
     /// </remarks>
     /// <returns>   Returns +0 (pass) or +1 (one or more tests failed). </returns>
-    [Ieee488( "*TST?", Ieee488OperationType.Read )]
+    [Ieee488( Ieee488Commands.TSTRead, Ieee488OperationType.Read )]
     public string TSTRead()
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>   Wait until all pending operations complete. *WAI. </summary>
+    /// <summary>   Wait until all pending operations complete. <see cref="Ieee488Commands.WAI"/>. </summary>
     /// <remarks>
     /// Configures the instrument to wait for all pending operations to complete before executing any
     /// additional commands over the interface. For example, you can use this with the *TRG command
@@ -211,7 +211,7 @@ public partial class Ieee488Device : IIeee488Device
     /// *TRG;*WAI;*TRG.
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    [Ieee488( "*WAI", Ieee488OperationType.Write )]
+    [Ieee488( Ieee488Commands.WAI, Ieee488OperationType.Write )]
     public bool WAI()
     {
         throw new NotImplementedException();

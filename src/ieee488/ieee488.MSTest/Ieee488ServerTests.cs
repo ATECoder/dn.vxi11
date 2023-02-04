@@ -148,8 +148,9 @@ public class Ieee488ServerTests
         ieee488Client.ThreadExceptionOccurred += OnThreadException;
 
         string identity = Ieee488ServerTests._identity;
-        string command = "*IDN?";
-        ieee488Client.Connect( ipv4Address, "inst0" );
+        string command = Ieee488Commands.IDNRead;
+        ieee488Client.Connect( ipv4Address,
+                                Visa.DeviceAddress.BuildInterfaceDeviceString( Visa.DeviceAddress.GenericInterfaceFamily, 0 ) );
 
         int count = repeatCount;
         while ( repeatCount > 0 )

@@ -397,15 +397,15 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
         private set => _ = this.SetProperty( ref this._interfaceDeviceString, value );
     }
 
-    private DeviceAddress _interfaceDevice;
-    /// <summary>   Gets or sets the interface device. </summary>
-    /// <value> The interface device. </value>
-    public DeviceAddress InterfaceDevice
+    private DeviceAddress _interfaceDeviceAddress;
+    /// <summary>   Gets or sets the interface device address. </summary>
+    /// <value> The interface device address. </value>
+    public DeviceAddress InterfaceDeviceAddress
     {
-        get => this._interfaceDevice;
+        get => this._interfaceDeviceAddress;
         set {
-            _ = this.SetProperty( ref this._interfaceDevice, value );
-            this.InterfaceDeviceString = this._interfaceDevice.InterfaceDeviceAddress;
+            _ = this.SetProperty( ref this._interfaceDeviceAddress, value );
+            this.InterfaceDeviceString = this._interfaceDeviceAddress.InterfaceDeviceString;
         }
     }
 
@@ -514,10 +514,13 @@ public partial class Ieee488SingleClientMockServer : CoreChannelServerBase
                 AbortPort = this.AbortPortNumber
             };
 
-            Logger.Writer.LogVerbose( $"creating link to {request.Device}" );
+            Logger.Writer.LogVerbose( $"creating link to {request.InterfaceDeviceString}" );
 
-            this.InterfaceDevice = new DeviceAddress( request.Device );
-            reply.ErrorCode = this.InterfaceDevice.IsValid()
+            // note that the 7510 responds to an incorrect interface device name 
+            // with the DeviceErrorCode.DeviceNotAccessible; I believe that the 
+            // Invalid link identifier is more informative as to the cause of this error.
+            this.InterfaceDeviceAddress = new DeviceAddress( request.InterfaceDeviceString );
+            reply.ErrorCode = this.InterfaceDeviceAddress.IsValid()
                 ? DeviceErrorCode.NoError
                 : DeviceErrorCode.InvalidLinkIdentifier;
             return reply;

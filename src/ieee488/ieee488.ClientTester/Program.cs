@@ -1,5 +1,6 @@
 // See https://aka.ms/new-console-template for more information
 
+using cc.isr.VXI11.IEEE488;
 using cc.isr.VXI11.Logging;
 
 Console.WriteLine( $"VXI-11 {nameof( cc.isr.VXI11.IEEE488.Ieee488Client )} Tester" );
@@ -29,11 +30,11 @@ Console.ReadKey();
 // client.connect("127.0.0.1", "inst0");
 Console.WriteLine( $"Connecting to {ipv4Address}" );
 
-ieee488Client.Connect( ipv4Address, "inst0" );
+ieee488Client.Connect( ipv4Address, cc.isr.VXI11.Visa.DeviceAddress.BuildInterfaceDeviceString( cc.isr.VXI11.Visa.DeviceAddress.GenericInterfaceFamily, 0 ) );
 
 if ( ipv4Address == "127.0.0.1" )
 {
-    string command = "*IDN?";
+    string command = Ieee488Commands.IDNRead;
     SendCommand( command );
 
     // closing client throws an exception when using the local mock server.
@@ -41,16 +42,16 @@ if ( ipv4Address == "127.0.0.1" )
 }
 else
 {
-    string command = "*RST";
+    string command = Ieee488Commands.RST;
     SendCommand( command );
 
-    command = "*CLS";
+    command = Ieee488Commands.CLS;
     SendCommand( command );
 
     command = "SYST:CLE";
     SendCommand( command );
 
-    command = "*IDN?";
+    command = Ieee488Commands.IDNRead;
     SendCommand( command );
 
     Console.WriteLine( $"closing {ipv4Address}" );
