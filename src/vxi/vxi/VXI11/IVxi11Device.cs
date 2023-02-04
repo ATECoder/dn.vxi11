@@ -1,12 +1,11 @@
 using System.Net;
 
 using cc.isr.VXI11.Codecs;
-using cc.isr.VXI11.Visa;
 
-namespace cc.isr.VXI11.LXI;
+namespace cc.isr.VXI11;
 
 /// <summary>   A unit test amenable interface for an LXI Device. </summary>
-public interface ILxiDevice
+public interface IVxi11Device
 {
 
     #region " Abort server "
@@ -32,7 +31,7 @@ public interface ILxiDevice
     int ClientId { get; set; }
 
     /// <summary>   Event queue for all listeners interested in ServiceRequested events. </summary>
-    event EventHandler<cc.isr.VXI11.Vxi11EventArgs> ServiceRequested;
+    event EventHandler<Vxi11EventArgs> ServiceRequested;
 
     /// <summary>
     /// Emulates calling remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
@@ -146,10 +145,6 @@ public interface ILxiDevice
     /// <value> The character encoding. </value>
     public Encoding CharacterEncoding { get; set; }
 
-    /// <summary>   Gets or sets the interface device. </summary>
-    /// <value> The interface device. </value>
-    public DeviceAddress InterfaceDeviceAddress { get; set; }
-
     /// <summary>   Gets or sets the maximum length of the receive. </summary>
     /// <value> The maximum length of the receive. </value>
     public int MaxReceiveLength { get; set; }
@@ -223,10 +218,10 @@ public interface ILxiDevice
     /// network instrument client should set <c>lock_timeout</c> to a reasonable value to avoid locking up
     /// the server. </para>
     /// </remarks>
-    /// <param name="request">  The request of type <see cref="Codecs.CreateLinkParms"/> to use with
+    /// <param name="request">  The request of type <see cref="CreateLinkParms"/> to use with
     ///                         the remote procedure call. </param>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
     CreateLinkResp CreateLink( CreateLinkParms request );
 
@@ -251,20 +246,20 @@ public interface ILxiDevice
     /// <param name="request">  The request of type of type <see cref="Codecs.DeviceLink"/> to use
     ///                         with the remote procedure call. </param>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
     DeviceError DestroyLink( DeviceLink request );
 
     /// <summary>   Create an interrupt channel. </summary>
     /// <remarks>   2023-01-26. </remarks>
-    /// <param name="request">  The request of type of type <see cref="Codecs.DeviceRemoteFunc"/> to
+    /// <param name="request">  The request of type of type <see cref="DeviceRemoteFunc"/> to
     ///                         use with the remote procedure call. </param>
     /// <returns>   The new interrupt channel 1. </returns>
     DeviceError CreateIntrChan( DeviceRemoteFunc request );
 
     /// <summary>   Destroy an interrupt channel. </summary>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
     DeviceError DestroyIntrChan();
 
@@ -289,19 +284,19 @@ public interface ILxiDevice
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, device_clear SHALL terminate
     /// with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="Codecs.DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
     DeviceError DeviceClear( DeviceGenericParms request );
 
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-01-26. </remarks>
-    /// <param name="request">  The request of type of type <see cref="Codecs.DeviceDoCmdParms"/> to
+    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to
     ///                         use with the remote procedure call. </param>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
+    /// A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>.
     /// </returns>
     DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request );
 
@@ -314,10 +309,10 @@ public interface ILxiDevice
     /// service request. Note that the return type to the interrupt RPC is void, denoting a one-way
     /// RPC.
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="Codecs.DeviceEnableSrqParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceEnableSrqParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
     DeviceError DeviceEnableSrq( DeviceEnableSrqParms request );
 
@@ -385,7 +380,7 @@ public interface ILxiDevice
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_remote</c>
     /// SHALL terminate with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="Codecs.DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>   A Device_Error. </returns>
     DeviceError DeviceRemote( DeviceGenericParms request );
@@ -423,7 +418,7 @@ public interface ILxiDevice
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_readstb</c>
     /// SHALL terminate with error set to 23.</para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="Codecs.DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>   A Device_ReadStbResp. </returns>
     DeviceReadStbResp DeviceReadStb( DeviceGenericParms request );
@@ -455,7 +450,7 @@ public interface ILxiDevice
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_trigger</c>
     /// SHALL terminate with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="Codecs.DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>   A Device_Error. </returns>
     DeviceError DeviceTrigger( DeviceGenericParms request );
