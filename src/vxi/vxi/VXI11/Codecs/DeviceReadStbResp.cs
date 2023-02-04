@@ -30,6 +30,7 @@ public class DeviceReadStbResp : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public DeviceReadStbResp()
     {
+        this.ErrorCode = DeviceErrorCode.NoError;
     }
 
     /// <summary>   Constructor. </summary>

@@ -29,6 +29,7 @@ public class DeviceDoCmdResp : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public DeviceDoCmdResp()
     {
+        this.ErrorCode = DeviceErrorCode.NoError;
         this._dataOut = Array.Empty<byte>();
     }
 

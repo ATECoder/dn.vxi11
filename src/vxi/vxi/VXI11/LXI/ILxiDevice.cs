@@ -131,10 +131,6 @@ public interface ILxiDevice
     /// <value> The lock timeout. </value>
     public int LockTimeout { get; set; }
 
-    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
-    /// <value> True if lock enabled, false if not. </value>
-    public bool LockEnabled { get; set; }
-
     /// <summary>   Gets or sets the write termination. </summary>
     /// <value> The write termination. </value>
     public byte[] WriteTermination { get; set; }
@@ -157,6 +153,18 @@ public interface ILxiDevice
     /// <summary>   Gets or sets the maximum length of the receive. </summary>
     /// <value> The maximum length of the receive. </value>
     public int MaxReceiveLength { get; set; }
+
+    #endregion
+
+    #region " device state "
+
+    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
+    /// <value> True if lock enabled, false if not. </value>
+    public bool LockEnabled { get; set; }
+
+    /// <summary>   Gets or sets a value indicating whether the remote is enabled. </summary>
+    /// <value> True if remote enabled, false if not. </value>
+    bool RemoteEnabled { get; set; }
 
     #endregion
 

@@ -3,7 +3,7 @@ using cc.isr.VXI11.IEEE488;
 using cc.isr.VXI11.IEEE488.EnumExtensions;
 using cc.isr.VXI11.IEEE488.Mock;
 
-namespace cc.isr.VXI11.MSTest.IEEE488;
+namespace cc.isr.VXI11.IEEE488.MSTest;
 
 /// <summary>   (Unit Test Class) a support tests. </summary>
 [TestClass]

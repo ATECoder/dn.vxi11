@@ -156,7 +156,11 @@ public partial class LxiDevice : ILxiDevice
     public DeviceErrorCode LastDeviceError
     {
         get => this._lastDeviceError;
-        set => _ = this.SetProperty( ref this._lastDeviceError, value );
+        set
+        {
+            if ( this.SetProperty( ref this._lastDeviceError, value ) )
+                if ( this._device is not null ) this._device.LastDeviceError = value;
+        }
     }
 
     #endregion
@@ -270,15 +274,6 @@ public partial class LxiDevice : ILxiDevice
         set => _ = this.SetProperty( ref this._lockTimeout, value );
     }
 
-    private bool _lockEnabled;
-    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
-    /// <value> True if lock enabled, false if not. </value>
-    public bool LockEnabled
-    {
-        get => this._lockEnabled;
-        set => _ = this.SetProperty( ref this._lockEnabled, value );
-    }
-
     private byte[] _writeTermination;
     /// <summary>   Gets or sets the write termination. </summary>
     /// <value> The write termination. </value>
@@ -301,7 +296,11 @@ public partial class LxiDevice : ILxiDevice
     public Encoding CharacterEncoding
     {
         get => this._characterEncoding;
-        set => _ = this.SetProperty( ref this._characterEncoding, value );
+        set
+        {
+            if ( this.SetProperty( ref this._characterEncoding, value ) )
+                if ( this._device is not null ) this._device.CharacterEncoding = value;
+        } 
     }
 
     private DeviceAddress _interfaceDevice;
@@ -323,6 +322,28 @@ public partial class LxiDevice : ILxiDevice
     {
         get => this._maxReceiveLength;
         set => _ = this.SetProperty( ref this._maxReceiveLength, value );
+    }
+
+    #endregion
+
+    #region " device state "
+
+    private bool _lockEnabled;
+    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
+    /// <value> True if lock enabled, false if not. </value>
+    public bool LockEnabled
+    {
+        get => this._lockEnabled;
+        set => _ = this.SetProperty( ref this._lockEnabled, value );
+    }
+
+    private bool _remoteEnabled;
+    /// <summary>   Gets or sets a value indicating whether Remote is enabeld on the device. </summary>
+    /// <value> True if remote is enabled, false if not. </value>
+    public bool RemoteEnabled
+    {
+        get => this._remoteEnabled;
+        set => _ = this.SetProperty( ref this._remoteEnabled, value );
     }
 
     #endregion
@@ -462,6 +483,10 @@ public partial class LxiDevice : ILxiDevice
             reply.ErrorCode = this.InterfaceDevice.IsValid()
                 ? DeviceErrorCode.NoError
                 : DeviceErrorCode.InvalidLinkIdentifier;
+
+            // enable remote 
+            this.RemoteEnabled = true;
+
             return reply;
         }
         else
@@ -499,7 +524,7 @@ public partial class LxiDevice : ILxiDevice
                 return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
 
             if ( request.LinkId != this.DeviceLink.LinkId )
-                return new DeviceError( DeviceErrorCode.SyntaxError ); 
+                return new DeviceError( DeviceErrorCode.InvalidLinkIdentifier ); 
 
             this.DeviceLink = new DeviceLink();
 
@@ -520,7 +545,11 @@ public partial class LxiDevice : ILxiDevice
     /// <returns>   The new interrupt channel 1. </returns>
     public DeviceError CreateIntrChan( DeviceRemoteFunc request )
     {
+        if ( this.DeviceLink is null )
+            return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+
         // TODO: Add device code
+
 
         return this.InterruptEnabled ? new DeviceError( DeviceErrorCode.ChannelAlreadyEstablished ) : new DeviceError();
     }
@@ -574,9 +603,15 @@ public partial class LxiDevice : ILxiDevice
     /// </returns>
     public DeviceError DeviceClear( DeviceGenericParms request )
     {
+        if ( this.DeviceLink is null )
+            return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+
+        if ( request.Link.LinkId != this.DeviceLink.LinkId )
+            return new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+
         // TODO: Add device code
 
-        throw new NotImplementedException();
+        return new DeviceError();
     }
 
     /// <summary>   The device executes a command. </summary>
@@ -588,9 +623,15 @@ public partial class LxiDevice : ILxiDevice
     /// </returns>
     public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
     {
+        if ( this.DeviceLink is null )
+            return new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
+
+        if ( request.Link.LinkId != this.DeviceLink.LinkId )
+            return new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.InvalidLinkIdentifier };
+
         // TODO: Add device code
 
-        throw new NotImplementedException();
+        return new DeviceDoCmdResp();
     }
 
     /// <summary>   The device enables or does not enable the Send Request service. </summary>
@@ -609,9 +650,16 @@ public partial class LxiDevice : ILxiDevice
     /// </returns>
     public DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
     {
+        if ( this.DeviceLink is null )
+            return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+
+        if ( request.Link.LinkId != this.DeviceLink.LinkId )
+            return new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+
         // TODO: Add device code
 
         this.InterruptEnabled = request.Enable;
+
         return new DeviceError();
     }
 
@@ -650,9 +698,17 @@ public partial class LxiDevice : ILxiDevice
     /// <returns>   A Device_Error. </returns>
     public DeviceError DeviceLocal( DeviceGenericParms request )
     {
+        if ( this.DeviceLink is null )
+            return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+
+        if ( request.Link.LinkId != this.DeviceLink.LinkId )
+            return new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+
         // TODO: Add device code
 
-        throw new NotImplementedException();
+        this.RemoteEnabled = false;
+
+        return new DeviceError();
     }
 
     /// <summary>   Enables device remote control. </summary>
@@ -689,9 +745,17 @@ public partial class LxiDevice : ILxiDevice
     /// <returns>   A Device_Error. </returns>
     public DeviceError DeviceRemote( DeviceGenericParms request )
     {
+        if ( this.DeviceLink is null )
+            return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+
+        if ( request.Link.LinkId != this.DeviceLink.LinkId )
+            return new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+
         // TODO: Add device code
 
-        throw new NotImplementedException();
+        this.RemoteEnabled = true;
+
+        return new DeviceError();
     }
 
     /// <summary>   Returns the device status byte. </summary>
@@ -732,9 +796,16 @@ public partial class LxiDevice : ILxiDevice
     /// <returns>   A Device_ReadStbResp. </returns>
     public DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
     {
+
+        if ( this.DeviceLink is null )
+            return new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
+
+        if ( request.Link.LinkId != this.DeviceLink.LinkId )
+            return new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.InvalidLinkIdentifier };
+
         // TODO: Add device code
 
-        throw new NotImplementedException();
+        return new DeviceReadStbResp();
     }
 
     /// <summary>   Performs a trigger. </summary>
@@ -769,9 +840,15 @@ public partial class LxiDevice : ILxiDevice
     /// <returns>   A Device_Error. </returns>
     public DeviceError DeviceTrigger( DeviceGenericParms request )
     {
+        if ( this.DeviceLink is null )
+            return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+
+        if ( request.Link.LinkId != this.DeviceLink.LinkId )
+            return new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+
         // TODO: Add device code
 
-        throw new NotImplementedException();
+        return new DeviceError();
     }
 
     /// <summary>   Lock the device. </summary>
@@ -810,9 +887,18 @@ public partial class LxiDevice : ILxiDevice
     /// <returns>   A Device_Error. </returns>
     public DeviceError DeviceLock( DeviceLockParms request )
     {
+
+        if ( this.DeviceLink is null )
+            return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+
+        if ( request.Link.LinkId != this.DeviceLink.LinkId )
+            return new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+
         // TODO: Add device code
 
-        throw new NotImplementedException();
+        this.LockTimeout = request.LockTimeout;
+        this.LockEnabled = true;
+        return new DeviceError();
     }
 
     /// <summary>   Unlock the device. </summary>
@@ -833,9 +919,18 @@ public partial class LxiDevice : ILxiDevice
     /// <returns>   A Device_Error. </returns>
     public DeviceError DeviceUnlock( DeviceLink deviceLink )
     {
+
+        if ( this.DeviceLink is null )
+            return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+
+        if ( deviceLink.LinkId != this.DeviceLink.LinkId )
+            return new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+
+        this.LockEnabled = false;
+
         // TODO: Add device code
 
-        throw new NotImplementedException();
+        return new DeviceError();
     }
 
     /// <summary>   Read a message. </summary>

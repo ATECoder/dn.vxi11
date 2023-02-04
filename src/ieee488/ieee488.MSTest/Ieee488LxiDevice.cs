@@ -7,7 +7,7 @@ using cc.isr.VXI11.LXI.Mock;
 using cc.isr.VXI11.Codecs;
 using System.Text;
 
-namespace cc.isr.VXI11.MSTest.IEEE488;
+namespace cc.isr.VXI11.IEEE488.MSTest;
 
 /// <summary>   (Unit Test Class) a support tests. </summary>
 [TestClass]
@@ -31,10 +31,6 @@ public class Ieee488LxiDevice
 
             int clientId = 1;
             _lxiDevice.ClientId = clientId;
-
-
-
-
         }
         catch ( Exception ex )
         {
@@ -80,6 +76,9 @@ public class Ieee488LxiDevice
 
             lxiDevice.InterfaceDeviceString = interfaceDeviceString;
         }
+
+        lxiDevice.RemoteEnabled = true;
+
         return linkResp;
     }
 
@@ -122,7 +121,7 @@ public class Ieee488LxiDevice
             return new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
         DeviceReadParms readParam = new() {
-            Link =  lxiDevice.DeviceLink,
+            Link = lxiDevice.DeviceLink,
             RequestSize = byteCount,
             IOTimeout = lxiDevice.IOTimeout,
             LockTimeout = lxiDevice.LockTimeout,
@@ -149,8 +148,7 @@ public class Ieee488LxiDevice
     [TestMethod]
     public void ShouldReadIdentity()
     {
-        if ( _mockDevice is null) { return ; }
-        AssertShouldCreateLink();
+        if ( _mockDevice is null ) return;         AssertShouldCreateLink();
 
         string command = "*IDN?\n";
 
@@ -161,6 +159,6 @@ public class Ieee488LxiDevice
         string expectedValue = _mockDevice.Identity;
         DeviceReadResp readResp = Receive( _lxiDevice, _lxiDevice!.MaxReceiveLength );
         Assert.AreEqual( DeviceErrorCode.NoError, readResp.ErrorCode );
-        Assert.AreEqual( expectedValue, _lxiDevice!.CharacterEncoding.GetString(readResp.GetData() ) );
+        Assert.AreEqual( expectedValue, _lxiDevice!.CharacterEncoding.GetString( readResp.GetData() ) );
     }
 }

@@ -38,6 +38,7 @@ public class CreateLinkResp : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public CreateLinkResp()
     {
+        this.ErrorCode = DeviceErrorCode.NoError;
         this._link = new();
     }
 
