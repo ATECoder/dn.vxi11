@@ -5,8 +5,6 @@ using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.EnumExtensions;
 using cc.isr.VXI11.Logging;
 
-using Newtonsoft.Json.Linq;
-
 namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a support tests. </summary>

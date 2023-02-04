@@ -33,7 +33,7 @@ Under the hood, making a connection to a VXI-11 enabled device goes in two phase
 * RPC PortMap call to request TCP/IP communication port - Port 111
 
 <ul>
-All TCP/IP connections go over ports. There is no standard port assigned for VXI-11 transactions, but RPC enabled servers often (always?) run a PortMap service on port 111.  
+All TCP/IP connections go over ports. There is no standard port assigned for VXI-11 transactions, but RPC enabled servers often (always?) run a Portmap service on port 111.  
 </ul>
 
 <ul>

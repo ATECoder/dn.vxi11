@@ -1,10 +1,8 @@
 using System.Diagnostics;
 using System.Net;
-using System.Net.Sockets;
 
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.ONC.RPC.Server;
-using cc.isr.VXI11.IEEE488.Mock;
 using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.MSTest;
@@ -27,7 +25,7 @@ public class DeviceExplorerTests
             Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             DeviceExplorerTests.EnumerateHosts();
 
-            Logger.Writer.LogInformation( $"Starting the embedded portmap service" );
+            Logger.Writer.LogInformation( $"Starting the embedded Portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
             _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
@@ -74,7 +72,6 @@ public class DeviceExplorerTests
     internal static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
     {
         string name = "unknown";
-        if ( sender is Ieee488SingleClientMockServer ) name = nameof( Ieee488SingleClientMockServer );
         if ( sender is OncRpcServerStubBase ) name = nameof( OncRpcServerStubBase );
 
         Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
@@ -134,7 +131,7 @@ public class DeviceExplorerTests
     public static List<IPAddress> PingedHosts { get; } = new();
 
 
-    /// <summary>   Adds a host if ping portmap service to 'timeout'. </summary>
+    /// <summary>   Adds a host if ping Portmap service to 'timeout'. </summary>
     /// <remarks> This causes an issue with subsequent port map operations. </remarks>
     /// <param name="host">     The host. </param>
     /// <param name="timeout">  The timeout in milliseconds. </param>
@@ -176,7 +173,7 @@ public class DeviceExplorerTests
         }
     }
 
-    /// <summary>   (Unit Test Method) the device explorer should ping the hosts using the portmap service. </summary>
+    /// <summary>   (Unit Test Method) the device explorer should ping the hosts using the Portmap service. </summary>
     /// <remarks>
     /// 2450 (152) 6510 (154) and 7510 (144) are on.
     /// Standard Output: 
@@ -221,10 +218,10 @@ public class DeviceExplorerTests
     /// Standard Output: 
     ///    2023-02-02 18:18:02.289,cc.isr.VXI11.MSTest.DeviceExplorerTests.DeviceExplorerTests
     ///    2023-02-02 18:18:02.292,Enumerating hosts:
-    ///    2023-02-02 18:18:06.300, Starting the embedded portmap service
-    ///    2023-02-02 18:18:06.302, Checking for portmap service
-    ///    2023-02-02 18:18:06.411, No portmap service available.
-    ///    2023-02-02 18:18:06.411,Creating embedded portmap instance
+    ///    2023-02-02 18:18:06.300, Starting the embedded Portmap service
+    ///    2023-02-02 18:18:06.302, Checking for Portmap service
+    ///    2023-02-02 18:18:06.411, No Portmap service available.
+    ///    2023-02-02 18:18:06.411,Creating embedded Portmap instance
     ///    2023-02-02 18:18:06.637, Portmap service started; checked 109.4 ms.
     ///    2023-02-02 18:18:06.637,OncRpcEmbeddedPortmapServiceStub started in 336.9 ms
     ///    2023-02-02 18:18:06.651,DeviceExplorer.ListCoreDevicesEndpoints found 3 Core VXI-11 device( s) in 8.9 ms:

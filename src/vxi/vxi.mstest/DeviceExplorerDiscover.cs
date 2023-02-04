@@ -1,10 +1,8 @@
 using System.Diagnostics;
 using System.Net;
-using System.Net.Sockets;
 
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.ONC.RPC.Server;
-using cc.isr.VXI11.IEEE488.Mock;
 using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.MSTest;
@@ -27,7 +25,7 @@ public class DeviceExplorerDiscover
             Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
             DeviceExplorerTests.EnumerateHosts();
 
-            Logger.Writer.LogInformation( $"Starting the embedded portmap service" );
+            Logger.Writer.LogInformation( $"Starting the embedded Portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
             _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
@@ -74,7 +72,6 @@ public class DeviceExplorerDiscover
     internal static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
     {
         string name = "unknown";
-        if ( sender is Ieee488SingleClientMockServer ) name = nameof( Ieee488SingleClientMockServer );
         if ( sender is OncRpcServerStubBase ) name = nameof( OncRpcServerStubBase );
 
         Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
@@ -91,10 +88,10 @@ public class DeviceExplorerDiscover
     /// Standard Output: 
     ///   2023-02-02 18:42:51.447,cc.isr.VXI11.MSTest.DeviceExplorerDiscover.DeviceExplorerDiscover
     ///   2023-02-02 18:42:51.450,Enumerating hosts:
-    ///   2023-02-02 18:42:55.502, Starting the embedded portmap service
-    ///   2023-02-02 18:42:55.503, Checking for portmap service
-    ///   2023-02-02 18:42:55.613, No portmap service available.
-    ///   2023-02-02 18:42:55.613,Creating embedded portmap instance
+    ///   2023-02-02 18:42:55.502, Starting the embedded Portmap service
+    ///   2023-02-02 18:42:55.503, Checking for Portmap service
+    ///   2023-02-02 18:42:55.613, No Portmap service available.
+    ///   2023-02-02 18:42:55.613,Creating embedded Portmap instance
     ///   2023-02-02 18:42:55.840, Portmap service started; checked 109.7 ms.
     ///   2023-02-02 18:42:55.840,OncRpcEmbeddedPortmapServiceStub started in 337.9 ms
     ///   2023-02-02 18:42:55.846,ListCoreDevicesEndpoints scanning 254 addresses at 192.168.4.255
@@ -130,10 +127,10 @@ public class DeviceExplorerDiscover
     /// Standard Output: 
     ///    2023-02-02 18:27:21.365,cc.isr.VXI11.MSTest.DeviceExplorerDiscover.DeviceExplorerDiscover
     ///    2023-02-02 18:27:21.368,Enumerating hosts:
-    ///    2023-02-02 18:27:25.398, Starting the embedded portmap service
-    ///    2023-02-02 18:27:25.400, Checking for portmap service
-    ///    2023-02-02 18:27:25.508, No portmap service available.
-    ///    2023-02-02 18:27:25.509,Creating embedded portmap instance
+    ///    2023-02-02 18:27:25.398, Starting the embedded Portmap service
+    ///    2023-02-02 18:27:25.400, Checking for Portmap service
+    ///    2023-02-02 18:27:25.508, No Portmap service available.
+    ///    2023-02-02 18:27:25.509,Creating embedded Portmap instance
     ///    2023-02-02 18:27:25.719, Portmap service started; checked 108.3 ms.
     ///    2023-02-02 18:27:25.719,OncRpcEmbeddedPortmapServiceStub started in 320.7 ms
     ///    2023-02-02 18:27:25.725,ListCoreDevicesAddresses scanning 254 addresses at 192.168.4.255
@@ -205,10 +202,10 @@ public class DeviceExplorerDiscover
     /// Standard Output: 
     ///    2023-02-02 19:22:30.287,cc.isr.VXI11.MSTest.DeviceExplorerDiscover.DeviceExplorerDiscover
     ///    2023-02-02 19:22:30.290,Enumerating hosts:
-    ///    2023-02-02 19:22:34.670,Starting the embedded portmap service
-    ///    2023-02-02 19:22:34.672,Checking for portmap service
-    ///    2023-02-02 19:22:34.781,No portmap service available.
-    ///    2023-02-02 19:22:34.781,Creating embedded portmap instance
+    ///    2023-02-02 19:22:34.670,Starting the embedded Portmap service
+    ///    2023-02-02 19:22:34.672,Checking for Portmap service
+    ///    2023-02-02 19:22:34.781,No Portmap service available.
+    ///    2023-02-02 19:22:34.781,Creating embedded Portmap instance
     ///    2023-02-02 19:22:34.994,Portmap service started; checked 108.9 ms.
     ///    2023-02-02 19:22:34.994,OncRpcEmbeddedPortmapServiceStub started in 323.9 ms
     ///    2023-02-02 19:22:35.001,EnumerateRegisteredServers scanning 254 addresses at 192.168.4.255

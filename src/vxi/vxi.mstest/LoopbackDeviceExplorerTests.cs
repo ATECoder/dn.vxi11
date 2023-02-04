@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using cc.isr.VXI11.Logging;
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.ONC.RPC.Server;
-using cc.isr.VXI11.IEEE488.Mock;
 
 namespace cc.isr.VXI11.MSTest;
 
@@ -25,7 +24,7 @@ public class LoopbackDeviceExplorerTests
             _classTestContext = context;
             Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
 
-            Logger.Writer.LogInformation( $"starting the embedded portmap service" );
+            Logger.Writer.LogInformation( $"starting the embedded Portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
             _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
@@ -71,7 +70,6 @@ public class LoopbackDeviceExplorerTests
     internal static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
     {
         string name = "unknown";
-        if ( sender is Ieee488SingleClientMockServer ) name = nameof( Ieee488SingleClientMockServer );
         if ( sender is OncRpcServerStubBase ) name = nameof( OncRpcServerStubBase );
 
         Logger.Writer.LogError( $"{name}  encountered an exception during an asynchronous operation", e.Exception );
@@ -96,15 +94,15 @@ public class LoopbackDeviceExplorerTests
 
     #region " port map tests "
 
-    /// <summary>   (Unit Test Method) portmap service should ping. </summary>
+    /// <summary>   (Unit Test Method) Portmap service should ping. </summary>
     /// <remarks>
     /// <code>
     /// Standard Output: 
     ///   2023-02-02 20:12:39.826,cc.isr.VXI11.MSTest.LoopbackDeviceExplorerTests.LoopbackDeviceExplorerTests
-    ///   2023-02-02 20:12:39.829,starting the embedded portmap service
-    ///   2023-02-02 20:12:39.830,Checking for portmap service
-    ///   2023-02-02 20:12:39.938, No portmap service available.
-    ///   2023-02-02 20:12:39.938,Creating embedded portmap instance
+    ///   2023-02-02 20:12:39.829,starting the embedded Portmap service
+    ///   2023-02-02 20:12:39.830,Checking for Portmap service
+    ///   2023-02-02 20:12:39.938, No Portmap service available.
+    ///   2023-02-02 20:12:39.938,Creating embedded Portmap instance
     ///   2023-02-02 20:12:40.160, Portmap service started; checked 107.6 ms.
     ///   2023-02-02 20:12:40.161,OncRpcEmbeddedPortmapServiceStub started in 331.6 ms
     ///   2023-02-02 20:12:40.165,2023:02:02:08:12:40.165 pinging Portmap service:

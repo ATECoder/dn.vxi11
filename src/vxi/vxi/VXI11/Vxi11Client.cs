@@ -2,35 +2,35 @@ using System.Net;
 
 using cc.isr.VXI11.Codecs;
 
-namespace cc.isr.VXI11.IEEE488;
+namespace cc.isr.VXI11;
 
-/// <summary>   An IEEE 488 VXI-11 client. </summary>
-public partial class Ieee488Client : ICloseable
+/// <summary>   A VXI-11 client. </summary>
+public partial class Vxi11Client : ICloseable
 {
 
     #region " construction, connection and cleanup "
 
     /// <summary>   Default constructor. </summary>
-    public Ieee488Client()
+    public Vxi11Client()
     {
 
         // get the next client identifier
-        this.ClientId = Ieee488Client.GetNextClientId();
+        this.ClientId = Vxi11Client.GetNextClientId();
 
         // initialize some values 
-        this.MaxReadRawLength = Ieee488Client.MaxReadRawLengthDefault;
+        this.MaxReadRawLength = Vxi11Client.MaxReadRawLengthDefault;
         this.MaxReceiveSize = 0;
         this.LastDeviceError = DeviceErrorCode.NoError;
         this._host = string.Empty;
         this._interfaceDeviceString = string.Empty;
-        this.Eoi = Ieee488Client.EoiEnabledDefault;
-        this.IOTimeout = Ieee488Client.IOTimeoutDefault;
-        this.TransmitTimeout = Ieee488Client.TransmitTimeoutDefault;
-        this.LockTimeout = Ieee488Client.LockTimeoutDefault;
-        this.LockEnabled = Ieee488Client.LockEnabledDefault;
-        this.ReadTermination = Ieee488Client.ReadTerminationDefault;
-        this.WriteTermination = Ieee488Client.WriteTerminationDefault;
-        this._writeTermination = Ieee488Client.WriteTerminationDefault;
+        this.Eoi = Vxi11Client.EoiEnabledDefault;
+        this.IOTimeout = Vxi11Client.IOTimeoutDefault;
+        this.TransmitTimeout = Vxi11Client.TransmitTimeoutDefault;
+        this.LockTimeout = Vxi11Client.LockTimeoutDefault;
+        this.LockEnabled = Vxi11Client.LockEnabledDefault;
+        this.ReadTermination = Vxi11Client.ReadTerminationDefault;
+        this.WriteTermination = Vxi11Client.WriteTerminationDefault;
+        this._writeTermination = Vxi11Client.WriteTerminationDefault;
         this.AbortPort = 0;
     }
 
@@ -111,7 +111,7 @@ public partial class Ieee488Client : ICloseable
     {
         if ( this.IsDisposed )
         {
-            throw new InvalidOperationException( $"{nameof( Ieee488Client )} @ {this.IPAddress} cannot reconnected because it is disposed." );
+            throw new InvalidOperationException( $"{nameof( Vxi11Client )} @ {this.IPAddress} cannot reconnected because it is disposed." );
         }
         this.Connect( this.Host, this.InterfaceDeviceString, this.ConnectTimeout );
     }
@@ -254,7 +254,7 @@ public partial class Ieee488Client : ICloseable
     }
 
     /// <summary>   Finalizer. </summary>
-    ~Ieee488Client()
+    ~Vxi11Client()
     {
         if ( this.IsDisposed ) { return; }
         this.Dispose( false );
@@ -374,7 +374,7 @@ public partial class Ieee488Client : ICloseable
         DeviceError reply = this.AbortClient.DeviceAbort( this.DeviceLink! );
         if ( reply.ErrorCode != DeviceErrorCode.NoError )
         {
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Abort )} command.", reply.ErrorCode );
+            throw new DeviceException( $"; failed sending the {nameof( Vxi11Client.Abort )} command.", reply.ErrorCode );
         }
     }
 
@@ -1160,20 +1160,13 @@ public partial class Ieee488Client : ICloseable
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DestroyLink()
+    public virtual DeviceError DestroyLink()
     {
         CoreChannelClient? coreClient = this.CoreClient;
         DeviceLink? link = this.DeviceLink;
         try
         {
-            if ( coreClient is not null && link is not null )
-            {
-                return coreClient.DestroyLink( link );
-            }
-            else
-            {
-                return new DeviceError();
-            }
+            return coreClient is not null && link is not null ? coreClient.DestroyLink( link ) : new DeviceError();
         }
         catch ( Exception )
         {
@@ -1194,7 +1187,7 @@ public partial class Ieee488Client : ICloseable
         if ( reply is null )
             throw new DeviceException( DeviceErrorCode.IOError );
         else if ( reply.ErrorCode != DeviceErrorCode.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Clear )} command.", reply.ErrorCode );
+            throw new DeviceException( $"; failed sending the {nameof( Vxi11Client.Clear )} command.", reply.ErrorCode );
     }
 
     /// <summary>   Sends the Lock command. </summary>
@@ -1206,7 +1199,7 @@ public partial class Ieee488Client : ICloseable
         if ( reply is null )
             throw new DeviceException( DeviceErrorCode.IOError );
         else if ( reply.ErrorCode != DeviceErrorCode.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Lock )} command.", reply.ErrorCode );
+            throw new DeviceException( $"; failed sending the {nameof( Vxi11Client.Lock )} command.", reply.ErrorCode );
     }
 
     /// <summary>   Sends the Unlock command. </summary>
@@ -1218,7 +1211,7 @@ public partial class Ieee488Client : ICloseable
         if ( reply is null )
             throw new DeviceException( DeviceErrorCode.IOError );
         else if ( reply.ErrorCode != DeviceErrorCode.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Unlock )} command.", reply.ErrorCode );
+            throw new DeviceException( $"; failed sending the {nameof( Vxi11Client.Unlock )} command.", reply.ErrorCode );
     }
 
     /// <summary>   Sends the Trigger command. </summary>
@@ -1230,7 +1223,7 @@ public partial class Ieee488Client : ICloseable
         if ( reply is null )
             throw new DeviceException( DeviceErrorCode.IOError );
         else if ( reply.ErrorCode != DeviceErrorCode.NoError )
-            throw new DeviceException( $"; failed sending the {nameof( Ieee488Client.Trigger )} command.", reply.ErrorCode );
+            throw new DeviceException( $"; failed sending the {nameof( Vxi11Client.Trigger )} command.", reply.ErrorCode );
     }
 
     #endregion

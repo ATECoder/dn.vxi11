@@ -105,8 +105,6 @@ public class DeviceDoCmdParms : IXdrCodec
     /// instrument server. If the particular value is not supported, the server returns error code
     /// <see cref="DeviceErrorCode.OperationNotSupported"/> (8). <para>
     /// 
-    /// Commands, such as interface commands, are enumerated in <see cref="IEEE488.Ieee488InterfaceCommand"/>
-    /// and <see cref="IEEE488.GpibCommandArgument"/>.
     /// </para>
     /// </remarks>
     /// <value> The command. </value>

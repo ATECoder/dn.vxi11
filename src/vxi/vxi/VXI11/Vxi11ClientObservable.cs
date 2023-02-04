@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace cc.isr.VXI11.LXI.Mock;
+namespace cc.isr.VXI11;
 
-public partial class LxiDevice : INotifyPropertyChanged
+public partial class Vxi11Client : INotifyPropertyChanged
 {
 
     /// <summary>   Occurs when a property value changes. </summary>

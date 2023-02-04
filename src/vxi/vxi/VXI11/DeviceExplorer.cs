@@ -1,8 +1,6 @@
-using System;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.ONC.RPC.Codecs;
@@ -25,7 +23,7 @@ public class DeviceExplorer
         Logger.Writer.LogError( $"Thread exception", e.Exception );
     }
 
-    /// <summary>   Starts embedded portmap service. </summary>
+    /// <summary>   Starts embedded Portmap service. </summary>
     public static OncRpcEmbeddedPortmapServiceStub StartEmbeddedPortmapService()
     {
         // start the embedded service.
@@ -138,7 +136,7 @@ public class DeviceExplorer
     ///                                             or <see cref="IPAddress.Any"/>(0.0.0.0) to scan all local
     ///                                             inter networks. </param>
     /// <param name="connectTimeout">               The timeout in milliseconds. </param>
-    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded Portmap service. </param>
     /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
     public static List<IPEndPoint> ListCoreDevicesEndpoints( IPAddress broadcastAddress, int connectTimeout, bool startEmbeddedPortmapService )
     {
@@ -174,7 +172,7 @@ public class DeviceExplorer
     ///                                             or <see cref="IPAddress.Any"/>(0.0.0.0) to scan all local
     ///                                             inter networks. </param>
     /// <param name="connectTimeout">               The timeout in milliseconds. </param>
-    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded Portmap service. </param>
     /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPAddress"/> </returns>
     public static List<IPAddress> ListCoreDevicesAddresses( IPAddress broadcastAddress, int connectTimeout, bool startEmbeddedPortmapService )
     {
@@ -206,7 +204,7 @@ public class DeviceExplorer
     /// </summary>
     /// <param name="addresses">                    The hosts. </param>
     /// <param name="connectTimeout">               The timeout in milliseconds. </param>
-    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded Portmap service. </param>
     /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPAddress"/> </returns>
     public static List<IPAddress> ListCoreDevicesAddresses( IEnumerable<IPAddress> addresses, int connectTimeout, bool startEmbeddedPortmapService )
     {
@@ -236,7 +234,7 @@ public class DeviceExplorer
     /// </summary>
     /// <param name="addresses">                    The hosts. </param>
     /// <param name="connectTimeout">               The timeout in milliseconds. </param>
-    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded Portmap service. </param>
     /// <param name="pmapPing">                     True to use the Portmap service to ping each
     ///                                             address before getting its port number thus
     ///                                             validating the address as a VXI-11 code
@@ -294,7 +292,7 @@ public class DeviceExplorer
     ///                                             or <see cref="IPAddress.Any"/>(0.0.0.0) to scan all local
     ///                                             inter networks. </param>
     /// <param name="timeout">                      The timeout in milliseconds. </param>
-    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded Portmap service. </param>
     /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
     public static List<IPEndPoint> EnumerateRegisteredServers( IPAddress broadcastAddress, int timeout, bool startEmbeddedPortmapService )
     {
@@ -325,7 +323,7 @@ public class DeviceExplorer
     /// </summary>
     /// <param name="addresses">                    The addresses. </param>
     /// <param name="timeout">                      The timeout in milliseconds. </param>
-    /// <param name="startEmbeddedPortmapService">  True to start embedded portmap service. </param>
+    /// <param name="startEmbeddedPortmapService">  True to start embedded Portmap service. </param>
     /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
     public static List<IPEndPoint> EnumerateRegisteredServers( IEnumerable<IPAddress> addresses, int timeout, bool startEmbeddedPortmapService )
     {
@@ -359,7 +357,7 @@ public class DeviceExplorer
 
         if ( GetLocalInterNetworkAddresses().Contains( host ) ) return endpoints;
 
-        // skip if the portmap service is not registered on the host
+        // skip if the Portmap service is not registered on the host
 
         if ( !Paping( new IPEndPoint( host, OncRpcPortmapConstants.OncRpcPortmapPortNumber ) ) )
             return endpoints;
