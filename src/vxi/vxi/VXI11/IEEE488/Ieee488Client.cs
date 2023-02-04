@@ -192,31 +192,23 @@ public partial class Ieee488Client : ICloseable
         if ( disposing )
         {
             // dispose managed state (managed objects)
-
-            CoreChannelClient? coreClient = this.CoreClient;
-            DeviceLink? link = this.DeviceLink;
             try
             {
-                if ( coreClient is not null && link is not null )
-                {
-                    DeviceError? deviceError = coreClient.DestroyLink( link );
-                    if ( deviceError is null )
-                        throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
-                            DeviceErrorCode.IOError );
-                    if ( deviceError.ErrorCode != DeviceErrorCode.NoError )
-                        throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
-                            deviceError.ErrorCode );
-                }
+                DeviceError? deviceError = this.DestroyLink();
+                if ( deviceError is null )
+                    throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
+                        DeviceErrorCode.IOError );
+                if ( deviceError.ErrorCode != DeviceErrorCode.NoError )
+                    throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
+                        deviceError.ErrorCode );
             }
             catch ( Exception ex )
             {
                 exceptions.Add( ex );
-            }
-            finally
-            {
-                this.DeviceLink = null;
+                throw;
             }
 
+            CoreChannelClient? coreClient = this.CoreClient;
             try
             {
                 coreClient?.Close();
@@ -1161,6 +1153,38 @@ public partial class Ieee488Client : ICloseable
             this.InterfaceDeviceString = interfaceDeviceString;
         }
         return linkResp;
+    }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DestroyLinkProcedure"/>;
+    /// Closes a link to a device.
+    /// </summary>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public DeviceError DestroyLink()
+    {
+        CoreChannelClient? coreClient = this.CoreClient;
+        DeviceLink? link = this.DeviceLink;
+        try
+        {
+            if ( coreClient is not null && link is not null )
+            {
+                return coreClient.DestroyLink( link );
+            }
+            else
+            {
+                return new DeviceError();
+            }
+        }
+        catch ( Exception )
+        {
+            throw;
+        }
+        finally
+        {
+            this.DeviceLink = null;
+        }
     }
 
     /// <summary>   Sends the Clear command. </summary>

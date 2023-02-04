@@ -27,8 +27,8 @@ public partial class LxiDevice : ILxiDevice
         this._writeMessage = string.Empty;
         this.CharacterEncoding = CoreChannelClient.EncodingDefault;
         this._characterEncoding = CoreChannelClient.EncodingDefault;
-        this.DeviceLink = new DeviceLink();
-        this._deviceLink = new DeviceLink();
+        this.DeviceLink = null;
+        this._deviceLink = null;
         this.MaxReceiveLength = IEEE488.Ieee488Client.MaxReceiveLengthDefault;
         this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
         this.OnDevicePropertiesChanges( this._device );
@@ -399,10 +399,10 @@ public partial class LxiDevice : ILxiDevice
 
     #region " LXI-11 ONC/RPC Calls "
 
-    private DeviceLink _deviceLink;
+    private DeviceLink? _deviceLink;
     /// <summary>   Gets or sets the device link to the actual single device. </summary>
     /// <value> The device link. </value>
-    public DeviceLink DeviceLink
+    public DeviceLink? DeviceLink
     {
         get => this._deviceLink;
         set => _ = this.SetProperty( ref this._deviceLink, value );
@@ -526,8 +526,6 @@ public partial class LxiDevice : ILxiDevice
             if ( request.LinkId != this.DeviceLink.LinkId )
                 return new DeviceError( DeviceErrorCode.InvalidLinkIdentifier ); 
 
-            this.DeviceLink = new DeviceLink();
-
             // TODO: Add device code here.
 
             return new DeviceError();
@@ -535,6 +533,10 @@ public partial class LxiDevice : ILxiDevice
         catch ( Exception )
         {
             return new DeviceError( DeviceErrorCode.IOError );
+        }
+        finally
+        {
+            this.DeviceLink = null;
         }
     }
 

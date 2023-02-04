@@ -11,7 +11,7 @@ namespace cc.isr.VXI11.IEEE488.MSTest;
 
 /// <summary>   (Unit Test Class) a support tests. </summary>
 [TestClass]
-public class Ieee488LxiDevice
+public class Ieee488LxiDeviceTests
 {
 
     #region " fixture construction and cleanup "
@@ -47,6 +47,7 @@ public class Ieee488LxiDevice
     [ClassCleanup]
     public static void CleanupFixture()
     {
+        AssertShouldDestroyLink();
     }
 
     private static IIeee488Device? _mockDevice;
@@ -81,6 +82,39 @@ public class Ieee488LxiDevice
 
         return linkResp;
     }
+
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DestroyLinkProcedure"/>;
+    /// Closes a link to a device.
+    /// </summary>
+    /// <returns>
+    /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
+    /// </returns>
+    public static DeviceError DestroyLink( ILxiDevice? lxiDevice )
+    {
+        if ( lxiDevice is null )
+            return new DeviceError() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
+        DeviceLink? link = lxiDevice.DeviceLink;
+        try
+        {
+            if ( link is not null )
+            {
+                return lxiDevice.DestroyLink( link );
+            }
+            else
+            {
+                return new DeviceError();
+            }
+        }
+        catch ( Exception )
+        {
+            throw;
+        }
+        finally
+        {
+        }
+    }
+
 
     public static DeviceWriteResp Send( ILxiDevice? lxiDevice, string message )
     {
@@ -142,9 +176,31 @@ public class Ieee488LxiDevice
             CreateLinkResp linkResp = CreateLink( _lxiDevice, "inst0" );
             Assert.AreEqual( DeviceErrorCode.NoError, linkResp.ErrorCode );
         }
-
     }
 
+    /// <summary>   Assert should destroy link. </summary>
+    private static void AssertShouldDestroyLink()
+    {
+        if ( _lxiDevice is not null && !_lxiDevice.CanCreateNewDeviceLink() )
+        {
+            DeviceError deviceError = DestroyLink( _lxiDevice );
+            Assert.IsNotNull( deviceError );
+            Assert.AreEqual( DeviceErrorCode.NoError, deviceError.ErrorCode );
+        }
+    }
+
+    /// <summary>   (Unit Test Method) should read identity. </summary>
+    /// <remarks>
+    /// <code>
+    /// Standard Output: 
+    ///   2023-02-03 20:09:12.193,cc.isr.VXI11.IEEE488.MSTest.Ieee488LxiDevice.Ieee488LxiDevice
+    ///   2023-02-03 20:09:12.275,creating link to inst0
+    ///   2023-02-03 20:09:12.279, link ID: 1 -> Received：*IDN?
+    ///   
+    ///   2023-02-03 20:09:12.279,Process the instruction： *IDN?
+    ///   2023-02-03 20:09:12.280,Query results： INTEGRATED SCIENTIFIC RESOURCES,MODEL IEEE488Mock,001,1.0.8434。
+    /// </code>
+    /// </remarks>
     [TestMethod]
     public void ShouldReadIdentity()
     {

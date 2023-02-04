@@ -97,6 +97,20 @@ public class LoopbackDeviceExplorerTests
     #region " port map tests "
 
     /// <summary>   (Unit Test Method) portmap service should ping. </summary>
+    /// <remarks>
+    /// <code>
+    /// Standard Output: 
+    ///   2023-02-02 20:12:39.826,cc.isr.VXI11.MSTest.LoopbackDeviceExplorerTests.LoopbackDeviceExplorerTests
+    ///   2023-02-02 20:12:39.829,starting the embedded portmap service
+    ///   2023-02-02 20:12:39.830,Checking for portmap service
+    ///   2023-02-02 20:12:39.938, No portmap service available.
+    ///   2023-02-02 20:12:39.938,Creating embedded portmap instance
+    ///   2023-02-02 20:12:40.160, Portmap service started; checked 107.6 ms.
+    ///   2023-02-02 20:12:40.161,OncRpcEmbeddedPortmapServiceStub started in 331.6 ms
+    ///   2023-02-02 20:12:40.165,2023:02:02:08:12:40.165 pinging Portmap service:
+    ///   2023-02-02 20:12:40.169,127.0.0.1 portmap pinged in 4.1 ms.
+    /// </code>
+    /// </remarks>
     [TestMethod]
     public void PortmapServiceShouldPing()
     {
