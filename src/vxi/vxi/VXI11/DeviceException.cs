@@ -28,7 +28,7 @@ public class DeviceException : Exception
     /// <remarks>   The detail message is derived automatically from the <paramref name="reason"/>. </remarks>
     /// <param name="reason">   The reason. This can be one of the constants -- oops, that should be
     ///                         "public final static integers" -- defined in this interface. </param>
-    public DeviceException( DeviceErrorCode reason ) : base( Support.GetDescription( reason ) )
+    public DeviceException( DeviceErrorCode reason ) : base( Vxi11Support.GetDescription( reason ) )
     {
         this.Reason = reason;
     }
@@ -38,7 +38,7 @@ public class DeviceException : Exception
     /// </summary>
     /// <param name="reason">           The detail reason. </param>
     /// <param name="innerException">   The inner exception. </param>
-    public DeviceException( DeviceErrorCode reason, Exception innerException ) : base( Support.GetDescription( reason ), innerException )
+    public DeviceException( DeviceErrorCode reason, Exception innerException ) : base( Vxi11Support.GetDescription( reason ), innerException )
     {
         this.Reason = reason;
     }
@@ -50,7 +50,7 @@ public class DeviceException : Exception
     /// <param name="reason">           The detail reason. </param>
     /// <param name="innerException">   The inner exception. </param>
     public DeviceException( string suffixMessage, DeviceErrorCode reason,
-                            Exception innerException ) : base( Support.GetDescription( reason ) + suffixMessage, innerException )
+                            Exception innerException ) : base( Vxi11Support.GetDescription( reason ) + suffixMessage, innerException )
     {
         this.Reason = reason;
     }
@@ -60,7 +60,7 @@ public class DeviceException : Exception
     /// </summary>
     /// <param name="suffixMessage">    Message describing the suffix. </param>
     /// <param name="reason">           The detail reason. </param>
-    public DeviceException( string suffixMessage, DeviceErrorCode reason ) : base( Support.GetDescription( reason ) + suffixMessage )
+    public DeviceException( string suffixMessage, DeviceErrorCode reason ) : base( Vxi11Support.GetDescription( reason ) + suffixMessage )
     {
         this.Reason = reason;
     }

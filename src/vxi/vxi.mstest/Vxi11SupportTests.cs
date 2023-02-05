@@ -9,7 +9,7 @@ namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a support tests. </summary>
 [TestClass]
-public class SupportTests
+public class Vxi11SupportTests
 {
 
     #region " fixture construction and cleanup "
@@ -49,9 +49,9 @@ public class SupportTests
     /// <returns>   An int. </returns>
     private static int AssertUniqueClientIdShouldBeGenerated()
     {
-        int clientId = Support.GenerateUniqueRandomClientIdentifier();
+        int clientId = Vxi11Support.GenerateUniqueRandomClientIdentifier();
         Assert.IsTrue( clientId >= 0 );
-        Assert.IsTrue( clientId < Support.ClientIdentifierUpperBound );
+        Assert.IsTrue( clientId < Vxi11Support.ClientIdentifierUpperBound );
         return clientId;
     }
 
@@ -82,12 +82,12 @@ public class SupportTests
     [TestMethod]
     public void IPAddressShouldRestoreFromUnsignedIntegerValue()
     {
-        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "127.0.0.1" ) );
-        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "192.168.0.1" ) );
-        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "255.255.255.255" ) );
-        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "255.255.255.1" ) );
-        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "1.1.1.1" ) );
-        SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "1.1.1.0" ) );
+        Vxi11SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "127.0.0.1" ) );
+        Vxi11SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "192.168.0.1" ) );
+        Vxi11SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "255.255.255.255" ) );
+        Vxi11SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "255.255.255.1" ) );
+        Vxi11SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "1.1.1.1" ) );
+        Vxi11SupportTests.AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress.Parse( "1.1.1.0" ) );
     }
 
     /// <summary>   Gets local inter network (IPv4) addresses. </summary>

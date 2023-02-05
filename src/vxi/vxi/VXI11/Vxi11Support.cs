@@ -5,7 +5,8 @@ using System.Reflection;
 
 namespace cc.isr.VXI11;
 
-public static class Support
+/// <summary>   A VXI-11 support. </summary>
+public static class Vxi11Support
 {
 
     /// <summary>   Gets a description from an Enum. </summary>

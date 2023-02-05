@@ -9,7 +9,7 @@ namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a device explorer tests. </summary>
 [TestClass]
-public class DeviceExplorerTests
+public class Vxi11Discoverer
 {
 
     #region " fixture construction and cleanup "
@@ -23,11 +23,11 @@ public class DeviceExplorerTests
         {
             _classTestContext = context;
             Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
-            DeviceExplorerTests.EnumerateHosts();
+            Vxi11Discoverer.EnumerateHosts();
 
             Logger.Writer.LogInformation( $"Starting the embedded Portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
-            _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
+            _embeddedPortMapService = VXI11.Vxi11Discoverer.StartEmbeddedPortmapService();
             _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
 
             Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
@@ -139,7 +139,7 @@ public class DeviceExplorerTests
     {
         Stopwatch sw = Stopwatch.StartNew();
         Logger.Writer.LogInformation( $"Portmap ping {host}" );
-        if ( DeviceExplorer.PortmapPingHost( IPAddress.Parse( host ), timeout ) )
+        if ( VXI11.Vxi11Discoverer.PortmapPingHost( IPAddress.Parse( host ), timeout ) )
         {
             PingedHosts.Add( IPAddress.Parse( host ) );
             Logger.Writer.LogInformation( $"Added {host}; portmap pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms." );
@@ -156,7 +156,7 @@ public class DeviceExplorerTests
             bool failed = false;
             try
             {
-                if ( DeviceExplorer.PingHost( host, 10 ) )
+                if ( VXI11.Vxi11Discoverer.PingHost( host, 10 ) )
                 {
                     PingedHosts.Add( IPAddress.Parse( host ) );
                 }
@@ -177,28 +177,43 @@ public class DeviceExplorerTests
     /// <remarks>
     /// 2450 (152) 6510 (154) and 7510 (144) are on.
     /// Standard Output: 
-    ///   2023-02-02 18:18:06.677,pinging Portmap service:
-    ///   2023-02-02 18:18:06.678,Pinging 192.168.0.144
-    ///   2023-02-02 18:18:06.678,192.168.0.144 portmap pinged in 0.5 ms.
-    ///   2023-02-02 18:18:06.679,Pinging 192.168.0.152
-    ///   2023-02-02 18:18:06.679,192.168.0.152 portmap pinged in 0.4 ms.
-    ///   2023-02-02 18:18:06.680,Pinging 192.168.0.154
-    ///   2023-02-02 18:18:06.680,192.168.0.154 portmap pinged in 0.4 ms.
+    ///   2023-02-04 19:23:10.667,cc.isr.VXI11.MSTest.DeviceExplorerTests.DeviceExplorerTests
+    ///   2023-02-04 19:23:10.671,Enumerating hosts:
+    ///   2023-02-04 19:23:15.020,Starting the embedded Portmap service
+    ///   2023-02-04 19:23:15.021,Checking for Portmap service
+    ///   2023-02-04 19:23:15.053,No Portmap service available.
+    ///   2023-02-04 19:23:15.053,Creating embedded Portmap instance
+    ///   2023-02-04 19:23:15.264,Portmap service started; checked 32.5 ms.
+    ///   2023-02-04 19:23:15.265,OncRpcEmbeddedPortmapServiceStub started in 244.9 ms
+    ///   2023-02-04 19:23:15.269,pinging Portmap service:
+    ///   
+    ///   2023-02-04 19:23:15.270,Pinging 192.168.0.144
+    ///   2023-02-04 19:23:15.273,192.168.0.144 portmap pinged in 2.4 ms.
+    ///   2023-02-04 19:23:15.315,192.168.0.144: KEITHLEY INSTRUMENTS, MODEL DMM7510,04051720,1.7.7b
+    ///   
+    ///   2023-02-04 19:23:15.315,Pinging 192.168.0.152
+    ///   2023-02-04 19:23:15.316,192.168.0.152 portmap pinged in 0.5 ms.
+    ///   2023-02-04 19:23:15.326,192.168.0.152: KEITHLEY INSTRUMENTS, MODEL 2450,01419966,1.6.4c
+    ///   
+    ///   2023-02-04 19:23:15.327,Pinging 192.168.0.154
+    ///   2023-02-04 19:23:15.327,192.168.0.154 portmap pinged in 0.5 ms.
+    ///   2023-02-04 19:23:15.356,192.168.0.154: KEITHLEY INSTRUMENTS, MODEL DAQ6510,04388991,0.0.03i
     /// </code>
     /// </remarks>
     [TestMethod]
     [TestCategory( "192.168.0.xxx" )]
     public void DeviceExplorerShouldPingHosts()
     {
-        Logger.Writer.LogInformation( $"pinging Portmap service: " );
+        Logger.Writer.LogInformation( $"pinging Portmap service:\n" );
         foreach ( IPAddress host in PingedHosts )
         {
-            if ( DeviceExplorer.PingHost( host, 10 ) )
+            if ( VXI11.Vxi11Discoverer.PingHost( host, 10 ) )
             {
                 Logger.Writer.LogInformation( $"Pinging {host}" );
                 Stopwatch sw = Stopwatch.StartNew();
-                Assert.IsTrue( DeviceExplorer.PortmapPingHost( host, 10 ), $"port map at {host} should reply to a ping" );
+                Assert.IsTrue( VXI11.Vxi11Discoverer.PortmapPingHost( host, 10 ), $"port map at {host} should reply to a ping" );
                 Logger.Writer.LogInformation( $"{host} portmap pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms." );
+                Logger.Writer.LogInformation( $"{host}: {VXI11.Vxi11Discoverer.QueryIdentity( host.ToString() )}" );
             }
             else
             {
@@ -216,21 +231,27 @@ public class DeviceExplorerTests
     /// <code>
     /// 2450 (152) 6510 (154) and 7510 (144) are on.
     /// Standard Output: 
-    ///    2023-02-02 18:18:02.289,cc.isr.VXI11.MSTest.DeviceExplorerTests.DeviceExplorerTests
-    ///    2023-02-02 18:18:02.292,Enumerating hosts:
-    ///    2023-02-02 18:18:06.300, Starting the embedded Portmap service
-    ///    2023-02-02 18:18:06.302, Checking for Portmap service
-    ///    2023-02-02 18:18:06.411, No Portmap service available.
-    ///    2023-02-02 18:18:06.411,Creating embedded Portmap instance
-    ///    2023-02-02 18:18:06.637, Portmap service started; checked 109.4 ms.
-    ///    2023-02-02 18:18:06.637,OncRpcEmbeddedPortmapServiceStub started in 336.9 ms
-    ///    2023-02-02 18:18:06.651,DeviceExplorer.ListCoreDevicesEndpoints found 3 Core VXI-11 device( s) in 8.9 ms:
-    ///    2023-02-02 18:18:06.651,Pinging 192.168.0.144:1024
-    ///    2023-02-02 18:18:06.652,192.168.0.144:1024 port pinged in 10.3 ms
-    ///    2023-02-02 18:18:06.652,Pinging 192.168.0.152:1024
-    ///    2023-02-02 18:18:06.653,192.168.0.152:1024 port pinged in 11.1 ms
-    ///    2023-02-02 18:18:06.653,Pinging 192.168.0.154:1024
-    ///    2023-02-02 18:18:06.654,192.168.0.154:1024 port pinged in 11.7 ms
+    ///   2023-02-04 19:19:59.702,cc.isr.VXI11.MSTest.DeviceExplorerTests.DeviceExplorerTests
+    ///   2023-02-04 19:19:59.705,Enumerating hosts:
+    ///   2023-02-04 19:20:04.017, Starting the embedded Portmap service
+    ///   2023-02-04 19:20:04.019, Checking for Portmap service
+    ///   2023-02-04 19:20:04.052, No Portmap service available.
+    ///   2023-02-04 19:20:04.052,Creating embedded Portmap instance
+    ///   2023-02-04 19:20:04.278, Portmap service started; checked 33.0 ms.
+    ///   2023-02-04 19:20:04.278,OncRpcEmbeddedPortmapServiceStub started in 260.6 ms
+    ///   2023-02-04 19:20:04.292,DeviceExplorer.ListCoreDevicesEndpoints found 3 Core VXI-11 device( s) in 9.7 ms:
+    ///   
+    ///   2023-02-04 19:20:04.292,Pinging 192.168.0.144:1024
+    ///   2023-02-04 19:20:04.294,192.168.0.144:1024 port pinged in 1.6 ms
+    ///   2023-02-04 19:20:04.328,192.168.0.144:1024: KEITHLEY INSTRUMENTS, MODEL DMM7510,04051720,1.7.7b
+    ///   
+    ///   2023-02-04 19:20:04.328,Pinging 192.168.0.152:1024
+    ///   2023-02-04 19:20:04.329,192.168.0.152:1024 port pinged in 0.8 ms
+    ///   2023-02-04 19:20:04.339,192.168.0.152:1024: KEITHLEY INSTRUMENTS, MODEL 2450,01419966,1.6.4c
+    ///   
+    ///   2023-02-04 19:20:04.339,Pinging 192.168.0.154:1024
+    ///   2023-02-04 19:20:04.340,192.168.0.154:1024 port pinged in 0.6 ms
+    ///   2023-02-04 19:20:04.368,192.168.0.154:1024: KEITHLEY INSTRUMENTS, MODEL DAQ6510,04388991,0.0.03i
     /// </code>
     /// </remarks>
     [TestMethod]
@@ -239,16 +260,19 @@ public class DeviceExplorerTests
     {
         Stopwatch sw = Stopwatch.StartNew();
 
-        var devices = DeviceExplorer.ListCoreDevicesEndpoints( PingedHosts, 100,false, true );
+        var devices = VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints( PingedHosts, 100,false, true );
         Assert.IsNotNull( devices );
-        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.ListCoreDevicesEndpoints )} found {devices.Count} Core VXI-11 device(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:" );
+        Logger.Writer.LogInformation(
+            $"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints )} found {devices.Count} Core VXI-11 device(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:\n" );
 
         foreach ( IPEndPoint endpoint in devices )
         {
             Logger.Writer.LogInformation( $"Pinging {endpoint}" );
-            sw.Start();
-            Assert.IsTrue( DeviceExplorer.Paping( endpoint ) );
+            sw.Restart();
+            Assert.IsTrue( VXI11.Vxi11Discoverer.Paping( endpoint ) );
             Logger.Writer.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
+            if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
+                Logger.Writer.LogInformation( $"{endpoint}: {VXI11.Vxi11Discoverer.QueryIdentity( endpoint.Address.ToString() )}" );
         }
         Assert.AreEqual( PingedHosts.Count, devices.Count, "Device count is expected to equal pinged hosts count." );
     }
@@ -267,10 +291,13 @@ public class DeviceExplorerTests
         {
             Logger.Writer.LogInformation( $"Pinging {endpoint}" );
             Stopwatch sw = Stopwatch.StartNew();
-            Assert.IsTrue( DeviceExplorer.Paping( endpoint ) );
-            Logger.Writer.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
+            Assert.IsTrue( VXI11.Vxi11Discoverer.Paping( endpoint ) );
+            Logger.Writer.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms\n" );
 
-            if ( endpoint.Port == 111 ) { actualCount++; }
+            if ( endpoint.Port == OncRpcPortmapConstants.OncRpcPortmapPortNumber ) { actualCount++; }
+            if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
+                Logger.Writer.LogInformation( $"{endpoint}: {VXI11.Vxi11Discoverer.QueryIdentity( endpoint.Address.ToString() )}" );
+
         }
 
         int expectedCount = 0;
@@ -292,15 +319,27 @@ public class DeviceExplorerTests
     /// <code>
     /// 2459=0 (152) 6510 (154) and 7510 (144) are on.
     /// Standard Output: 
-    ///   2023-02-02 18:18:06.673,DeviceExplorer.EnumerateRegisteredServers(addresses ) found 4 VXI-11 registered servers( s) in 4.2 ms
-    ///   2023-02-02 18:18:06.673,Pinging 192.168.0.144:111
-    ///   2023-02-02 18:18:06.674,192.168.0.144:111 port pinged in 0.6 ms
-    ///   2023-02-02 18:18:06.674,Pinging 192.168.0.144:1024
-    ///   2023-02-02 18:18:06.675,192.168.0.144:1024 port pinged in 0.6 ms
-    ///   2023-02-02 18:18:06.675,Pinging 192.168.0.154:111
-    ///   2023-02-02 18:18:06.675,192.168.0.154:111 port pinged in 0.6 ms
-    ///   2023-02-02 18:18:06.675,Pinging 192.168.0.154:1024
-    ///   2023-02-02 18:18:06.676,192.168.0.154:1024 port pinged in 0.5 ms
+    ///   2023-02-04 19:21:54.634,cc.isr.VXI11.MSTest.DeviceExplorerTests.DeviceExplorerTests
+    ///   2023-02-04 19:21:54.638,Enumerating hosts:
+    ///   2023-02-04 19:21:59.005, Starting the embedded Portmap service
+    ///   2023-02-04 19:21:59.007, Checking for Portmap service
+    ///   2023-02-04 19:21:59.039, No Portmap service available.
+    ///   2023-02-04 19:21:59.039,Creating embedded Portmap instance
+    ///   2023-02-04 19:21:59.264, Portmap service started; checked 32.1 ms.
+    ///   2023-02-04 19:21:59.265,OncRpcEmbeddedPortmapServiceStub started in 259.1 ms
+    ///   2023-02-04 19:21:59.281,DeviceExplorer.EnumerateRegisteredServers(addresses ) found 4 VXI-11 registered servers( s) in 12.1 ms
+    ///   
+    ///   2023-02-04 19:21:59.282,Pinging 192.168.0.144:111
+    ///   2023-02-04 19:21:59.282,192.168.0.144:111 port pinged in 0.7 ms
+    ///   2023-02-04 19:21:59.282,Pinging 192.168.0.144:1024
+    ///   2023-02-04 19:21:59.283,192.168.0.144:1024 port pinged in 0.6 ms
+    ///   2023-02-04 19:21:59.300,192.168.0.144:1024: KEITHLEY INSTRUMENTS, MODEL DMM7510,04051720,1.7.7b
+    ///   
+    ///   2023-02-04 19:21:59.300,Pinging 192.168.0.154:111
+    ///   2023-02-04 19:21:59.301,192.168.0.154:111 port pinged in 0.7 ms
+    ///   2023-02-04 19:21:59.301,Pinging 192.168.0.154:1024
+    ///   2023-02-04 19:21:59.302,192.168.0.154:1024 port pinged in 0.6 ms
+    ///   2023-02-04 19:21:59.311,192.168.0.154:1024: KEITHLEY INSTRUMENTS, MODEL DAQ6510,04388991,0.0.03i
     /// </code>
     /// </remarks>
     [TestMethod]
@@ -308,9 +347,9 @@ public class DeviceExplorerTests
     public void DeviceExplorerShouldListPingedRegisteredServers()
     {
         Stopwatch sw = Stopwatch.StartNew();
-        var endpoints = DeviceExplorer.EnumerateRegisteredServers( PingedHosts, 100, false );
+        var endpoints = VXI11.Vxi11Discoverer.EnumerateRegisteredServers( PingedHosts, 100, false );
         Assert.IsNotNull( endpoints );
-        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorer )}.{nameof( DeviceExplorer.EnumerateRegisteredServers )}( addresses ) found {endpoints.Count} VXI-11 registered servers(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
+        Logger.Writer.LogInformation( @$"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.EnumerateRegisteredServers )}( addresses ) found {endpoints.Count} VXI-11 registered servers(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
 
         AssertRegisteredServersShouldPing( endpoints );
     }

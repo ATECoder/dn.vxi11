@@ -9,7 +9,7 @@ namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a device explorer tests. </summary>
 [TestClass]
-public class LoopbackDeviceExplorerTests
+public class Vxi11DiscovererLoopbackTests
 {
 
     #region " fixture construction and cleanup "
@@ -26,7 +26,7 @@ public class LoopbackDeviceExplorerTests
 
             Logger.Writer.LogInformation( $"starting the embedded Portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
-            _embeddedPortMapService = DeviceExplorer.StartEmbeddedPortmapService();
+            _embeddedPortMapService = VXI11.Vxi11Discoverer.StartEmbeddedPortmapService();
             _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
 
             Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
@@ -98,15 +98,15 @@ public class LoopbackDeviceExplorerTests
     /// <remarks>
     /// <code>
     /// Standard Output: 
-    ///   2023-02-02 20:12:39.826,cc.isr.VXI11.MSTest.LoopbackDeviceExplorerTests.LoopbackDeviceExplorerTests
-    ///   2023-02-02 20:12:39.829,starting the embedded Portmap service
-    ///   2023-02-02 20:12:39.830,Checking for Portmap service
-    ///   2023-02-02 20:12:39.938, No Portmap service available.
-    ///   2023-02-02 20:12:39.938,Creating embedded Portmap instance
-    ///   2023-02-02 20:12:40.160, Portmap service started; checked 107.6 ms.
-    ///   2023-02-02 20:12:40.161,OncRpcEmbeddedPortmapServiceStub started in 331.6 ms
-    ///   2023-02-02 20:12:40.165,2023:02:02:08:12:40.165 pinging Portmap service:
-    ///   2023-02-02 20:12:40.169,127.0.0.1 portmap pinged in 4.1 ms.
+    ///   2023-02-04 19:24:55.307,cc.isr.VXI11.MSTest.LoopbackDeviceExplorerTests.LoopbackDeviceExplorerTests
+    ///   2023-02-04 19:24:55.310,starting the embedded Portmap service
+    ///   2023-02-04 19:24:55.311,Checking for Portmap service
+    ///   2023-02-04 19:24:55.339, No Portmap service available.
+    ///   2023-02-04 19:24:55.339,Creating embedded Portmap instance
+    ///   2023-02-04 19:24:55.561, Portmap service started; checked 27.4 ms.
+    ///   2023-02-04 19:24:55.562,OncRpcEmbeddedPortmapServiceStub started in 251.5 ms
+    ///   2023-02-04 19:24:55.567,2023:02:04:07:24:55.566 pinging Portmap service:
+    ///   2023-02-04 19:24:55.571,127.0.0.1 portmap pinged in 4.2 ms.
     /// </code>
     /// </remarks>
     [TestMethod]
@@ -115,7 +115,7 @@ public class LoopbackDeviceExplorerTests
         Logger.Writer.LogInformation( $"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} pinging Portmap service: " );
         Stopwatch sw = Stopwatch.StartNew();
         IPAddress host = IPAddress.Loopback;
-        Assert.IsTrue( DeviceExplorer.PortmapPingHost( host ), $"port map at {IPAddress.Loopback} should reply to a ping" );
+        Assert.IsTrue( VXI11.Vxi11Discoverer.PortmapPingHost( host ), $"port map at {IPAddress.Loopback} should reply to a ping" );
         Logger.Writer.LogInformation( $"{host} portmap pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms." );
     }
 
