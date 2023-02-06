@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <RootNamespace>cc.isr.VXI11.Discover</RootNamespace>
+    <AssemblyName>cc.isr.VXI11.Discover</AssemblyName>
+
+    <!-- Display name -->
+    <ApplicationTitle>cc.isr.VXI11.Discover</ApplicationTitle>
+
+    <!-- App Identifier -->
+    <ApplicationId>cc.isr.vxi11.Discover</ApplicationId>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\vxi\src\vxi\vxi\cc.isr.VXI11.csproj" />
+  </ItemGroup>
+
+</Project>
