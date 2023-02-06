@@ -1,165 +1,452 @@
+using System.ComponentModel;
 using System.Net;
+using System.Reflection;
 
+using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
+using cc.isr.VXI11.Logging;
 
-namespace cc.isr.VXI11;
+namespace cc.isr.VXI11.Server;
 
-/// <summary>   A unit test amenable interface for an LXI Device. </summary>
-public interface IVxi11Device
+/// <summary>   A VXI-11 server capable of serving a single client. </summary>
+public partial class Vxi11SingleClientServer : CoreChannelServerBase
 {
 
-    #region " Abort server "
+    #region " construction and cleanup "
 
+    /// <summary>   Default constructor. </summary>
+    public Vxi11SingleClientServer() : this( null, 0 )
+    {
+    }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="port"> The port number where the server will wait for incoming calls. </param>
+    public Vxi11SingleClientServer( int port ) : this( null, port )
+    {
+    }
+
+    public Vxi11SingleClientServer( IPAddress? bindAddr, int port ) : this( new Vxi11Device( new Vxi11Instrument() ), bindAddr, port )
+    {
+    }
+
+    public Vxi11SingleClientServer( Vxi11Device device ) : this( device, null, 0 )
+    {
+    }
+
+    /// <summary>   Constructor. </summary>
+    /// <param name="device">   current device. </param>
+    /// <param name="bindAddr"> The local Internet Address the server will bind to. </param>
+    /// <param name="port">     The port number where the server will wait for incoming calls. </param>
+    public Vxi11SingleClientServer( Vxi11Device device, IPAddress? bindAddr, int port ) : base( bindAddr ?? IPAddress.Any, port )
+    {
+        this._device = device;
+        this.InterfaceDeviceString = string.Empty;
+        this._interfaceDeviceString = string.Empty;
+        this.ReadMessage = string.Empty;
+        this._readMessage = string.Empty;
+        this.WriteMessage = string.Empty;
+        this._writeMessage = string.Empty;
+        this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
+        this.MaxReceiveLength = Client.Vxi11Client.MaxReceiveLengthDefault;
+        this.InterruptAddress = IPAddress.Any;
+        this.DeviceLink = new DeviceLink();
+        this.OnDevicePropertiesChanges( device );
+    }
+
+    /// <summary>
+    /// Terminates listening if active and closes the  all transports listed in a set of server
+    /// transports. Performs application-defined tasks associated with freeing, releasing, or
+    /// resetting unmanaged resources.
+    /// </summary>
+    /// <remarks>
+    /// Allows a timeout of <see cref="P:cc.isr.ONC.RPC.Server.OncRpcServerStubBase.ShutdownTimeout" />
+    /// milliseconds for the server to stop listening before raising an exception to that effect.
+    /// </remarks>
+    /// <exception cref="AggregateException">   Thrown when an Aggregate error condition occurs. </exception>
+    /// <param name="disposing">    True to release both managed and unmanaged resources; false to
+    ///                             release only unmanaged resources. </param>
+    protected override void Dispose( bool disposing )
+    {
+        List<Exception> exceptions = new();
+        if ( disposing )
+        {
+            // dispose managed state (managed objects)
+
+            this._device = null;
+            this.DeviceLink = new DeviceLink();
+
+            AbortChannelServer? abortServer = this.AbortServer;
+            try
+            {
+                if ( abortServer is not null )
+                {
+                    using Task? task = this.DisableAbortServerAsync();
+                    task.Wait();
+                    if ( task.IsFaulted ) exceptions.Add( task.Exception );
+                }
+            }
+            catch ( Exception ex )
+            {
+                { exceptions.Add( ex ); }
+            }
+            finally
+            {
+                this.AbortServer = null;
+            }
+
+            InterruptChannelClient? interruptClient = this.InterruptClient;
+            try
+            {
+                interruptClient?.Close();
+            }
+            catch ( Exception ex )
+            {
+                exceptions.Add( ex );
+            }
+            finally
+            {
+                this.InterruptClient = null;
+            }
+
+        }
+
+        // free unmanaged resources and override finalizer
+
+        // set large fields to null
+
+        // call base dispose( bool ).
+
+        try
+        {
+            base.Dispose( disposing );
+        }
+        catch ( Exception ex )
+        { exceptions.Add( ex ); }
+        finally
+        {
+        }
+
+        if ( exceptions.Any() )
+        {
+            AggregateException aggregateException = new( exceptions );
+            throw aggregateException;
+        }
+    }
+
+    #endregion
+
+    #region " abort server "
+
+    private int _abortPortNumber;
     /// <summary>   Gets or sets the abort port number. </summary>
     /// <value> The abortPort number. </value>
-    int AbortPortNumber { get; set; }
+    public int AbortPortNumber
+    {
+        get => this._abortPortNumber;
+        set => _ = this.SetProperty( ref this._abortPortNumber, value );
+    }
 
     /// <summary>   Handles abort request. </summary>
+    /// <remarks>   2023-01-26. </remarks>
+    /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        Device error event information. </param>
-    void HandleAbortRequest( DeviceErrorEventArgs e );
+    private void HandleAbortRequest( object sender, DeviceErrorEventArgs e )
+    {
+        if ( this._device is null ) return;
+        this._device.HandleAbortRequest( e );
+    }
+
+    protected AbortChannelServer? AbortServer { get; set; }
+
+    /// <summary>   Starts the abort server. </summary>
+    /// <remarks>
+    /// To successfully complete a <c>device_abort</c> RPC, a network instrument server SHALL: <para>
+    /// 
+    /// 1. Initiate termination of any core channel, in-progress RPC associated with the link except
+    /// destroy_link, device_enable_srq, and device_unlock. </para><para>
+    /// 
+    /// 2. Return with error set to 0, no error, to indicate successful completion </para><para>
+    /// 
+    /// The intent of this rule is to handle the <c>device_abort</c> RPC ahead of the other operations, but
+    /// due to operating system specific implementation details the timeliness cannot be guaranteed. </para>
+    /// <para>
+    /// 
+    /// The <c>device_abort</c> RPC only aborts an in-progress RPC, not a queued RPC. </para><para>
+    /// 
+    /// After replying to the <c>device_abort</c> call, the network instrument server SHALL reply to the
+    /// original in-progress call which was aborted with error set to 23, aborted.  </para><para>
+    /// 
+    /// Receiving 0 on the abort call at the network instrument client only means that the abort was
+    /// successfully delivered to the network instrument server. </para><para>
+    /// 
+    /// The <c>link id</c> parameter is compared against the active link identifiers . If none match,
+    /// <c>device_abort</c> SHALL terminate with error set to 4 invalid link identifier.  </para><para>
+    /// 
+    /// The operation of <c>device_abort</c> SHALL NOT be affected by locking  </para>
+    /// </remarks>
+    /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
+    /// <returns>   A DeviceErrorCode. </returns>
+    protected virtual void StartAbortServer()
+    {
+        if ( this.AbortServer is null )
+        {
+            this.AbortServer = new AbortChannelServer( this.IPv4Address, this.AbortPortNumber );
+            this.AbortServer.AbortRequested += this.HandleAbortRequest;
+            this.AbortServer.Run();
+        }
+    }
+
+    /// <summary>   Enables (start) the abort server asynchronously. </summary>
+    /// <remarks>   2023-01-30. </remarks>
+    /// <returns>   A Task. </returns>
+    public virtual async Task EnableAbortServerAsync()
+    {
+        await Task.Factory.StartNew( () => { this.StartAbortServer(); } )
+                .ContinueWith( failedTask => this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) ), TaskContinuationOptions.OnlyOnFaulted );
+    }
+
+    /// <summary>   The default time for waiting the abort server to stop listening. </summary>
+    public static int AbortServerDisableTimeoutDefault = 500;
+
+    /// <summary>   The abort server disable loop delay default. </summary>
+    public static int AbortServerDisableLoopDelayDefault = 5;
+
+    /// <summary>   Stops abort server. </summary>
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    The loop delay in milliseconds. </param>
+    protected virtual void StopAbortServer( int timeout = 500, int loopDelay = 5 )
+    {
+        if ( this.AbortServer is not null && this.AbortServer.Running )
+            try
+            {
+                this.AbortServer.AbortRequested -= this.HandleAbortRequest;
+                this.AbortServer.StopRpcProcessing();
+                DateTime endT = DateTime.Now.AddMilliseconds( timeout );
+                while ( endT > DateTime.Now && this.AbortServer.Running )
+                    // allow the thread time to address the request
+                    Task.Delay( loopDelay ).Wait();
+            }
+            catch ( Exception )
+            {
+                throw;
+            }
+            finally
+            {
+                this.AbortServer.Close();
+                this.AbortServer = null;
+            }
+    }
+
+    /// <summary>   Disables (stops) the abort server asynchronously. </summary>
+    /// <remarks>   2023-01-28. </remarks>
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
+    public virtual async Task DisableAbortServerAsync( int timeout = 500, int loopDelay = 5 )
+    {
+        await Task.Factory.StartNew( () => { this.StopAbortServer( timeout, loopDelay ); } )
+                .ContinueWith( failedTask => this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) ), TaskContinuationOptions.OnlyOnFaulted );
+    }
+
+    /// <summary>   Disables the abort server synchronously. </summary>
+    /// <remarks>   2023-01-30. </remarks>
+    /// <exception cref="Exception">    Thrown when an exception error condition occurs. </exception>
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
+    public virtual void DisableAbortServerSync( int timeout = 500, int loopDelay = 5 )
+    {
+        AbortChannelServer? abortServer = this.AbortServer;
+        try
+        {
+            if ( abortServer is not null )
+            {
+                using Task? task = this.DisableAbortServerAsync( timeout, loopDelay );
+                task.Wait();
+                if ( task.IsFaulted ) throw task.Exception;
+            }
+        }
+        catch ( Exception )
+        {
+            throw;
+        }
+        finally
+        {
+            this.AbortServer = null;
+        }
+    }
 
     #endregion
 
     #region " Interrupt port and client "
 
-    /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
-    /// <value> True if interrupt enabled, false if not. </value>
-    bool InterruptEnabled { get; set; }
+    /// <summary>   The interrupt address as set when getting the <see cref="CreateIntrChan(DeviceRemoteFunc)"/> RPC. </summary>
+    private IPAddress InterruptAddress { get; set; }
 
-    /// <summary>   Gets or sets the identifier of the client. </summary>
-    /// <value> The identifier of the client. </value>
-    int ClientId { get; set; }
+    private bool _interruptEnabled;
+    public bool InterruptEnabled
+    {
+        get => this._interruptEnabled;
+        set
+        {
+                if ( this.OnPropertyChanged( ref this._interruptEnabled, value ) && this._device is not null )
+            {
+                this._device.InterruptEnabled = value;
+            }
+        }
+    }
 
-    /// <summary>   Event queue for all listeners interested in ServiceRequested events. </summary>
-    event EventHandler<Vxi11EventArgs> ServiceRequested;
+    /// <summary>   the Handle of the interrupt as received when getting the <see cref="DeviceEnableSrq(DeviceEnableSrqParms)"/> RPC. </summary>
+    private byte[] _interruptHandle = new byte[40];
 
-    /// <summary>
-    /// Emulates calling remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
-    /// </summary>
-    /// <param name="handle">   The handle as it was received from the Core device. </param>
-    void DeviceIntrSrq( byte[] handle );
+    private int InterruptTransmitTimeout { get; set; }
+
+    /// <summary>   Gets or sets the interrupt connect timeout. </summary>
+    /// <value> The interrupt connect timeout. </value>
+    public int InterruptConnectTimeout { get; set; }
+
+    /// <summary>   Gets or sets the interrupt i/o timeout. </summary>
+    /// <value> The interrupt i/o timeout. </value>
+    public int InterruptIOTimeout { get; set; }
+
+    /// <summary>   Gets or sets the Interrupt port. </summary>
+    /// <value> The Interrupt port. </value>
+    private int InterruptPort { get; set; }
+
+    /// <summary>   Gets or sets the interrupt protocol. </summary>
+    /// <value> The interrupt protocol. </value>
+    private TransportProtocol InterruptProtocol { get; set; }
+
+    /// <summary>   Gets or sets the <see cref="InterruptChannelClient"/> Interrupt client. </summary>
+    /// <value> The Interrupt client. </value>
+    protected InterruptChannelClient? InterruptClient { get; set; }
 
     /// <summary>   Asynchronous Interrupt an in-progress call. </summary>
-    /// <param name="handle">   The handle as it was received from the Core device. </param>
-    void Interrupt( byte[] handle );
+    /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
+    public virtual void Interrupt()
+    {
+        if ( this.InterruptClient is null && this.InterruptEnabled && this.InterruptAddress is not null && this.InterruptAddress != IPAddress.Any )
+        {
+            if ( this.InterruptConnectTimeout == 0 ) this.InterruptConnectTimeout = OncRpcTcpClient.ConnectTimeoutDefault;
+            if ( this.InterruptTransmitTimeout == 0 ) this.InterruptTransmitTimeout = OncRpcTcpClient.TransmitTimeoutDefault;
+            if ( this.InterruptIOTimeout == 0 ) this.InterruptIOTimeout = OncRpcTcpClient.IOTimeoutDefault;
+
+            this.InterruptClient = new InterruptChannelClient( this.InterruptAddress, this.InterruptPort,
+                                                               this.InterruptProtocol == TransportProtocol.Udp ? OncRpcProtocol.OncRpcUdp : OncRpcProtocol.OncRpcTcp,
+                                                               this.InterruptConnectTimeout );
+
+            // set the timeouts of the client.
+            this.InterruptClient.Client!.TransmitTimeout = this.InterruptTransmitTimeout;
+            this.InterruptClient.Client!.IOTimeout = this.InterruptIOTimeout;
+        }
+        if ( this.InterruptEnabled )
+            this.InterruptClient?.DeviceIntrSrq( this._interruptHandle );
+    }
 
     #endregion
 
     #region " I/O messages "
 
+    private string _writeMessage;
     /// <summary>   Gets or sets a message that was sent to the device. </summary>
     /// <value> The message that was sent to the device. </value>
-    string WriteMessage { get; set; }
+    public string WriteMessage
+    {
+        get => this._writeMessage;
+        set => _ = this.SetProperty( ref this._writeMessage, value );
+    }
 
+    private string _readMessage;
     /// <summary>   Gets or sets a message that was received from the device. </summary>
     /// <value> A message that was received from the device. </value>
-    string ReadMessage { get; set; }
-
-    /// <summary>   Gets or sets the last device error. </summary>
-    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
-    DeviceErrorCode LastDeviceError { get; set; }
+    public string ReadMessage
+    {
+        get => this._readMessage;
+        set => _ = this.SetProperty( ref this._readMessage, value );
+    }
 
     #endregion
 
-    #region " IEEE488 properties "
-
-    /// <summary>   Gets or sets the host IPv4 Address. </summary>
-    /// <value> The host. </value>
-    public string Host { get; set; }
-
-    /// <summary>   Gets the IP address. </summary>
-    /// <value> The IP address. </value>
-    public IPAddress IPAddress { get; }
-
-    /// <summary>
-    /// Gets or sets the interface device string, .e.g, inst0, gpib0,5, or usb0[...].
-    /// </summary>
-    /// <value> The interface device string. </value>
-    public string InterfaceDeviceString { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the end-or-identify (EOI) terminator is enabled.
-    /// </summary>
-    /// <remarks>
-    /// The driver must be configured so that when talking on the bus it sends a write termination
-    /// string (e.g., a line-feed or line-feed followed by a carriage return) with EOI as the
-    /// terminator, and when listening on the bus it expects a read termination (e.g., a line-feed)
-    /// with EOI as the terminator. The IEEE-488.2 EOI (end-or-identify) message is interpreted as a 
-    /// <c>new line</c> character and can be used to terminate a message in place of a <c>new line</c>
-    /// character. A <c>carriage return</c> followed by a <c>new line</c> is also accepted. Message
-    /// termination will always reset the current SCPI message path to the root level.
-    /// </remarks>
-    /// <value> True if EOI is enabled, false if not. </value>
-    public bool Eoi { get; set; }
-
-    /// <summary>   Gets or sets the read termination. </summary>
-    /// <value> The read termination. </value>
-    public byte ReadTermination { get; set; }
-
-    /// <summary>   Gets or sets the connect timeout. </summary>
-    /// <remarks>
-    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
-    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
-    /// value.
-    /// </remarks>
-    /// <value> The connect timeout. </value>
-    public int ConnectTimeout { get; set; }
-
-    /// <summary>   Gets or sets the I/O timeout. </summary>
-    /// <value> The I/O timeout. </value>
-    public int IOTimeout { get; set; }
-
-    /// <summary>   
-    /// Gets or sets the timeout during the phase where data is sent within RPC calls, or data is
-    /// received within RPC replies. The <see cref="TransmitTimeout"/> timeout must be greater than 0.
-    /// </summary>
-    /// <value> The Transmit timeout. </value>
-    public int TransmitTimeout { get; set; }
-
-    /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
-    /// <remarks>
-    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
-    /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
-    /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
-    /// milliseconds for a lock to be released. <para>
-    /// 
-    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
-    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
-    /// value. </para>
-    /// </remarks>
-    /// <value> The lock timeout. </value>
-    public int LockTimeout { get; set; }
-
-    /// <summary>   Gets or sets the write termination. </summary>
-    /// <value> The write termination. </value>
-    public byte[] WriteTermination { get; set; }
-
-    /// <summary>   Gets a value indicating whether the VXI Core Client is connected. </summary>
-    /// <value> True if connected, false if not. </value>
-    public bool Connected { get; }
+    #region " members "
 
     /// <summary>
     /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
     /// system's default encoding is to be used.
     /// </summary>
     /// <value> The character encoding. </value>
-    public Encoding CharacterEncoding { get; set; }
+    public override Encoding CharacterEncoding
+    {
+        get => base.CharacterEncoding;
+        set => _ = this.SetProperty( base.CharacterEncoding!, value, () => base.CharacterEncoding = value );
+    }
 
+    private int _waitOnOutTime = 1000;
+    /// <summary>   Timeout wait time ms. </summary>
+    /// <value> The wait on out time. </value>
+    public int WaitOnOutTime
+    {
+        get => this._waitOnOutTime;
+        set => _ = this.SetProperty( ref this._waitOnOutTime, value );
+    }
+
+    private string _interfaceDeviceString;
+    /// <summary>   Gets or sets the interface device string. </summary>
+    /// <value> The interface device string. </value>
+    public string InterfaceDeviceString
+    {
+        get => this._interfaceDeviceString;
+        private set => _ = this.SetProperty( ref this._interfaceDeviceString, value );
+    }
+
+    private int _maxReceiveLength;
     /// <summary>   Gets or sets the maximum length of the receive. </summary>
     /// <value> The maximum length of the receive. </value>
-    public int MaxReceiveLength { get; set; }
+    public int MaxReceiveLength
+    {
+        get => this._maxReceiveLength;
+        set => _ = this.SetProperty( ref this._maxReceiveLength, value );
+    }
 
     #endregion
 
-    #region " Device state "
+    #region " VXI-11 device "
 
-    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
-    /// <value> True if lock enabled, false if not. </value>
-    public bool LockEnabled { get; set; }
+    /// <summary>
+    /// The <see cref="IVxi11Device"/> interface
+    /// </summary>
+    private IVxi11Device? _device;
 
-    /// <summary>   Gets or sets a value indicating whether the remote is enabled. </summary>
-    /// <value> True if remote enabled, false if not. </value>
-    bool RemoteEnabled { get; set; }
+    private void OnDevicePropertyChanged( object sender, PropertyChangedEventArgs e )
+    {
+        if ( sender is not IVxi11Device ) return;
+        this.OnDevicePropertyChanged( ( IVxi11Device ) sender, e.PropertyName );
+    }
+
+    private void OnDevicePropertyChanged( IVxi11Device sender, string propertyName )
+    {
+        if ( sender is not IVxi11Device || string.IsNullOrWhiteSpace( propertyName ) ) return;
+        {
+            switch ( propertyName )
+            {
+                case nameof( IVxi11Device.CharacterEncoding ):
+                    this.CharacterEncoding = sender.CharacterEncoding;
+                    break;
+                case nameof( IVxi11Device.ReadMessage ):
+                    this.ReadMessage = sender.ReadMessage;
+                    break;
+
+                case nameof( IVxi11Device.WriteMessage ):
+                    this.WriteMessage = sender.WriteMessage;
+                    break;
+            }
+        }
+    }
+
+    private void OnDevicePropertiesChanges( IVxi11Device sender )
+    {
+        if ( sender is not IVxi11Device ) return;
+        this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.CharacterEncoding ) );
+        this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.ReadMessage ) );
+        this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.WriteMessage ) );
+    }
 
     #endregion
 
@@ -167,7 +454,7 @@ public interface IVxi11Device
 
     /// <summary>   Gets or sets the device link to the actual single device. </summary>
     /// <value> The device link. </value>
-    DeviceLink? DeviceLink { get; set; }
+    private DeviceLink DeviceLink { get; set; }
 
     /// <summary>
     /// Query if the server can create a new device link given that this is a
@@ -175,7 +462,10 @@ public interface IVxi11Device
     /// </summary>
     /// <remarks>   2023-01-28. </remarks>
     /// <returns>   True if device free, false if not. </returns>
-    bool CanCreateNewDeviceLink();
+    public bool CanCreateNewDeviceLink()
+    {
+        return this.DeviceLink is null || this.DeviceLink.LinkId == 0;
+    }
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>
@@ -223,7 +513,37 @@ public interface IVxi11Device
     /// <returns>
     /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
-    CreateLinkResp CreateLink( CreateLinkParms request );
+    public override CreateLinkResp CreateLink( CreateLinkParms request )
+    {
+        if ( this.CanCreateNewDeviceLink() )
+        {
+            this.DeviceLink = new DeviceLink() { LinkId = 1 };
+
+            CreateLinkResp reply = new() {
+                DeviceLink = this.DeviceLink,
+                MaxReceiveSize = this.MaxReceiveLength,
+                AbortPort = this.AbortPortNumber
+            };
+
+            Logger.Writer.LogVerbose( $"creating link to {request.InterfaceDeviceString}" );
+
+            // note that the 7510 responds to an incorrect interface device name 
+            // with the DeviceErrorCode.DeviceNotAccessible; I believe that the 
+            // Invalid link identifier is more informative as to the cause of this error.
+            if ( this._device is null )
+                reply.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
+            else
+            {
+                this._device.InterfaceDeviceString = request.InterfaceDeviceString;
+                reply.ErrorCode = this._device.IsValidInterfaceDeviceString()
+                    ? DeviceErrorCode.NoError
+                    : DeviceErrorCode.InvalidLinkIdentifier;
+            }
+            return reply;
+        }
+        else
+            return new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
+    }
 
     /// <summary>   Destroy a connection. </summary>
     /// <remarks>
@@ -243,25 +563,68 @@ public interface IVxi11Device
     /// 
     /// The operation of destroy_link SHALL NOT be affected by device_abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="Codecs.DeviceLink"/> to use
+    /// <param name="request">  The request of type of type <see cref="DeviceLink"/> to use
     ///                         with the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
-    DeviceError DestroyLink( DeviceLink request );
+    public override DeviceError DestroyLink( DeviceLink request )
+    {
+        try
+        {
+            this.DeviceLink = new DeviceLink();
+
+            InterruptChannelClient? interruptClient = this.InterruptClient;
+            interruptClient?.Close();
+            this.InterruptClient = null;
+            this.DisableAbortServerSync();
+            return new DeviceError();
+        }
+        catch ( Exception )
+        {
+            return new DeviceError( DeviceErrorCode.IOError );
+        }
+    }
 
     /// <summary>   Create an interrupt channel. </summary>
     /// <remarks>   2023-01-26. </remarks>
     /// <param name="request">  The request of type of type <see cref="DeviceRemoteFunc"/> to
     ///                         use with the remote procedure call. </param>
     /// <returns>   The new interrupt channel 1. </returns>
-    DeviceError CreateIntrChan( DeviceRemoteFunc request );
+    public override DeviceError CreateIntrChan( DeviceRemoteFunc request )
+    {
+        if ( this.InterruptEnabled )
+            return new DeviceError( DeviceErrorCode.ChannelAlreadyEstablished );
+        this.InterruptAddress = request.HostAddr;
+        this.InterruptPort = request.HostPort;
+        this.InterruptProtocol = request.TransportProtocol;
+        this.InterruptEnabled = true;
+        DeviceError result = new();
+        return result;
+    }
 
     /// <summary>   Destroy an interrupt channel. </summary>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
-    DeviceError DestroyIntrChan();
+    public override DeviceError DestroyIntrChan()
+    {
+        try
+        {
+            if ( !this.InterruptEnabled )
+                return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+            this.InterruptClient?.Dispose();
+            return new DeviceError();
+        }
+        catch ( Exception )
+        {
+            return new DeviceError( DeviceErrorCode.IOError );
+        }
+        finally
+        {
+            this.InterruptClient = null;
+        }
+    }
 
     /// <summary>   Device clear. </summary>
     /// <remarks>
@@ -289,7 +652,10 @@ public interface IVxi11Device
     /// <returns>
     /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
-    DeviceError DeviceClear( DeviceGenericParms request );
+    public override DeviceError DeviceClear( DeviceGenericParms request )
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-01-26. </remarks>
@@ -298,7 +664,10 @@ public interface IVxi11Device
     /// <returns>
     /// A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>.
     /// </returns>
-    DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request );
+    public override DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>   The device enables or does not enable the Send Request service. </summary>
     /// <remarks>
@@ -314,7 +683,12 @@ public interface IVxi11Device
     /// <returns>
     /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
-    DeviceError DeviceEnableSrq( DeviceEnableSrqParms request );
+    public override DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
+    {
+        this.InterruptEnabled = request.Enable;
+        this._interruptHandle = request.GetHandle();
+        return new DeviceError();
+    }
 
     /// <summary>   Enables device local control. </summary>
     /// <remarks>
@@ -349,7 +723,10 @@ public interface IVxi11Device
     /// </remarks>
     /// <param name="request">  device generic parameters. </param>
     /// <returns>   A Device_Error. </returns>
-    DeviceError DeviceLocal( DeviceGenericParms request );
+    public override DeviceError DeviceLocal( DeviceGenericParms request )
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>   Enables device remote control. </summary>
     /// <remarks>
@@ -383,7 +760,10 @@ public interface IVxi11Device
     /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>   A Device_Error. </returns>
-    DeviceError DeviceRemote( DeviceGenericParms request );
+    public override DeviceError DeviceRemote( DeviceGenericParms request )
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>   Returns the device status byte. </summary>
     /// <remarks>
@@ -421,7 +801,10 @@ public interface IVxi11Device
     /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>   A Device_ReadStbResp. </returns>
-    DeviceReadStbResp DeviceReadStb( DeviceGenericParms request );
+    public override DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>   Performs a trigger. </summary>
     /// <remarks>
@@ -453,7 +836,10 @@ public interface IVxi11Device
     /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>   A Device_Error. </returns>
-    DeviceError DeviceTrigger( DeviceGenericParms request );
+    public override DeviceError DeviceTrigger( DeviceGenericParms request )
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>   Lock the device. </summary>
     /// <remarks>
@@ -489,7 +875,10 @@ public interface IVxi11Device
     /// </remarks>
     /// <param name="request"> Device lock parameters. </param>
     /// <returns>   A Device_Error. </returns>
-    DeviceError DeviceLock( DeviceLockParms request );
+    public override DeviceError DeviceLock( DeviceLockParms request )
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>   Unlock the device. </summary>
     /// <remarks>
@@ -507,7 +896,10 @@ public interface IVxi11Device
     /// </remarks>
     /// <param name="deviceLink">   The device link parameters. </param>
     /// <returns>   A Device_Error. </returns>
-    DeviceError DeviceUnlock( DeviceLink deviceLink );
+    public override DeviceError DeviceUnlock( DeviceLink deviceLink )
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>   Read a message. </summary>
     /// <remarks>
@@ -558,7 +950,16 @@ public interface IVxi11Device
     /// </remarks>
     /// <param name="deviceReadParameters"> Device read parameters. </param>
     /// <returns>   A Device_ReadResp. </returns>
-    DeviceReadResp DeviceRead( DeviceReadParms deviceReadParameters );
+    public override DeviceReadResp DeviceRead( DeviceReadParms deviceReadParameters )
+    {
+        DeviceReadResp readRes = new();
+        if ( this._device is null )
+            readRes.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
+        else
+            readRes = this._device.DeviceRead( deviceReadParameters );
+        return readRes;
+    }
+
 
     /// <summary>   Process the device write procedure. </summary>
     /// <remarks>
@@ -628,7 +1029,15 @@ public interface IVxi11Device
     /// </remarks>
     /// <param name="deviceWriteParameters">    Device write parameters. </param>
     /// <returns>   A <c>device_write</c> Resp. </returns>
-    DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters );
+    public override DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters )
+    {
+        DeviceWriteResp writeRes = new();
+        if ( this._device is null )
+            writeRes.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
+        else
+            writeRes = this._device.DeviceWrite( deviceWriteParameters );
+        return writeRes;
+    }
 
     #endregion
 

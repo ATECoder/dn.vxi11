@@ -2,7 +2,7 @@ using System.Net;
 
 using cc.isr.VXI11.Codecs;
 
-namespace cc.isr.VXI11;
+namespace cc.isr.VXI11.Client;
 
 /// <summary>   A VXI-11 client. </summary>
 public partial class Vxi11Client : ICloseable

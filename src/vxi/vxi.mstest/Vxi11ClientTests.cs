@@ -45,7 +45,7 @@ public class Vxi11ClientTests
     /// <returns>   An int. </returns>
     private static int AssertUniqueClientIdShouldBeGenerated()
     {
-        int clientId = Vxi11Client.GetNextClientId();
+        int clientId = cc.isr.VXI11.Client.Vxi11Client.GetNextClientId();
         Assert.IsTrue( clientId >= 0 );
         return clientId;
     }

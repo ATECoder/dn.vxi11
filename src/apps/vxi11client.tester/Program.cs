@@ -1,7 +1,8 @@
-using cc.isr.VXI11.Logging;
-using cc.isr.VXI11;
+using System.Diagnostics.SymbolStore;
 
-Console.WriteLine( $"VXI-11 {nameof( Vxi11Client )} Tester" );
+using cc.isr.VXI11.Logging;
+
+Console.WriteLine( $"VXI-11 {nameof( cc.isr.VXI11.Client.Vxi11Client )} Tester" );
 
 string ipv4Address = "192.168.0.144"; // "127.0.0.1";
 string deviceInterfaceString = "inst0";
@@ -18,7 +19,7 @@ while ( !ready )
     ready = yesno.KeyChar == 'y' || yesno.KeyChar == 'Y';
 }
 
-using Vxi11Client vxi11Client = new();
+using cc.isr.VXI11.Client.Vxi11Client vxi11Client = new();
 
 vxi11Client.ThreadExceptionOccurred += OnThreadExcetion;
 
@@ -80,7 +81,7 @@ void SendCommand( string command )
 static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
 {
     string name = "unknown";
-    if ( sender is Vxi11Client ) name = nameof( Vxi11Client );
+    if ( sender is cc.isr.VXI11.Client.Vxi11Client ) name = nameof( cc.isr.VXI11.Client.Vxi11Client );
 
     Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
 }

@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace cc.isr.VXI11;
+namespace cc.isr.VXI11.Client;
 
 public partial class Vxi11Client : INotifyPropertyChanged
 {

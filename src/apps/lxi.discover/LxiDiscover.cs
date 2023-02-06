@@ -175,7 +175,7 @@ to discover all the instruments listening on the local IPs of this machine.
     /// <returns>   The instrument identity. </returns>
     public static string QueryIdentity( string address, string deviceInterfaceString )
     {
-        using Vxi11Client instrument = new();
+        using cc.isr.VXI11.Client.Vxi11Client instrument = new();
         instrument.ThreadExceptionOccurred += OnThreadException;
         instrument.Connect( address, deviceInterfaceString );
         return instrument.QueryLine( "*IDN?" ).response;
@@ -207,7 +207,7 @@ to discover all the instruments listening on the local IPs of this machine.
     internal static void OnThreadException( object sender, ThreadExceptionEventArgs e )
     {
         string name = "unknown";
-        if ( sender is Vxi11Client ) name = nameof( Vxi11Client );
+        if ( sender is cc.isr.VXI11.Client.Vxi11Client ) name = nameof( cc.isr.VXI11.Client.Vxi11Client );
         Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
     }
 

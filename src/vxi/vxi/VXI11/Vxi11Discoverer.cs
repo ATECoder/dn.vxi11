@@ -159,7 +159,7 @@ public class Vxi11Discoverer
     /// <returns>   The identity. </returns>
     public static string QueryIdentity( string address, string interfaceDeviceString )
     {
-        using Vxi11Client instrument = new();
+        using Client.Vxi11Client instrument = new();
         instrument.ThreadExceptionOccurred += OnThreadException;
         instrument.Connect( address, interfaceDeviceString );
         return instrument.QueryLine( "*IDN?" ).response;
