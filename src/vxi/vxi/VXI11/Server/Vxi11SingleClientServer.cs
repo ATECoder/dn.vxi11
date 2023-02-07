@@ -39,7 +39,6 @@ public partial class Vxi11SingleClientServer : CoreChannelServerBase
     /// <param name="port">     The port number where the server will wait for incoming calls. </param>
     public Vxi11SingleClientServer( Vxi11Device device, IPAddress? bindAddr, int port ) : base( bindAddr ?? IPAddress.Any, port )
     {
-        this._device = device;
         this.InterfaceDeviceString = string.Empty;
         this._interfaceDeviceString = string.Empty;
         this.ReadMessage = string.Empty;
@@ -50,7 +49,10 @@ public partial class Vxi11SingleClientServer : CoreChannelServerBase
         this.MaxReceiveLength = Client.Vxi11Client.MaxReceiveLengthDefault;
         this.InterruptAddress = IPAddress.Any;
         this.DeviceLink = new DeviceLink();
+
+        this._device = device;
         this.OnDevicePropertiesChanges( device );
+        this._device.RequestingService += this.OnRequestingService;
     }
 
     /// <summary>
@@ -340,6 +342,12 @@ public partial class Vxi11SingleClientServer : CoreChannelServerBase
         if ( this.InterruptEnabled )
             this.InterruptClient?.DeviceIntrSrq( this._interruptHandle );
     }
+
+    private void OnRequestingService( object sender, Vxi11EventArgs e )
+    {
+        this.Interrupt();
+    }
+
 
     #endregion
 

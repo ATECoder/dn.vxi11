@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Xml.Xsl;
+
 using cc.isr.VXI11;
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.Logging;
@@ -16,23 +18,20 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public Vxi11Instrument( string identity = "INTEGRATED SCIENTIFIC RESOURCES,MODEL IEEE488Mock,001,1.0.8434" )
     {
         this.Identity = identity;
+        this._identity = identity;
         this.WriteMessage = string.Empty;
-        this._writeMessage= string.Empty;
-        this.ReadMessage= string.Empty;
-        this._readMessage= string.Empty;
+        this._writeMessage = string.Empty;
+        this.ReadMessage = string.Empty;
+        this._readMessage = string.Empty;
         this._readBuffer = Array.Empty<byte>();
         this.CharacterEncoding = CoreChannelClient.EncodingDefault;
         this._characterEncoding = CoreChannelClient.EncodingDefault;
+        this._cancelSource = new();
     }
 
     #endregion
 
-    #region " Interface implementation "
-
-    /// <summary>
-    /// Device identification string
-    /// </summary>
-    public string Identity { get; set; }
+    #region " instrument operations "
 
     /// <summary>   Clears status: <see cref="Vxi11InstrumentCommands.CLS"/>. </summary>
     /// <remarks>
@@ -62,7 +61,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     /// <summary>
-    /// Reads Standard Event Status: *ESE?
+    /// Reads Standard Event Status: <see cref="Vxi11InstrumentCommands.ESERead"/>
     /// </summary>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESERead, Vxi11InstrumentOperationType.Read )]
     public string ESERead()
@@ -220,6 +219,205 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     #endregion
 
+    #region " thread exception handler "
+
+    /// <summary>
+    /// Event queue for all listeners interested in ThreadExceptionOccurred events.
+    /// </summary>
+    public event ThreadExceptionEventHandler? ThreadExceptionOccurred;
+
+    /// <summary>   Executes the <see cref="ThreadExceptionOccurred"/> event. </summary>
+    /// <param name="e">    Event information to send to registered event handlers. </param>
+    protected virtual void OnThreadException( ThreadExceptionEventArgs e )
+    {
+        var handler = this.ThreadExceptionOccurred;
+        handler?.Invoke( this, e );
+    }
+
+    #endregion
+
+    #region " run long operation in the background "
+
+    private bool _longOperationRunning;
+    /// <summary>   Gets or sets a value indicating whether the long operation running. </summary>
+    /// <value> True if long operation running, false if not. </value>
+    public bool LongOperationRunning
+    {
+        get => this._longOperationRunning;
+        set => _ = this.OnPropertyChanged( ref this._longOperationRunning, value );
+    }
+
+    /// <summary>   Starts long operation asynchronous. </summary>
+    /// <param name="cancelSource"> The cancellation source that allows processing to be canceled. </param>
+    /// <returns>   The start long operation. </returns>
+    public virtual async Task<DeviceErrorCode> StartLongOperationAsync( CancellationTokenSource cancelSource )
+    {
+        this._cancelSource = cancelSource;
+        DeviceErrorCode result = DeviceErrorCode.NoError;
+        _ = await Task<DeviceErrorCode>.Factory.StartNew( () => {
+            result = this.RunLongOperation( cancelSource );
+            return result;
+        } )
+              .ContinueWith(
+            failedTask => {
+                result = DeviceErrorCode.IOError;
+                this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) );
+                return result;
+            }, TaskContinuationOptions.OnlyOnFaulted );
+        return result;
+    }
+
+
+    private CancellationTokenSource _cancelSource;
+    /// <summary>
+    /// Override this method to execute a long operation.
+    /// </summary>
+    /// <param name="cancelSource"> The cancellation source that allows processing to be canceled. </param>
+    protected virtual DeviceErrorCode RunLongOperation( CancellationTokenSource cancelSource ) { return DeviceErrorCode.NoError; }
+
+    /// <summary>   Stops the long operation. </summary>
+    /// <param name="cancelSource"> The cancel source. </param>
+    public void StopLongOperation( CancellationTokenSource cancelSource )
+    {
+        cancelSource.Cancel();
+    }
+
+    /// <summary>   Attempts to stop long operation an int from the given int. </summary>
+    /// <exception cref="InvalidOperationException">    Thrown when the requested operation is
+    ///                                                 invalid. </exception>
+    /// <exception cref="AggregateException">           Thrown when an Aggregate error condition
+    ///                                                 occurs. </exception>
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public bool TryStopLongOperation( int timeout = 100, int loopDelay = 5 )
+    {
+        List<Exception> exceptions = new();
+
+        try
+        {
+            if ( this.LongOperationRunning )
+                this.StopLongOperation( this._cancelSource );
+        }
+        catch ( Exception ex )
+        { exceptions.Add( ex ); }
+
+        try
+        {
+            DateTime endTime = DateTime.Now.AddMilliseconds( timeout );
+            while ( this.LongOperationRunning && endTime > DateTime.Now )
+            {
+                Task.Delay( loopDelay ).Wait();
+            }
+            if ( this.LongOperationRunning )
+                throw new InvalidOperationException( "Long operation still running after sending the stop signal." );
+        }
+        catch ( Exception ex )
+        { exceptions.Add( ex ); }
+        finally
+        {
+        }
+
+        if ( exceptions.Any() )
+        {
+            AggregateException aggregateException = new( exceptions );
+            throw aggregateException;
+        }
+        else
+            return !this.LongOperationRunning;
+
+    }
+
+    /// <summary>   Try stop long operation asynchronously. </summary>
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
+    /// <returns>   A Task. </returns>
+    public virtual async Task<bool> TryStopLongOperationAsync( int timeout = 100, int loopDelay = 5 )
+    {
+        bool result = false;
+        _ = await Task<bool>.Factory.StartNew( () => {
+            result = this.TryStopLongOperation( timeout, loopDelay );
+            return result;
+        } )
+              .ContinueWith(
+            failedTask => {
+                result = false;
+                this.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception ) );
+                return result;
+            }, TaskContinuationOptions.OnlyOnFaulted );
+        return result;
+    }
+
+    #endregion
+
+    #region  " instrument operation members "
+
+    private string _identity;
+    /// <summary>
+    /// Device identification string
+    /// </summary>
+    public string Identity
+    {
+        get => this._identity;
+        set => _ = this.OnPropertyChanged( ref this._identity, value );
+    }
+
+    #endregion
+
+    #region " Sending interrupts (service requests) to the clients "
+
+    private bool _interruptEnabled;
+    /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
+    /// <value> True if interrupt enabled, false if not. </value>
+    public bool InterruptEnabled
+    {
+        get => this._interruptEnabled;
+        set => _ = this.SetProperty( ref this._interruptEnabled, value );
+    }
+
+    /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
+    public event EventHandler<cc.isr.VXI11.Vxi11EventArgs>? RequestingService;
+
+    /// <summary>   Override this method to handle the <see cref="RequestingService"/> VXI-11 event. </summary>
+    /// <param name="e">    Event information to send to registered event handlers. </param>
+    protected virtual void OnRequestingService( Vxi11EventArgs e )
+    {
+        if ( this.InterruptEnabled && e is not null ) RequestingService?.Invoke( this, e );
+    }
+
+    private int _clientId;
+    /// <summary>   Gets or sets the identifier of the client. </summary>
+    /// <value> The identifier of the client. </value>
+    public int ClientId
+    {
+        get => this._clientId;
+        set => _ = this.OnPropertyChanged( ref this._clientId, value );
+    }
+
+    #endregion
+
+    #region " Device state "
+
+    private bool _lockEnabled;
+    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
+    /// <value> True if lock enabled, false if not. </value>
+    public bool LockEnabled
+    {
+        get => this._lockEnabled;
+        set => _ = this.OnPropertyChanged( ref this._lockEnabled, value );
+    }
+
+    private bool _remoteEnabled;
+    /// <summary>   Gets or sets a value indicating whether the remote is enabled. </summary>
+    /// <value> True if remote enabled, false if not. </value>
+    public bool RemoteEnabled
+    {
+        get => this._remoteEnabled;
+        set => _ = this.OnPropertyChanged( ref this._remoteEnabled, value );
+    }
+
+    #endregion
+
     #region " RPC implementations "
 
     /// <summary>   Aborts and returns the <see cref="DeviceError"/>. </summary>
@@ -243,7 +441,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// Receiving 0 on the abort call at the network instrument client only means that the abort was
     /// successfully delivered to the network instrument server. </para><para>
     /// 
-    /// The <c>link id</c> parameter is compared against the active link identifiers . If none match,
+    /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_abort</c> SHALL terminate with error set to 4 invalid link identifier.  </para><para>
     /// 
     /// The operation of <c>device_abort</c> SHALL NOT be affected by locking  </para>
@@ -251,66 +449,25 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <returns>   A DeviceError. </returns>
     public DeviceError Abort()
     {
+        if ( this.LongOperationRunning )
+        {
+            try
+            {
+                return this.TryStopLongOperation()
+                    ? new DeviceError()
+                    : new DeviceError( DeviceErrorCode.IOError );
+            }
+            catch ( Exception )
+            {
+                return new DeviceError( DeviceErrorCode.IOError );
+            }
+        }
         return new DeviceError();
     }
 
-    private DeviceErrorCode _lastDeviceError;
-    /// <summary>   Gets or sets the last device error. </summary>
-    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
-    public DeviceErrorCode LastDeviceError
-    {
-        get => this._lastDeviceError;
-        set => _ = this.SetProperty( ref this._lastDeviceError, value );
-    }
+    #endregion
 
-    private string _writeMessage;
-    /// <summary>   Gets or sets a message that was sent to the device. </summary>
-    /// <value> The message that was sent to the device. </value>
-    public string WriteMessage
-    {
-        get => this._writeMessage;
-        set => _ = this.SetProperty( ref this._writeMessage, value );
-    }
-
-    private string _readMessage;
-    /// <summary>   Gets or sets a message that was received from the device. </summary>
-    /// <value> A message that was received from the device. </value>
-    public string ReadMessage
-    {
-        get => this._readMessage;
-        set => _ = this.SetProperty( ref this._readMessage, value );
-    }
-
-    private Encoding _characterEncoding;
-    /// <summary>
-    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
-    /// system's default encoding is to be used.
-    /// </summary>
-    /// <value> The character encoding. </value>
-    public Encoding CharacterEncoding
-    {
-        get => this._characterEncoding;
-        set => _ = this.SetProperty( ref this._characterEncoding, value );
-    }
-
-    private int _waitOnOutTime = 1000;
-    /// <summary>   Timeout wait time ms. </summary>
-    /// <value> The wait on out time. </value>
-    public int WaitOnOutTime
-    {
-        get => this._waitOnOutTime;
-        set => _ = this.SetProperty( ref this._waitOnOutTime, value );
-    }
-
-    /// <summary>
-    /// Thread synchronization locks
-    /// </summary>
-    private readonly ManualResetEvent _asyncLocker = new( false );
-
-    /// <summary>
-    /// Read cache buffer
-    /// </summary>
-    private byte[] _readBuffer = Array.Empty<byte>();
+    #region " I/O operations "
 
     /// <summary>   The current operation instruction type. </summary>
     /// <value> The type of the current operation. </value>
@@ -415,8 +572,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// 
     /// If data.data_len is greater than the value of maxRecvSize returned in create_link,
     /// <c>device_write</c>  SHALL terminate without transferring any bytes to the device and SHALL
-    /// set error
-    /// to 5.Section B: Network Instrument Protocol Page 29 October 4, 2000 Printing VXIbus
+    /// set error to 5.Section B: Network Instrument Protocol Page 29 October 4, 2000 Printing VXIbus
     /// Specification: VXI-11 Revision 1.0 </para><para>
     /// 
     /// If some other link has the lock, <c>device_write</c>  SHALL examine the <c>waitlock</c> flag
@@ -432,8 +588,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// If after at least <c>io_timeout</c> milliseconds not all of data has been transferred to the
     /// device,
     /// <c>device_write</c>  SHALL terminate with error set to 15, I/O timeout. This timeout is based
-    /// on the
-    /// entire transaction and not the time required to transfer single bytes. </para><para>
+    /// on the entire transaction and not the time required to transfer single bytes. </para><para>
     /// 
     /// The <c>io_timeout</c> value set by the application may need to change based on the size of
     /// data. </para>
@@ -457,110 +612,213 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// 
     /// </item></list>
     /// </remarks>
-    /// <param name="deviceWriteParameters">    Device write parameters. </param>
-    /// <returns>   A <c>device_write</c> Resp. </returns>
-    public DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters )
+    /// <param name="compoundScpiCommand">  The compound SCPI command, which might consist of
+    ///                                     commands separated with ';' or new line. </param>
+    /// <returns>   A DeviceErrorCode. </returns>
+    public DeviceErrorCode DeviceWrite( string compoundScpiCommand )
     {
-        // get the write command.
-        string cmd = this.CharacterEncoding.GetString( deviceWriteParameters.GetData() );
-        Logger.Writer.LogVerbose( $"link ID: {deviceWriteParameters.Link.LinkId} -> Received：{cmd}" );
-        DeviceWriteResp result = new() {
-            Size = deviceWriteParameters.GetData().Length
-        };
+        if ( string.IsNullOrWhiteSpace( compoundScpiCommand ) ) return DeviceErrorCode.IOError;
 
         // holds one or more SCPI commands each with its arguments
-        string[] scpiCommands = cmd.Split( new char[] { '\n', '\r', ';' }, StringSplitOptions.RemoveEmptyEntries );
+        string[] scpiCommands = compoundScpiCommand.Split( new char[] { '\n', '\r', ';' }, StringSplitOptions.RemoveEmptyEntries );
 
-        if ( scpiCommands.Length == 0 )
+        if ( scpiCommands.Length == 0 ) return DeviceErrorCode.SyntaxError;
+
+        DeviceErrorCode result = DeviceErrorCode.NoError;
+        foreach ( string scpiCommand in scpiCommands )
         {
-            // The instruction is incorrect or undefined
-            result.ErrorCode = DeviceErrorCode.SyntaxError;
-            return result;
-        }
-
-        // process all the SCPI commands
-        for ( int n = 0; n < scpiCommands.Length; n++ )
-        {
-            string spciCommand = scpiCommands[n]; // select a complete SCPI command with optional arguments
-            Logging.Logger.Writer.LogVerbose( $"Process the instruction： {spciCommand}" );
-            string[] scpiArgs = Array.Empty<string>(); // Holds the SCPI command arguments
-
-            // split the command to the core command and its arguments:
-            string[] scpiCmdElements = scpiCommands[n].Split( new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries );
-            spciCommand = scpiCmdElements[0].Trim();
-
-            _ = this._asyncLocker.Reset(); // Block threads
-            this._readBuffer = Array.Empty<byte>();
-
-            // check if we have a query message (read) or a write message:
-            this.CurrentOperationType = spciCommand[^1] == '?' ? Vxi11InstrumentOperationType.Read : Vxi11InstrumentOperationType.Write;
-
-            // get the command arguments
-            if ( scpiCmdElements.Length >= 2 )
-                scpiArgs = scpiCmdElements[1].Split( new char[] { '，' }, StringSplitOptions.RemoveEmptyEntries );
-
-            // find the mock server method that corresponds to the SCPI command.
-            MethodInfo? method = this.GetType().GetMethods().ToList().Find( p => {
-                var att = p.GetCustomAttribute( typeof( Vxi11InstrumentOperationAttribute ) );
-                if ( att == null || att is not Vxi11InstrumentOperationAttribute ) return false;
-                Vxi11InstrumentOperationAttribute scpiAtt = ( Vxi11InstrumentOperationAttribute ) att;
-
-                // return success if the command matches the method attribute
-                return String.Equals( scpiAtt.Content, spciCommand, StringComparison.OrdinalIgnoreCase );
-            } );
-
-            if ( method is not null )
+            Logging.Logger.Writer.LogVerbose( $"Processing '{scpiCommand}'" );
+            try
             {
-                Vxi11InstrumentOperationAttribute scpiAtt = ( Vxi11InstrumentOperationAttribute ) method.GetCustomAttribute( typeof( Vxi11InstrumentOperationAttribute ) )!;
-                try
-                {
-                    object? res = null;
-                    switch ( scpiAtt.OperationType )
-                    {
-                        case Vxi11InstrumentOperationType.None:
-                            Logger.Writer.LogMemberWarning( $"The attribute of method {method} is marked incorrectly as {scpiAtt.OperationType}。" );
-                            break;
-                        case Vxi11InstrumentOperationType.Write:
-                            this.WriteMessage = scpiCommands[n];
-                            // invoke the corresponding method
-                            res = method.Invoke( this, scpiArgs );
-                            result.ErrorCode = DeviceErrorCode.NoError;
-                            break;
-                        case Vxi11InstrumentOperationType.Read://Query instructions
-                            this.WriteMessage = scpiCommands[n];
-                            res = method.Invoke( this, scpiArgs );
-                            if ( res is not null )
-                            {
-                                this.ReadMessage = res.ToString();
-                                this._readBuffer = this.CharacterEncoding.GetBytes( res.ToString()! );
-                                Logger.Writer.LogVerbose( $"Query results： {res}。" );
-                            }
-                            else
-                            {
-                                this.ReadMessage = "null";
-                                Logger.Writer.LogVerbose( "Query results：NULL。" );
-                                result.ErrorCode = DeviceErrorCode.NoError;
-                            }
-                            break;
-                    }
-                }
-                catch ( Exception ex )
-                {
-                    Logger.Writer.LogMemberError( $"An error occurred when the method was called：{method}", ex );
-                    // Parameter error
-                    result.ErrorCode = DeviceErrorCode.ParameterError;
-                }
-            }
-            else
-            {
-                Logger.Writer.LogMemberWarning( $"No method found： {spciCommand}" );
-                result.ErrorCode = DeviceErrorCode.SyntaxError; // The instruction is incorrect or undefined
-                this.CurrentOperationType = Vxi11InstrumentOperationType.None;
-            }
-            _ = this._asyncLocker.Set();//Reset block
-        }
+                _ = this._asyncLocker.Reset(); // Block threads
+                result = this.ProcessScpiCommand( scpiCommand );
 
+            }
+            catch ( Exception ex )
+            {
+                Logging.Logger.Writer.LogError( $"failed processing '{scpiCommand}'", ex );
+                result = DeviceErrorCode.IOError;
+            }
+            finally
+            {
+                _ = this._asyncLocker.Set(); //Reset block
+            }
+
+            if ( result != DeviceErrorCode.NoError ) { break; }
+        }
         return result;
+    }
+
+
+    /// <summary>   Lists the instrument operations. </summary>
+    private List<MethodInfo> _instrumentOperations = new List<MethodInfo>();
+
+    /// <summary>   Enumerates the instrument operation methods. </summary>
+    /// <returns>   A List{MethodInfo}; </returns>
+    public List<MethodInfo> InstrumentOperations()
+    {
+        if ( this._instrumentOperations is null || this._instrumentOperations.Count == 0 )
+        {
+            this._instrumentOperations = this.GetType().GetMethods().ToList().Where( (o) =>
+            {
+                return o.GetCustomAttribute( typeof( Vxi11InstrumentOperationAttribute ) ) is Vxi11InstrumentOperationAttribute;
+            } ).ToList();
+        }
+        return this._instrumentOperations;
+    }
+
+    /// <summary>   Searches for the first instrument operation. </summary>
+    /// <param name="operationName">    Name of the operation. </param>
+    /// <returns>   The found instrument operation. </returns>
+    private MethodInfo? FindInstrumentOperation( string operationName )
+    {
+        return this.InstrumentOperations().Find( p => {
+
+            var att = p.GetCustomAttribute( typeof( Vxi11InstrumentOperationAttribute ) );
+            if ( att == null || att is not Vxi11InstrumentOperationAttribute ) return false;
+            Vxi11InstrumentOperationAttribute scpiAtt = ( Vxi11InstrumentOperationAttribute ) att;
+
+            // return success if the command matches the method attribute
+            return String.Equals( scpiAtt.Content, operationName, StringComparison.OrdinalIgnoreCase );
+        } );
+    }
+
+    /// <summary>   Process the SCPI command described by <paramref name="fullScpiCommand"/>. </summary>
+    /// <param name="fullScpiCommand">  A SCPI command and command arguments. </param>
+    /// <returns>   A DeviceErrorCode. </returns>
+    protected virtual DeviceErrorCode ProcessScpiCommand( string fullScpiCommand )
+    {
+
+        string[] scpiArgs = Array.Empty<string>(); // Holds the SCPI command arguments
+
+        // split the command to the core command and its arguments:
+        string[] scpiCmdElements = fullScpiCommand.Split( new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries );
+        string coreScpiCommand = scpiCmdElements[0].Trim();
+
+        this._readBuffer = Array.Empty<byte>();
+
+        // check if we have a query message (read) or a write message:
+        this.CurrentOperationType = coreScpiCommand[^1] == '?' ? Vxi11InstrumentOperationType.Read : Vxi11InstrumentOperationType.Write;
+
+        // get the command arguments
+        if ( scpiCmdElements.Length >= 2 )
+            scpiArgs = scpiCmdElements[1].Split( new char[] { '，' }, StringSplitOptions.RemoveEmptyEntries );
+
+        // find the instrument method that corresponds to this command.
+        var method = this.FindInstrumentOperation( coreScpiCommand );
+
+        DeviceErrorCode result = DeviceErrorCode.NoError;
+        if ( method is not null )
+        {
+            Vxi11InstrumentOperationAttribute scpiAtt = ( Vxi11InstrumentOperationAttribute ) method.GetCustomAttribute( typeof( Vxi11InstrumentOperationAttribute ) )!;
+            try
+            {
+                object? res = null;
+                switch ( scpiAtt.OperationType )
+                {
+                    case Vxi11InstrumentOperationType.None:
+                        Logger.Writer.LogMemberWarning( $"The attribute of method {method} is marked incorrectly as {scpiAtt.OperationType}。" );
+                        break;
+                    case Vxi11InstrumentOperationType.Write:
+                        this.WriteMessage = fullScpiCommand;
+                        // invoke the corresponding method
+                        res = method.Invoke( this, scpiArgs );
+                        result = DeviceErrorCode.NoError;
+                        break;
+                    case Vxi11InstrumentOperationType.Read://Query instructions
+                        this.WriteMessage = fullScpiCommand;
+                        res = method.Invoke( this, scpiArgs );
+                        if ( res is not null )
+                        {
+                            this.ReadMessage = res.ToString();
+                            this._readBuffer = this.CharacterEncoding.GetBytes( res.ToString()! );
+                            Logger.Writer.LogVerbose( $"Query results： {res}。" );
+                        }
+                        else
+                        {
+                            this.ReadMessage = "null";
+                            Logger.Writer.LogVerbose( "Query results：NULL。" );
+                            result = DeviceErrorCode.NoError;
+                        }
+                        break;
+                }
+            }
+            catch ( Exception ex )
+            {
+                Logger.Writer.LogMemberError( $"An error occurred when the method was called：{method}", ex );
+                // Parameter error
+                result = DeviceErrorCode.ParameterError;
+            }
+        }
+        else
+        {
+            Logger.Writer.LogMemberWarning( $"No method found： {fullScpiCommand}" );
+            result = DeviceErrorCode.SyntaxError; // The instruction is incorrect or undefined
+            this.CurrentOperationType = Vxi11InstrumentOperationType.None;
+        }
+        return result;
+    }
+
+    #endregion
+
+    #region " RPC operation members "
+
+    private string _writeMessage;
+    /// <summary>   Gets or sets a message that was sent to the device. </summary>
+    /// <value> The message that was sent to the device. </value>
+    public string WriteMessage
+    {
+        get => this._writeMessage;
+        set => _ = this.SetProperty( ref this._writeMessage, value );
+    }
+
+    private string _readMessage;
+    /// <summary>   Gets or sets a message that was received from the device. </summary>
+    /// <value> A message that was received from the device. </value>
+    public string ReadMessage
+    {
+        get => this._readMessage;
+        set => _ = this.SetProperty( ref this._readMessage, value );
+    }
+
+    private Encoding _characterEncoding;
+    /// <summary>
+    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
+    /// system's default encoding is to be used.
+    /// </summary>
+    /// <value> The character encoding. </value>
+    public Encoding CharacterEncoding
+    {
+        get => this._characterEncoding;
+        set => _ = this.SetProperty( ref this._characterEncoding, value );
+    }
+
+    private int _waitOnOutTime = 1000;
+    /// <summary>   Timeout wait time ms. </summary>
+    /// <value> The wait on out time. </value>
+    public int WaitOnOutTime
+    {
+        get => this._waitOnOutTime;
+        set => _ = this.SetProperty( ref this._waitOnOutTime, value );
+    }
+
+    /// <summary>
+    /// Thread synchronization locks
+    /// </summary>
+    private readonly ManualResetEvent _asyncLocker = new( false );
+
+    /// <summary>
+    /// Read cache buffer
+    /// </summary>
+    private byte[] _readBuffer = Array.Empty<byte>();
+
+    private DeviceErrorCode _lastDeviceError;
+    /// <summary>   Gets or sets the last device error. </summary>
+    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
+    public DeviceErrorCode LastDeviceError
+    {
+        get => this._lastDeviceError;
+        set => _ = this.SetProperty( ref this._lastDeviceError, value );
     }
 
     #endregion

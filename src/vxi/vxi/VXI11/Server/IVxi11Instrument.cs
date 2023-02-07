@@ -7,6 +7,7 @@ namespace cc.isr.VXI11.Server;
 public interface IVxi11Instrument
 {
 
+    #region " instrument operations "
     /// <summary>   Clears status: *CLS. </summary>
     /// <remarks>
     /// Clear Status Command. Clears the event registers in all register groups. Also clears the
@@ -145,34 +146,88 @@ public interface IVxi11Instrument
     /// <returns>   True if it succeeds, false if it fails. </returns>
     bool WAI();
 
-    #region " VXI-11 implementation "
+    #endregion
 
-    /// <summary>   Gets or sets the last device error. </summary>
-    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
-    DeviceErrorCode LastDeviceError { get; set; }
+    #region " thread exception handler "
 
     /// <summary>
-    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
-    /// system's default encoding is to be used.
+    /// Event queue for all listeners interested in ThreadExceptionOccurred events.
     /// </summary>
-    /// <value> The character encoding. </value>
-    Encoding CharacterEncoding { get; set; }
+    public event ThreadExceptionEventHandler? ThreadExceptionOccurred;
 
-    /// <summary>   Gets or sets a message that was sent to the device. </summary>
-    /// <value> The message that was sent to the device. </value>
-    string WriteMessage { get; set; }
+    #endregion
 
-    /// <summary>   Gets or sets a message that was received from the device. </summary>
-    /// <value> A message that was received from the device. </value>
-    string ReadMessage { get; set; }
+    #region " run long operation in the background "
 
-    /// <summary>   Timeout wait time ms. </summary>
-    /// <value> The wait on out time. </value>
-    public int WaitOnOutTime { get; set; }
+    /// <summary>   Gets or sets a value indicating whether the long operation running. </summary>
+    /// <value> True if long operation running, false if not. </value>
+    bool LongOperationRunning { get; set; }
+
+    /// <summary>   Starts long operation asynchronously. </summary>
+    /// <remarks> The task return <see cref="DeviceErrorCode.Abort"/> if the task is aborted using 
+    /// the <paramref name="cancelSource"/> </remarks>
+    /// <param name="cancelSource"> The cancellation source that allows processing to be canceled. </param>
+    /// <returns>   A Task{DeviceErrorCode}. </returns>
+    Task<DeviceErrorCode> StartLongOperationAsync( CancellationTokenSource cancelSource );
+
+    /// <summary>   Stops the long operation. </summary>
+    /// <param name="cancelSource"> The cancel source. </param>
+    void StopLongOperation( CancellationTokenSource cancelSource );
+
+    /// <summary>   Attempts to stop long operation an int from the given int. </summary>
+    /// <exception cref="InvalidOperationException">    Thrown when the requested operation is
+    ///                                                 invalid. </exception>
+    /// <exception cref="AggregateException">           Thrown when an Aggregate error condition
+    ///                                                 occurs. </exception>
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    bool TryStopLongOperation( int timeout = 100, int loopDelay = 5 );
+
+    /// <summary>   Try stop long operation asynchronously. </summary>
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
+    /// <returns>   A Task. </returns>
+    Task<bool> TryStopLongOperationAsync( int timeout = 100, int loopDelay = 5 );
+
+    #endregion
+
+    #region " instrument operation members "
 
     /// <summary>   Gets or sets the identity. </summary>
     /// <value> The identity. </value>
     string Identity { get; set; }
+
+    #endregion
+
+    #region " Sending interrupts (service requests) to the clients "
+
+    /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
+    /// <value> True if interrupt enabled, false if not. </value>
+    bool InterruptEnabled { get; set; }
+
+    /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
+    public event EventHandler<cc.isr.VXI11.Vxi11EventArgs>? RequestingService;
+
+    /// <summary>   Gets or sets the identifier of the client. </summary>
+    /// <value> The identifier of the client. </value>
+    public int ClientId { get; set; }
+
+    #endregion
+
+    #region " Device state "
+
+    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
+    /// <value> True if lock enabled, false if not. </value>
+    public bool LockEnabled { get; set; }
+
+    /// <summary>   Gets or sets a value indicating whether the remote is enabled. </summary>
+    /// <value> True if remote enabled, false if not. </value>
+    bool RemoteEnabled { get; set; }
+
+    #endregion
+
+    #region " RPC Implementations "
 
     /// <summary>   Aborts and returns the <see cref="DeviceError"/>. </summary>
     /// <remarks>
@@ -201,6 +256,10 @@ public interface IVxi11Instrument
     /// The operation of <c>device_abort</c> SHALL NOT be affected by locking  </para>
     /// </remarks>
     DeviceError Abort();
+
+    #endregion
+
+    #region " I/O operations "
 
     /// <summary>   Read a message. </summary>
     /// <remarks>
@@ -277,8 +336,7 @@ public interface IVxi11Instrument
     /// 
     /// If data.data_len is greater than the value of maxRecvSize returned in create_link,
     /// <c>device_write</c>  SHALL terminate without transferring any bytes to the device and SHALL
-    /// set error
-    /// to 5.Section B: Network Instrument Protocol Page 29 October 4, 2000 Printing VXIbus
+    /// set error to 5.Section B: Network Instrument Protocol Page 29 October 4, 2000 Printing VXIbus
     /// Specification: VXI-11 Revision 1.0 </para><para>
     /// 
     /// If some other link has the lock, <c>device_write</c>  SHALL examine the <c>waitlock</c> flag
@@ -294,8 +352,7 @@ public interface IVxi11Instrument
     /// If after at least <c>io_timeout</c> milliseconds not all of data has been transferred to the
     /// device,
     /// <c>device_write</c>  SHALL terminate with error set to 15, I/O timeout. This timeout is based
-    /// on the
-    /// entire transaction and not the time required to transfer single bytes. </para><para>
+    /// on the entire transaction and not the time required to transfer single bytes. </para><para>
     /// 
     /// The <c>io_timeout</c> value set by the application may need to change based on the size of
     /// data. </para>
@@ -319,10 +376,37 @@ public interface IVxi11Instrument
     /// 
     /// </item></list>
     /// </remarks>
-    /// <param name="deviceWriteParameters">    Device write parameters. </param>
-    /// <returns>   A <c>device_write</c> Resp. </returns>
-    DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters );
+    /// <param name="compoundScpiCommand">  The compound SCPI command, which might consist of
+    ///                                     commands separated with ';' or new line. </param>
+    /// <returns>   A DeviceErrorCode. </returns>
+    DeviceErrorCode DeviceWrite( string compoundScpiCommand );
 
     #endregion
 
+    #region " RPC operation members "
+
+    /// <summary>   Gets or sets the last device error. </summary>
+    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
+    DeviceErrorCode LastDeviceError { get; set; }
+
+    /// <summary>
+    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
+    /// system's default encoding is to be used.
+    /// </summary>
+    /// <value> The character encoding. </value>
+    Encoding CharacterEncoding { get; set; }
+
+    /// <summary>   Gets or sets a message that was sent to the device. </summary>
+    /// <value> The message that was sent to the device. </value>
+    string WriteMessage { get; set; }
+
+    /// <summary>   Gets or sets a message that was received from the device. </summary>
+    /// <value> A message that was received from the device. </value>
+    string ReadMessage { get; set; }
+
+    /// <summary>   Timeout wait time ms. </summary>
+    /// <value> The wait on out time. </value>
+    public int WaitOnOutTime { get; set; }
+
+    #endregion
 }

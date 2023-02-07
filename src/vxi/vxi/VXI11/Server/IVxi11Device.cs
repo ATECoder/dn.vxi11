@@ -31,18 +31,8 @@ public interface IVxi11Device
     /// <value> The identifier of the client. </value>
     int ClientId { get; set; }
 
-    /// <summary>   Event queue for all listeners interested in ServiceRequested events. </summary>
-    event EventHandler<Vxi11EventArgs> ServiceRequested;
-
-    /// <summary>
-    /// Emulates calling remote procedure <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/>.
-    /// </summary>
-    /// <param name="handle">   The handle as it was received from the Core device. </param>
-    void DeviceIntrSrq( byte[] handle );
-
-    /// <summary>   Asynchronous Interrupt an in-progress call. </summary>
-    /// <param name="handle">   The handle as it was received from the Core device. </param>
-    void Interrupt( byte[] handle );
+    /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
+    event EventHandler<Vxi11EventArgs> RequestingService;
 
     #endregion
 

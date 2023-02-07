@@ -353,6 +353,15 @@ public partial class Vxi11DeviceRenamed : IVxi11Device
                 Monitor.PulseAll( this.ShutdownSignal );
     }
 
+    /// <summary>   Attempts to stop long operation an int from the given int. </summary>
+    /// <remarks>   2023-02-06. </remarks>
+    /// <exception cref="InvalidOperationException">    Thrown when the requested operation is
+    ///                                                 invalid. </exception>
+    /// <exception cref="AggregateException">           Thrown when an Aggregate error condition
+    ///                                                 occurs. </exception>
+    /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
+    /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
     public bool TryStopLongOperation( int timeout = 100, int loopDelay = 5 )
     {
         List<Exception> exceptions = new();
@@ -411,9 +420,6 @@ public partial class Vxi11DeviceRenamed : IVxi11Device
         return result;
     }
 
-    #endregion
-
-    #region " Vxi11Device Interface implementation "
     #endregion
 
     #region " abort server "
@@ -477,14 +483,14 @@ public partial class Vxi11DeviceRenamed : IVxi11Device
 
     #region " service requested event handler "
 
-    public event EventHandler<Vxi11EventArgs>? ServiceRequested;
+    public event EventHandler<Vxi11EventArgs>? RequestingService;
 
-    /// <summary>   Executes the <see cref="ServiceRequested"/> event. </summary>
+    /// <summary>   Executes the <see cref="RequestingService"/> event. </summary>
     /// <param name="e">    Event information to send to registered event handlers. </param>
     protected virtual void OnServiceRequested( Vxi11EventArgs e )
     {
         // TODO: not sure if we needs this. Probably belongs on teh client only.
-        var handler = this.ServiceRequested;
+        var handler = this.RequestingService;
         handler?.Invoke( this, e );
     }
 

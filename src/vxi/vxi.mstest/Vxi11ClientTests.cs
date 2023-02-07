@@ -7,7 +7,7 @@ namespace cc.isr.VXI11.MSTest;
 public class Vxi11ClientTests
 {
 
-    #region " fixture construction and cleanup "
+    #region " Fixture construction and cleanup "
 
     /// <summary>   Initializes the fixture. </summary>
     /// <param name="context">  The context. </param>
