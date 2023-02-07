@@ -29,7 +29,7 @@ public partial class Vxi11SingleClientServer : CoreChannelServerBase
     {
     }
 
-    public Vxi11SingleClientServer( Vxi11Device device ) : this( device, null, 0 )
+    public Vxi11SingleClientServer( IVxi11Device device ) : this( device, null, 0 )
     {
     }
 
@@ -37,7 +37,7 @@ public partial class Vxi11SingleClientServer : CoreChannelServerBase
     /// <param name="device">   current device. </param>
     /// <param name="bindAddr"> The local Internet Address the server will bind to. </param>
     /// <param name="port">     The port number where the server will wait for incoming calls. </param>
-    public Vxi11SingleClientServer( Vxi11Device device, IPAddress? bindAddr, int port ) : base( bindAddr ?? IPAddress.Any, port )
+    public Vxi11SingleClientServer( IVxi11Device device, IPAddress? bindAddr, int port ) : base( bindAddr ?? IPAddress.Any, port )
     {
         this.InterfaceDeviceString = string.Empty;
         this._interfaceDeviceString = string.Empty;

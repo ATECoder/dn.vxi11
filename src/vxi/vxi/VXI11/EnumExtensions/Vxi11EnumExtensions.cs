@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Reflection;
 
 using cc.isr.VXI11.Codecs;
+using cc.isr.VXI11.Server;
 
 namespace cc.isr.VXI11.EnumExtensions;
 
@@ -115,5 +116,19 @@ public static class Vxi11EnumExtensions
             ? ( DeviceReadReasons ) value
             : throw new ArgumentException( $"{typeof( int )} value of {value} cannot be cast to {nameof( DeviceReadReasons )}" );
     }
+
+    /// <summary>   An int extension method that converts a value to a <see cref="Vxi11InstrumentOperationType"/>. </summary>
+    /// <exception cref="ArgumentException">    Thrown when one or more arguments have unsupported or
+    ///                                         illegal values. </exception>
+    /// <param name="value">    An enum constant representing the enum value. </param>
+    /// <returns>   Value as the <see cref="Vxi11InstrumentOperationType"/>. </returns>
+    public static Vxi11InstrumentOperationType ToVxi11InstrumentOperationType( this int value )
+    {
+        return Enum.IsDefined( typeof( Vxi11InstrumentOperationType ), value )
+            ? ( Vxi11InstrumentOperationType ) value
+            : throw new ArgumentException( $"{typeof( int )} value of {value} cannot be cast to {nameof( Vxi11InstrumentOperationType )}" );
+    }
+
+
 
 }
