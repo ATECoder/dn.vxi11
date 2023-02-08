@@ -278,7 +278,7 @@ public class Vxi11InstrumentClient : Vxi11Client
     protected virtual void StopInterruptServer( int timeout = 500, int loopDelay = 5 )
     {
         InterruptChannelServer? interruptServer = this.InterruptServer;
-        if ( interruptServer is not null && interruptServer.Running )
+        if ( interruptServer?.Running ?? false )
             try
             {
                 try

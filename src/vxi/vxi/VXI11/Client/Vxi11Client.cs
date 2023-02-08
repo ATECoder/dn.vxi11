@@ -587,7 +587,7 @@ public partial class Vxi11Client : ICloseable
     /// <returns>   True if ends with the termination, false if not. </returns>
     private static bool EndsWith( byte[] data, byte[] termination )
     {
-        bool terminated = data is not null && termination is not null && termination.Length > 0 && data.Length > termination.Length;
+        bool terminated = ( termination?.Length > 0 ) && ( data?.Length > termination?.Length );
         if ( !terminated ) return terminated;
         for ( int i = 0; i < termination!.Length; i++ )
             terminated &= data![^(i + 1)] == termination[i];
@@ -626,7 +626,7 @@ public partial class Vxi11Client : ICloseable
     /// <returns>   True if ends with the termination, false if not. </returns>
     private static bool EndsWith( string message, byte[] termination )
     {
-        bool terminated = !String.IsNullOrWhiteSpace( message ) && termination is not null && termination.Length > 0 && message.Length > termination.Length;
+        bool terminated = ( termination?.Length > 0 ) && ( message?.Length > termination?.Length );
         if ( !terminated ) return terminated;
         for ( int i = 0; i < termination!.Length; i++ )
             terminated &= message![^(i + 1)] == termination[i];
@@ -1171,7 +1171,9 @@ public partial class Vxi11Client : ICloseable
         DeviceLink? link = this.DeviceLink;
         try
         {
-            return coreClient is not null && link is not null ? coreClient.DestroyLink( link ) : new DeviceError();
+            return coreClient is not null && link is not null
+                ? coreClient.DestroyLink( link )
+                : new DeviceError();
         }
         catch ( Exception )
         {

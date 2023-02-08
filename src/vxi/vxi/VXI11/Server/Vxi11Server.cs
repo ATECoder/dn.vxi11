@@ -213,7 +213,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <param name="loopDelay">    The loop delay in milliseconds. </param>
     protected virtual void StopAbortServer( int timeout = 500, int loopDelay = 5 )
     {
-        if ( this.AbortServer is not null && this.AbortServer.Running )
+        if ( this.AbortServer?.Running ?? false )
             try
             {
                 this.AbortServer.AbortRequested -= this.HandleAbortRequest;

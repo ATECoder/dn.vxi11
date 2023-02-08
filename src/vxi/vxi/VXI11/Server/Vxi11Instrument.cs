@@ -651,7 +651,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
 
     /// <summary>   Lists the instrument operations. </summary>
-    private List<MethodInfo> _instrumentOperations = new List<MethodInfo>();
+    private List<MethodInfo> _instrumentOperations = new ();
 
     /// <summary>   Enumerates the instrument operation methods. </summary>
     /// <returns>   A List{MethodInfo}; </returns>

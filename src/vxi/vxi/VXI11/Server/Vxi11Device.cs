@@ -1147,11 +1147,11 @@ namespace cc.isr.VXI11.Server
                                     : DeviceErrorCode.NoError,
                 Size = data is null ? 0 : data.Length
             };
-            if ( this.Instrument is not null && result.ErrorCode == DeviceErrorCode.NoError )
+            if ( result.ErrorCode == DeviceErrorCode.NoError )
             {
                 string cmd = this.CharacterEncoding.GetString( data );
                 Logger.Writer.LogVerbose( $"link ID: {linkId} -> Received：{cmd}" );
-                result.ErrorCode = this.Instrument.DeviceWrite( cmd );
+                result.ErrorCode = this.Instrument!.DeviceWrite( cmd );
             }
 
             return result;

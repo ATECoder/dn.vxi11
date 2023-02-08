@@ -15,7 +15,7 @@ public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
         List<byte> data = new( new byte[] { ( byte ) (this.BusAddress | ( byte ) GpibCommandArgument.TalkAddress), ( byte ) GpibCommandArgument.Unlisten } );
 
         foreach ( byte[] addr in addressList )
-            if ( addr is not null && addr.Length > 0 )
+            if ( addr?.Length > 0 )
                 for ( int i = 0; i < addr.Length; i++ )
                 {
                     if ( addr[i] < 0 || addr[i] > 30 )
