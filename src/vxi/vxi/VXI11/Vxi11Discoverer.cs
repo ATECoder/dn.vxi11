@@ -153,15 +153,16 @@ public class Vxi11Discoverer
     }
 
     /// <summary>   Queries the instrument identity. </summary>
-    /// <param name="address">                  The instrument <see cref="System.Net.Sockets.AddressFamily.InterNetwork"/>
-    ///                                         (IPv4) address. </param>
-    /// <param name="interfaceDeviceString">    The device name,, e.g., inst0 or gpib0,4. </param>
+    /// <remarks>   2023-02-08. </remarks>
+    /// <param name="address">      The instrument <see cref="System.Net.Sockets.AddressFamily.InterNetwork"/>
+    ///                             (IPv4) address. </param>
+    /// <param name="deviceName">   The device name,, e.g., inst0 or gpib0,4. </param>
     /// <returns>   The identity. </returns>
-    public static string QueryIdentity( string address, string interfaceDeviceString )
+    public static string QueryIdentity( string address, string deviceName )
     {
         using Client.Vxi11Client instrument = new();
         instrument.ThreadExceptionOccurred += OnThreadException;
-        instrument.Connect( address, interfaceDeviceString );
+        instrument.Connect( address, deviceName );
         return instrument.QueryLine( "*IDN?" ).response;
     }
 

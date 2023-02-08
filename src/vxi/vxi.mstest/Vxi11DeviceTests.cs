@@ -53,13 +53,14 @@ public class Vxi11DeviceTests
     #endregion
 
     #region " client emulations "
-    private static CreateLinkResp CreateLink( IVxi11Device? vxi11Device, string interfaceDeviceString, bool lockEnabled = false, int lockTimeout = 1000 )
+
+    private static CreateLinkResp CreateLink( IVxi11Device? vxi11Device, string deviceName, bool lockEnabled = false, int lockTimeout = 1000 )
     {
         if ( vxi11Device is null )
             return new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
         CreateLinkParms createLinkParam = new() {
-            DeviceName = interfaceDeviceString,
+            DeviceName = deviceName,
             LockDevice = lockEnabled,
             LockTimeout = lockTimeout,
         };
@@ -71,7 +72,7 @@ public class Vxi11DeviceTests
             vxi11Device.LastDeviceError = linkResp.ErrorCode;
             vxi11Device.AbortPortNumber = linkResp.AbortPort;
 
-            vxi11Device.DeviceName = interfaceDeviceString;
+            vxi11Device.DeviceName = deviceName;
         }
 
         vxi11Device.RemoteEnabled = true;

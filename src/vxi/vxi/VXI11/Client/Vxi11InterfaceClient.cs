@@ -9,12 +9,13 @@ public class Vxi11InterfaceClient : Vxi11Client
     #region " construction and cleanup "
 
     /// <summary>   Connects. </summary>
-    /// <param name="hostAddress">              The host address. </param>
-    /// <param name="interfaceDeviceString">    The device name. </param>
-    /// <param name="connectTimeout">           (Optional) The connect timeout. </param>
-    public override void Connect( string hostAddress, string interfaceDeviceString, int connectTimeout = 3000 )
+    /// <remarks>   2023-02-08. </remarks>
+    /// <param name="hostAddress">      The host address. </param>
+    /// <param name="deviceName">       The device name. </param>
+    /// <param name="connectTimeout">   (Optional) The connect timeout. </param>
+    public override void Connect( string hostAddress, string deviceName, int connectTimeout = 3000 )
     {
-        base.Connect( hostAddress, interfaceDeviceString, connectTimeout );
+        base.Connect( hostAddress, deviceName, connectTimeout );
         this.BusAddress = this.GetBusAddress();
 
     }

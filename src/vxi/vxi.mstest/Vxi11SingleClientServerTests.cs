@@ -6,6 +6,7 @@ using cc.isr.VXI11;
 using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.Client;
 using cc.isr.VXI11.Server;
+using System.Net;
 
 namespace cc.isr.LXI.IEEE488.MSTest;
 
@@ -30,9 +31,7 @@ public class Vxi11SingleClientServerTests
             _classTestContext = context;
             Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
 
-            _instrument = new  Vxi11Instrument();
-            _device = new Vxi11Device( _instrument );
-            _server = new( _device );
+            _server = new();
 
             _server.PropertyChanged += OnServerPropertyChanged;
             _server.ThreadExceptionOccurred += OnThreadException;
@@ -95,8 +94,6 @@ public class Vxi11SingleClientServerTests
     private static readonly string? _ipv4Address = "127.0.0.1";
 
     private static Vxi11SingleClientServer? _server;
-    private static IVxi11Device? _device;
-    private static IVxi11Instrument? _instrument;
 
     internal static void OnThreadException( ThreadExceptionEventArgs e )
     {
@@ -150,7 +147,7 @@ public class Vxi11SingleClientServerTests
         using VXI11.Client.Vxi11Client vxi11Client = new();
         vxi11Client.ThreadExceptionOccurred += OnThreadException;
 
-        string identity = _instrument!.Identity;
+        string identity = _server!.Device!.Instrument!.Identity;
         string command = Vxi11InstrumentCommands.IDNRead;
         vxi11Client.Connect( ipv4Address,
                              DeviceNameParser.BuildDeviceName( DeviceNameParser.GenericInterfaceFamily, 0 ) );

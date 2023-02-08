@@ -35,7 +35,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// remote program can be accessed.
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    /// <param name="host">     The Internet address of host where to contact the remote program.. </param>
+    /// <param name="host">     The Internet address of host where to contact the remote program. </param>
     /// <param name="protocol"> The <see cref="OncRpcProtocol"/> protocol to be used for ONC/RPC calls. </param>
     /// <param name="timeout">  The transmit timeout for <see cref="OncRpcProtocol.OncRpcUdp"/>
     ///                         or the connection timeout for <see cref="OncRpcProtocol.OncRpcTcp"/>. </param>
