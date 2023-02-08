@@ -168,7 +168,7 @@ public interface IVxi11Device
 
     /// <summary>   Gets or sets the device link to the actual single device. </summary>
     /// <value> The device link. </value>
-    DeviceLink? DeviceLink { get; set; }
+    DeviceLink DeviceLink { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether a valid link exists between the <see cref="Client.Vxi11Client"/>

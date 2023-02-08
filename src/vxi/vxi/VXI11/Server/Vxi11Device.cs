@@ -25,8 +25,8 @@ namespace cc.isr.VXI11.Server
             this._deviceName = string.Empty;
             this.DeviceName = string.Empty;
             this._interfaceDeviceAddress = new DeviceNameParser( string.Empty );
-            this.DeviceLink = null;
-            this._deviceLink = null;
+            this.DeviceLink = new();
+            this._deviceLink = new();
             this.MaxReceiveLength = VXI11.Client.Vxi11Client.MaxReceiveLengthDefault;
             this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
             this.Host = string.Empty;
@@ -398,10 +398,10 @@ namespace cc.isr.VXI11.Server
 
         #region " LXI-11 ONC/RPC Calls "
 
-        private DeviceLink? _deviceLink;
+        private DeviceLink _deviceLink;
         /// <summary>   Gets or sets the device link to the actual single device. </summary>
         /// <value> The device link. </value>
-        public DeviceLink? DeviceLink
+        public DeviceLink DeviceLink
         {
             get => this._deviceLink;
             set => _ = this.SetProperty( ref this._deviceLink, value );
@@ -415,7 +415,7 @@ namespace cc.isr.VXI11.Server
         /// True if a valid device link exists between the <see cref="Client.Vxi11Client"/>
         /// and <see cref="Vxi11Server"/>.
         /// </value>
-        public bool DeviceLinked => this.DeviceLink is not null && this.DeviceLink.LinkId > 0 ;
+        public bool DeviceLinked =>  ( this.DeviceLink.LinkId > 0 );
 
         /// <summary>   Create a device connection; Opens a link to a device. </summary>
         /// <remarks>
@@ -518,10 +518,10 @@ namespace cc.isr.VXI11.Server
         {
             try
             {
-                if ( this.DeviceLink is null )
+                if ( !this.DeviceLinked )
                     return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
 
-                if ( request.LinkId != this.DeviceLink.LinkId )
+                if ( this.DeviceLink.LinkId != request.LinkId )
                     return new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
 
                 // TODO: Add device code here.
@@ -534,7 +534,7 @@ namespace cc.isr.VXI11.Server
             }
             finally
             {
-                this.DeviceLink = null;
+                this.DeviceLink = new ();
             }
         }
 
@@ -545,7 +545,7 @@ namespace cc.isr.VXI11.Server
         /// <returns>   The new interrupt channel 1. </returns>
         public DeviceError CreateIntrChan( DeviceRemoteFunc request )
         {
-            if ( this.DeviceLink is null )
+            if ( !this.DeviceLinked )
                 return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
 
             // TODO: Add device code
@@ -603,7 +603,7 @@ namespace cc.isr.VXI11.Server
         /// </returns>
         public DeviceError DeviceClear( DeviceGenericParms request )
         {
-            if ( this.DeviceLink is null )
+            if ( !this.DeviceLinked )
                 return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
 
             if ( request.Link.LinkId != this.DeviceLink.LinkId )
@@ -623,7 +623,7 @@ namespace cc.isr.VXI11.Server
         /// </returns>
         public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
         {
-            if ( this.DeviceLink is null )
+            if ( !this.DeviceLinked )
                 return new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
             if ( request.Link.LinkId != this.DeviceLink.LinkId )
@@ -650,7 +650,7 @@ namespace cc.isr.VXI11.Server
         /// </returns>
         public DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
         {
-            if ( this.DeviceLink is null )
+            if ( !this.DeviceLinked )
                 return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
 
             if ( request.Link.LinkId != this.DeviceLink.LinkId )
@@ -698,7 +698,7 @@ namespace cc.isr.VXI11.Server
         /// <returns>   A Device_Error. </returns>
         public DeviceError DeviceLocal( DeviceGenericParms request )
         {
-            if ( this.DeviceLink is null )
+            if ( !this.DeviceLinked )
                 return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
 
             if ( request.Link.LinkId != this.DeviceLink.LinkId )
@@ -745,7 +745,7 @@ namespace cc.isr.VXI11.Server
         /// <returns>   A Device_Error. </returns>
         public DeviceError DeviceRemote( DeviceGenericParms request )
         {
-            if ( this.DeviceLink is null )
+            if ( !this.DeviceLinked )
                 return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
 
             if ( request.Link.LinkId != this.DeviceLink.LinkId )
@@ -796,8 +796,7 @@ namespace cc.isr.VXI11.Server
         /// <returns>   A Device_ReadStbResp. </returns>
         public DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
         {
-
-            if ( this.DeviceLink is null )
+            if ( !this.DeviceLinked )
                 return new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
             if ( request.Link.LinkId != this.DeviceLink.LinkId )
@@ -840,7 +839,7 @@ namespace cc.isr.VXI11.Server
         /// <returns>   A Device_Error. </returns>
         public DeviceError DeviceTrigger( DeviceGenericParms request )
         {
-            if ( this.DeviceLink is null )
+            if ( !this.DeviceLinked )
                 return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
 
             if ( request.Link.LinkId != this.DeviceLink.LinkId )
@@ -887,8 +886,7 @@ namespace cc.isr.VXI11.Server
         /// <returns>   A Device_Error. </returns>
         public DeviceError DeviceLock( DeviceLockParms request )
         {
-
-            if ( this.DeviceLink is null )
+            if ( !this.DeviceLinked )
                 return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
 
             if ( request.Link.LinkId != this.DeviceLink.LinkId )
@@ -919,8 +917,7 @@ namespace cc.isr.VXI11.Server
         /// <returns>   A Device_Error. </returns>
         public DeviceError DeviceUnlock( DeviceLink deviceLink )
         {
-
-            if ( this.DeviceLink is null )
+            if ( !this.DeviceLinked )
                 return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
 
             if ( deviceLink.LinkId != this.DeviceLink.LinkId )
@@ -984,8 +981,8 @@ namespace cc.isr.VXI11.Server
         /// <returns>   A Device_ReadResp. </returns>
         public DeviceReadResp DeviceRead( DeviceReadParms deviceReadParameters )
         {
-            return this.DeviceLink is null
-                ? new DeviceReadResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            return !this.DeviceLinked
+                ? new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished }
                 : this.DeviceLink.LinkId != deviceReadParameters.Link.LinkId
                     ? new DeviceReadResp() { ErrorCode = DeviceErrorCode.InvalidLinkIdentifier }
                     : this.Instrument is null
@@ -1063,9 +1060,9 @@ namespace cc.isr.VXI11.Server
         /// <returns>   A <c>device_write</c> Resp. </returns>
         public DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters )
         {
-            return this.DeviceLink is null
-                ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-                : this.DeviceLink.LinkId != deviceWriteParameters.Link.LinkId
+            return !this.DeviceLinked
+                ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished }
+                : this.DeviceLink?.LinkId != deviceWriteParameters.Link.LinkId
                     ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.InvalidLinkIdentifier }
                     : this.Instrument is null
                         ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
@@ -1162,7 +1159,7 @@ namespace cc.isr.VXI11.Server
 
 
 
-        #endregion
+#endregion
 
     }
 }

@@ -5,7 +5,6 @@ using cc.isr.VXI11.Server;
 namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a VXI-11 device tests. </summary>
-/// <remarks>   2023-02-06. </remarks>
 [TestClass]
 public class Vxi11DeviceTests
 {
@@ -183,7 +182,7 @@ public class Vxi11DeviceTests
     /// <remarks>
     /// <code>
     /// Standard Output: 
-    /// 2023-02-04 19:37:27.368,cc.isr.LXI.IEEE488.MSTest.Ieee488LxiDeviceTests.Ieee488LxiDeviceTests
+    /// 2023-02-04 19:37:27.368,cc.isr.VXI11.MSTest.Vxi11DeviceTests.Vxi11DeviceTests
     /// 2023-02-04 19:37:27.378,creating link to inst0
     /// 2023-02-04 19:37:27.382, link ID: 1 -> Received：*IDN?
     ///

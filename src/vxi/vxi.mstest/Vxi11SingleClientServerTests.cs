@@ -2,13 +2,10 @@ using System.ComponentModel;
 
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.ONC.RPC.Server;
-using cc.isr.VXI11;
 using cc.isr.VXI11.Logging;
-using cc.isr.VXI11.Client;
 using cc.isr.VXI11.Server;
-using System.Net;
 
-namespace cc.isr.LXI.IEEE488.MSTest;
+namespace cc.isr.VXI11.MSTest;
 
 [TestClass]
 public class Vxi11SingleClientServerTests
@@ -166,24 +163,22 @@ public class Vxi11SingleClientServerTests
     /// <remarks>
     /// <code>
     /// Standard Output: 
-    /// 2023-02-04 19:36:03.032,cc.isr.LXI.IEEE488.MSTest.Ieee488ServerTests.Ieee488ServerTests
-    /// 2023-02-04 19:36:03.071,Vxi11SingleClientServer waiting running 03.071
-    /// 2023-02-04 19:36:03.071,starting the embedded port map service; this takes ~3.5 seconds.
-    /// 2023-02-04 19:36:03.072,Checking for Portmap service
-    /// 2023-02-04 19:36:03.090, No Portmap service available.
-    /// 2023-02-04 19:36:03.090,Creating embedded Portmap instance
-    /// 2023-02-04 19:36:03.312, Portmap service started; checked 18.1 ms.
-    /// 2023-02-04 19:36:03.312,starting the server task; this takes ~2.5 seconds.
-    /// 2023-02-04 19:36:03.319,Running set to True
-    /// 2023-02-04 19:36:10.076, Vxi11SingleClientServer is running  10.076
-    /// 2023-02-04 19:36:10.088,creating link to inst0
-    /// 2023-02-04 19:36:10.093, link ID: 1 -> Received：*IDN?
+    ///    2023-02-08 11:54:38.666,cc.isr.VXI11.MSTest.Vxi11SingleClientServerTests.Vxi11SingleClientServerTests
+    ///    2023-02-08 11:54:38.677,Vxi11SingleClientServer waiting running 38.677
+    ///    2023-02-08 11:54:38.677,starting the embedded port map service; this takes ~3.5 seconds.
+    ///    2023-02-08 11:54:38.678,Checking for Portmap service
+    ///    2023-02-08 11:54:38.712, No Portmap service available.
+    ///    2023-02-08 11:54:38.712,Creating embedded Portmap instance
+    ///    2023-02-08 11:54:38.923, Portmap service started; checked 34.4 ms.
+    ///    2023-02-08 11:54:38.924,starting the server task; this takes ~2.5 seconds.
+    ///    2023-02-08 11:54:38.930,Running set to True
+    ///    2023-02-08 11:54:45.770, Vxi11SingleClientServer is running  45.770
+    ///    2023-02-08 11:54:45.782,creating link to inst0
+    ///    2023-02-08 11:54:45.786, link ID: 1 -> Received：*IDN?
     ///
-    /// 2023-02-04 19:36:10.093,Process the instruction： *IDN?
-    /// 2023-02-04 19:36:10.093,*IDN?
-    /// 2023-02-04 19:36:10.093,Ieee488 mock device
-    /// 2023-02-04 19:36:10.093,Query results： Ieee488 mock device。
-    /// 2023-02-04 19:36:10.109,Running set to False
+    ///    2023-02-08 11:54:45.786,Processing '*IDN?'
+    ///    2023-02-08 11:54:45.787,Query results： INTEGRATED SCIENTIFIC RESOURCES,MODEL IEEE488Mock,001,1.0.8434。
+    ///    2023-02-08 11:54:45.804, Running set to False
     /// </code>
     /// </remarks>
     [TestMethod]

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Net;
+using System.Runtime.CompilerServices;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
@@ -39,6 +40,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
         this.MaxReceiveLength = Client.Vxi11Client.MaxReceiveLengthDefault;
         this.InterruptAddress = IPAddress.Any;
         this.DeviceLink = new DeviceLink();
+        this._deviceLink = this.DeviceLink;
 
         this.OnDevicePropertiesChanges( device );
         this.Device.RequestingService += this.OnRequestingService;
@@ -465,9 +467,18 @@ public abstract class Vxi11Server : CoreChannelServerBase
 
     #region " remote procedure call handlers "
 
-    /// <summary>   Gets or sets the device link to the actual single device. </summary>
+    private DeviceLink _deviceLink;
+    /// <summary>   Gets or sets the device link between the <see cref="Client.Vxi11Client"/>
+    /// and this <see cref="Vxi11Server"/>. </summary>
     /// <value> The device link. </value>
-    private DeviceLink DeviceLink { get; set; }
+    public DeviceLink DeviceLink
+    {
+        get => this._deviceLink;
+        set
+        {  if ( this.OnPropertyChanged( ref this._deviceLink, value ) && this.Device is not null )
+                this.Device.DeviceLink = value;
+        }
+    }
 
     /// <summary>
     /// Gets a value indicating whether a valid link exists between the <see cref="Client.Vxi11Client"/>
@@ -477,7 +488,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// True if a valid device link exists between the <see cref="Client.Vxi11Client"/>
     /// and <see cref="Vxi11Server"/>.
     /// </value>
-    public bool DeviceLinked => this.Device is not null && this.Device.DeviceLinked;
+    public bool DeviceLinked => ( this.Device?.DeviceLinked ?? false );
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>
@@ -595,6 +606,10 @@ public abstract class Vxi11Server : CoreChannelServerBase
         catch ( Exception )
         {
             return new DeviceError( DeviceErrorCode.IOError );
+        }
+        finally
+        {
+            this.DeviceLink = new();
         }
     }
 
