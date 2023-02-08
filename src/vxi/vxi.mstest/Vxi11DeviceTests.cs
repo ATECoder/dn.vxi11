@@ -161,7 +161,7 @@ public class Vxi11DeviceTests
     /// <remarks>   2023-02-03. </remarks>
     private static void AssertShouldCreateLink()
     {
-        if ( _vxi11Device is not null && _vxi11Device.CanCreateNewDeviceLink() )
+        if ( !_vxi11Device?.DeviceLinked ?? true )
         {
             CreateLinkResp linkResp = CreateLink( _vxi11Device, "inst0" );
             Assert.AreEqual( DeviceErrorCode.NoError, linkResp.ErrorCode );
@@ -171,7 +171,7 @@ public class Vxi11DeviceTests
     /// <summary>   Assert should destroy link. </summary>
     private static void AssertShouldDestroyLink()
     {
-        if ( _vxi11Device is not null && !_vxi11Device.CanCreateNewDeviceLink() )
+        if ( _vxi11Device?.DeviceLinked ?? false )
         {
             DeviceError deviceError = DestroyLink( _vxi11Device );
             Assert.IsNotNull( deviceError );
