@@ -153,7 +153,7 @@ public class Vxi11SingleClientServerTests
         string identity = _instrument!.Identity;
         string command = Vxi11InstrumentCommands.IDNRead;
         vxi11Client.Connect( ipv4Address,
-                             InsterfaceDeviceStringParser.BuildInterfaceDeviceString( InsterfaceDeviceStringParser.GenericInterfaceFamily, 0 ) );
+                             DeviceNameParser.BuildDeviceName( DeviceNameParser.GenericInterfaceFamily, 0 ) );
 
         int count = repeatCount;
         while ( repeatCount > 0 )

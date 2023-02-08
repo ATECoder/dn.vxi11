@@ -59,7 +59,7 @@ public class Vxi11DeviceTests
             return new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
         CreateLinkParms createLinkParam = new() {
-            InterfaceDeviceString = interfaceDeviceString,
+            DeviceName = interfaceDeviceString,
             LockDevice = lockEnabled,
             LockTimeout = lockTimeout,
         };
@@ -71,7 +71,7 @@ public class Vxi11DeviceTests
             vxi11Device.LastDeviceError = linkResp.ErrorCode;
             vxi11Device.AbortPortNumber = linkResp.AbortPort;
 
-            vxi11Device.InterfaceDeviceString = interfaceDeviceString;
+            vxi11Device.DeviceName = interfaceDeviceString;
         }
 
         vxi11Device.RemoteEnabled = true;

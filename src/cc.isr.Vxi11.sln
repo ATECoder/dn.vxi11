@@ -53,7 +53,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.MSTest", "vxi\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.Discover", "apps\lxi.discover\cc.isr.VXI11.Discover.csproj", "{26B0B22B-025B-4EFD-AD29-30CC62862E5D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.ClientTester", "apps\vxi11client.tester\cc.isr.VXI11.ClientTester.csproj", "{052BF9B4-745B-4AEF-9A71-D0743BAAA5C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.ClientTester", "apps\vxi11.client.tester\cc.isr.VXI11.ClientTester.csproj", "{052BF9B4-745B-4AEF-9A71-D0743BAAA5C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

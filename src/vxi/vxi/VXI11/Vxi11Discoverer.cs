@@ -155,7 +155,7 @@ public class Vxi11Discoverer
     /// <summary>   Queries the instrument identity. </summary>
     /// <param name="address">                  The instrument <see cref="System.Net.Sockets.AddressFamily.InterNetwork"/>
     ///                                         (IPv4) address. </param>
-    /// <param name="interfaceDeviceString">    The interface device string,, e.g., inst0 or gpib0,4. </param>
+    /// <param name="interfaceDeviceString">    The device name,, e.g., inst0 or gpib0,4. </param>
     /// <returns>   The identity. </returns>
     public static string QueryIdentity( string address, string interfaceDeviceString )
     {

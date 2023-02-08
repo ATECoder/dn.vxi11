@@ -513,21 +513,21 @@ public partial class Vxi11DeviceRenamed : IVxi11Device
 
     private string _interfaceDeviceString;
     /// <summary>
-    /// Gets or sets the interface device string, .e.g, inst0, gpib0,5, or usb0[...].
+    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
     /// </summary>
-    /// <value> The interface device string. </value>
-    public string InterfaceDeviceString
+    /// <value> The device name. </value>
+    public string DeviceName
     {
         get => this._interfaceDeviceString;
         set => _ = this.OnPropertyChanged( ref this._interfaceDeviceString, value );
     }
 
-    /// <summary>   Query if this device has valid interface device string. </summary>
-    /// <remarks> This is required for validating the interface device string when creating the link. </remarks>
-    /// <returns>   True if valid interface device string, false if not. </returns>
-    public bool IsValidInterfaceDeviceString()
+    /// <summary>   Query if this device has valid device name. </summary>
+    /// <remarks> This is required for validating the device name when creating the link. </remarks>
+    /// <returns>   True if valid device name, false if not. </returns>
+    public bool IsValidDeviceName()
     {
-        InsterfaceDeviceStringParser parser = new( this.InterfaceDeviceString );
+        DeviceNameParser parser = new( this.DeviceName );
         return parser.IsValid();
     }
 

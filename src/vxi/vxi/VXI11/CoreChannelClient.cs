@@ -103,25 +103,25 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.CreateLinkProcedure"/>; Opens a link to a
     /// device.
     /// </summary>
-    /// <remarks> <para>
-    ///
+    /// <remarks>
+    /// <para>
+    /// 
     /// Renamed from <c>create_link_1</c> </para>
     /// </remarks>
-    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
-    /// <param name="clientId">                 Identifier for the client. </param>
-    /// <param name="lockDevice">               True to lock, false to unlock the device. </param>
-    /// <param name="lockTimeout">              The lock timeout. </param>
-    /// <param name="interfaceDeviceString">    The interface device string. </param>
+    /// <param name="clientId">     Identifier for the client. </param>
+    /// <param name="lockDevice">   True to lock, false to unlock the device. </param>
+    /// <param name="lockTimeout">  The lock timeout. </param>
+    /// <param name="deviceName">   The device name. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public CreateLinkResp CreateLink( int clientId, bool lockDevice, int lockTimeout, string interfaceDeviceString )
+    public CreateLinkResp CreateLink( int clientId, bool lockDevice, int lockTimeout, string deviceName )
     {
         CreateLinkParms request = new() {
             ClientId = clientId,
             LockDevice = lockDevice,
             LockTimeout = lockTimeout,
-            InterfaceDeviceString = interfaceDeviceString
+            DeviceName = deviceName
         };
         return this.CreateLink( request );
     }
@@ -633,7 +633,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
     ///                             server allows an I/O operation to take. </param>
     /// <param name="cmd">          The command; which command to execute. </param>
-    /// <param name="dataSize">     Size of the data. </param>
+    /// <param name="dataSize">     Size of individual data elements. </param>
     /// <param name="value">        The value. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
@@ -670,7 +670,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
     ///                             server allows an I/O operation to take. </param>
     /// <param name="cmd">          The command; which command to execute. </param>
-    /// <param name="dataSize">     Size of the data. </param>
+    /// <param name="dataSize">     Size of individual data elements. </param>
     /// <param name="value">        The value. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
@@ -707,7 +707,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <param name="ioTimeout">    The i/o timeout, which determines how long a network instrument
     ///                             server allows an I/O operation to take. </param>
     /// <param name="cmd">          The command; which command to execute. </param>
-    /// <param name="dataSize">     Size of the data. </param>
+    /// <param name="dataSize">     Size of individual data elements. </param>
     /// <param name="dataIn">       The data in. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
@@ -736,7 +736,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <param name="netWorkOrder"> True to net work order; the client's byte order. Network order is
     ///                             defined by the Internet Protocol Suite; set <see langword="true"/>
     ///                             for big endian. </param>
-    /// <param name="dataSize">     Size of the data. </param>
+    /// <param name="dataSize">     Size of individual data elements. </param>
     /// <param name="dataIn">       The data in. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.

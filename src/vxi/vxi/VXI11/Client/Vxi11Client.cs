@@ -22,7 +22,7 @@ public partial class Vxi11Client : ICloseable
         this.MaxReceiveSize = 0;
         this.LastDeviceError = DeviceErrorCode.NoError;
         this._host = string.Empty;
-        this._interfaceDeviceString = string.Empty;
+        this._deviceName = string.Empty;
         this.Eoi = Vxi11Client.EoiEnabledDefault;
         this.IOTimeout = Vxi11Client.IOTimeoutDefault;
         this.TransmitTimeout = Vxi11Client.TransmitTimeoutDefault;
@@ -38,12 +38,12 @@ public partial class Vxi11Client : ICloseable
     /// An internal method to process connecting the device by calling the <see cref="Vxi11Message.CreateLinkProcedure"/>
     /// RPC and returning the <see cref="DeviceErrorCode"/> codec.
     /// </summary>
-    /// <param name="hostAddress">              The host device IPv4 address. </param>
-    /// <param name="interfaceDeviceString">    The interface device string, e.g., inst0 or gpib0,8. </param>
-    /// <param name="connectTimeout">           The connect timeout. This timeout overrides the 
-    ///                                         <see cref="ONC.RPC.Client.OncRpcClientBase.TransmitTimeout"/></param>
+    /// <param name="hostAddress">      The host device IPv4 address. </param>
+    /// <param name="deviceName">       The device name, e.g., inst0 or gpib0,8. </param>
+    /// <param name="connectTimeout">   The connect timeout. This timeout overrides the
+    ///                                 <see cref="ONC.RPC.Client.OncRpcClientBase.TransmitTimeout"/> </param>
     /// <returns>   A DeviceErrorCode. </returns>
-    protected virtual DeviceErrorCode ConnectDevice( string hostAddress, string interfaceDeviceString, int connectTimeout )
+    protected virtual DeviceErrorCode ConnectDevice( string hostAddress, string deviceName, int connectTimeout )
     {
         // First destroy the link if not destroyed. 
         if ( this.Connected ) { this.Close(); }
@@ -51,7 +51,7 @@ public partial class Vxi11Client : ICloseable
         // clear previous values.
         this.DeviceLink = null;
         this.Host = string.Empty;
-        this.InterfaceDeviceString = string.Empty;
+        this.DeviceName = string.Empty;
 
         // save for reconnecting.
         this.ConnectTimeout = connectTimeout;
@@ -66,21 +66,25 @@ public partial class Vxi11Client : ICloseable
         // override the client transmit timeout during the connection to allow longer timeout periods.
         this.CoreClient.Client!.TransmitTimeout = connectTimeout;
 
-        CreateLinkResp linkResp = this.CreateLink( this.CoreClient, interfaceDeviceString );
+        CreateLinkResp linkResp = this.CreateLink( this.CoreClient, deviceName );
         return linkResp.ErrorCode;
     }
 
-    /// <summary>   Connects the device by calling the <see cref="Vxi11Message.CreateLinkProcedure"/> 
-    /// RPC and sets the <see cref="LastDeviceError"/> or throws an exception on failure. </summary>
-    /// <param name="hostAddress">              The host device IPv4 address. </param>
-    /// <param name="interfaceDeviceString">    The interface device string, e.g., inst0 or gpib0,8. </param>
-    /// <param name="connectTimeout">           (Optional) The connect timeout [3000]. This timeouts overrides the 
-    ///                                         <see cref="ONC.RPC.Client.OncRpcClientBase.TransmitTimeout"/></param>
-    public virtual void Connect( string hostAddress, string interfaceDeviceString, int connectTimeout = 3000 )
+    /// <summary>
+    /// Connects the device by calling the <see cref="Vxi11Message.CreateLinkProcedure"/>
+    /// RPC and sets the <see cref="LastDeviceError"/> or throws an exception on failure.
+    /// </summary>
+    /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
+    /// <param name="hostAddress">      The host device IPv4 address. </param>
+    /// <param name="deviceName">       The device name, e.g., inst0 or gpib0,8. </param>
+    /// <param name="connectTimeout">   (Optional) The connect timeout [3000]. This timeouts
+    ///                                 overrides the
+    ///                                 <see cref="ONC.RPC.Client.OncRpcClientBase.TransmitTimeout"/> </param>
+    public virtual void Connect( string hostAddress, string deviceName, int connectTimeout = 3000 )
     {
         try
         {
-            this.LastDeviceError = this.ConnectDevice( hostAddress, interfaceDeviceString, connectTimeout );
+            this.LastDeviceError = this.ConnectDevice( hostAddress, deviceName, connectTimeout );
 
             if ( this.LastDeviceError != DeviceErrorCode.NoError )
             {
@@ -113,7 +117,7 @@ public partial class Vxi11Client : ICloseable
         {
             throw new InvalidOperationException( $"{nameof( Vxi11Client )} @ {this.IPAddress} cannot reconnected because it is disposed." );
         }
-        this.Connect( this.Host, this.InterfaceDeviceString, this.ConnectTimeout );
+        this.Connect( this.Host, this.DeviceName, this.ConnectTimeout );
     }
 
     /// <summary>
@@ -199,10 +203,10 @@ public partial class Vxi11Client : ICloseable
             {
                 DeviceError? deviceError = this.DestroyLink();
                 if ( deviceError is null )
-                    throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
+                    throw new DeviceException( $"; failed destroying the link to the {this.DeviceName} device at {this.IPAddress}.",
                         DeviceErrorCode.IOError );
                 if ( deviceError.ErrorCode != DeviceErrorCode.NoError )
-                    throw new DeviceException( $"; failed destroying the link to the {this.InterfaceDeviceString} device at {this.IPAddress}.",
+                    throw new DeviceException( $"; failed destroying the link to the {this.DeviceName} device at {this.IPAddress}.",
                         deviceError.ErrorCode );
             }
             catch ( Exception ex )
@@ -361,7 +365,7 @@ public partial class Vxi11Client : ICloseable
     {
         if ( !this.Connected )
         {
-            this.Connect( this.Host, this.InterfaceDeviceString );
+            this.Connect( this.Host, this.DeviceName );
         }
 
         if ( this.AbortClient is null )
@@ -436,15 +440,15 @@ public partial class Vxi11Client : ICloseable
     /// <value> The IP address. </value>
     public IPAddress IPAddress => IPAddress.Parse( this.Host );
 
-    private string _interfaceDeviceString;
+    private string _deviceName;
     /// <summary>
-    /// Gets or sets the interface device string, .e.g, inst0, gpib0,5, or usb0[...].
+    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
     /// </summary>
-    /// <value> The interface device string. </value>
-    public string InterfaceDeviceString
+    /// <value> The device name. </value>
+    public string DeviceName
     {
-        get => this._interfaceDeviceString;
-        set => _ = this.SetProperty( ref this._interfaceDeviceString, value );
+        get => this._deviceName;
+        set => _ = this.SetProperty( ref this._deviceName, value );
     }
 
     /// <summary>
@@ -1131,15 +1135,16 @@ public partial class Vxi11Client : ICloseable
     #region " VXI-11 call implementations: Client "
 
     /// <summary>   Creates a link. </summary>
-    /// <param name="coreChannelClient">        The core channel client. </param>
-    /// <param name="interfaceDeviceString">    The interface device string, e.g., inst0 or gpib0,8. </param>
+    /// <remarks>   2023-02-07. </remarks>
+    /// <param name="coreChannelClient">    The core channel client. </param>
+    /// <param name="deviceName">           The device name, e.g., inst0 or gpib0,8. </param>
     /// <returns>   The new link. </returns>
-    private CreateLinkResp CreateLink( CoreChannelClient coreChannelClient, string interfaceDeviceString )
+    private CreateLinkResp CreateLink( CoreChannelClient coreChannelClient, string deviceName )
     {
         if ( coreChannelClient is null || coreChannelClient.Client is null )
             return new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
-        CreateLinkResp linkResp = coreChannelClient.CreateLink( this.ClientId, this.LockEnabled, this.LockTimeout, interfaceDeviceString );
+        CreateLinkResp linkResp = coreChannelClient.CreateLink( this.ClientId, this.LockEnabled, this.LockTimeout, deviceName );
         if ( linkResp.ErrorCode == DeviceErrorCode.NoError )
         {
             this.DeviceLink = linkResp.DeviceLink;
@@ -1148,7 +1153,7 @@ public partial class Vxi11Client : ICloseable
             this.AbortPort = linkResp.AbortPort;
 
             this.Host = coreChannelClient.Client.Host.ToString();
-            this.InterfaceDeviceString = interfaceDeviceString;
+            this.DeviceName = deviceName;
         }
         return linkResp;
     }

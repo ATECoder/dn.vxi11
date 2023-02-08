@@ -29,7 +29,7 @@ public class CreateLinkParms : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public CreateLinkParms()
     {
-        this.InterfaceDeviceString = string.Empty;
+        this.DeviceName = string.Empty;
     }
 
     /// <summary>   Constructor. </summary>
@@ -73,9 +73,12 @@ public class CreateLinkParms : IXdrCodec
     /// <value> The time to wait on a lock. </value>
     public int LockTimeout { get; set; }
 
-    /// <summary>   Gets or sets the interface device string, e.g., inst0, gpib,5 or usb0[...]. </summary>
-    /// <value> The interface device string. </value>
-    public string InterfaceDeviceString { get; set; }
+    /// <summary>
+    /// Gets or sets the device name also called device name, e.g., inst0, gpib,5 or
+    /// usb0[...].
+    /// </summary>
+    /// <value> The device name. </value>
+    public string DeviceName { get; set; }
 
     /// <summary>
     /// Encodes -- that is: serializes -- an object into an XDR stream in compliance to RFC 1832.
@@ -86,7 +89,7 @@ public class CreateLinkParms : IXdrCodec
         encoder.EncodeInt( this.ClientId );
         encoder.EncodeBoolean( this.LockDevice );
         encoder.EncodeInt( this.LockTimeout );
-        encoder.EncodeString( this.InterfaceDeviceString );
+        encoder.EncodeString( this.DeviceName );
     }
 
     /// <summary>
@@ -98,7 +101,7 @@ public class CreateLinkParms : IXdrCodec
         this.ClientId = decoder.DecodeInt();
         this.LockDevice = decoder.DecodeBoolean();
         this.LockTimeout = decoder.DecodeInt();
-        this.InterfaceDeviceString = decoder.DecodeString();
+        this.DeviceName = decoder.DecodeString();
     }
 
 }

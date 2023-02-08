@@ -63,15 +63,15 @@ public interface IVxi11Device
     public IPAddress IPAddress { get; }
 
     /// <summary>
-    /// Gets or sets the interface device string, .e.g, inst0, gpib0,5, or usb0[...].
+    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
     /// </summary>
-    /// <value> The interface device string. </value>
-    public string InterfaceDeviceString { get; set; }
+    /// <value> The device name. </value>
+    public string DeviceName { get; set; }
 
-    /// <summary>   Query if this device has valid interface device string. </summary>
-    /// <remarks> This is required for validating the interface device string when creating the link. </remarks>
-    /// <returns>   True if valid interface device string, false if not. </returns>
-    public bool IsValidInterfaceDeviceString();
+    /// <summary>   Query if this device has valid device name. </summary>
+    /// <remarks> This is required for validating the device name when creating the link. </remarks>
+    /// <returns>   True if valid device name, false if not. </returns>
+    public bool IsValidDeviceName();
 
     /// <summary>
     /// Gets or sets a value indicating whether the end-or-identify (EOI) terminator is enabled.

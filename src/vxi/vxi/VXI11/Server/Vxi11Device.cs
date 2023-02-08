@@ -15,16 +15,15 @@ public partial class Vxi11Device : IVxi11Device
     /// <param name="device">   An implementation of the <see cref="IVxi11Instrument"/>. </param>
     public Vxi11Device( IVxi11Instrument device )
     {
-        this._interfaceDeviceString = string.Empty;
         this.ReadMessage = string.Empty;
         this._readMessage = string.Empty;
         this.WriteMessage = string.Empty;
         this._writeMessage = string.Empty;
         this.CharacterEncoding = CoreChannelClient.EncodingDefault;
         this._characterEncoding = CoreChannelClient.EncodingDefault;
-        this.InterfaceDeviceString = string.Empty;
-        this._interfaceDeviceString = string.Empty;
-        this._interfaceDeviceAddress = new InsterfaceDeviceStringParser( string.Empty );
+        this._deviceName = string.Empty;
+        this.DeviceName = string.Empty;
+        this._interfaceDeviceAddress = new DeviceNameParser( string.Empty );
         this.DeviceLink = null;
         this._deviceLink = null;
         this.MaxReceiveLength = VXI11.Client.Vxi11Client.MaxReceiveLengthDefault;
@@ -177,23 +176,23 @@ public partial class Vxi11Device : IVxi11Device
     /// <value> The IP address. </value>
     public IPAddress IPAddress => IPAddress.Parse( this.Host );
 
-    private string _interfaceDeviceString;
+    private string _deviceName;
     /// <summary>
-    /// Gets or sets the interface device string, .e.g, inst0, gpib0,5, or usb0[...].
+    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
     /// </summary>
-    /// <value> The interface device string. </value>
-    public string InterfaceDeviceString
+    /// <value> The device name. </value>
+    public string DeviceName
     {
-        get => this._interfaceDeviceString;
-        set => _ = this.SetProperty( ref this._interfaceDeviceString, value );
+        get => this._deviceName;
+        set => _ = this.SetProperty( ref this._deviceName, value );
     }
 
-    /// <summary>   Query if this device has valid interface device string. </summary>
-    /// <remarks> This is required for validating the interface device string when creating the link. </remarks>
-    /// <returns>   True if valid interface device string, false if not. </returns>
-    public bool IsValidInterfaceDeviceString()
+    /// <summary>   Query if this device has valid device name. </summary>
+    /// <remarks> This is required for validating the device name when creating the link. </remarks>
+    /// <returns>   True if valid device name, false if not. </returns>
+    public bool IsValidDeviceName()
     {
-        InsterfaceDeviceStringParser parser = new( this.InterfaceDeviceString );
+        DeviceNameParser parser = new( this.DeviceName );
         return parser.IsValid();
     }
 
@@ -309,15 +308,15 @@ public partial class Vxi11Device : IVxi11Device
         } 
     }
 
-    private InsterfaceDeviceStringParser _interfaceDeviceAddress;
+    private DeviceNameParser _interfaceDeviceAddress;
     /// <summary>   Gets or sets the interface device address. </summary>
     /// <value> The interface device. </value>
-    public InsterfaceDeviceStringParser InterfaceDeviceAddress
+    public DeviceNameParser InterfaceDeviceAddress
     {
         get => this._interfaceDeviceAddress;
         set {
             if ( this.SetProperty( ref this._interfaceDeviceAddress, value ) )
-                this.InterfaceDeviceString = this._interfaceDeviceAddress.InterfaceDeviceString;
+                this.DeviceName = this._interfaceDeviceAddress.DeviceName;
         }
     }
 
@@ -483,9 +482,9 @@ public partial class Vxi11Device : IVxi11Device
                 AbortPort = this.AbortPortNumber
             };
 
-            Logger.Writer.LogVerbose( $"creating link to {request.InterfaceDeviceString}" );
+            Logger.Writer.LogVerbose( $"creating link to {request.DeviceName}" );
 
-            this.InterfaceDeviceAddress = new InsterfaceDeviceStringParser( request.InterfaceDeviceString );
+            this.InterfaceDeviceAddress = new DeviceNameParser( request.DeviceName );
             reply.ErrorCode = this.InterfaceDeviceAddress.IsValid()
                 ? DeviceErrorCode.NoError
                 : DeviceErrorCode.InvalidLinkIdentifier;

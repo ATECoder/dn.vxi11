@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Net;
-using System.Reflection;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
@@ -9,6 +8,8 @@ using cc.isr.VXI11.Logging;
 namespace cc.isr.VXI11.Server;
 
 /// <summary>   A VXI-11 server capable of serving a single client. </summary>
+/// <remarks> Implements the minimum requirements for a VXI-11 including an <see cref="AbortChannelServer"/>
+/// and <see cref="InterruptChannelClient"/></remarks>
 public partial class Vxi11SingleClientServer : CoreChannelServerBase
 {
 
@@ -396,8 +397,8 @@ public partial class Vxi11SingleClientServer : CoreChannelServerBase
     }
 
     private string _interfaceDeviceString;
-    /// <summary>   Gets or sets the interface device string. </summary>
-    /// <value> The interface device string. </value>
+    /// <summary>   Gets or sets the device name. </summary>
+    /// <value> The device name. </value>
     public string InterfaceDeviceString
     {
         get => this._interfaceDeviceString;
@@ -533,7 +534,7 @@ public partial class Vxi11SingleClientServer : CoreChannelServerBase
                 AbortPort = this.AbortPortNumber
             };
 
-            Logger.Writer.LogVerbose( $"creating link to {request.InterfaceDeviceString}" );
+            Logger.Writer.LogVerbose( $"creating link to {request.DeviceName}" );
 
             // note that the 7510 responds to an incorrect interface device name 
             // with the DeviceErrorCode.DeviceNotAccessible; I believe that the 
@@ -542,8 +543,8 @@ public partial class Vxi11SingleClientServer : CoreChannelServerBase
                 reply.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
             else
             {
-                this._device.InterfaceDeviceString = request.InterfaceDeviceString;
-                reply.ErrorCode = this._device.IsValidInterfaceDeviceString()
+                this._device.DeviceName = request.DeviceName;
+                reply.ErrorCode = this._device.IsValidDeviceName()
                     ? DeviceErrorCode.NoError
                     : DeviceErrorCode.InvalidLinkIdentifier;
             }

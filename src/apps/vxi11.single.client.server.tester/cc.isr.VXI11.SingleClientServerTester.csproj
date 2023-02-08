@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <RootNamespace>cc.isr.VXI11.Vxi11SingleClientServerTester</RootNamespace>
+    <AssemblyName>cc.isr.VXI11.Vxi11SingleClientServerTester</AssemblyName>
+
+    <!-- Display name -->
+    <ApplicationTitle>cc.isr.VXI11.Vxi11SingleClientServerTester</ApplicationTitle>
+
+    <!-- App Identifier -->
+    <ApplicationId>cc.isr.lxi11.Vxi11SingleClientServerTester</ApplicationId>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\vxi\vxi\cc.isr.VXI11.csproj" />
+  </ItemGroup>
+
+</Project>
