@@ -65,14 +65,6 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     #region " I/O messages "
 
-    /// <summary>   Gets or sets a message that was sent to the device. </summary>
-    /// <value> The message that was sent to the device. </value>
-    string WriteMessage { get; set; }
-
-    /// <summary>   Gets or sets a message that was received from the device. </summary>
-    /// <value> A message that was received from the device. </value>
-    string ReadMessage { get; set; }
-
     /// <summary>   Gets or sets the last device error. </summary>
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
     DeviceErrorCode LastDeviceError { get; set; }
@@ -103,6 +95,10 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// </summary>
     /// <value> The device name. </value>
     public string DeviceName { get; set; }
+
+    /// <summary>   Gets or sets the parser for the device name. </summary>
+    /// <value> The device name parser. </value>
+    DeviceNameParser DeviceNameParser { get; }
 
     /// <summary>   Query if this device has valid device name. </summary>
     /// <remarks> This is required for validating the device name when creating the link. </remarks>

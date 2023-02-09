@@ -389,9 +389,14 @@ public partial class Vxi11Client : ICloseable
     /// <summary>   Gets or sets the Core client. </summary>
     protected CoreChannelClient? CoreClient { get; set; }
 
+    private int _clientId;
     /// <summary>   Gets or sets the identifier of the client. </summary>
     /// <value> The identifier of the client. </value>
-    protected int ClientId { get; set; }
+    public int ClientId
+    {
+        get => this._clientId;
+        set => _ = this.OnPropertyChanged( ref this._clientId, value );
+    }
 
     /// <summary>   The  <see cref="DeviceLink"/> that is established upon connection. </summary>
     /// <value> The device link. </value>

@@ -457,15 +457,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
                 case nameof( IVxi11Device.InterruptEnabled ):
                     this.InterruptEnabled = sender.InterruptEnabled;
                     break;
-
-
-                case nameof( IVxi11Device.ReadMessage ):
-                    this.ReadMessage = sender.ReadMessage;
-                    break;
-
-                case nameof( IVxi11Device.WriteMessage ):
-                    this.WriteMessage = sender.WriteMessage;
-                    break;
             }
         }
     }
@@ -477,8 +468,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.CharacterEncoding ) );
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.DeviceName ) );
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.InterruptEnabled ) );
-        this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.ReadMessage ) );
-        this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.WriteMessage ) );
     }
 
     #endregion
@@ -526,7 +515,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// A network instrument server should be able to maintain at least two separate links
     /// simultaneously over a single network instrument connection. </para><para>
     /// 
-    /// The network instrument client sends an identifying number in the clientId parameter.While
+    /// The network instrument client sends an identifying number in the clientId parameter. While
     /// this protocol requires no special behavior based on the value of clientId, the device may
     /// provide a local means to examine its value to help a user identify communication problems. </para>
     /// <para>
@@ -578,6 +567,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
             else
             {
                 this.Device.DeviceName = request.DeviceName;
+                this.Device.Instrument!.ClientId = request.ClientId;
                 reply.ErrorCode = this.Device.IsValidDeviceName()
                     ? DeviceErrorCode.NoError
                     : DeviceErrorCode.InvalidLinkIdentifier;

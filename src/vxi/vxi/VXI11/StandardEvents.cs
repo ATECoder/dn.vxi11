@@ -103,7 +103,7 @@ namespace cc.isr.VXI11.EnumExtensions
             _standardEventsAll = 0;
             foreach ( var enumValue in Enum.GetValues( typeof( StandardEvents ) ) )
             {
-                _standardEventsAll |= ( byte ) enumValue;
+                _standardEventsAll |= ( byte ) ( int ) enumValue;
             }
             return _standardEventsAll;
         }
@@ -116,8 +116,8 @@ namespace cc.isr.VXI11.EnumExtensions
         public static StandardEvents ToStandardEvents( this byte value )
         {
             return Enum.IsDefined( typeof( StandardEvents ), value ) || ((value & StandardEventsAll()) == value)
-                ? ( StandardEvents ) value
-                : throw new ArgumentException( $"{typeof( int )} value of {value} cannot be cast to {nameof( StandardEvents )}" );
+                ? ( StandardEvents ) ( int ) value
+                : throw new ArgumentException( $"{typeof( byte )} value of {value} cannot be cast to {nameof( StandardEvents )}" );
         }
 
         /// <summary>

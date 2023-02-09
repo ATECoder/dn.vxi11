@@ -36,18 +36,15 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <param name="identity"> (Optional) Device identification string. </param>
     public Vxi11Instrument( string identity = "INTEGRATED SCIENTIFIC RESOURCES,MODEL IEEE488Mock,001,1.0.8434" )
     {
-        this.Identity = identity;
+        this.MessageLog = new CircularList<(int LinkId, char IO, DateTimeOffset Timestamp, String Value)>( IOMessageCapacity );
+                this.Identity = identity;
         this._identity = identity;
-        this.LastWriteMessage = string.Empty;
-        this._lastWriteMessage = string.Empty;
-        this.LastReadData = string.Empty;
-        this._lastReadData = string.Empty;
         this._readBuffer = Array.Empty<byte>();
         this.CharacterEncoding = CoreChannelClient.EncodingDefault;
         this._characterEncoding = CoreChannelClient.EncodingDefault;
         this._cancelSource = new();
 
-        this.StandardEventStatusMask = cc.isr.VXI11.EnumExtensions.Vxi11EnumExtensions.StandardEventsAll();
+        this.StandardEventStatusMask = Vxi11EnumExtensions.StandardEventsAll();
         this.ServiceRequestEventMask = Vxi11EnumExtensions.ServiceRequestsAll();
     }
 
@@ -60,6 +57,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     protected int ServiceRequestEventMask { get; set; }
 
     private ServiceRequests _serviceRequestStatus;
+    /// <summary>   Gets or sets the service request status. </summary>
+    /// <value> The service request status. </value>
     public ServiceRequests ServiceRequestStatus
     {
         get => this._serviceRequestStatus;
@@ -67,7 +66,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
         {
             if ( this.OnPropertyChanged( ref this._serviceRequestStatus, value ) )
             {
-                if ( ( ( byte ) this._serviceRequestStatus & this.ServiceRequestEventMask ) != 0 )
+                if ( this.InterruptEnabled
+                    && ( ( byte ) this._serviceRequestStatus & this.ServiceRequestEventMask ) != 0 )
                     this.OnRequestingService( new Vxi11EventArgs( this._interruptHandle ) );
             }
         } 
@@ -479,7 +479,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     #endregion
 
-    #region " Device state "
+    #region " instrument state "
 
     private bool _lockEnabled;
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
@@ -802,51 +802,69 @@ public partial class Vxi11Instrument : IVxi11Instrument
         if ( method is not null )
         {
             Vxi11InstrumentOperationAttribute scpiAtt = ( Vxi11InstrumentOperationAttribute ) method.GetCustomAttribute( typeof( Vxi11InstrumentOperationAttribute ) )!;
-            try
+            if ( scpiAtt != null )
             {
-                object? res = null;
-                switch ( scpiAtt.OperationType )
+                try
                 {
-                    case Vxi11InstrumentOperationType.None:
-                        Logger.Writer.LogMemberWarning( $"The attribute of method {method} is marked incorrectly as {scpiAtt.OperationType}。" );
-                        break;
-                    case Vxi11InstrumentOperationType.Write:
-                        this.LastWriteMessage = fullScpiCommand;
-                        // invoke the corresponding method
-                        res = method.Invoke( this, scpiArgs );
-                        result = DeviceErrorCode.NoError;
-                        break;
-                    case Vxi11InstrumentOperationType.Read://Query instructions
-                        this.LastWriteMessage = fullScpiCommand;
-                        res = method.Invoke( this, scpiArgs );
-                        if ( res is not null )
-                        {
-                            this.LastReadData = res.ToString();
-                            this._readBuffer = this.CharacterEncoding.GetBytes( res.ToString()! );
-                            Logger.Writer.LogVerbose( $"Query results： {res}。" );
-                        }
-                        else
-                        {
-                            this.LastReadData = "null";
-                            Logger.Writer.LogVerbose( "Query results：NULL。" );
+                    object? res = null;
+                    switch ( scpiAtt.OperationType )
+                    {
+                        case Vxi11InstrumentOperationType.None:
+                            string message = $"The attribute of method {method} is marked incorrectly as {scpiAtt.OperationType}";
+                            Logger.Writer.LogMemberWarning( message );
+                            this.LogMessage( scpiAtt.OperationType, message );
+                            break;
+                        case Vxi11InstrumentOperationType.Write:
+                            this.LogMessage( scpiAtt.OperationType, fullScpiCommand );
+                            // invoke the corresponding method
+                            res = method.Invoke( this, scpiArgs );
                             result = DeviceErrorCode.NoError;
-                        }
-                        break;
+                            break;
+                        case Vxi11InstrumentOperationType.Read://Query instructions
+                            this.LogMessage( scpiAtt.OperationType, fullScpiCommand );
+                            res = method.Invoke( this, scpiArgs );
+                            if ( res is not null )
+                            {
+                                this.LogMessage( scpiAtt.OperationType, res.ToString() );
+                                this._readBuffer = this.CharacterEncoding.GetBytes( res.ToString()! );
+                                Logger.Writer.LogVerbose( $"Query results： {res}。" );
+                            }
+                            else
+                            {
+                                this.LogMessage( scpiAtt.OperationType, "null" );
+                                Logger.Writer.LogVerbose( "Query results：NULL。" );
+                                result = DeviceErrorCode.NoError;
+                            }
+                            break;
+                    }
+                }
+                catch ( Exception ex )
+                {
+                    string message = $"An error occurred when the method was called：{method}; {ex.Message}";
+                    Logger.Writer.LogMemberError( $"An error occurred when the method was called：{method}", ex );
+                    this.LogMessage( 'e', message );
+                    // Parameter error
+                    result = DeviceErrorCode.ParameterError;
                 }
             }
-            catch ( Exception ex )
+            else
             {
-                Logger.Writer.LogMemberError( $"An error occurred when the method was called：{method}", ex );
-                // Parameter error
-                result = DeviceErrorCode.ParameterError;
+                string message = $"Attribute not found for method '{method}' parsed from the command '{fullScpiCommand}'";
+                Logger.Writer.LogMemberWarning( message );
+                this.LogMessage( 'e', message );
+                result = DeviceErrorCode.SyntaxError; // The instruction is incorrect or undefined
+                this.CurrentOperationType = Vxi11InstrumentOperationType.None;
             }
         }
         else
         {
-            Logger.Writer.LogMemberWarning( $"No method found： {fullScpiCommand}" );
+            string message = $"No method found to match the command '{fullScpiCommand}'";
+            Logger.Writer.LogMemberWarning( message );
+            this.LogMessage( 'e', message );
             result = DeviceErrorCode.SyntaxError; // The instruction is incorrect or undefined
             this.CurrentOperationType = Vxi11InstrumentOperationType.None;
         }
+        this.LastDeviceError = result;
         return result;
     }
 
@@ -854,22 +872,42 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     #region " RPC operation members "
 
-    private string _lastWriteMessage;
-    /// <summary>   Gets or sets a message that was sent to the device. </summary>
-    /// <value> The message that was sent to the device. </value>
-    public string LastWriteMessage
+    /// <summary>   Gets or sets the i/o message capacity. </summary>
+    /// <value> The i/o message capacity. </value>
+    public static int IOMessageCapacity { get; set; } = 127;
+
+    /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="String"/> Value)
+    /// of the last messages that were sent to and received from the instrument. </summary>
+    /// <value> The list of message tuples consisting of the Client Id, IO (R for read and W for write), 
+    /// a timestamp and a value that were sent to or received from the instrument. </value>
+    public List<(int ClientId, char IO, DateTimeOffset Timestamp, String Value)> MessageLog { get; }
+
+    private int _messageLogCount;
+    /// <summary>   Gets or sets the number of I/O messages. </summary>
+    /// <value> The number of I/O messages, which, in fact, flags the property change flag that can be used to 
+    /// indicate the availability of new messages. </value>
+    public int MessageLogCount
     {
-        get => this._lastWriteMessage;
-        set => _ = this.SetProperty( ref this._lastWriteMessage, value );
+        get => this._messageLogCount;
+        set => _ = this.OnPropertyChanged( ref this._messageLogCount, value );
     }
 
-    private string _lastReadData;
-    /// <summary>   Gets or sets the last data that was received from the device. </summary>
-    /// <value> The last data that was received from the device. </value>
-    public string LastReadData
+    /// <summary>   Logs a message. </summary>
+    /// <param name="operationType">    Type of the operation. </param>
+    /// <param name="value">            The value. </param>
+    private void LogMessage( Vxi11InstrumentOperationType operationType, string value )
     {
-        get => this._lastReadData;
-        set => _ = this.SetProperty( ref this._lastReadData, value );
+        this.LogMessage( operationType.ToString()[0], value );
+    }
+
+    /// <summary>   Logs a message. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="operationType">    Type of the operation. </param>
+    /// <param name="value">            The value. </param>
+    private void LogMessage( char operationType, string value )
+    {
+        this.MessageLog.Add( (this.ClientId, operationType, DateTimeOffset.Now, value) );
+        this.MessageLogCount++;
     }
 
     private Encoding _characterEncoding;

@@ -6,7 +6,7 @@ using cc.isr.VXI11.Codecs;
 namespace cc.isr.VXI11.Server;
 
 /// <summary>
-/// Interface for a base LXI device, which implements standard IEEE 488.2 commands.
+/// Interface for a base LXI instrument, which implements standard IEEE 488.2 commands.
 /// </summary>
 /// <remarks>
 /// This interface defines the implementation for a 'physical' instrument that is the end point
@@ -26,7 +26,7 @@ namespace cc.isr.VXI11.Server;
 /// <see href="https://vxibus.org/specifications.html">VXI-11 TCP/IP Instrument Protocol
 /// Specification</see> VXI-11 Version 1.0 document.
 /// 
-/// The VXI-11 device procedures are from the host perspective, i.e., a device write is writes to
+/// The VXI-11 device procedures are from the host perspective, i.e., a device write writes to
 /// the 'physical' instrument (also called 'Network Instrument') and device read reads from the
 /// instrument.
 /// </remarks>
@@ -34,6 +34,11 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 {
 
     #region " instrument operations "
+
+    /// <summary>   Gets or sets the service request status. </summary>
+    /// <value> The service request status. </value>
+    ServiceRequests ServiceRequestStatus { get; set; }
+
     /// <summary>   Clears status: *CLS. </summary>
     /// <remarks>
     /// Clear Status Command. Clears the event registers in all register groups. Also clears the
@@ -68,7 +73,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <returns>   A string. </returns>
     string ESRRead();
 
-    /// <summary>   Reads the device identity string: *IDN? </summary>
+    /// <summary>   Reads the instrument identity string: *IDN? </summary>
     /// <returns>   A string. </returns>
     string IDNRead();
 
@@ -99,7 +104,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <returns>   Returns 1 when all previous commands complete. </returns>
     string OPCRead();
 
-    /// <summary>   Resets the device: *RST. </summary>
+    /// <summary>   Resets the instrument: *RST. </summary>
     /// <remarks>
     /// Resets instrument to factory default state, independent of MEMory:STATe:RECall:AUTO setting.
     /// Does not affect stored instrument states, stored arbitrary waveforms, or I/O settings; these
@@ -248,7 +253,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     #endregion
 
-    #region " Device state "
+    #region " instrument state "
 
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
     /// <value> True if lock enabled, false if not. </value>
@@ -260,7 +265,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     #endregion
 
-    #region " RPC Implementations "
+    #region " RPC implementations "
 
     /// <summary>   Aborts and returns the <see cref="DeviceError"/>. </summary>
     /// <remarks>
@@ -430,21 +435,15 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     Encoding CharacterEncoding { get; set; }
 
     /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="String"/> Value)
-    /// of the last messages that were sent to the device. </summary>
-    /// <value> The message that was sent to the device. </value>
-    CircularList<(DateTime Timestamp, String Value)> LastWrites { get; }
+    /// of the last messages that were sent to and received from the instrument. </summary>
+    /// <value> The list of message tuples consisting of the client id, IO (R for read and W for write), 
+    /// a timestamp and a value that were sent to or received from the instrument. </value>
+    List<(int ClientId, char IO, DateTimeOffset Timestamp, String Value)> MessageLog { get; }
 
-    /// <summary>   Gets or sets the number of writes. </summary>
-    /// <value> The number of writes. </value>
-    int WriteCount { get; set; }
-
-    /// <summary>   Gets the last data that was received from the device. </summary>
-    /// <value> The last data that was received from the device. </value>
-    CircularList<(DateTime Timestamp, String Value)> LastReads { get; }
-
-    /// <summary>   Gets or sets the number of reads. </summary>
-    /// <value> The number of reads. </value>
-    int ReadCount { get; set; }
+    /// <summary>   Gets or sets the number of I/O messages. </summary>
+    /// <value> The number of I/O messages, which, in fact, flags the property change flag that can be used to 
+    /// indicate the availability of new messages. </value>
+    int MessageLogCount { get; set; }
 
     /// <summary>   Timeout wait time ms. </summary>
     /// <value> The wait on out time. </value>

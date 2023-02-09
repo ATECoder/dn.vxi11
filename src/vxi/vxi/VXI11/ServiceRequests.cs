@@ -96,7 +96,7 @@ namespace cc.isr.VXI11.EnumExtensions
             _serviceRequestsAll = 0;
             foreach ( var enumValue in Enum.GetValues( typeof( ServiceRequests ) ) )
             {
-                _serviceRequestsAll |= ( byte ) enumValue;
+                _serviceRequestsAll |= ( byte ) ( int ) enumValue;
             }
             return _serviceRequestsAll;
         }
@@ -109,8 +109,8 @@ namespace cc.isr.VXI11.EnumExtensions
         public static ServiceRequests ToServiceRequests( this byte value )
         {
             return Enum.IsDefined( typeof( ServiceRequests ), value ) || ((value & ServiceRequestsAll()) == value)
-                ? ( ServiceRequests ) value
-                : throw new ArgumentException( $"{typeof( int )} value of {value} cannot be cast to {nameof( ServiceRequests )}" );
+                ? ( ServiceRequests ) ( int ) value
+                : throw new ArgumentException( $"{typeof( byte )} value of {value} cannot be cast to {nameof( ServiceRequests )}" );
         }
 
         /// <summary>
