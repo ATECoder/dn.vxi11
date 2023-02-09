@@ -24,8 +24,6 @@ public class Vxi11DeviceTests
             _vxi11Instrument = new Vxi11Instrument();
             _vxi11Device = new Vxi11Device( _vxi11Instrument );
 
-            int clientId = 1;
-            _vxi11Device.ClientId = clientId;
         }
         catch ( Exception ex )
         {
@@ -62,19 +60,9 @@ public class Vxi11DeviceTests
             DeviceName = deviceName,
             LockDevice = lockEnabled,
             LockTimeout = lockTimeout,
+            ClientId = 1,
         };
         CreateLinkResp linkResp = vxi11Device.CreateLink( createLinkParam );
-        if ( linkResp.ErrorCode == DeviceErrorCode.NoError )
-        {
-            vxi11Device.DeviceLink = linkResp.DeviceLink;
-            vxi11Device.MaxReceiveLength = linkResp.MaxReceiveSize;
-            vxi11Device.LastDeviceError = linkResp.ErrorCode;
-            vxi11Device.AbortPortNumber = linkResp.AbortPort;
-
-            vxi11Device.DeviceName = deviceName;
-        }
-
-        vxi11Device.RemoteEnabled = true;
 
         return linkResp;
     }
@@ -90,7 +78,7 @@ public class Vxi11DeviceTests
     {
         if ( vxi11Device is null )
             return new DeviceError() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
-        DeviceLink? link = vxi11Device.DeviceLink;
+        DeviceLink? link = new DeviceLink( vxi11Device.ActiveLinkId );
         try
         {
             return link is not null ? vxi11Device.DestroyLink( link ) : new DeviceError();
@@ -117,7 +105,7 @@ public class Vxi11DeviceTests
         if ( vxi11Device is null )
             return new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
-        if ( vxi11Device.DeviceLink is null )
+        if ( vxi11Device.ActiveLinkId == 0 )
             return new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
         if ( data is null || data.Length == 0 ) return new DeviceWriteResp();
@@ -126,7 +114,7 @@ public class Vxi11DeviceTests
             throw new DeviceException( $"Data size {data.Length} exceed {nameof( Vxi11Device.MaxReceiveLength )}({vxi11Device.MaxReceiveLength})", DeviceErrorCode.IOError );
 
         DeviceWriteParms writeParam = new() {
-            Link = vxi11Device.DeviceLink,
+            Link = new DeviceLink( vxi11Device.ActiveLinkId ),
             IOTimeout = vxi11Device.IOTimeout, // in ms
             LockTimeout = vxi11Device.LockTimeout, // in ms
             Flags = vxi11Device.Eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None,
@@ -140,11 +128,11 @@ public class Vxi11DeviceTests
         if ( vxi11Device is null )
             return new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
-        if ( vxi11Device.DeviceLink is null )
+        if ( vxi11Device.ActiveLinkId == 0 )
             return new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
         DeviceReadParms readParam = new() {
-            Link = vxi11Device.DeviceLink,
+            Link = new DeviceLink( vxi11Device.ActiveLinkId ),
             RequestSize = byteCount,
             IOTimeout = vxi11Device.IOTimeout,
             LockTimeout = vxi11Device.LockTimeout,
@@ -160,7 +148,7 @@ public class Vxi11DeviceTests
     /// <remarks>   2023-02-03. </remarks>
     private static void AssertShouldCreateLink()
     {
-        if ( !_vxi11Device?.DeviceLinked ?? true )
+        if ( 0 != ( _vxi11Device?.ActiveLinkId ?? 0 ) )
         {
             CreateLinkResp linkResp = CreateLink( _vxi11Device, "inst0" );
             Assert.AreEqual( DeviceErrorCode.NoError, linkResp.ErrorCode );
@@ -170,7 +158,7 @@ public class Vxi11DeviceTests
     /// <summary>   Assert should destroy link. </summary>
     private static void AssertShouldDestroyLink()
     {
-        if ( _vxi11Device?.DeviceLinked ?? false )
+        if ( 0 != (_vxi11Device?.ActiveLinkId ?? 0 ) )
         {
             DeviceError deviceError = DestroyLink( _vxi11Device );
             Assert.IsNotNull( deviceError );

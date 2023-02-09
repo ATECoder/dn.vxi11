@@ -241,8 +241,8 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
     public event EventHandler<cc.isr.VXI11.Vxi11EventArgs>? RequestingService;
 
-    /// <summary>   Gets or sets the identifier of the client. </summary>
-    /// <value> The identifier of the client. </value>
+    /// <summary>   Gets or sets the identifier of the active client. </summary>
+    /// <value> The identifier of the active client. </value>
     public int ClientId { get; set; }
 
     /// <summary>   Sets interrupt handle. </summary>

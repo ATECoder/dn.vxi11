@@ -483,19 +483,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
         get => this._deviceLink;
         set
         {  if ( this.OnPropertyChanged( ref this._deviceLink, value ) && this.Device is not null )
-                this.Device.DeviceLink = value;
+                this.Device.ActiveLinkId = value.LinkId;
         }
     }
-
-    /// <summary>
-    /// Gets a value indicating whether a valid link exists between the <see cref="Client.Vxi11Client"/>
-    /// and the <see cref="Vxi11Server"/>.
-    /// </summary>
-    /// <value>
-    /// True if a valid device link exists between the <see cref="Client.Vxi11Client"/>
-    /// and <see cref="Vxi11Server"/>.
-    /// </value>
-    public bool DeviceLinked => ( this.Device?.DeviceLinked ?? false );
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>
@@ -545,7 +535,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override CreateLinkResp CreateLink( CreateLinkParms request )
     {
-        if ( this.DeviceLinked )
+        if ( this.Device!.DeviceLinked( request.ClientId) )
             return new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelAlreadyEstablished };
         else
         {

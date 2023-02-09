@@ -68,6 +68,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
             {
                 if ( this.InterruptEnabled
                     && ( ( byte ) this._serviceRequestStatus & this.ServiceRequestEventMask ) != 0 )
+                    // note that the interrupt handle should include the id of the current client.
                     this.OnRequestingService( new Vxi11EventArgs( this._interruptHandle ) );
             }
         } 

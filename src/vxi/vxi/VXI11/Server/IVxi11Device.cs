@@ -48,10 +48,6 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <value> True if interrupt enabled, false if not. </value>
     bool InterruptEnabled { get; set; }
 
-    /// <summary>   Gets or sets the identifier of the client. </summary>
-    /// <value> The identifier of the client. </value>
-    int ClientId { get; set; }
-
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
     event EventHandler<Vxi11EventArgs> RequestingService;
 
@@ -187,11 +183,15 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     #endregion
 
-    #region " LXI-11 ONC/RPC Calls "
+    #region " clients and links "
 
-    /// <summary>   Gets or sets the device link to the actual single device. </summary>
+    /// <summary>   Gets or sets the identifier of the active client. </summary>
+    /// <value> The identifier of the active client. </value>
+    int ActiveClientId { get; set; }
+
+    /// <summary>   Gets or sets the ID of the active link between the active client and the actual single device. </summary>
     /// <value> The device link. </value>
-    DeviceLink DeviceLink { get; set; }
+    int ActiveLinkId { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether a valid link exists between the <see cref="Client.Vxi11Client"/>
@@ -201,7 +201,11 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// True if a valid device link exists between the <see cref="Client.Vxi11Client"/>
     /// and <see cref="Vxi11Server"/>.
     /// </value>
-    bool DeviceLinked { get; }
+    bool DeviceLinked( int clientId );
+
+    #endregion
+
+    #region " LXI-11 ONC/RPC Calls "
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>
