@@ -6,6 +6,25 @@ using System.Net;
 namespace cc.isr.VXI11.Server
 {
     /// <summary>   A basic implementation of a <see cref="IVxi11Device"/> interface. </summary>
+    /// <remarks>
+    /// This class serves to interface between a VXI-11 server, such as <see cref="Vxi11Server"/>
+    /// and a VXI-11 'physical' instrument, such as <see cref="Vxi11Instrument"/>.
+    /// 
+    /// Implementations of VXI-11 servers should inherit from the <see cref="Vxi11Instrument"/> and,
+    /// perhaps also, from the <see cref="Vxi11Device"/>.
+    /// 
+    /// Instrument classes inheriting from the <see cref="Vxi11Instrument"/> might override a few
+    /// methods as necessary for implementing the designed behavior.
+    /// 
+    /// The <see cref="Vxi11Server"/> and <see cref="Vxi11Device"/> classes implement the device_xxx
+    /// remote procedure calls as specified in the
+    /// <see href="https://vxibus.org/specifications.html">VXI-11 TCP/IP Instrument Protocol
+    /// Specification</see> VXI-11 Version 1.0 document.
+    /// 
+    /// The VXI-11 device procedures are from the host perspective, i.e., a device write is writes to
+    /// the 'physical' instrument (also called 'Network Instrument') and device read reads from the
+    /// instrument.
+    /// </remarks>
     public partial class Vxi11Device : IVxi11Device
     {
 
@@ -35,6 +54,7 @@ namespace cc.isr.VXI11.Server
             this.WriteTermination = VXI11.Client.Vxi11Client.WriteTerminationDefault;
             this._writeTermination = VXI11.Client.Vxi11Client.WriteTerminationDefault;
 
+            this.Instrument.PropertyChanged += this.OnDevicePropertyChanged;
             this.OnInstrumentPropertiesChanges( this.Instrument );
             this.Instrument.RequestingService += this.OnRequestingService;
         }
@@ -73,7 +93,9 @@ namespace cc.isr.VXI11.Server
         /// <param name="e">        Device error event information. </param>
         public void HandleAbortRequest( DeviceErrorEventArgs e )
         {
-            e.ErrorCodeValue = this.Instrument is null ? DeviceErrorCode.DeviceNotAccessible : this.Instrument.Abort().ErrorCode;
+            e.ErrorCodeValue = this.Instrument is null
+                                    ? DeviceErrorCode.DeviceNotAccessible
+                                    : this.Instrument.Abort().ErrorCode;
         }
 
         #endregion
@@ -86,7 +108,10 @@ namespace cc.isr.VXI11.Server
         public bool InterruptEnabled
         {
             get => this._interruptEnabled;
-            set => _ = this.SetProperty( ref this._interruptEnabled, value );
+            set
+            {  if ( this.SetProperty( ref this._interruptEnabled, value ) && this.Instrument is not null )
+                    this.Instrument.InterruptEnabled= value;
+            } 
         }
 
         /// <summary>
@@ -114,13 +139,26 @@ namespace cc.isr.VXI11.Server
             set => _ = this.OnPropertyChanged( ref this._clientId, value );
         }
 
-
         /// <summary>   Filters and passes on the service request. </summary>
         /// <param name="sender">   Source of the event. </param>
         /// <param name="e">        VXI-11 event information. </param>
         private void OnRequestingService( object sender, Vxi11EventArgs e )
         {
             if ( e.ServiceRequestCodec.ClientId == this.ClientId ) { this.OnRequestingService( e ); }
+        }
+
+        /// <summary>   the Handle of the interrupt as received when getting 
+        ///             the <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/> RPC. </summary>
+        private byte[] _interruptHandle = new byte[40];
+
+        /// <summary>   Sets interrupt handle. </summary>
+        /// <param name="interruptHandle">  the Handle of the interrupt as received when getting the 
+        ///                                 <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/>
+        ///                                 RPC. </param>
+        public void SetInterruptHandle( byte[] interruptHandle )
+        {
+            this._interruptHandle = interruptHandle;
+            this.Instrument?.SetInterruptHandle( interruptHandle );
         }
 
         #endregion
@@ -369,16 +407,20 @@ namespace cc.isr.VXI11.Server
                         this.CharacterEncoding = sender.CharacterEncoding;
                         break;
 
+                    case nameof( IVxi11Instrument.InterruptEnabled ):
+                        this.InterruptEnabled = sender.InterruptEnabled;
+                        break;
+
                     case nameof( IVxi11Instrument.LastDeviceError ):
                         this.LastDeviceError = sender.LastDeviceError;
                         break;
 
-                    case nameof( IVxi11Instrument.ReadMessage ):
-                        this.ReadMessage = sender.ReadMessage;
+                    case nameof( IVxi11Instrument.LastReadData ):
+                        this.ReadMessage = sender.LastReadData;
                         break;
 
-                    case nameof( IVxi11Instrument.WriteMessage ):
-                        this.WriteMessage = sender.WriteMessage;
+                    case nameof( IVxi11Instrument.LastWriteMessage ):
+                        this.WriteMessage = sender.LastWriteMessage;
                         break;
 
                 }
@@ -388,10 +430,11 @@ namespace cc.isr.VXI11.Server
         private void OnInstrumentPropertiesChanges( IVxi11Instrument sender )
         {
             if ( sender is not IVxi11Instrument ) return;
-            this.OnInstrumentPropertyChanged( sender, nameof( IVxi11Instrument.ReadMessage ) );
-            this.OnInstrumentPropertyChanged( sender, nameof( IVxi11Instrument.WriteMessage ) );
             this.OnInstrumentPropertyChanged( sender, nameof( IVxi11Instrument.CharacterEncoding ) );
+            this.OnInstrumentPropertyChanged( sender, nameof( IVxi11Instrument.InterruptEnabled ) );
             this.OnInstrumentPropertyChanged( sender, nameof( IVxi11Instrument.LastDeviceError ) );
+            this.OnInstrumentPropertyChanged( sender, nameof( IVxi11Instrument.LastReadData ) );
+            this.OnInstrumentPropertyChanged( sender, nameof( IVxi11Instrument.LastWriteMessage ) );
         }
 
         #endregion

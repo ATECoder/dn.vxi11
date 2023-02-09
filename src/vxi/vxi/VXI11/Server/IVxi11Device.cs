@@ -1,12 +1,33 @@
+using System.ComponentModel;
 using System.Net;
 
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;
 
-/// <summary>   An interface that is required for the implementation of a VXI-11 Device
-/// on a <see cref="Vxi11SingleClientServer"/>. </summary>
-public interface IVxi11Device
+/// <summary>
+/// An interface that is required for the implementation of a VXI-11 Device on a <see cref="Vxi11Server"/>.
+/// </summary>
+/// <remarks>
+/// This interface defines the implementation for an interface between a VXI-11 server, such as <see cref="Vxi11Server"/>
+/// and a VXI-11 'physical' instrument, such as <see cref="Vxi11Instrument"/>.
+/// 
+/// Implementations of VXI-11 servers should inherit from the <see cref="Vxi11Instrument"/> and,
+/// perhaps also, from the <see cref="Vxi11Device"/>.
+/// 
+/// Instrument classes inheriting from the <see cref="Vxi11Instrument"/> might override a few
+/// methods as necessary for implementing the designed behavior.
+/// 
+/// The <see cref="Vxi11Server"/> and <see cref="Vxi11Device"/> classes implement the device_xxx
+/// remote procedure calls as specified in the
+/// <see href="https://vxibus.org/specifications.html">VXI-11 TCP/IP Instrument Protocol
+/// Specification</see> VXI-11 Version 1.0 document.
+/// 
+/// The VXI-11 device procedures are from the host perspective, i.e., a device write is writes to
+/// the 'physical' instrument (also called 'Network Instrument') and device read reads from the
+/// instrument.
+/// </remarks>
+public interface IVxi11Device : INotifyPropertyChanged
 {
 
     #region " Abort server "
@@ -33,6 +54,12 @@ public interface IVxi11Device
 
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
     event EventHandler<Vxi11EventArgs> RequestingService;
+
+    /// <summary>   Sets interrupt handle. </summary>
+    /// <param name="interruptHandle">  the Handle of the interrupt as received when getting the 
+    ///                                 <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/>
+    ///                                 RPC. </param>
+    void SetInterruptHandle( byte[] interruptHandle );
 
     #endregion
 

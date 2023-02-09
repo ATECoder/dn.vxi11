@@ -12,3 +12,22 @@ namespace cc.isr.VXI11
 
     }
 }
+
+namespace cc.isr.VXI11.EnumExtensions
+{
+    public static partial class Vxi11EnumExtensions
+    {
+        /// <summary>   An int extension method that converts a value to a <see cref="Vxi11EventType"/>. </summary>
+        /// <exception cref="ArgumentException">    Thrown when one or more arguments have unsupported or
+        ///                                         illegal values. </exception>
+        /// <param name="value">    An enum constant representing the enum value. </param>
+        /// <returns>   Value as the <see cref="Vxi11EventType"/>. </returns>
+        public static Vxi11EventType ToVxi11EventType( this int value )
+        {
+            return Enum.IsDefined( typeof( Vxi11EventType ), value )
+                ? ( Vxi11EventType ) value
+                : throw new ArgumentException(
+                    $"{typeof( int )} value of {value} cannot be cast to {nameof( Vxi11EventType )}" );
+        }
+    }
+}

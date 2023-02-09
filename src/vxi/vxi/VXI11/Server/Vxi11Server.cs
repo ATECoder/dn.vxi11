@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Net;
-using System.Runtime.CompilerServices;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
@@ -42,6 +41,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
         this.DeviceLink = new DeviceLink();
         this._deviceLink = this.DeviceLink;
 
+        this.Device.PropertyChanged += this.OnDevicePropertyChanged;
         this.OnDevicePropertiesChanges( device );
         this.Device.RequestingService += this.OnRequestingService;
     }
@@ -140,7 +140,10 @@ public abstract class Vxi11Server : CoreChannelServerBase
     public int AbortPortNumber
     {
         get => this._abortPortNumber;
-        set => _ = this.SetProperty( ref this._abortPortNumber, value );
+        set
+        { if ( this.SetProperty( ref this._abortPortNumber, value ) && this.Device is not null )
+                this.Device.AbortPortNumber = value;
+        }
     }
 
     /// <summary>   Handles abort request. </summary>
@@ -279,6 +282,8 @@ public abstract class Vxi11Server : CoreChannelServerBase
     private IPAddress InterruptAddress { get; set; }
 
     private bool _interruptEnabled;
+    /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
+    /// <value> True if interrupt enabled, false if not. </value>
     public bool InterruptEnabled
     {
         get => this._interruptEnabled;
@@ -435,6 +440,11 @@ public abstract class Vxi11Server : CoreChannelServerBase
         {
             switch ( propertyName )
             {
+
+                case nameof( IVxi11Device.AbortPortNumber ):
+                    this.AbortPortNumber = sender.AbortPortNumber;
+                    break;
+
                 case nameof( IVxi11Device.CharacterEncoding ):
                     this.CharacterEncoding = sender.CharacterEncoding;
                     break;
@@ -442,6 +452,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
                 case nameof( IVxi11Device.DeviceName ):
                     this.DeviceName = sender.DeviceName;
                     break;
+
+
+                case nameof( IVxi11Device.InterruptEnabled ):
+                    this.InterruptEnabled = sender.InterruptEnabled;
+                    break;
+
 
                 case nameof( IVxi11Device.ReadMessage ):
                     this.ReadMessage = sender.ReadMessage;
@@ -457,8 +473,10 @@ public abstract class Vxi11Server : CoreChannelServerBase
     private void OnDevicePropertiesChanges( IVxi11Device sender )
     {
         if ( sender is not IVxi11Device ) return;
+        this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.AbortPortNumber ) );
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.CharacterEncoding ) );
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.DeviceName ) );
+        this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.InterruptEnabled ) );
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.ReadMessage ) );
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.WriteMessage ) );
     }
@@ -713,6 +731,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     {
         this.InterruptEnabled = request.Enable;
         this._interruptHandle = request.GetHandle();
+        this.Device?.SetInterruptHandle( this._interruptHandle );
         return new DeviceError();
     }
 

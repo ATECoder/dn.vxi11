@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace cc.isr.VXI11.Server;
 
-public partial class Vxi11Instrument : INotifyPropertyChanged
+public partial class Vxi11Instrument
 {
 
     /// <summary>   Occurs when a property value changes. </summary>

@@ -1,10 +1,36 @@
+using System.ComponentModel;
+
 using cc.isr.VXI11;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;
 
-/// <summary>   Interface for a base LXI device, which implements standard IEEE 488.2 commands. </summary>
-public interface IVxi11Instrument
+/// <summary>
+/// Interface for a base LXI device, which implements standard IEEE 488.2 commands.
+/// </summary>
+/// <remarks>
+/// This interface defines the implementation for a 'physical' instrument that is the end point
+/// for the <see cref="Client.Vxi11InstrumentClient"/> Virtual Instrument. The remote procedure
+/// call initiated at the <see cref="Client.Vxi11Client"/> side, passes to the instrument through
+/// a <see cref="Vxi11Device"/>, which links the <see cref="Vxi11Server"/> and the 'physical'
+/// <see cref="Vxi11Instrument"/>.
+/// 
+/// Implementations of VXI-11 servers should inherit from the <see cref="Vxi11Instrument"/> and,
+/// perhaps also, from the <see cref="Vxi11Device"/>.
+/// 
+/// Instrument classes inheriting from the <see cref="Vxi11Instrument"/> might override a few
+/// methods as necessary for implementing the designed behavior.
+/// 
+/// The <see cref="Vxi11Server"/> and <see cref="Vxi11Device"/> classes implement the device_xxx
+/// remote procedure calls as specified in the
+/// <see href="https://vxibus.org/specifications.html">VXI-11 TCP/IP Instrument Protocol
+/// Specification</see> VXI-11 Version 1.0 document.
+/// 
+/// The VXI-11 device procedures are from the host perspective, i.e., a device write is writes to
+/// the 'physical' instrument (also called 'Network Instrument') and device read reads from the
+/// instrument.
+/// </remarks>
+public interface IVxi11Instrument : INotifyPropertyChanged
 {
 
     #region " instrument operations "
@@ -24,8 +50,9 @@ public interface IVxi11Instrument
     /// 7 (value 128), the decimal sum would be 140 (4 + 8 + 128). For example, *ESE 48 enables bit 4
     /// (value 16) and bit 5 (value 32) in the enable register.
     /// </remarks>
+    /// <param name="standardEventStatusMask">  The standard event status mask. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    bool ESE();
+    bool ESE( byte standardEventStatusMask );
 
     /// <summary>   Reads Standard Event Status: *ESE? </summary>
     /// <returns>   A string. </returns>
@@ -98,7 +125,7 @@ public interface IVxi11Instrument
     /// Status Byte enable register is not cleared by *RST.
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    bool SRE();
+    bool SRE( int serviceRequestEventMask );
 
     /// <summary>   Reads the service request enabled status: *SER? </summary>
     /// <returns>   A string. </returns>
@@ -212,6 +239,12 @@ public interface IVxi11Instrument
     /// <summary>   Gets or sets the identifier of the client. </summary>
     /// <value> The identifier of the client. </value>
     public int ClientId { get; set; }
+
+    /// <summary>   Sets interrupt handle. </summary>
+    /// <param name="interruptHandle">  the Handle of the interrupt as received when getting the 
+    ///                                 <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/>
+    ///                                 RPC. </param>
+    void SetInterruptHandle( byte[] interruptHandle );
 
     #endregion
 
@@ -396,13 +429,22 @@ public interface IVxi11Instrument
     /// <value> The character encoding. </value>
     Encoding CharacterEncoding { get; set; }
 
-    /// <summary>   Gets or sets a message that was sent to the device. </summary>
+    /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="String"/> Value)
+    /// of the last messages that were sent to the device. </summary>
     /// <value> The message that was sent to the device. </value>
-    string WriteMessage { get; set; }
+    CircularList<(DateTime Timestamp, String Value)> LastWrites { get; }
 
-    /// <summary>   Gets or sets a message that was received from the device. </summary>
-    /// <value> A message that was received from the device. </value>
-    string ReadMessage { get; set; }
+    /// <summary>   Gets or sets the number of writes. </summary>
+    /// <value> The number of writes. </value>
+    int WriteCount { get; set; }
+
+    /// <summary>   Gets the last data that was received from the device. </summary>
+    /// <value> The last data that was received from the device. </value>
+    CircularList<(DateTime Timestamp, String Value)> LastReads { get; }
+
+    /// <summary>   Gets or sets the number of reads. </summary>
+    /// <value> The number of reads. </value>
+    int ReadCount { get; set; }
 
     /// <summary>   Timeout wait time ms. </summary>
     /// <value> The wait on out time. </value>

@@ -1,13 +1,32 @@
 using System.Reflection;
-using System.Xml.Xsl;
-
-using cc.isr.VXI11;
 using cc.isr.VXI11.Codecs;
+using cc.isr.VXI11.EnumExtensions;
 using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.Server;
 
 /// <summary>   Implementation of the <see cref="IVxi11Instrument"/>. </summary>
+/// <remarks>
+/// This class implements a 'physical' instrument that is the end point for the <see cref="Client.Vxi11InstrumentClient"/>
+/// Virtual Instrument. The remote procedure call initiated at the <see cref="Client.Vxi11Client"/>
+/// side, passes to the instrument through a <see cref="Vxi11Device"/>, which links the <see cref="Vxi11Server"/>
+/// and the 'physical' <see cref="Vxi11Instrument"/>.
+/// 
+/// Implementations of VXI-11 servers should inherit from the <see cref="Vxi11Instrument"/> and,
+/// perhaps also, from the <see cref="Vxi11Device"/>.
+/// 
+/// Instrument classes inheriting from the <see cref="Vxi11Instrument"/> might override a few
+/// methods as necessary for implementing the designed behavior.
+/// 
+/// The <see cref="Vxi11Server"/> and <see cref="Vxi11Device"/> classes implement the device_xxx
+/// remote procedure calls as specified in the
+/// <see href="https://vxibus.org/specifications.html">VXI-11 TCP/IP Instrument Protocol
+/// Specification</see> VXI-11 Version 1.0 document.
+/// 
+/// The VXI-11 device procedures are from the host perspective, i.e., a device write is writes to
+/// the 'physical' instrument (also called 'Network Instrument') and device read reads from the
+/// instrument.
+/// </remarks>
 public partial class Vxi11Instrument : IVxi11Instrument
 {
 
@@ -19,19 +38,48 @@ public partial class Vxi11Instrument : IVxi11Instrument
     {
         this.Identity = identity;
         this._identity = identity;
-        this.WriteMessage = string.Empty;
-        this._writeMessage = string.Empty;
-        this.ReadMessage = string.Empty;
-        this._readMessage = string.Empty;
+        this.LastWriteMessage = string.Empty;
+        this._lastWriteMessage = string.Empty;
+        this.LastReadData = string.Empty;
+        this._lastReadData = string.Empty;
         this._readBuffer = Array.Empty<byte>();
         this.CharacterEncoding = CoreChannelClient.EncodingDefault;
         this._characterEncoding = CoreChannelClient.EncodingDefault;
         this._cancelSource = new();
+
+        this.StandardEventStatusMask = cc.isr.VXI11.EnumExtensions.Vxi11EnumExtensions.StandardEventsAll();
+        this.ServiceRequestEventMask = Vxi11EnumExtensions.ServiceRequestsAll();
     }
 
     #endregion
 
     #region " instrument operations "
+
+    /// <summary>   Gets or sets the service request event mask. </summary>
+    /// <value> The service request event mask. </value>
+    protected int ServiceRequestEventMask { get; set; }
+
+    private ServiceRequests _serviceRequestStatus;
+    public ServiceRequests ServiceRequestStatus
+    {
+        get => this._serviceRequestStatus;
+        set
+        {
+            if ( this.OnPropertyChanged( ref this._serviceRequestStatus, value ) )
+            {
+                if ( ( ( byte ) this._serviceRequestStatus & this.ServiceRequestEventMask ) != 0 )
+                    this.OnRequestingService( new Vxi11EventArgs( this._interruptHandle ) );
+            }
+        } 
+    }
+
+    /// <summary>   Gets or sets the standard event status mask. </summary>
+    /// <value> The standard event status mask. </value>
+    protected byte StandardEventStatusMask { get; set; }
+
+    /// <summary>   Gets or sets the standard event status. </summary>
+    /// <value> The standard event status. </value>
+    protected StandardEvents StandardEventStatus { get; set; }
 
     /// <summary>   Clears status: <see cref="Vxi11InstrumentCommands.CLS"/>. </summary>
     /// <remarks>
@@ -42,6 +90,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.CLS, Vxi11InstrumentOperationType.Write )]
     public bool CLS()
     {
+        this.ServiceRequestStatus = ServiceRequests.None;
+        this.StandardEventStatus = StandardEvents.None;
         return true;
     }
 
@@ -53,11 +103,14 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// 7 (value 128), the decimal sum would be 140 (4 + 8 + 128). For example, *ESE 48 enables bit 4
     /// (value 16) and bit 5 (value 32) in the enable register.
     /// </remarks>
+    /// <param name="standardEventStatusMask">  The standard event status mask. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESE, Vxi11InstrumentOperationType.Write )]
-    public bool ESE()
+    public bool ESE( byte standardEventStatusMask )
     {
-        throw new NotImplementedException();
+        this.StandardEventStatus &= ~StandardEvents.OperationComplete;
+        this.StandardEventStatusMask = standardEventStatusMask;
+        return true;
     }
 
     /// <summary>
@@ -66,7 +119,9 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESERead, Vxi11InstrumentOperationType.Read )]
     public string ESERead()
     {
-        throw new NotImplementedException();
+        this.StandardEventStatus &= ~StandardEvents.OperationComplete;
+        this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
+        return (( byte) this.StandardEventStatus).ToString();
     }
 
     /// <summary>   Standard Event Status Register Query: <see cref="Vxi11InstrumentCommands.ESRRead"/>. </summary>
@@ -80,7 +135,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESRRead, Vxi11InstrumentOperationType.Read )]
     public string ESRRead()
     {
-        throw new NotImplementedException();
+        this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
+        return (( byte ) this.StandardEventStatus).ToString();
     }
 
     /// <summary>   Reads the device identity string: <see cref="Vxi11InstrumentCommands.IDNRead"/></summary>
@@ -88,6 +144,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.IDNRead, Vxi11InstrumentOperationType.Read )]
     public string IDNRead()
     {
+        this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
         return this.Identity;
     }
 
@@ -106,7 +163,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.OPC, Vxi11InstrumentOperationType.Write )]
     public bool OPC()
     {
-        throw new NotImplementedException();
+        this.StandardEventStatus |= StandardEvents.OperationComplete;
+        return true;
     }
 
     /// <summary>   Reads the operation completion status: <see cref="Vxi11InstrumentCommands.OPCRead"/> </summary>
@@ -123,6 +181,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.OPCRead, Vxi11InstrumentOperationType.Read )]
     public string OPCRead()
     {
+        this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
         return "1";
     }
 
@@ -136,10 +195,14 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.RST, Vxi11InstrumentOperationType.Write )]
     public bool RST()
     {
-        throw new NotImplementedException();
+        this.ServiceRequestStatus = ServiceRequests.None;
+        this.StandardEventStatus = StandardEvents.None;
+        return true;
     }
 
-    /// <summary>   Enables the service request events: <see cref="Vxi11InstrumentCommands.SRE"/>. </summary>
+    /// <summary>
+    /// Enables the service request events: <see cref="Vxi11InstrumentCommands.SRE"/>.
+    /// </summary>
     /// <remarks>
     /// This command enables bits in the enable register for the Status Byte Register group.
     /// Parameters consists of the decimal sum of the bits in the register; default 0. For example,
@@ -154,11 +217,13 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// power on.For example, *PSC 0 preserves the contents of the enable register through power
     /// cycles. Status Byte enable register is not cleared by *RST.
     /// </remarks>
+    /// <param name="serviceRequestEventMask">  The service request event mask. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.SRE, Vxi11InstrumentOperationType.Write )]
-    public bool SRE()
+    public bool SRE( int serviceRequestEventMask )
     {
-        throw new NotImplementedException();
+        this.ServiceRequestEventMask = serviceRequestEventMask;
+        return true;
     }
 
     /// <summary>   Reads the service request enabled status: <see cref="Vxi11InstrumentCommands.SRERead"/> </summary>
@@ -166,7 +231,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.SRERead, Vxi11InstrumentOperationType.Read )]
     public string SRERead()
     {
-        throw new NotImplementedException();
+        this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
+        return (( byte) this.ServiceRequestEventMask).ToString();
     }
 
     /// <summary>
@@ -175,7 +241,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.STBRead, Vxi11InstrumentOperationType.Read )]
     public string STBRead()
     {
-        throw new NotImplementedException();
+        this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
+        return (( byte ) this.ServiceRequestStatus).ToString();
     }
 
     /// <summary>   Trigger command: *TRG. </summary>
@@ -188,7 +255,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.TRG, Vxi11InstrumentOperationType.Write )]
     public bool TRG()
     {
-        throw new NotImplementedException();
+        // TODO: Add functionality here
+        return true;
     }
 
     /// <summary>   Runs a self test and reads its status: <see cref="Vxi11InstrumentCommands.TSTRead"/>. </summary>
@@ -200,7 +268,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.TSTRead, Vxi11InstrumentOperationType.Read )]
     public string TSTRead()
     {
-        throw new NotImplementedException();
+        this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
+        return "0";
     }
 
     /// <summary>   Wait until all pending operations complete. <see cref="Vxi11InstrumentCommands.WAI"/>. </summary>
@@ -214,7 +283,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.WAI, Vxi11InstrumentOperationType.Write )]
     public bool WAI()
     {
-        throw new NotImplementedException();
+        // TODO: wait for operations to complete.
+        return true;
     }
 
     #endregion
@@ -394,6 +464,19 @@ public partial class Vxi11Instrument : IVxi11Instrument
         set => _ = this.OnPropertyChanged( ref this._clientId, value );
     }
 
+    /// <summary>   the Handle of the interrupt as received when getting 
+    ///             the <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/> RPC. </summary>
+    private byte[] _interruptHandle = new byte[40];
+
+    /// <summary>   Sets interrupt handle. </summary>
+    /// <param name="interruptHandle">  the Handle of the interrupt as received when getting the 
+    ///                                 <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/>
+    ///                                 RPC. </param>
+    public void SetInterruptHandle( byte[] interruptHandle )
+    {
+        this._interruptHandle = interruptHandle;
+    }
+
     #endregion
 
     #region " Device state "
@@ -535,16 +618,21 @@ public partial class Vxi11Instrument : IVxi11Instrument
             readRes.SetData( this._readBuffer );
             readRes.ErrorCode = DeviceErrorCode.IOTimeout; // timeout
             readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
-            return readRes;
         }
-
-        if ( this.CurrentOperationType == Vxi11InstrumentOperationType.Read )
+        else
         {
-            readRes.SetData( this._readBuffer );
-            readRes.ErrorCode = DeviceErrorCode.NoError;
-            readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
+            if ( this.CurrentOperationType == Vxi11InstrumentOperationType.Read )
+            {
+                readRes.SetData( this._readBuffer );
+                readRes.ErrorCode = DeviceErrorCode.NoError;
+                readRes.Reason = DeviceReadReasons.RequestCountIndicator | DeviceReadReasons.TermCharIndicator;
+            }
         }
         this.CurrentOperationType = Vxi11InstrumentOperationType.None; //Reset the action type
+        this.ServiceRequestStatus |= readRes.ErrorCode == DeviceErrorCode.NoError
+            ? ServiceRequests.MessageAvailable
+            : ServiceRequests.ErrorAvailable;
+        this.LastDeviceError = readRes.ErrorCode;
         return readRes;
     }
 
@@ -646,6 +734,9 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
             if ( result != DeviceErrorCode.NoError ) { break; }
         }
+        if ( result != DeviceErrorCode.NoError )
+            this.ServiceRequestStatus |= ServiceRequests.ErrorAvailable;
+        this.LastDeviceError = result;
         return result;
     }
 
@@ -720,23 +811,23 @@ public partial class Vxi11Instrument : IVxi11Instrument
                         Logger.Writer.LogMemberWarning( $"The attribute of method {method} is marked incorrectly as {scpiAtt.OperationType}。" );
                         break;
                     case Vxi11InstrumentOperationType.Write:
-                        this.WriteMessage = fullScpiCommand;
+                        this.LastWriteMessage = fullScpiCommand;
                         // invoke the corresponding method
                         res = method.Invoke( this, scpiArgs );
                         result = DeviceErrorCode.NoError;
                         break;
                     case Vxi11InstrumentOperationType.Read://Query instructions
-                        this.WriteMessage = fullScpiCommand;
+                        this.LastWriteMessage = fullScpiCommand;
                         res = method.Invoke( this, scpiArgs );
                         if ( res is not null )
                         {
-                            this.ReadMessage = res.ToString();
+                            this.LastReadData = res.ToString();
                             this._readBuffer = this.CharacterEncoding.GetBytes( res.ToString()! );
                             Logger.Writer.LogVerbose( $"Query results： {res}。" );
                         }
                         else
                         {
-                            this.ReadMessage = "null";
+                            this.LastReadData = "null";
                             Logger.Writer.LogVerbose( "Query results：NULL。" );
                             result = DeviceErrorCode.NoError;
                         }
@@ -763,22 +854,22 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     #region " RPC operation members "
 
-    private string _writeMessage;
+    private string _lastWriteMessage;
     /// <summary>   Gets or sets a message that was sent to the device. </summary>
     /// <value> The message that was sent to the device. </value>
-    public string WriteMessage
+    public string LastWriteMessage
     {
-        get => this._writeMessage;
-        set => _ = this.SetProperty( ref this._writeMessage, value );
+        get => this._lastWriteMessage;
+        set => _ = this.SetProperty( ref this._lastWriteMessage, value );
     }
 
-    private string _readMessage;
-    /// <summary>   Gets or sets a message that was received from the device. </summary>
-    /// <value> A message that was received from the device. </value>
-    public string ReadMessage
+    private string _lastReadData;
+    /// <summary>   Gets or sets the last data that was received from the device. </summary>
+    /// <value> The last data that was received from the device. </value>
+    public string LastReadData
     {
-        get => this._readMessage;
-        set => _ = this.SetProperty( ref this._readMessage, value );
+        get => this._lastReadData;
+        set => _ = this.SetProperty( ref this._lastReadData, value );
     }
 
     private Encoding _characterEncoding;

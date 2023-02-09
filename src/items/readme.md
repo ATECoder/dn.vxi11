@@ -26,6 +26,12 @@
 
 For information on using [ISR's VXI-11] see the repository [ISR's VXI-11 IEEE488] projects.
 
+The [ISR's VXI-11] VXI11 package consists of a set of fully functional low level classes implementing VXI-11 clients, servers, devices and instruments. 
+
+Typically, the VXI-11 Instrument Client and Interface Client classed would be inherited for creating classes such as the Visa message-based session. 
+
+On the server side the VXI-11 Instrument and, possibly, the VXI-11 Device classes would be inherited for creating the specific behavior desired from an instrument.
+
 ## Departures from [VXI11.CSharp]
 
 * The XDR and ONC/RPC classes were removed in favor of using [ISR's XDR] and [ISR's ONC RPC] packages;
@@ -67,4 +73,3 @@ Bug reports and contributions are welcome at the [ISR's VXI-11] repository.
 [Java ONC RPC]: https://github.com/remotetea/remotetea/tree/master/src/tests/org/acplt/oncrpc
 [VXI11.CSharp]: https://github.com/Xanliang/VXI11.CSharp 
 [VXI Bus Specification]: https://vxibus.org/specifications.html
-
