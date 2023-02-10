@@ -86,10 +86,6 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <value> The host. </value>
     public string Host { get; set; }
 
-    /// <summary>   Gets the IP address. </summary>
-    /// <value> The IP address. </value>
-    public IPAddress IPAddress { get; }
-
     /// <summary>
     /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
     /// </summary>
@@ -104,21 +100,6 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <remarks> This is required for validating the device name when creating the link. </remarks>
     /// <returns>   True if valid device name, false if not. </returns>
     public bool IsValidDeviceName();
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the end-or-identify (EOI) terminator is enabled.
-    /// </summary>
-    /// <remarks>
-    /// The driver must be configured so that when talking on the bus it sends a write termination
-    /// string (e.g., a line-feed or line-feed followed by a carriage return) with EOI as the
-    /// terminator, and when listening on the bus it expects a read termination (e.g., a line-feed)
-    /// with EOI as the terminator. The IEEE-488.2 EOI (end-or-identify) message is interpreted as a 
-    /// <c>new line</c> character and can be used to terminate a message in place of a <c>new line</c>
-    /// character. A <c>carriage return</c> followed by a <c>new line</c> is also accepted. Message
-    /// termination will always reset the current SCPI message path to the root level.
-    /// </remarks>
-    /// <value> True if EOI is enabled, false if not. </value>
-    public bool Eoi { get; set; }
 
     /// <summary>   Gets or sets the read termination. </summary>
     /// <value> The read termination. </value>

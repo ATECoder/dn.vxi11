@@ -91,6 +91,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.CLS, Vxi11InstrumentOperationType.Write )]
     public bool CLS()
     {
+        // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared on device clear.
+
         this.ServiceRequestStatus = ServiceRequests.None;
         this.StandardEventStatus = StandardEvents.None;
         return true;
@@ -120,6 +122,9 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESERead, Vxi11InstrumentOperationType.Read )]
     public string ESERead()
     {
+
+        // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared reading ESE.
+
         this.StandardEventStatus &= ~StandardEvents.OperationComplete;
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
         return (( byte) this.StandardEventStatus).ToString();
@@ -136,6 +141,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESRRead, Vxi11InstrumentOperationType.Read )]
     public string ESRRead()
     {
+        // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared reading ESR.
+
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
         return (( byte ) this.StandardEventStatus).ToString();
     }
@@ -196,6 +203,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.RST, Vxi11InstrumentOperationType.Write )]
     public bool RST()
     {
+        // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared on reset.
+
         this.ServiceRequestStatus = ServiceRequests.None;
         this.StandardEventStatus = StandardEvents.None;
         return true;
@@ -232,6 +241,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.SRERead, Vxi11InstrumentOperationType.Read )]
     public string SRERead()
     {
+        // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared reading SRE.
+
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
         return (( byte) this.ServiceRequestEventMask).ToString();
     }
@@ -242,6 +253,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.STBRead, Vxi11InstrumentOperationType.Read )]
     public string STBRead()
     {
+        // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared reading STB.
+
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
         return (( byte ) this.ServiceRequestStatus).ToString();
     }
@@ -256,7 +269,6 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.TRG, Vxi11InstrumentOperationType.Write )]
     public bool TRG()
     {
-        // TODO: Add functionality here
         return true;
     }
 
@@ -284,7 +296,6 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.WAI, Vxi11InstrumentOperationType.Write )]
     public bool WAI()
     {
-        // TODO: wait for operations to complete.
         return true;
     }
 

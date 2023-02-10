@@ -111,6 +111,12 @@ public interface IVxi11Interface : INotifyPropertyChanged
 
     #region " RPC operation members "
 
+    /// <summary>   Query if 'command' is supported command. </summary>
+    /// <remarks>   2023-02-10. </remarks>
+    /// <param name="command">  The command. </param>
+    /// <returns>   True if supported command, false if not. </returns>
+    bool IsSupportedCommand( int command );
+
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-01-26. </remarks>
     /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to

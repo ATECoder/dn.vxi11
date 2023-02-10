@@ -1,3 +1,4 @@
+using System.ComponentModel.Design;
 using System.Reflection;
 using System.Security.Principal;
 
@@ -233,6 +234,18 @@ public partial class Vxi11Interface : IVxi11Interface
 
     #region " RPC operation members "
 
+    /// <summary>   Query if 'command' is supported command. </summary>
+    /// <remarks>   2023-02-10. </remarks>
+    /// <param name="command">  The command. </param>
+    /// <returns>   True if supported command, false if not. </returns>
+    public bool IsSupportedCommand( int command )
+    {
+        return ( command >= ( int )  InterfaceCommandOption.ListenerStatus
+                && command <= ( int ) InterfaceCommandOption.BusAddressStatus )
+            || ( command >= ( int ) InterfaceCommand.SendCommand
+                && command <= ( int ) InterfaceCommand.InterfaceClearControl );
+    }
+
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-01-26. </remarks>
     /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to
@@ -244,7 +257,109 @@ public partial class Vxi11Interface : IVxi11Interface
     {
         // TODO: Implement interface operations here based on the parsing of the request.
 
+        if ( !this.IsSupportedCommand(  request.Cmd ) )
+        {
+            Logger.Writer.LogVerbose( $"{request.Cmd} is not a supported interface command." );
+            return new DeviceDoCmdResp();
+        }
+        else if ( request.Cmd < ( int ) InterfaceCommand.SendCommand )
+        {
+            InterfaceCommandOption cmd = ( ( int ) request.Cmd).ToInterfaceCommandOption();
+            Logger.Writer.LogVerbose( $"Implementing： {cmd}({request.Cmd})" );
+            return this.DeviceDoCmd( request, cmd );
+        }
+        else if ( request.Cmd <= ( int ) InterfaceCommand.InterfaceClearControl )
+        {
+            InterfaceCommand cmd = (( int ) request.Cmd).ToInterfaceCommand();
+            Logger.Writer.LogVerbose( $"Implementing： {cmd}({request.Cmd})" );
+            return this.DeviceDoCmd( request, cmd );
+        }
+        else
+        {
+            Logger.Writer.LogVerbose( $"{request.Cmd} is unexpected yet unsupported interface command." );
+        }
+
         return new DeviceDoCmdResp();
+    }
+
+    /// <summary>   The device executes a command. </summary>
+    /// <remarks>   2023-02-10. </remarks>
+    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to use
+    ///                         with the remote procedure call. </param>
+    /// <param name="command">  The <see cref="InterfaceCommand"/> command. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>. </returns>
+    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request, InterfaceCommand command )
+    {
+        // TODO: Finish implementing the commands.
+
+        XdrBufferEncodingStream encoder = new( 128 );
+        XdrBufferDecodingStream decoder = new( request.GetDataIn() );
+
+        DeviceDoCmdResp reply = new();
+        switch ( command )
+        {
+            case InterfaceCommand.SendCommand:
+                reply.SetDataOut( this.SendCommand( request.GetDataIn() ) );
+                break;
+            case InterfaceCommand.BusStatus:
+                break;
+            case InterfaceCommand.AttentionControl:
+                break;
+            case InterfaceCommand.RemoteEnableControl:
+                break;
+            case InterfaceCommand.PassControl:
+                encoder.EncodeBoolean( this.PassControl( decoder.DecodeInt() ) );
+                break;
+            case InterfaceCommand.BusAddress:
+                break;
+            case InterfaceCommand.InterfaceClearControl:
+                reply.SetDataOut( this.SendInterfaceClear() );
+                break;
+            default:
+                break;
+        }
+
+        return reply;
+    }
+
+    /// <summary>   The device executes a command. </summary>
+    /// <remarks>   2023-02-10. </remarks>
+    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to use
+    ///                         with the remote procedure call. </param>
+    /// <param name="command">  The <see cref="InterfaceCommand"/> command. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>. </returns>
+    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request, InterfaceCommandOption command )
+    {
+        // TODO: Finish implementing the commands.
+
+        XdrBufferEncodingStream encoder = new( 128 );
+        DeviceDoCmdResp reply = new();
+        switch ( command )
+        {
+            case InterfaceCommandOption.RemoteStatus:
+                encoder.EncodeInt( this.ReadRenLine() );
+                reply.SetDataOut( encoder.GetEncodedData() );
+                break;
+            case InterfaceCommandOption.ServiceRequestStatus:
+                break;
+            case InterfaceCommandOption.NotDataAcceptedLineStatus:
+                break;
+            case InterfaceCommandOption.SystemControllerStatus:
+                break;
+            case InterfaceCommandOption.ControllerInChargeStatus:
+                break;
+            case InterfaceCommandOption.TalkerStatus:
+                break;
+            case InterfaceCommandOption.ListenerStatus:
+                break;
+            case InterfaceCommandOption.BusAddressStatus:
+                encoder.EncodeInt( this.ReadBusStatus( command ) );
+                reply.SetDataOut( encoder.GetEncodedData() );
+                break;
+            default:
+                break;
+        }
+        return reply;
     }
 
     private int _activeClientId;

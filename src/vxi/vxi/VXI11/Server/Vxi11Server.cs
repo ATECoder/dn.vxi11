@@ -21,7 +21,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
     {
     }
 
-
     /// <summary>   Constructor. </summary>
     /// <param name="device">   current device. </param>
     /// <param name="bindAddr"> The local Internet Address the server will bind to. </param>
@@ -29,14 +28,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     public Vxi11Server( IVxi11Device device, IPAddress bindAddr, int port = 0 ) : base( bindAddr ?? IPAddress.Any, port )
     {
         this.Device = device;
-        this.DeviceName = string.Empty;
-        this._deviceName = string.Empty;
-        this.ReadMessage = string.Empty;
-        this._readMessage = string.Empty;
-        this.WriteMessage = string.Empty;
-        this._writeMessage = string.Empty;
         this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
-        this.MaxReceiveLength = Client.Vxi11Client.MaxReceiveLengthDefault;
         this.InterruptAddress = IPAddress.Any;
 
         this.Device.PropertyChanged += this.OnDevicePropertyChanged;
@@ -347,28 +339,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
 
     #endregion
 
-    #region " i/o messages "
-
-    private string _writeMessage;
-    /// <summary>   Gets or sets a message that was sent to the device. </summary>
-    /// <value> The message that was sent to the device. </value>
-    public string WriteMessage
-    {
-        get => this._writeMessage;
-        set => _ = this.SetProperty( ref this._writeMessage, value );
-    }
-
-    private string _readMessage;
-    /// <summary>   Gets or sets a message that was received from the device. </summary>
-    /// <value> A message that was received from the device. </value>
-    public string ReadMessage
-    {
-        get => this._readMessage;
-        set => _ = this.SetProperty( ref this._readMessage, value );
-    }
-
-    #endregion
-
     #region " members "
 
     /// <summary>
@@ -379,38 +349,11 @@ public abstract class Vxi11Server : CoreChannelServerBase
     public override Encoding CharacterEncoding
     {
         get => base.CharacterEncoding;
-        set => _ = this.SetProperty( base.CharacterEncoding!, value, () => base.CharacterEncoding = value );
-    }
-
-    private int _waitOnOutTime = 1000;
-    /// <summary>   Timeout wait time ms. </summary>
-    /// <value> The wait on out time. </value>
-    public int WaitOnOutTime
-    {
-        get => this._waitOnOutTime;
-        set => _ = this.SetProperty( ref this._waitOnOutTime, value );
-    }
-
-    private string _deviceName;
-    /// <summary>   Gets or sets the device name. </summary>
-    /// <value> The device name. </value>
-    public string DeviceName
-    {
-        get => this._deviceName;
-        private set
+        set
         {
-            if ( this.SetProperty( ref this._deviceName, value ) && this.Device is not null )
-                this.Device.DeviceName = value;
-        }
-    }
-
-    private int _maxReceiveLength;
-    /// <summary>   Gets or sets the maximum length of the receive. </summary>
-    /// <value> The maximum length of the receive. </value>
-    public int MaxReceiveLength
-    {
-        get => this._maxReceiveLength;
-        set => _ = this.SetProperty( ref this._maxReceiveLength, value );
+            if ( this.SetProperty( base.CharacterEncoding!, value, () => base.CharacterEncoding = value ) )
+                if ( this.Device is not null ) { this.Device.CharacterEncoding = value; }
+        } 
     }
 
     #endregion
@@ -445,9 +388,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
                     this.CharacterEncoding = sender.CharacterEncoding;
                     break;
 
-                case nameof( IVxi11Device.DeviceName ):
-                    this.DeviceName = sender.DeviceName;
-                    break;
             }
         }
     }
@@ -564,7 +504,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
                 InterruptChannelClient? interruptClient = this.InterruptClient;
                 interruptClient?.Close();
                 this.InterruptClient = null;
-                this.DisableAbortServerSync();
             }
         }
         catch ( Exception )
@@ -676,7 +615,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceClear( DeviceGenericParms request )
     {
-        throw new NotImplementedException();
+        return this.Device is null
+            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.DeviceClear( request );
     }
 
     /// <summary>   The device executes a command. </summary>
@@ -688,7 +629,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
     {
-        throw new NotImplementedException();
+        return this.Device is null
+            ? new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.DeviceDoCmd( request );
     }
 
     /// <summary>   The device enables or does not enable the Send Request service. </summary>
@@ -707,7 +650,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
     {
-        return this.Device!.DeviceEnableSrq( request );
+        return this.Device is null
+            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.DeviceEnableSrq( request );
     }
 
     /// <summary>   Enables device local control. </summary>
@@ -748,7 +693,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceLocal( DeviceGenericParms request )
     {
-        throw new NotImplementedException();
+        return this.Device is null
+            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.DeviceLocal( request );
     }
 
     /// <summary>   Enables device remote control. </summary>
@@ -787,7 +734,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceRemote( DeviceGenericParms request )
     {
-        throw new NotImplementedException();
+        return this.Device is null
+            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.DeviceRemote( request );
     }
 
     /// <summary>   Returns the device status byte. </summary>
@@ -830,7 +779,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
     {
-        throw new NotImplementedException();
+        return this.Device is null
+            ? new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.DeviceReadStb( request );
     }
 
     /// <summary>   Performs a trigger. </summary>
@@ -867,7 +818,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceTrigger( DeviceGenericParms request )
     {
-        throw new NotImplementedException();
+        return this.Device is null
+            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.DeviceTrigger( request );
     }
 
     /// <summary>   Lock the device. </summary>
@@ -909,7 +862,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceLock( DeviceLockParms request )
     {
-        throw new NotImplementedException();
+        return this.Device is null
+            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.DeviceLock( request );
     }
 
     /// <summary>   Unlock the device. </summary>
@@ -932,7 +887,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceUnlock( DeviceLink deviceLink )
     {
-        throw new NotImplementedException();
+        return this.Device is null
+            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.DeviceUnlock( deviceLink );
     }
 
     /// <summary>   Read a message. </summary>

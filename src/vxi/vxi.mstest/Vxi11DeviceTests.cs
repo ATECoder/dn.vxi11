@@ -134,11 +134,12 @@ public class Vxi11DeviceTests
         if ( data.Length > vxi11Device.MaxReceiveLength )
             throw new DeviceException( $"Data size {data.Length} exceed {nameof( Vxi11Device.MaxReceiveLength )}({vxi11Device.MaxReceiveLength})", DeviceErrorCode.IOError );
 
+        bool eoi = data.Length < vxi11Device.MaxReceiveLength;
         DeviceWriteParms writeParam = new() {
             Link = new DeviceLink( vxi11Device.ActiveServerClient!.LinkId ),
             IOTimeout = vxi11Device.IOTimeout, // in ms
             LockTimeout = vxi11Device.LockTimeout, // in ms
-            Flags = vxi11Device.Eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None,
+            Flags = eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None,
         };
         writeParam.SetData( data );
         return vxi11Device.DeviceWrite( writeParam );

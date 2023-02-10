@@ -145,7 +145,7 @@ public partial class Vxi11Device : IVxi11Device
 
     #endregion
 
-    #region " i/o messages "
+    #region " members "
 
     private DeviceErrorCode _lastDeviceError;
     /// <summary>   Gets or sets the last device error. </summary>
@@ -153,15 +153,8 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceErrorCode LastDeviceError
     {
         get => this._lastDeviceError;
-        set {
-            if ( this.SetProperty( ref this._lastDeviceError, value ) )
-                if ( this.Instrument is not null ) this.Instrument.LastDeviceError = value;
-        }
+        set => _ = this.SetProperty( ref this._lastDeviceError, value );
     }
-
-    #endregion
-
-    #region " members "
 
     private string _host;
     /// <summary>   Gets or sets the host IPv4 Address. </summary>
@@ -171,10 +164,6 @@ public partial class Vxi11Device : IVxi11Device
         get => this._host;
         set => _ = this.SetProperty( ref this._host, value );
     }
-
-    /// <summary>   Gets the IP address. </summary>
-    /// <value> The IP address. </value>
-    public IPAddress IPAddress => IPAddress.Parse( this.Host );
 
     private string _deviceName;
     /// <summary>
@@ -202,26 +191,6 @@ public partial class Vxi11Device : IVxi11Device
     {
         DeviceNameParser parser = new( this.DeviceName );
         return parser.IsValid();
-    }
-
-    private bool _eoi;
-    /// <summary>
-    /// Gets or sets a value indicating whether the end-or-identify (EOI) terminator is enabled.
-    /// </summary>
-    /// <remarks>
-    /// The driver must be configured so that when talking on the bus it sends a write termination
-    /// string (e.g., a line-feed or line-feed followed by a carriage return) with EOI as the
-    /// terminator, and when listening on the bus it expects a read termination (e.g., a line-feed)
-    /// with EOI as the terminator. The IEEE-488.2 EOI (end-or-identify) message is interpreted as a 
-    /// <c>new line</c> character and can be used to terminate a message in place of a <c>new line</c>
-    /// character. A <c>carriage return</c> followed by a <c>new line</c> is also accepted. Message
-    /// termination will always reset the current SCPI message path to the root level.
-    /// </remarks>
-    /// <value> True if EOI is enabled, false if not. </value>
-    public bool Eoi
-    {
-        get => this._eoi;
-        set => _ = this.SetProperty( ref this._eoi, value );
     }
 
     private byte _readTermination;
@@ -744,6 +713,7 @@ public partial class Vxi11Device : IVxi11Device
 
                 // TODO: Implement the specifications as defined above.
 
+                // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared on device clear.
            }
 
         }
@@ -778,9 +748,9 @@ public partial class Vxi11Device : IVxi11Device
             {
                 // now this is the active client.
 
-                // TODO: Add interface to this device in addition to the instrument.
+                // run the commands on the interface
 
-                // TODO: implement the interface commands
+                reply = this.Vxi11Interface?.DeviceDoCmd( request ) ?? reply; 
             }
         }
         this.LastDeviceError = reply.ErrorCode;
@@ -1020,6 +990,9 @@ public partial class Vxi11Device : IVxi11Device
 
                 // TODO: Add device code
                 reply.Stb = ( int ) this.Instrument!.ServiceRequestStatus;
+
+                // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared on reading the status byte.
+
             }
         }
 

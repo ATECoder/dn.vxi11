@@ -111,12 +111,6 @@ public class Vxi11SingleClientServerTests
         if ( sender is not Vxi11SingleClientServer ) { return; }
         switch ( e.PropertyName )
         {
-            case nameof( Vxi11SingleClientServer.ReadMessage ):
-                Logger.Writer.LogInformation( ( ( Vxi11SingleClientServer ) sender).ReadMessage );
-                break;
-            case nameof( Vxi11SingleClientServer.WriteMessage ):
-                Logger.Writer.LogInformation( (( Vxi11SingleClientServer ) sender).WriteMessage );
-                break;
             case nameof( Vxi11SingleClientServer.PortNumber ):
                 Logger.Writer.LogInformation( $"{e.PropertyName} set to {(( Vxi11SingleClientServer ) sender).PortNumber}" );
                 break;
