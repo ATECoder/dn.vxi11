@@ -986,13 +986,7 @@ public partial class Vxi11Device : IVxi11Device
             {
                 // now this is the active client.
 
-                // TODO: Implement the specifications as defined above.
-
-                // TODO: Add device code
-                reply.Stb = ( int ) this.Instrument!.ServiceRequestStatus;
-
-                // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared on reading the status byte.
-
+                reply.Stb = this.Instrument!.ReadStatusByte();
             }
         }
 

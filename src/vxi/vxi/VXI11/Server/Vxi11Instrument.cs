@@ -247,16 +247,39 @@ public partial class Vxi11Instrument : IVxi11Instrument
         return (( byte) this.ServiceRequestEventMask).ToString();
     }
 
+    /// <summary>   Gets or sets a value indicating whether the status byte active. </summary>
+    /// <value> True if status byte active, false if not. </value>
+    public bool StatusByteActive { get; set; }
+
+    /// <summary>   Reads status byte. </summary>
+    /// <remarks>   2023-02-10. </remarks>
+    /// <returns>   The status byte. </returns>
+    public byte ReadStatusByte()
+    {
+        if ( this.StatusByteActive )
+        {
+            // set bit 6 (of 0..7) if SRQ is activated
+
+            this.ServiceRequestStatus |= ServiceRequests.RequestingService;
+            this.StatusByteActive = false;
+        }
+
+        byte value = ( byte ) ( int )this.ServiceRequestStatus;
+
+        // per the specs, the status byte is cleared after reading.
+        this.ServiceRequestStatus = ServiceRequests.None;
+
+        return value;
+    }
+
     /// <summary>
     /// Read the status byte: *STB?
     /// </summary>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.STBRead, Vxi11InstrumentOperationType.Read )]
     public string STBRead()
     {
-        // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared reading STB.
-
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
-        return (( byte ) this.ServiceRequestStatus).ToString();
+        return this.ReadStatusByte().ToString();
     }
 
     /// <summary>   Trigger command: *TRG. </summary>

@@ -337,9 +337,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
         this.OnRequestingService ( e );
     }
 
-    #endregion
+#endregion
 
-    #region " members "
+#region " members "
 
     /// <summary>
     /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
@@ -356,9 +356,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
         } 
     }
 
-    #endregion
+#endregion
 
-    #region " device "
+#region " device "
 
     /// <summary>
     /// Gets a reference to the implementation of the <see cref="IVxi11Device"/> interface.
@@ -400,9 +400,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.DeviceName ) );
     }
 
-    #endregion
+#endregion
 
-    #region " remote procedure call handlers "
+#region " remote procedure call handlers "
 
     /// <summary>   Gets the active device link between the <see cref="Client.Vxi11Client"/>
     /// and this <see cref="Vxi11Server"/>. </summary>
@@ -531,6 +531,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
 
         if ( this.InterruptClient is not null )
             return new DeviceError( DeviceErrorCode.ChannelAlreadyEstablished );
+
+        if ( request.ProgNum != Vxi11ProgramConstants.InterruptProgram
+            || request.ProgVers != Vxi11ProgramConstants.InterruptVersion
+            || request.TransportProtocol != TransportProtocol.Tcp )
+            return new DeviceError( DeviceErrorCode.OperationNotSupported );
+
         this.InterruptAddress = request.HostAddr;
         this.InterruptPort = request.HostPort;
         this.InterruptProtocol = request.TransportProtocol;
@@ -551,7 +557,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
             catch ( Exception ex )
             {
                 Logger.Writer.LogError( "Failed creating interrupt channel", ex );
-                result = new DeviceError( DeviceErrorCode.IOError );
+                result = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
             }
         }
         return result;
@@ -1036,6 +1042,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
         return writeRes;
     }
 
-    #endregion
+#endregion
 
 }

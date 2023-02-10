@@ -136,6 +136,15 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <returns>   A string. </returns>
     string SRERead();
 
+    /// <summary>   Gets or sets a value indicating whether the status byte active. </summary>
+    /// <value> True if status byte active, false if not. </value>
+    bool StatusByteActive { get; set; }
+
+    /// <summary>   Reads status byte. </summary>
+    /// <remarks>   2023-02-10. </remarks>
+    /// <returns>   The status byte. </returns>
+    byte ReadStatusByte();
+
     /// <summary>   Reads the status byte: *STB? </summary>
     /// <remarks>
     /// This command queries the condition register for the Status Byte Register group. For example
