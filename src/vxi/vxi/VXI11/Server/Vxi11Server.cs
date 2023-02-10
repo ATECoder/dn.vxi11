@@ -17,7 +17,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     #region " construction and cleanup "
 
     /// <summary>   Default constructor. </summary>
-    public Vxi11Server() : this( new Vxi11Device ( new Vxi11Instrument() ), IPAddress.Any, 0 )
+    public Vxi11Server() : this( new Vxi11Device ( new Vxi11Instrument(), new Vxi11Interface() ), IPAddress.Any, 0 )
     {
     }
 
@@ -38,8 +38,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
         this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
         this.MaxReceiveLength = Client.Vxi11Client.MaxReceiveLengthDefault;
         this.InterruptAddress = IPAddress.Any;
-        this.DeviceLink = new DeviceLink();
-        this._deviceLink = this.DeviceLink;
 
         this.Device.PropertyChanged += this.OnDevicePropertyChanged;
         this.OnDevicePropertiesChanges( device );
@@ -70,7 +68,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
                 this.Device.Instrument = null;
                 this.Device = null;
             }
-            this.DeviceLink = new DeviceLink();
 
             AbortChannelServer? abortServer = this.AbortServer;
             try
@@ -277,22 +274,17 @@ public abstract class Vxi11Server : CoreChannelServerBase
 
     #region " interrupt port and client "
 
-    /// <summary>   The interrupt address as set when getting the <see cref="CreateIntrChan(DeviceRemoteFunc)"/> RPC. </summary>
-    private IPAddress InterruptAddress { get; set; }
-
-    /// <summary>   Enables or disables the interrupt. </summary>
-    /// <param name="enable">   True to enable, false to disable. </param>
-    /// <param name="handle">   The handle. </param>
-    public void EnableInterrupt( bool enable, byte[] handle )
+    /// <summary>   Query if an interrupt channel was created. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <returns>   True if interrupt created, false if not. </returns>
+    private bool IsInterruptChannelRequested()
     {
-        _ = this.OnPropertyChanged( ref this._interruptEnabled, enable, nameof( this.InterruptEnabled ) );
-        this.Device?.EnableInterrupt( enable, handle );
+        return !( ( this.InterruptAddress.Equals( IPAddress.Any ) || this.InterruptAddress.Equals( IPAddress.None ) )
+                 && this.InterruptPort > 0 );
     }
 
-    private bool _interruptEnabled;
-    /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
-    /// <value> True if interrupt enabled, false if not. </value>
-    public bool InterruptEnabled => this._interruptEnabled;
+    /// <summary>   The interrupt address as set when getting the <see cref="CreateIntrChan(DeviceRemoteFunc)"/> RPC. </summary>
+    private IPAddress InterruptAddress { get; set; }
 
     private int InterruptTransmitTimeout { get; set; }
 
@@ -316,11 +308,11 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <value> The Interrupt client. </value>
     protected InterruptChannelClient? InterruptClient { get; set; }
 
-    /// <summary>   Asynchronous Interrupt an in-progress call. </summary>
-    /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
-    protected virtual void OnRequestingService( Vxi11EventArgs e )
+    /// <summary>   Creates interrupt channel. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    protected virtual void CreateInterruptChannel()
     {
-        if ( this.InterruptClient is null && this.InterruptEnabled && this.InterruptAddress is not null && this.InterruptAddress != IPAddress.Any )
+        if ( this.InterruptClient is null && this.IsInterruptChannelRequested() )
         {
             if ( this.InterruptConnectTimeout == 0 ) this.InterruptConnectTimeout = OncRpcTcpClient.ConnectTimeoutDefault;
             if ( this.InterruptTransmitTimeout == 0 ) this.InterruptTransmitTimeout = OncRpcTcpClient.TransmitTimeoutDefault;
@@ -334,15 +326,24 @@ public abstract class Vxi11Server : CoreChannelServerBase
             this.InterruptClient.Client!.TransmitTimeout = this.InterruptTransmitTimeout;
             this.InterruptClient.Client!.IOTimeout = this.InterruptIOTimeout;
         }
-        if ( this.InterruptEnabled )
+    }
+
+    /// <summary>   Asynchronous Interrupt an in-progress call. </summary>
+    /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
+    protected virtual void OnRequestingService( Vxi11EventArgs e )
+    {
+        if ( this.InterruptClient is not null &&  this.IsInterruptChannelRequested() )
             this.InterruptClient?.DeviceIntrSrq( e.ServiceRequestCodec.GetHandle() );
     }
 
+    /// <summary>   Asynchronous Interrupt an in-progress call. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="sender">   Source of the event. </param>
+    /// <param name="e">        Event information to send to registered event handlers. </param>
     private void OnRequestingService( object sender, Vxi11EventArgs e )
     {
         this.OnRequestingService ( e );
     }
-
 
     #endregion
 
@@ -463,21 +464,10 @@ public abstract class Vxi11Server : CoreChannelServerBase
 
     #region " remote procedure call handlers "
 
-    private DeviceLink _deviceLink;
-    /// <summary>   Gets or sets the device link between the <see cref="Client.Vxi11Client"/>
+    /// <summary>   Gets the active device link between the <see cref="Client.Vxi11Client"/>
     /// and this <see cref="Vxi11Server"/>. </summary>
     /// <value> The device link. </value>
-    public DeviceLink DeviceLink
-    {
-        get => this._deviceLink;
-        set
-        {  if ( this.OnPropertyChanged( ref this._deviceLink, value ) && this.Device is not null )
-            {
-                // this is no longer the way to do this....
-                // this.Device.ActiveLinkId = value.LinkId;
-            }
-        }
-    }
+    public DeviceLink DeviceLink => new ( this.Device?.ActiveServerClient?.LinkId ?? 0 );
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>
@@ -527,35 +517,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override CreateLinkResp CreateLink( CreateLinkParms request )
     {
-        if ( this.Device!.DeviceLinked( request.ClientId) )
-            return new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelAlreadyEstablished };
-        else
-        {
-            this.DeviceLink = new DeviceLink() { LinkId = 1 };
-
-            CreateLinkResp reply = new() {
-                DeviceLink = this.DeviceLink,
-                MaxReceiveSize = this.MaxReceiveLength,
-                AbortPort = this.AbortPortNumber
-            };
-
-            Logger.Writer.LogVerbose( $"creating link to {request.DeviceName}" );
-
-            // note that the 7510 responds to an incorrect interface device name 
-            // with the DeviceErrorCode.DeviceNotAccessible; I believe that the 
-            // Invalid link identifier is more informative as to the cause of this error.
-            if ( this.Device is null )
-                reply.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
-            else
-            {
-                this.Device.DeviceName = request.DeviceName;
-                _ = this.Device.AddClient( request.ClientId, this.DeviceLink.LinkId );
-                reply.ErrorCode = this.Device.IsValidDeviceName()
-                    ? DeviceErrorCode.NoError
-                    : DeviceErrorCode.InvalidLinkIdentifier;
-            }
-            return reply;
-        }
+        return this.Device is null
+            ? new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.CreateLink( request );
     }
 
     /// <summary>   Destroy a connection. </summary>
@@ -583,27 +547,39 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DestroyLink( DeviceLink request )
     {
+        if ( this.Device is null )
+            return new DeviceError( DeviceErrorCode.DeviceNotAccessible );
+
+        DeviceError reply;
         try
         {
-            this.DeviceLink = new DeviceLink();
+            // get the device to destroy the current link
 
-            InterruptChannelClient? interruptClient = this.InterruptClient;
-            interruptClient?.Close();
-            this.InterruptClient = null;
-            this.DisableAbortServerSync();
-            return new DeviceError();
+            reply = this.Device.DestroyLink( request );
+
+            // remove all servers if no more clients.
+
+            if ( this.Device.LinkedClientsCount == 0 )
+            {
+                InterruptChannelClient? interruptClient = this.InterruptClient;
+                interruptClient?.Close();
+                this.InterruptClient = null;
+                this.DisableAbortServerSync();
+            }
         }
         catch ( Exception )
         {
-            return new DeviceError( DeviceErrorCode.IOError );
+            reply = new ( DeviceErrorCode.IOError );
         }
         finally
         {
-            this.DeviceLink = new();
         }
+        return reply;
     }
 
     /// <summary>   Create an interrupt channel. </summary>
+    /// <remarks> notices that the interrupt channel is created only after the first 
+    /// service request is sent to the client. </remarks>
     /// <param name="request">  The request of type of type <see cref="DeviceRemoteFunc"/> to
     ///                         use with the remote procedure call. </param>
     /// <returns>
@@ -614,12 +590,31 @@ public abstract class Vxi11Server : CoreChannelServerBase
         // These constructs only exists in the server class. 
         // no calls are required on the device and instrument classes.
 
-        if ( this.InterruptEnabled )
+        if ( this.InterruptClient is not null )
             return new DeviceError( DeviceErrorCode.ChannelAlreadyEstablished );
         this.InterruptAddress = request.HostAddr;
         this.InterruptPort = request.HostPort;
         this.InterruptProtocol = request.TransportProtocol;
-        DeviceError result = new();
+
+        // if the interrupt requested check is in error it means that either 
+        // the port or address are invalid
+
+        DeviceError result = this.IsInterruptChannelRequested()
+            ? (new())
+            : (new( DeviceErrorCode.ParameterError));
+
+        if ( result.ErrorCode == DeviceErrorCode.NoError )
+        {
+            try
+            {
+                this.CreateInterruptChannel();
+            }
+            catch ( Exception ex )
+            {
+                Logger.Writer.LogError( "Failed creating interrupt channel", ex );
+                result = new DeviceError( DeviceErrorCode.IOError );
+            }
+        }
         return result;
     }
 
@@ -629,21 +624,28 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DestroyIntrChan()
     {
+        DeviceError reply = new ();
         try
         {
-            if ( !this.InterruptEnabled )
-                return new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-            this.InterruptClient?.Dispose();
-            return new DeviceError();
+            // no calls are required on the device. 
+            // just make sure to tell it that interrupts are disabled.
+
+            this.Device?.EnableInterrupt( false, Array.Empty<byte>() );
+
+            if ( this.InterruptClient is not null )
+                this.InterruptClient?.Dispose();
+            else
+                reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
         }
         catch ( Exception )
         {
-            return new DeviceError( DeviceErrorCode.IOError );
+            reply = new DeviceError( DeviceErrorCode.IOError );
         }
         finally
         {
             this.InterruptClient = null;
         }
+        return reply;
     }
 
     /// <summary>   Device clear. </summary>
@@ -705,7 +707,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
     {
-        this.EnableInterrupt( request.Enable, request.GetHandle() );
         return this.Device!.DeviceEnableSrq( request );
     }
 

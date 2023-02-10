@@ -31,10 +31,14 @@ public partial class Vxi11Device : IVxi11Device
     #region " construction and cleanup "
 
     /// <summary>   Constructor. </summary>
-    /// <param name="instrument">   An implementation of the <see cref="IVxi11Instrument"/>. </param>
-    public Vxi11Device( IVxi11Instrument instrument )
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="instrument">       An implementation of the <see cref="IVxi11Instrument"/>. </param>
+    /// <param name="vxi11Interface">   A reference to the implemented <see cref="IVxi11Interface"/>
+    ///                                 VXI-11 Interface. </param>
+    public Vxi11Device( IVxi11Instrument instrument, IVxi11Interface vxi11Interface )
     {
         this.Instrument = instrument;
+        this.Vxi11Interface = vxi11Interface;
         this.CharacterEncoding = CoreChannelClient.EncodingDefault;
         this._characterEncoding = CoreChannelClient.EncodingDefault;
         this._deviceName = string.Empty;
@@ -49,9 +53,11 @@ public partial class Vxi11Device : IVxi11Device
         this._writeTermination = VXI11.Client.Vxi11Client.WriteTerminationDefault;
 
         this.ServerClients = new();
-        this.Instrument.PropertyChanged += this.OnDevicePropertyChanged;
+        this.Instrument.PropertyChanged += this.OnInstrumentPropertyChanged;
         this.OnInstrumentPropertiesChanges( this.Instrument );
         this.Instrument.RequestingService += this.OnRequestingService;
+
+        this.Vxi11Interface.PropertyChanged += this.OnInterfacePropertyChanged;
     }
 
     #endregion
@@ -345,19 +351,62 @@ public partial class Vxi11Device : IVxi11Device
 
     #endregion
 
-    #region " VXI-11 instrument "
+    #region " VXI-11 instrument and interface "
+
+    /// <summary>
+    /// Gets or sets a reference to the implemented <see cref="IVxi11Interface"/> VXI-11 Interface.
+    /// </summary>
+    /// <remarks>   The setter is provided for detaching the reference. </remarks>
+    /// <value> A reference to the implemented <see cref="IVxi11Interface"/> VXI-11 Interface. </value>
+    public IVxi11Interface? Vxi11Interface { get; set; }
+
+    /// <summary>   Executes the interface property changed action. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="sender">   Source of the event. </param>
+    /// <param name="e">        Event information to send to registered event handlers. </param>
+    private void OnInterfacePropertyChanged( object sender, PropertyChangedEventArgs e )
+    {
+        if ( sender is not IVxi11Interface) return;
+        this.OnInterfacePropertyChanged( ( IVxi11Interface ) sender, e.PropertyName );
+    }
+
+    /// <summary>   Executes the interface property changed action. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="sender">       Source of the event. </param>
+    /// <param name="propertyName"> Name of the property. </param>
+    private void OnInterfacePropertyChanged( IVxi11Interface sender, string propertyName )
+    {
+        if ( sender is not IVxi11Interface || string.IsNullOrWhiteSpace( propertyName ) ) return;
+        {
+            switch ( propertyName )
+            {
+                case nameof( IVxi11Interface.LastDeviceError ):
+                    this.LastDeviceError = sender.LastDeviceError;
+                    break;
+
+            }
+        }
+    }
 
     /// <summary>   Get a reference to the implemented <see cref="IVxi11Instrument"/> VXI-11 instrument. </summary>
     /// <remarks>   The setter is provided for detaching the reference. </remarks>
     /// <value> A reference to the implemented <see cref="IVxi11Instrument"/> VXI-11 instrument. </value>
     public IVxi11Instrument? Instrument { get; set; }
 
-    private void OnDevicePropertyChanged( object sender, PropertyChangedEventArgs e )
+    /// <summary>   Raises the instrument property changed event. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="sender">   Source of the event. </param>
+    /// <param name="e">        Event information to send to registered event handlers. </param>
+    private void OnInstrumentPropertyChanged( object sender, PropertyChangedEventArgs e )
     {
         if ( sender is not IVxi11Instrument ) return;
         this.OnInstrumentPropertyChanged( ( IVxi11Instrument ) sender, e.PropertyName );
     }
 
+    /// <summary>   Raises the instrument property changed event. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="sender">       Source of the event. </param>
+    /// <param name="propertyName"> Name of the property. </param>
     private void OnInstrumentPropertyChanged( IVxi11Instrument sender, string propertyName )
     {
         if ( sender is not IVxi11Instrument || string.IsNullOrWhiteSpace( propertyName ) ) return;
@@ -390,6 +439,10 @@ public partial class Vxi11Device : IVxi11Device
     /// <summary>   Gets or sets the server clients. </summary>
     /// <value> The server clients. </value>
     private ServerClients ServerClients { get; set;  }
+
+    /// <summary>   Gets the number of linked clients. </summary>
+    /// <value> The number of linked clients. </value>
+    public int LinkedClientsCount => this.ServerClients.Count;
 
     /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
     /// <param name="clientId"> Identifier for the client. </param>
@@ -448,14 +501,7 @@ public partial class Vxi11Device : IVxi11Device
         {
             if ( this.OnPropertyChanged(ref this._activeServerClient, value ) )
             {
-                if ( value is null )
-                {
-                    this.ActiveClientId = 0;
-                }
-                else
-                {
-                    this.ActiveClientId = value.ClientId;
-                }
+                this.ActiveClientId = value?.ClientId ?? 0;
             }
         }
 
@@ -470,6 +516,7 @@ public partial class Vxi11Device : IVxi11Device
             if ( this.Instrument is not null &&
                  this.SetProperty( this.Instrument.ActiveClientId, value, () => this.Instrument.ActiveClientId = value ) )
             {
+                if ( this.Vxi11Interface is not null ) this.Vxi11Interface.ActiveClientId = value;
             }
         }
     }
@@ -490,7 +537,7 @@ public partial class Vxi11Device : IVxi11Device
 
     #endregion
 
-    #region " LXI-11 ONC/RPC Calls "
+    #region " link id generator "
 
     private static int _lastLinkId = 0;
 
@@ -501,6 +548,10 @@ public partial class Vxi11Device : IVxi11Device
     {
         return ++_lastLinkId == int.MaxValue ? 0 : _lastLinkId;
     }
+
+    #endregion
+
+    #region " LXI-11 ONC/RPC Calls "
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>
@@ -550,13 +601,16 @@ public partial class Vxi11Device : IVxi11Device
     /// </returns>
     public CreateLinkResp CreateLink( CreateLinkParms request )
     {
+        CreateLinkResp reply;
         if ( this.ServerClients.IsClientLinked( request.ClientId ) )
-            return new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelAlreadyEstablished };
+            reply = new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelAlreadyEstablished };
+        else if ( this.Instrument is null )
+            reply = new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
         else
         {
             // set the active device link
 
-            CreateLinkResp reply = new() {
+            reply = new() {
                 DeviceLink = new DeviceLink( Vxi11Device.GetNextLinkId() ),
                 MaxReceiveSize = this.MaxReceiveLength,
                 AbortPort = this.AbortPortNumber
@@ -588,9 +642,9 @@ public partial class Vxi11Device : IVxi11Device
 
             // TODO: Implement the specifications as defined above.
 
-            this.LastDeviceError = reply.ErrorCode;
-            return reply;
         }
+        this.LastDeviceError = reply.ErrorCode;
+        return reply;
     }
 
     /// <summary>   Destroy a connection. </summary>
@@ -645,51 +699,6 @@ public partial class Vxi11Device : IVxi11Device
         return reply;
     }
 
-    /// <summary>   Create an interrupt channel. </summary>
-    /// <remarks>   2023-01-26. </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceRemoteFunc"/> to
-    ///                         use with the remote procedure call. </param>
-    /// <returns>
-    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
-    /// </returns>
-    public DeviceError CreateIntrChan( DeviceRemoteFunc request )
-    {
-        // TODO: This needs to be done in the server only
-
-        DeviceError reply = this.InterruptEnabled
-                    ? new DeviceError( DeviceErrorCode.ChannelAlreadyEstablished )
-                    : new DeviceError();
-
-        this.LastDeviceError = reply.ErrorCode;
-        return reply;
-    }
-
-    /// <summary>   Destroy an interrupt channel. </summary>
-    /// <returns>
-    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
-    /// </returns>
-    public DeviceError DestroyIntrChan()
-    {
-        DeviceError reply;
-        try
-        {
-            // TODO: This needs to be done in the server only
-
-            reply = !this.InterruptEnabled
-                        ? new DeviceError( DeviceErrorCode.ChannelNotEstablished )
-                        : new DeviceError();
-        }
-        catch ( Exception )
-        {
-            reply = new DeviceError( DeviceErrorCode.IOError );
-        }
-        finally
-        {
-        }
-        this.LastDeviceError = reply.ErrorCode;
-        return reply;
-    }
-
     /// <summary>   Device clear. </summary>
     /// <remarks>
     /// Since not all devices directly support a clear operation, how this operation is executed
@@ -721,11 +730,22 @@ public partial class Vxi11Device : IVxi11Device
         DeviceError reply = new ();
         if ( !this.ServerClients.IsLinkCreated( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( request.Link.LinkId != ( this.ActiveServerClient?.LinkId ?? 0 ) )
-            reply = new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+        else if ( this.Instrument is null )
+            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
-            // TODO: Add device code
+            // Select the client for this link. This maybe the existing client or a 
+            // new client. Either was this should return true because we checked that 
+            // the link was created so a client exists for this link
+
+            if ( this.TrySelectClient( request.Link.LinkId ) )
+            {
+                // now this is the active client.
+
+                // TODO: Implement the specifications as defined above.
+
+           }
+
         }
 
         this.LastDeviceError = reply.ErrorCode;
@@ -745,11 +765,23 @@ public partial class Vxi11Device : IVxi11Device
 
         if ( !this.ServerClients.IsLinkCreated( request.Link.LinkId ) )
             reply = new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
-        else if ( request.Link.LinkId != ( this.ActiveServerClient?.LinkId ?? 0 ) )
-            reply = new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.InvalidLinkIdentifier };
+        else if ( this.Instrument is null )
+            reply = new() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
         else
         {
-            // TODO: Add device code
+
+            // Select the client for this link. This maybe the existing client or a 
+            // new client. Either was this should return true because we checked that 
+            // the link was created so a client exists for this link
+
+            if ( this.TrySelectClient( request.Link.LinkId ) )
+            {
+                // now this is the active client.
+
+                // TODO: Add interface to this device in addition to the instrument.
+
+                // TODO: implement the interface commands
+            }
         }
         this.LastDeviceError = reply.ErrorCode;
         return reply;
@@ -774,6 +806,8 @@ public partial class Vxi11Device : IVxi11Device
         DeviceError reply = new();
         if ( !this.ServerClients.IsLinkCreated( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+        else if ( this.Instrument is null )
+            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
             // Select the client for this link. This maybe the existing client or a 
@@ -840,6 +874,8 @@ public partial class Vxi11Device : IVxi11Device
         DeviceError reply = new ();
         if ( !this.ServerClients.IsLinkCreated( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+        else if ( this.Instrument is null )
+            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
             // Select the client for this link. This maybe the existing client or a 
@@ -901,12 +937,24 @@ public partial class Vxi11Device : IVxi11Device
         DeviceError reply = new ();
         if ( !this.ServerClients.IsLinkCreated( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( request.Link.LinkId != ( this.ActiveServerClient?.LinkId ?? 0 ) )
-            reply = new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+        else if ( this.Instrument is null )
+            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
-            // TODO: Add device code
-            this.RemoteEnabled = true;
+
+            // Select the client for this link. This maybe the existing client or a 
+            // new client. Either was this should return true because we checked that 
+            // the link was created so a client exists for this link
+
+            if ( this.TrySelectClient( request.Link.LinkId ) )
+            {
+                // now this is the active client.
+
+                // TODO: Implement the specifications as defined above.
+
+                // TODO: Add device code
+                this.RemoteEnabled = true;
+            }
         }
 
         this.LastDeviceError = reply.ErrorCode;
@@ -956,12 +1004,23 @@ public partial class Vxi11Device : IVxi11Device
         DeviceReadStbResp reply = new ();
         if ( !this.ServerClients.IsLinkCreated( request.Link.LinkId ) )
             reply = new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
-        else if ( request.Link.LinkId != ( this.ActiveServerClient?.LinkId ?? 0 ) )
-            reply = new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.InvalidLinkIdentifier };
+        else if ( this.Instrument is null )
+            reply = new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
         else
         {
-            // TODO: Add device code
-            reply.Stb = ( int ) this.Instrument!.ServiceRequestStatus;
+            // Select the client for this link. This maybe the existing client or a 
+            // new client. Either was this should return true because we checked that 
+            // the link was created so a client exists for this link
+
+            if ( this.TrySelectClient( request.Link.LinkId ) )
+            {
+                // now this is the active client.
+
+                // TODO: Implement the specifications as defined above.
+
+                // TODO: Add device code
+                reply.Stb = ( int ) this.Instrument!.ServiceRequestStatus;
+            }
         }
 
         this.LastDeviceError = reply.ErrorCode;
@@ -1005,11 +1064,22 @@ public partial class Vxi11Device : IVxi11Device
         DeviceError reply = new();
         if ( !this.ServerClients.IsLinkCreated( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( request.Link.LinkId != ( this.ActiveServerClient?.LinkId ?? 0 ) )
-            reply = new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+        else if ( this.Instrument is null )
+            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
-            // TODO: Add device code
+            // Select the client for this link. This maybe the existing client or a 
+            // new client. Either was this should return true because we checked that 
+            // the link was created so a client exists for this link
+
+            if ( this.TrySelectClient( request.Link.LinkId ) )
+            {
+                // now this is the active client.
+
+                // TODO: Implement the specifications as defined above.
+
+                // TODO: Add device code
+            }
         }
 
         this.LastDeviceError = reply.ErrorCode;
@@ -1058,13 +1128,24 @@ public partial class Vxi11Device : IVxi11Device
         DeviceError reply = new();
         if ( !this.ServerClients.IsLinkCreated( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( request.Link.LinkId != ( this.ActiveServerClient?.LinkId ?? 0 ) )
-            reply = new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+        else if ( this.Instrument is null )
+            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
-            // TODO: Add device code
-            this.LockTimeout = request.LockTimeout;
-            this.LockEnabled = true;
+            // Select the client for this link. This maybe the existing client or a 
+            // new client. Either was this should return true because we checked that 
+            // the link was created so a client exists for this link
+
+            if ( this.TrySelectClient( request.Link.LinkId ) )
+            {
+                // now this is the active client.
+
+                // TODO: Implement the specifications as defined above.
+
+                // TODO: Add device code
+                this.LockTimeout = request.LockTimeout;
+                this.LockEnabled = true;
+            }
         }
 
         this.LastDeviceError = reply.ErrorCode;
@@ -1094,12 +1175,23 @@ public partial class Vxi11Device : IVxi11Device
         DeviceError reply = new();
         if ( !this.ServerClients.IsLinkCreated( deviceLink.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( deviceLink.LinkId != ( this.ActiveServerClient?.LinkId ?? 0 ) )
-            reply = new DeviceError( DeviceErrorCode.InvalidLinkIdentifier );
+        else if ( this.Instrument is null )
+            reply = new ( DeviceErrorCode.DeviceNotAccessible );
         else
         {
-            // TODO: Add device code
-            this.LockEnabled = false;
+            // Select the client for this link. This maybe the existing client or a 
+            // new client. Either was this should return true because we checked that 
+            // the link was created so a client exists for this link
+
+            if ( this.TrySelectClient( deviceLink.LinkId ) )
+            {
+                // now this is the active client.
+
+                // TODO: Implement the specifications as defined above.
+
+                // TODO: Add device code
+                this.LockEnabled = false;
+            }
         }
 
         this.LastDeviceError = reply.ErrorCode;
@@ -1160,13 +1252,28 @@ public partial class Vxi11Device : IVxi11Device
     /// </returns>
     public DeviceReadResp DeviceRead( DeviceReadParms request )
     {
-        DeviceReadResp reply = !this.ServerClients.IsLinkCreated( request.Link.LinkId )
-            ? new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished }
-            : request.Link.LinkId != (this.ActiveServerClient?.LinkId ?? 0) 
-                ? new DeviceReadResp() { ErrorCode = DeviceErrorCode.InvalidLinkIdentifier }
-                : this.Instrument is null
-                    ? new DeviceReadResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-                    : this.Instrument.DeviceRead( request );
+        DeviceReadResp reply = new();
+        if ( !this.ServerClients.IsLinkCreated( request.Link.LinkId ) )
+            reply = new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
+        else if ( this.Instrument is null )
+            reply = new DeviceReadResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
+        else
+        {
+            // Select the client for this link. This maybe the existing client or a 
+            // new client. Either was this should return true because we checked that 
+            // the link was created so a client exists for this link
+
+            if ( this.TrySelectClient( request.Link.LinkId ) )
+            {
+                // now this is the active client.
+
+                // TODO: Implement the specifications as defined above.
+
+                // TODO: Add device code
+                reply = this.Instrument.DeviceRead( request );
+            }
+        }
+
         this.LastDeviceError = reply.ErrorCode;
         return reply;
     }
@@ -1244,13 +1351,28 @@ public partial class Vxi11Device : IVxi11Device
     /// </returns>
     public DeviceWriteResp DeviceWrite( DeviceWriteParms request )
     {
-        DeviceWriteResp reply = !this.ServerClients.IsLinkCreated( request.Link.LinkId )
-            ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished }
-            : request.Link.LinkId != ( this.ActiveServerClient?.LinkId ?? 0 )
-                ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.InvalidLinkIdentifier }
-                : this.Instrument is null
-                    ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-                    : this.DeviceWrite( request.Link.LinkId, request.GetData() );
+        DeviceWriteResp reply = new();
+        if ( !this.ServerClients.IsLinkCreated( request.Link.LinkId ) )
+            reply = new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
+        else if ( this.Instrument is null )
+            reply = new DeviceWriteResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
+        else
+        {
+            // Select the client for this link. This maybe the existing client or a 
+            // new client. Either was this should return true because we checked that 
+            // the link was created so a client exists for this link
+
+            if ( this.TrySelectClient( request.Link.LinkId ) )
+            {
+                // now this is the active client.
+
+                // TODO: Implement the specifications as defined above.
+
+                // TODO: Add device code
+                reply = this.DeviceWrite( request.Link.LinkId, request.GetData() );
+            }
+        }
+
         this.LastDeviceError = reply.ErrorCode;
         return reply;
     }
@@ -1326,7 +1448,6 @@ public partial class Vxi11Device : IVxi11Device
     /// </returns>
     private DeviceWriteResp DeviceWrite( int linkId, byte[] data )
     {
-
         DeviceWriteResp reply = new() {
             ErrorCode = this.Instrument is null
                             ? DeviceErrorCode.DeviceNotAccessible

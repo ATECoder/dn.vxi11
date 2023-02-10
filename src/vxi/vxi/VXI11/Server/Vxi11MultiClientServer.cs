@@ -11,7 +11,8 @@ public partial class Vxi11MultiClientServer : Vxi11Server
     #region " construction and cleanup "
 
     /// <summary>   Default constructor. </summary>
-    public Vxi11MultiClientServer() : this( new Vxi11Device( new Vxi11Instrument() ), IPAddress.Any, 0 )
+    public Vxi11MultiClientServer() : this( new Vxi11Device( new Vxi11Instrument(), new Vxi11Interface() ),
+                                            IPAddress.Any, 0 )
     {
         throw new NotImplementedException();
     }

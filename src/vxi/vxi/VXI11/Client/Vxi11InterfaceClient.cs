@@ -202,7 +202,7 @@ public class Vxi11InterfaceClient : Vxi11Client
 
     #endregion
 
-    #region " Set buss commands "
+    #region " Set bus commands "
 
     /// <summary>   Set ATN line. </summary>
     /// <remarks>

@@ -468,6 +468,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     private int _activeClientId;
     /// <summary>   Gets or sets the identifier of the active client. </summary>
+    /// <remarks> Used solely for generating log messages. </remarks>
     /// <value> The identifier of the active client. </value>
     public int ActiveClientId
     {

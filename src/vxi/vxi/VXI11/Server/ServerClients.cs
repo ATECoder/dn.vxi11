@@ -25,6 +25,10 @@ public class ServerClients
     /// <value> The links keyed by <see cref="ServerClientInfo.ClientId"/>. </value>
     private ConcurrentDictionary<int, int> ClientLinks { get; set; }
 
+    /// <summary>   Gets the number of clients. </summary>
+    /// <value> The number of clients. </value>
+    public int Count => this.LinkedClients.Count;
+
     /// <summary>   Gets or sets information describing the active server client. </summary>
     /// <value> Information describing the active server client. </value>
     public ServerClientInfo? ActiveServerClient { get; set; }

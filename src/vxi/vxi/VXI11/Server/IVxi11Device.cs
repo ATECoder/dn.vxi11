@@ -66,7 +66,12 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     #endregion
 
-    #region " instrument "
+    #region " instrument and interface "
+
+    /// <summary>   Gets a reference to the implemented <see cref="IVxi11Interface"/> VXI-11 Interface. </summary>
+    /// <remarks>   The setter is provided for detaching the reference. </remarks>
+    /// <value> A reference to the implemented <see cref="IVxi11Interface"/> VXI-11 Interface. </value>
+    IVxi11Interface? Vxi11Interface { get; set; }
 
     /// <summary>   Gets a reference to the implemented <see cref="IVxi11Instrument"/> VXI-11 instrument. </summary>
     /// <remarks>   The setter is provided for detaching the reference. </remarks>
@@ -188,6 +193,10 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <value> Information describing the server client. </value>
     ServerClientInfo? ActiveServerClient { get; set; }
 
+    /// <summary>   Gets the number of linked clients. </summary>
+    /// <value> The number of linked clients. </value>
+    int LinkedClientsCount { get; }
+
     /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
     /// <param name="clientId"> Identifier for the client. </param>
     /// <param name="linkId">   Identifier for the link. </param>
@@ -286,19 +295,6 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// A Result from remote procedure call of type <see cref="DeviceError"/>.
     /// </returns>
     DeviceError DestroyLink( DeviceLink request );
-
-    /// <summary>   Create an interrupt channel. </summary>
-    /// <remarks>   2023-01-26. </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceRemoteFunc"/> to
-    ///                         use with the remote procedure call. </param>
-    /// <returns>   The new interrupt channel 1. </returns>
-    DeviceError CreateIntrChan( DeviceRemoteFunc request );
-
-    /// <summary>   Destroy an interrupt channel. </summary>
-    /// <returns>
-    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
-    /// </returns>
-    DeviceError DestroyIntrChan();
 
     /// <summary>   Device clear. </summary>
     /// <remarks>
