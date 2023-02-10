@@ -236,20 +236,19 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
     /// <value> True if interrupt enabled, false if not. </value>
-    bool InterruptEnabled { get; set; }
+    bool InterruptEnabled { get; }
+
+    /// <summary>   Enables or disables the interrupt. </summary>
+    /// <param name="enable">   True to enable, false to disable. </param>
+    /// <param name="handle">   The handle. </param>
+    void EnableInterrupt( bool enable, byte[] handle );
 
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
     public event EventHandler<cc.isr.VXI11.Vxi11EventArgs>? RequestingService;
 
     /// <summary>   Gets or sets the identifier of the active client. </summary>
     /// <value> The identifier of the active client. </value>
-    public int ClientId { get; set; }
-
-    /// <summary>   Sets interrupt handle. </summary>
-    /// <param name="interruptHandle">  the Handle of the interrupt as received when getting the 
-    ///                                 <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/>
-    ///                                 RPC. </param>
-    void SetInterruptHandle( byte[] interruptHandle );
+    public int ActiveClientId { get; set; }
 
     #endregion
 

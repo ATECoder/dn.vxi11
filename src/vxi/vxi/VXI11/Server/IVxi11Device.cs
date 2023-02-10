@@ -46,16 +46,15 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
     /// <value> True if interrupt enabled, false if not. </value>
-    bool InterruptEnabled { get; set; }
+    bool InterruptEnabled { get; }
+
+    /// <summary>   Enables or disables the interrupt. </summary>
+    /// <param name="enable">   True to enable, false to disable. </param>
+    /// <param name="handle">   The handle. </param>
+    void EnableInterrupt( bool enable, byte[] handle );
 
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
     event EventHandler<Vxi11EventArgs> RequestingService;
-
-    /// <summary>   Sets interrupt handle. </summary>
-    /// <param name="interruptHandle">  the Handle of the interrupt as received when getting the 
-    ///                                 <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/>
-    ///                                 RPC. </param>
-    void SetInterruptHandle( byte[] interruptHandle );
 
     #endregion
 
@@ -185,13 +184,21 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     #region " clients and links "
 
-    /// <summary>   Gets or sets the identifier of the active client. </summary>
-    /// <value> The identifier of the active client. </value>
-    int ActiveClientId { get; set; }
+    /// <summary>   Gets or sets the <see cref="ServerClientInfo"/> of the active client. </summary>
+    /// <value> Information describing the server client. </value>
+    ServerClientInfo? ActiveServerClient { get; set; }
 
-    /// <summary>   Gets or sets the ID of the active link between the active client and the actual single device. </summary>
-    /// <value> The device link. </value>
-    int ActiveLinkId { get; set; }
+    /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
+    /// <param name="clientId"> Identifier for the client. </param>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    bool AddClient( int clientId, int linkId );
+
+    /// <summary>   Attempts to select client. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    bool TrySelectClient( int linkId );
 
     /// <summary>
     /// Gets a value indicating whether a valid link exists between the <see cref="Client.Vxi11Client"/>

@@ -440,10 +440,20 @@ public partial class Vxi11Instrument : IVxi11Instrument
     private bool _interruptEnabled;
     /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
     /// <value> True if interrupt enabled, false if not. </value>
-    public bool InterruptEnabled
+    public bool InterruptEnabled => this._interruptEnabled;
+
+    /// <summary>   the Handle of the interrupt as received when getting 
+    ///             the <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/> RPC. </summary>
+    private byte[] _interruptHandle = new byte[40];
+
+    /// <summary>   Enables or disables the interrupt. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="enable">   True to enable, false to disable. </param>
+    /// <param name="handle">   The handle. </param>
+    public void EnableInterrupt( bool enable, byte[] handle )
     {
-        get => this._interruptEnabled;
-        set => _ = this.SetProperty( ref this._interruptEnabled, value );
+        this._interruptHandle = handle;
+        _ = this.OnPropertyChanged( ref this._interruptEnabled, enable, nameof( this.InterruptEnabled ) );
     }
 
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
@@ -456,26 +466,13 @@ public partial class Vxi11Instrument : IVxi11Instrument
         if ( this.InterruptEnabled && e is not null ) RequestingService?.Invoke( this, e );
     }
 
-    private int _clientId;
-    /// <summary>   Gets or sets the identifier of the client. </summary>
-    /// <value> The identifier of the client. </value>
-    public int ClientId
+    private int _activeClientId;
+    /// <summary>   Gets or sets the identifier of the active client. </summary>
+    /// <value> The identifier of the active client. </value>
+    public int ActiveClientId
     {
-        get => this._clientId;
-        set => _ = this.OnPropertyChanged( ref this._clientId, value );
-    }
-
-    /// <summary>   the Handle of the interrupt as received when getting 
-    ///             the <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/> RPC. </summary>
-    private byte[] _interruptHandle = new byte[40];
-
-    /// <summary>   Sets interrupt handle. </summary>
-    /// <param name="interruptHandle">  the Handle of the interrupt as received when getting the 
-    ///                                 <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/>
-    ///                                 RPC. </param>
-    public void SetInterruptHandle( byte[] interruptHandle )
-    {
-        this._interruptHandle = interruptHandle;
+        get => this._activeClientId;
+        set => _ = this.OnPropertyChanged( ref this._activeClientId, value );
     }
 
     #endregion
@@ -907,7 +904,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <param name="value">            The value. </param>
     private void LogMessage( char operationType, string value )
     {
-        this.MessageLog.Add( (this.ClientId, operationType, DateTimeOffset.Now, value) );
+        this.MessageLog.Add( (this.ActiveClientId, operationType, DateTimeOffset.Now, value) );
         this.MessageLogCount++;
     }
 

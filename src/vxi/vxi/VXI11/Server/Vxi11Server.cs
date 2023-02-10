@@ -185,7 +185,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// The operation of <c>device_abort</c> SHALL NOT be affected by locking  </para>
     /// </remarks>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
-    /// <returns>   A DeviceErrorCode. </returns>
     protected virtual void StartAbortServer()
     {
         if ( this.AbortServer is null )
@@ -281,23 +280,19 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <summary>   The interrupt address as set when getting the <see cref="CreateIntrChan(DeviceRemoteFunc)"/> RPC. </summary>
     private IPAddress InterruptAddress { get; set; }
 
+    /// <summary>   Enables or disables the interrupt. </summary>
+    /// <param name="enable">   True to enable, false to disable. </param>
+    /// <param name="handle">   The handle. </param>
+    public void EnableInterrupt( bool enable, byte[] handle )
+    {
+        _ = this.OnPropertyChanged( ref this._interruptEnabled, enable, nameof( this.InterruptEnabled ) );
+        this.Device?.EnableInterrupt( enable, handle );
+    }
+
     private bool _interruptEnabled;
     /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
     /// <value> True if interrupt enabled, false if not. </value>
-    public bool InterruptEnabled
-    {
-        get => this._interruptEnabled;
-        set
-        {
-                if ( this.OnPropertyChanged( ref this._interruptEnabled, value ) && this.Device is not null )
-            {
-                this.Device.InterruptEnabled = value;
-            }
-        }
-    }
-
-    /// <summary>   the Handle of the interrupt as received when getting the <see cref="DeviceEnableSrq(DeviceEnableSrqParms)"/> RPC. </summary>
-    private byte[] _interruptHandle = new byte[40];
+    public bool InterruptEnabled => this._interruptEnabled;
 
     private int InterruptTransmitTimeout { get; set; }
 
@@ -323,7 +318,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
 
     /// <summary>   Asynchronous Interrupt an in-progress call. </summary>
     /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
-    public virtual void Interrupt()
+    protected virtual void OnRequestingService( Vxi11EventArgs e )
     {
         if ( this.InterruptClient is null && this.InterruptEnabled && this.InterruptAddress is not null && this.InterruptAddress != IPAddress.Any )
         {
@@ -340,12 +335,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
             this.InterruptClient.Client!.IOTimeout = this.InterruptIOTimeout;
         }
         if ( this.InterruptEnabled )
-            this.InterruptClient?.DeviceIntrSrq( this._interruptHandle );
+            this.InterruptClient?.DeviceIntrSrq( e.ServiceRequestCodec.GetHandle() );
     }
 
     private void OnRequestingService( object sender, Vxi11EventArgs e )
     {
-        this.Interrupt();
+        this.OnRequestingService ( e );
     }
 
 
@@ -452,11 +447,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
                 case nameof( IVxi11Device.DeviceName ):
                     this.DeviceName = sender.DeviceName;
                     break;
-
-
-                case nameof( IVxi11Device.InterruptEnabled ):
-                    this.InterruptEnabled = sender.InterruptEnabled;
-                    break;
             }
         }
     }
@@ -467,7 +457,6 @@ public abstract class Vxi11Server : CoreChannelServerBase
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.AbortPortNumber ) );
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.CharacterEncoding ) );
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.DeviceName ) );
-        this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.InterruptEnabled ) );
     }
 
     #endregion
@@ -483,7 +472,10 @@ public abstract class Vxi11Server : CoreChannelServerBase
         get => this._deviceLink;
         set
         {  if ( this.OnPropertyChanged( ref this._deviceLink, value ) && this.Device is not null )
-                this.Device.ActiveLinkId = value.LinkId;
+            {
+                // this is no longer the way to do this....
+                // this.Device.ActiveLinkId = value.LinkId;
+            }
         }
     }
 
@@ -531,7 +523,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <param name="request">  The request of type <see cref="CreateLinkParms"/> to use with
     ///                         the remote procedure call. </param>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
+    /// A response of type <see cref="CreateLinkResp"/> to send to the remote procedure call.
     /// </returns>
     public override CreateLinkResp CreateLink( CreateLinkParms request )
     {
@@ -557,7 +549,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
             else
             {
                 this.Device.DeviceName = request.DeviceName;
-                this.Device.Instrument!.ClientId = request.ClientId;
+                _ = this.Device.AddClient( request.ClientId, this.DeviceLink.LinkId );
                 reply.ErrorCode = this.Device.IsValidDeviceName()
                     ? DeviceErrorCode.NoError
                     : DeviceErrorCode.InvalidLinkIdentifier;
@@ -587,7 +579,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <param name="request">  The request of type of type <see cref="DeviceLink"/> to use
     ///                         with the remote procedure call. </param>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
+    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
     public override DeviceError DestroyLink( DeviceLink request )
     {
@@ -614,22 +606,26 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <summary>   Create an interrupt channel. </summary>
     /// <param name="request">  The request of type of type <see cref="DeviceRemoteFunc"/> to
     ///                         use with the remote procedure call. </param>
-    /// <returns>   The new interrupt channel 1. </returns>
+    /// <returns>
+    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
+    /// </returns>
     public override DeviceError CreateIntrChan( DeviceRemoteFunc request )
     {
+        // These constructs only exists in the server class. 
+        // no calls are required on the device and instrument classes.
+
         if ( this.InterruptEnabled )
             return new DeviceError( DeviceErrorCode.ChannelAlreadyEstablished );
         this.InterruptAddress = request.HostAddr;
         this.InterruptPort = request.HostPort;
         this.InterruptProtocol = request.TransportProtocol;
-        this.InterruptEnabled = true;
         DeviceError result = new();
         return result;
     }
 
     /// <summary>   Destroy an interrupt channel. </summary>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
+    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
     public override DeviceError DestroyIntrChan()
     {
@@ -674,7 +670,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
+    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
     public override DeviceError DeviceClear( DeviceGenericParms request )
     {
@@ -686,7 +682,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to
     ///                         use with the remote procedure call. </param>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>.
+    /// A response of type <see cref="DeviceDoCmdResp"/> to send to the remote procedure call.
     /// </returns>
     public override DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
     {
@@ -705,14 +701,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <param name="request">  The request of type of type <see cref="DeviceEnableSrqParms"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
-    /// A Result from remote procedure call of type <see cref="DeviceError"/>.
+    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
     public override DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
     {
-        this.InterruptEnabled = request.Enable;
-        this._interruptHandle = request.GetHandle();
-        this.Device?.SetInterruptHandle( this._interruptHandle );
-        return new DeviceError();
+        this.EnableInterrupt( request.Enable, request.GetHandle() );
+        return this.Device!.DeviceEnableSrq( request );
     }
 
     /// <summary>   Enables device local control. </summary>
@@ -746,8 +740,11 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_local</c> SHALL terminate
     /// with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  device generic parameters. </param>
-    /// <returns>   A Device_Error. </returns>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    ///                         to use with the remote procedure call. </param>
+    /// <returns>
+    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
+    /// </returns>
     public override DeviceError DeviceLocal( DeviceGenericParms request )
     {
         throw new NotImplementedException();
@@ -784,7 +781,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </remarks>
     /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
-    /// <returns>   A Device_Error. </returns>
+    /// <returns>
+    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
+    /// </returns>
     public override DeviceError DeviceRemote( DeviceGenericParms request )
     {
         throw new NotImplementedException();
@@ -825,7 +824,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </remarks>
     /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
-    /// <returns>   A Device_ReadStbResp. </returns>
+    /// <returns>
+    /// A response of type <see cref="DeviceReadStbResp"/> to send to the remote procedure call.
+    /// </returns>
     public override DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
     {
         throw new NotImplementedException();
@@ -860,7 +861,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </remarks>
     /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
     ///                         to use with the remote procedure call. </param>
-    /// <returns>   A Device_Error. </returns>
+    /// <returns>
+    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
+    /// </returns>
     public override DeviceError DeviceTrigger( DeviceGenericParms request )
     {
         throw new NotImplementedException();
@@ -898,8 +901,11 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// instrument server.This means that if the network instrument server detects a broken connection, it
     /// SHALL release all of the connection's locks. </para>
     /// </remarks>
-    /// <param name="request"> Device lock parameters. </param>
-    /// <returns>   A Device_Error. </returns>
+    /// <param name="request">  The request of type of type <see cref="DeviceLockParms"/>
+    ///                         to use with the remote procedure call. </param>
+    /// <returns>
+    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
+    /// </returns>
     public override DeviceError DeviceLock( DeviceLockParms request )
     {
         throw new NotImplementedException();
@@ -920,7 +926,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// The operation of <c>device_unlock</c> SHALL NOT be affected by device_abort. </para>
     /// </remarks>
     /// <param name="deviceLink">   The device link parameters. </param>
-    /// <returns>   A Device_Error. </returns>
+    /// <returns>
+    /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
+    /// </returns>
     public override DeviceError DeviceUnlock( DeviceLink deviceLink )
     {
         throw new NotImplementedException();
@@ -973,15 +981,18 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// The number of bytes transferred from the device into data SHALL be returned in data.data_len
     /// even when <c>device_read</c> terminates due to a timeout or <c>device_abort</c>. </item></list>
     /// </remarks>
-    /// <param name="deviceReadParameters"> Device read parameters. </param>
-    /// <returns>   A Device_ReadResp. </returns>
-    public override DeviceReadResp DeviceRead( DeviceReadParms deviceReadParameters )
+    /// <param name="request">  The request of type of type <see cref="DeviceReadParms"/>
+    ///                         to use with the remote procedure call. </param>
+    /// <returns>
+    /// A response of type <see cref="DeviceReadResp"/> to send to the remote procedure call.
+    /// </returns>
+    public override DeviceReadResp DeviceRead( DeviceReadParms request )
     {
         DeviceReadResp readRes = new();
         if ( this.Device is null )
             readRes.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
         else
-            readRes = this.Device.DeviceRead( deviceReadParameters );
+            readRes = this.Device.DeviceRead( request );
         return readRes;
     }
 
@@ -1052,15 +1063,18 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// 
     /// </item></list>
     /// </remarks>
-    /// <param name="deviceWriteParameters">    Device write parameters. </param>
-    /// <returns>   A <c>device_write</c> Resp. </returns>
-    public override DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters )
+    /// <param name="request">  The request of type of type <see cref="DeviceReadParms"/>
+    ///                         to use with the remote procedure call. </param>
+    /// <returns>
+    /// A response of type <see cref="DeviceWriteResp"/> to send to the remote procedure call.
+    /// </returns>
+    public override DeviceWriteResp DeviceWrite( DeviceWriteParms request )
     {
         DeviceWriteResp writeRes = new();
         if ( this.Device is null )
             writeRes.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
         else
-            writeRes = this.Device.DeviceWrite( deviceWriteParameters );
+            writeRes = this.Device.DeviceWrite( request );
         return writeRes;
     }
 
