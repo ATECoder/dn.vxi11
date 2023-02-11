@@ -2,8 +2,8 @@
 
 using cc.isr.VXI11;
 using cc.isr.VXI11.Logging;
-using cc.isr.VXI11.Server;
 using cc.isr.VXI11.Client;
+using cc.isr.VXI11.Server;
 
 Console.WriteLine( $"VXI-11 {nameof( Vxi11InstrumentClient)} Tester" );
 

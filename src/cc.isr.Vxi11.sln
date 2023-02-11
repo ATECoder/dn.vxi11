@@ -59,6 +59,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.InstrumentClie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.SingleClientServerTester", "apps\vxi11.single.client.server.tester\cc.isr.VXI11.SingleClientServerTester.csproj", "{74045BB9-86DC-4BD4-9074-4CA124C91E42}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.Client", "vxi\client\cc.isr.VXI11.Client.csproj", "{B682BAB9-179C-414C-9E85-56AA050CC2BD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.Server", "vxi\server\cc.isr.VXI11.Server.csproj", "{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +109,14 @@ Global
 		{74045BB9-86DC-4BD4-9074-4CA124C91E42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74045BB9-86DC-4BD4-9074-4CA124C91E42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74045BB9-86DC-4BD4-9074-4CA124C91E42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B682BAB9-179C-414C-9E85-56AA050CC2BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B682BAB9-179C-414C-9E85-56AA050CC2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B682BAB9-179C-414C-9E85-56AA050CC2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B682BAB9-179C-414C-9E85-56AA050CC2BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -120,6 +132,8 @@ Global
 		{052BF9B4-745B-4AEF-9A71-D0743BAAA5C2} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
 		{7AAB0479-E1EB-41AE-A83B-9B3CFBEB41A7} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
 		{74045BB9-86DC-4BD4-9074-4CA124C91E42} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
+		{B682BAB9-179C-414C-9E85-56AA050CC2BD} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
+		{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A0429F81-8254-4C93-A727-249FEAC06071}

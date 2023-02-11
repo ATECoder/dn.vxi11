@@ -26,5 +26,4 @@ public partial class Vxi11SingleClientServer : Vxi11Server
 
     #endregion
 
-
 }

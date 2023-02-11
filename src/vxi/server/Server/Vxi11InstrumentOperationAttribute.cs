@@ -1,7 +1,5 @@
 using System.ComponentModel;
 
-using cc.isr.VXI11.Server;
-
 namespace cc.isr.VXI11.Server
 {
     /// <summary>   Values that represent VXI-11 instrument operation types. </summary>
@@ -43,7 +41,7 @@ namespace cc.isr.VXI11.Server
 }
 
 
-namespace cc.isr.VXI11.EnumExtensions
+namespace cc.isr.VXI11.Server.EnumExtensions
 {
     public static partial class Vxi11EnumExtensions
     {

@@ -1,7 +1,5 @@
 using System.ComponentModel;
 
-using cc.isr.VXI11;
-using cc.isr.VXI11.Client;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;
@@ -12,10 +10,9 @@ namespace cc.isr.VXI11.Server;
 /// </summary>
 /// <remarks>
 /// This interface defines the implementation for a 'physical' interface that is the end point
-/// for the <see cref="Client.Vxi11InterfaceClient"/> Instrument. The remote procedure
-/// call initiated at the <see cref="Client.Vxi11Client"/> side, passes to the instrument through
-/// a <see cref="Vxi11Device"/>, which links the <see cref="Vxi11Server"/> and the 'physical'
-/// <see cref="Vxi11Interface"/>.
+/// for a VXI-11 client interface. The remote procedure call initiated at the client side, 
+/// passes to the instrument through a <see cref="Vxi11Device"/>, which links the 
+/// <see cref="Vxi11Server"/> and the 'physical' <see cref="Vxi11Interface"/>.
 /// 
 /// Implementations of VXI-11 servers should inherit from the <see cref="Vxi11Interface"/> and,
 /// perhaps also, from the <see cref="Vxi11Device"/>.

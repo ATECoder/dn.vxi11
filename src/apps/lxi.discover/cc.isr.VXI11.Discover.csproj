@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\vxi\src\vxi\vxi\cc.isr.VXI11.csproj" />
+    <ProjectReference Include="..\..\vxi\client\cc.isr.VXI11.Client.csproj" />
   </ItemGroup>
 
 </Project>

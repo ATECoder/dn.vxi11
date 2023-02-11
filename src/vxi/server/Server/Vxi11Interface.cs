@@ -1,8 +1,3 @@
-using System.ComponentModel.Design;
-using System.Reflection;
-using System.Security.Principal;
-
-using cc.isr.VXI11.Client;
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.EnumExtensions;
 using cc.isr.VXI11.Logging;
@@ -11,9 +6,9 @@ namespace cc.isr.VXI11.Server;
 
 /// <summary>   Implementation of the <see cref="IVxi11Interface"/>. </summary>
 /// <remarks>
-/// This class implements a 'physical' instrument that is the end point for the <see cref="Client.Vxi11InterfaceClient"/>
-/// Virtual Instrument. The remote procedure call initiated at the <see cref="Client.Vxi11Client"/>
-/// side, passes to the instrument through a <see cref="Vxi11Device"/>, which links the <see cref="Vxi11Server"/>
+/// This class implements a 'physical' instrument that is the end point for the instrument client
+/// Virtual Instrument. The remote procedure call initiated at the VXI-11 client side, passes to
+/// the instrument through a <see cref="Vxi11Device"/>, which links the <see cref="Vxi11Server"/>
 /// and the 'physical' <see cref="Vxi11Interface"/>.
 /// 
 /// Implementations of VXI-11 servers should inherit from the <see cref="Vxi11Interface"/> and,
@@ -248,11 +243,9 @@ public partial class Vxi11Interface : IVxi11Interface
 
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-01-26. </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to
-    ///                         use with the remote procedure call. </param>
-    /// <returns>
-    /// A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>.
-    /// </returns>
+    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to use
+    ///                         with the remote procedure call. </param>
+    /// <returns>   A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>. </returns>
     public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
     {
         // TODO: Implement interface operations here based on the parsing of the request.
@@ -266,7 +259,7 @@ public partial class Vxi11Interface : IVxi11Interface
         {
             InterfaceCommandOption cmd = ( ( int ) request.Cmd).ToInterfaceCommandOption();
             Logger.Writer.LogVerbose( $"Implementing： {cmd}({request.Cmd})" );
-            return this.DeviceDoCmd( request, cmd );
+            return this.DeviceDoCmd( cmd );
         }
         else if ( request.Cmd <= ( int ) InterfaceCommand.InterfaceClearControl )
         {
@@ -276,7 +269,9 @@ public partial class Vxi11Interface : IVxi11Interface
         }
         else
         {
-            Logger.Writer.LogVerbose( $"{request.Cmd} is unexpected yet unsupported interface command." );
+            string message = $"{request.Cmd} is unexpected yet unsupported interface command.";
+            Logger.Writer.LogVerbose( message );
+            this.LogMessage( 'c', message );
         }
 
         return new DeviceDoCmdResp();
@@ -324,11 +319,9 @@ public partial class Vxi11Interface : IVxi11Interface
 
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-02-10. </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to use
-    ///                         with the remote procedure call. </param>
     /// <param name="command">  The <see cref="InterfaceCommand"/> command. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>. </returns>
-    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request, InterfaceCommandOption command )
+    public DeviceDoCmdResp DeviceDoCmd( InterfaceCommandOption command )
     {
         // TODO: Finish implementing the commands.
 
@@ -401,11 +394,6 @@ public partial class Vxi11Interface : IVxi11Interface
         this.MessageLog.Add( (this.ActiveClientId, operationType, DateTimeOffset.Now, value) );
         this.MessageLogCount++;
     }
-
-    /// <summary>
-    /// Thread synchronization locks
-    /// </summary>
-    private readonly ManualResetEvent _asyncLocker = new( false );
 
     private DeviceErrorCode _lastDeviceError;
     /// <summary>   Gets or sets the last device error. </summary>

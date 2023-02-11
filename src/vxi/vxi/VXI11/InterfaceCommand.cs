@@ -1,6 +1,4 @@
-using cc.isr.VXI11.Client;
-
-namespace cc.isr.VXI11.Client
+namespace cc.isr.VXI11
 {
     /// <summary>   Values that represent IEEE 488 interface commands. </summary>
     public enum InterfaceCommand

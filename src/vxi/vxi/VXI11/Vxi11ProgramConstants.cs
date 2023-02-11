@@ -2,9 +2,11 @@ namespace cc.isr.VXI11;
 
 
 /// <summary>   A collection of VXI-11 program and program version constants. </summary>
-/// <remarks>   A network instrument server is expected to implement all three of the channels described
-/// in the VXI-11 specifications, and the channels. </remarks>
-internal static class Vxi11ProgramConstants
+/// <remarks>
+/// A network instrument server is expected to implement all three of the channels described in
+/// the VXI-11 specifications, and the channels.
+/// </remarks>
+public static class Vxi11ProgramConstants
 {
     /// <summary>  VXI-11 RPC Device Core channel program number. <para>
     /// 

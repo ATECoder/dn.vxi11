@@ -7,10 +7,13 @@ using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.Server;
 
-/// <summary>  A abstract VXI-11 server. </summary>
-/// <remarks> Implements the minimum requirements for a VXI-11 server including an <see cref="AbortChannelServer"/>
-/// and <see cref="InterruptChannelClient"/> without handling locks. Intended to be inherited by either a <see cref="Vxi11SingleClientServer"/> 
-/// or a <see cref="Vxi11MultiClientServer"/> server. </remarks>
+/// <summary>   A abstract VXI-11 server. </summary>
+/// <remarks>
+/// Implements the minimum requirements for a VXI-11 server including an <see cref="AbortChannelServer"/>
+/// and <see cref="InterruptChannelClient"/> without handling locks. Intended to be inherited by
+/// either a <see cref="Vxi11SingleClientServer"/>
+/// or a <see cref="Vxi11MultiClientServer"/> server.
+/// </remarks>
 public abstract class Vxi11Server : CoreChannelServerBase
 {
 
@@ -404,7 +407,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
 
 #region " remote procedure call handlers "
 
-    /// <summary>   Gets the active device link between the <see cref="Client.Vxi11Client"/>
+    /// <summary>   Gets the active device link between the VXI-11 client
     /// and this <see cref="Vxi11Server"/>. </summary>
     /// <value> The device link. </value>
     public DeviceLink DeviceLink => new ( this.Device?.ActiveServerClient?.LinkId ?? 0 );
@@ -413,8 +416,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <remarks>
     /// To successfully complete a create_link RPC, a network instrument server SHALL: <para>
     /// 1. If lockDevice is set to true, acquire the lock for the device. </para><para>
-    /// 2. Return in <c>link id</c> a link identifier to be used with future calls. The value of <c>link id</c> SHALL be
-    /// unique for all currently active links within a network instrument server.  </para><para>
+    /// 2. Return in <c>link id</c> a link identifier to be used with future calls. The value of <c>
+    /// link id</c> SHALL be unique for all currently active links within a network instrument
+    /// server.  </para><para>
     /// 3. Return in maxRecvSize the size of the largest data parameter the network instrument server
     /// can accept in a <c>device_write</c>  RPC.This value SHALL be at least 1024.  </para><para>
     /// 4. Return in asyncPort the port number for asynchronous RPCs. See device_abort.  </para><para>
@@ -438,20 +442,20 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// set error to 9. </para><para>
     /// 
     /// The operation of create_link SHALL ignore locks if lockDevice is false. </para><para>
-    /// If lockDevice is true and the lock is not freed after at least <c>lock_timeout</c> milliseconds,
-    /// create_link SHALL terminate without creating a link and return with error set to 11, device
-    /// locked by another link.Page 26 Section B: Network Instrument Protocol October 4, 2000
-    /// Printing VXIbus Specification: VXI-11 Revision 1.0 </para><para>
+    /// If lockDevice is true and the lock is not freed after at least <c>lock_timeout</c>
+    /// milliseconds, create_link SHALL terminate without creating a link and return with error set
+    /// to 11, device locked by another link.Page 26 Section B: Network Instrument Protocol October 4,
+    /// 2000 Printing VXIbus Specification: VXI-11 Revision 1.0 </para><para>
     /// 
     /// The execution of create_link SHALL have no effect on the state of any device associated with
     /// the network instrument server. </para><para>
     /// 
     /// A create_link RPC cannot be aborted since a valid link identifier is not yet available.A
-    /// network instrument client should set <c>lock_timeout</c> to a reasonable value to avoid locking up
-    /// the server. </para>
+    /// network instrument client should set <c>lock_timeout</c> to a reasonable value to avoid
+    /// locking up the server. </para>
     /// </remarks>
-    /// <param name="request">  The request of type <see cref="CreateLinkParms"/> to use with
-    ///                         the remote procedure call. </param>
+    /// <param name="request">  The request of type <see cref="CreateLinkParms"/> to use with the
+    ///                         remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="CreateLinkResp"/> to send to the remote procedure call.
     /// </returns>

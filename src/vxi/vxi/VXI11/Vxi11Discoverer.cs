@@ -140,34 +140,6 @@ public class Vxi11Discoverer
 
     #endregion
 
-    #region " query device "
-
-    /// <summary>   Queries the instrument identity. </summary>
-    /// <remarks>   2023-02-04. </remarks>
-    /// <param name="address">  The instrument <see cref="System.Net.Sockets.AddressFamily.InterNetwork"/>
-    ///                         (IPv4) address. </param>
-    /// <returns>   The identity. </returns>
-    public static string QueryIdentity( string address )
-    {
-        return QueryIdentity( address, "inst0" );
-    }
-
-    /// <summary>   Queries the instrument identity. </summary>
-    /// <remarks>   2023-02-08. </remarks>
-    /// <param name="address">      The instrument <see cref="System.Net.Sockets.AddressFamily.InterNetwork"/>
-    ///                             (IPv4) address. </param>
-    /// <param name="deviceName">   The device name,, e.g., inst0 or gpib0,4. </param>
-    /// <returns>   The identity. </returns>
-    public static string QueryIdentity( string address, string deviceName )
-    {
-        using Client.Vxi11Client instrument = new();
-        instrument.ThreadExceptionOccurred += OnThreadException;
-        instrument.Connect( address, deviceName );
-        return instrument.QueryLine( "*IDN?" ).response;
-    }
-
-    #endregion
-
     #region " core devices on the network "
 
     /// <summary>

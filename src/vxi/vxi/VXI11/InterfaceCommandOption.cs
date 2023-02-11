@@ -1,6 +1,4 @@
-using cc.isr.VXI11.Client;
-
-namespace cc.isr.VXI11.Client
+namespace cc.isr.VXI11
 {
 
     /// <summary>   Values that represent interface command options. </summary>

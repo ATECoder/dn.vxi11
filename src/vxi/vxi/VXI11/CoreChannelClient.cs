@@ -82,7 +82,53 @@ public class CoreChannelClient : OncRpcClientStubBase
 
     #endregion
 
-    #region " defaults "
+    #region " default values "
+
+    /// <summary>
+    /// Gets or sets the default maximum length for the raw read method of and instrument client.
+    /// </summary>
+    /// <remarks>   Was used in Python to limit the size of the raw read length. </remarks>
+    /// <value> The default maximum read raw length. </value>
+    public static int MaxReadRawLengthDefault { get; set; } = 128 * 1024 * 1024;
+
+    /// <summary>   Gets or sets the maximum receive length default. </summary>
+    /// <remarks>
+    /// not yet used. As used in Python to reduce the maximum receive size received from the
+    /// instrument in <see cref="CreateLinkResp"/>.
+    /// </remarks>
+    /// <value> The maximum receive length default. </value>
+    public static int MaxReceiveLengthDefault { get; set; } = 1024 * 1024;
+
+    /// <summary>   Gets or sets the lock timeout default. </summary>
+    /// <value> The lock timeout default. </value>
+    public static int LockTimeoutDefault { get; set; } = 3000;
+
+    /// <summary>   Gets or sets the IO Timeout default. </summary>
+    /// <value> The I/O timeout default. </value>
+    public static int IOTimeoutDefault { get; set; } = 3000;
+
+    /// <summary>   Gets or sets the transmit timeout default. </summary>
+    /// <value> The transmit timeout default. </value>
+    public static int TransmitTimeoutDefault { get; set; } = 1000;
+
+    /// <summary>   Gets or sets the read termination default. </summary>
+    /// <value> The read termination default. </value>
+    public static byte ReadTerminationDefault { get; set; } = ( byte ) '\n';
+
+    /// <summary>   Gets or sets the write termination default. </summary>
+    /// <value> The write termination default. </value>
+    public static byte[] WriteTerminationDefault { get; set; } = new byte[] { ( byte ) '\n' };
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the end-or-identify (EOI) terminator is enabled by
+    /// default.
+    /// </summary>
+    /// <value> True if end-or-identify (EOI) terminator is enabled by default, false if not. </value>
+    public static bool EoiEnabledDefault { get; set; } = true;
+
+    /// <summary>   Gets or sets a value indicating whether the enabled default is locked. </summary>
+    /// <value> True if lock enabled default, false if not. </value>
+    public static bool LockEnabledDefault { get; set; } = false;
 
     /// <summary>   Gets or sets the default encoding. </summary>
     /// <remarks>

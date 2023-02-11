@@ -9,7 +9,7 @@ namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a device explorer tests. </summary>
 [TestClass]
-public class Vxi11Discoverer
+public class Vxi11DiscovererTests
 {
 
     #region " fixture construction and cleanup "
@@ -23,7 +23,7 @@ public class Vxi11Discoverer
         {
             _classTestContext = context;
             Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
-            Vxi11Discoverer.EnumerateHosts();
+            Vxi11DiscovererTests.EnumerateHosts();
 
             Logger.Writer.LogInformation( $"Starting the embedded Portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
@@ -77,6 +77,34 @@ public class Vxi11Discoverer
         Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
     }
 
+
+    #endregion
+
+    #region " query device "
+
+    /// <summary>   Queries the instrument identity. </summary>
+    /// <remarks>   2023-02-04. </remarks>
+    /// <param name="address">  The instrument <see cref="System.Net.Sockets.AddressFamily.InterNetwork"/>
+    ///                         (IPv4) address. </param>
+    /// <returns>   The identity. </returns>
+    public static string QueryIdentity( string address )
+    {
+        return QueryIdentity( address, "inst0" );
+    }
+
+    /// <summary>   Queries the instrument identity. </summary>
+    /// <remarks>   2023-02-08. </remarks>
+    /// <param name="address">      The instrument <see cref="System.Net.Sockets.AddressFamily.InterNetwork"/>
+    ///                             (IPv4) address. </param>
+    /// <param name="deviceName">   The device name,, e.g., inst0 or gpib0,4. </param>
+    /// <returns>   The identity. </returns>
+    public static string QueryIdentity( string address, string deviceName )
+    {
+        using Client.Vxi11Client instrument = new();
+        instrument.ThreadExceptionOccurred += OnThreadException;
+        instrument.Connect( address, deviceName );
+        return instrument.QueryLine( "*IDN?" ).response;
+    }
 
     #endregion
 
@@ -213,7 +241,7 @@ public class Vxi11Discoverer
                 Stopwatch sw = Stopwatch.StartNew();
                 Assert.IsTrue( VXI11.Vxi11Discoverer.PortmapPingHost( host, 10 ), $"port map at {host} should reply to a ping" );
                 Logger.Writer.LogInformation( $"{host} portmap pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms." );
-                Logger.Writer.LogInformation( $"{host}: {VXI11.Vxi11Discoverer.QueryIdentity( host.ToString() )}" );
+                Logger.Writer.LogInformation( $"{host}: {Vxi11DiscovererTests.QueryIdentity( host.ToString() )}" );
             }
             else
             {
@@ -272,7 +300,7 @@ public class Vxi11Discoverer
             Assert.IsTrue( VXI11.Vxi11Discoverer.Paping( endpoint ) );
             Logger.Writer.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
             if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
-                Logger.Writer.LogInformation( $"{endpoint}: {VXI11.Vxi11Discoverer.QueryIdentity( endpoint.Address.ToString() )}" );
+                Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.QueryIdentity( endpoint.Address.ToString() )}" );
         }
         Assert.AreEqual( PingedHosts.Count, devices.Count, "Device count is expected to equal pinged hosts count." );
     }
@@ -296,7 +324,7 @@ public class Vxi11Discoverer
 
             if ( endpoint.Port == OncRpcPortmapConstants.OncRpcPortmapPortNumber ) { actualCount++; }
             if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
-                Logger.Writer.LogInformation( $"{endpoint}: {VXI11.Vxi11Discoverer.QueryIdentity( endpoint.Address.ToString() )}" );
+                Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.QueryIdentity( endpoint.Address.ToString() )}" );
 
         }
 

@@ -168,39 +168,6 @@ to discover all the instruments listening on the local IPs of this machine.
         Console.Write( builder.ToString() );
     }
 
-    /// <summary>   Queries the instrument identity. </summary>
-    /// <remarks>   2023-02-06. </remarks>
-    /// <param name="address">                  The instrument network IPv4 address. </param>
-    /// <param name="deviceInterfaceString">    The device interface string, e.g., inst0 or gpib0,4. </param>
-    /// <returns>   The instrument identity. </returns>
-    public static string QueryIdentity( string address, string deviceInterfaceString )
-    {
-        using cc.isr.VXI11.Client.Vxi11Client instrument = new();
-        instrument.ThreadExceptionOccurred += OnThreadException;
-        instrument.Connect( address, deviceInterfaceString );
-        return instrument.QueryLine( "*IDN?" ).response;
-    }
-
-    /// <summary>   Try query identity. </summary>
-    /// <param name="address">                  The instrument network IPv4 address. </param>
-    /// <param name="deviceInterfaceString">    The device interface string, e.g., inst0 or gpib0,4. </param>
-    /// <returns>   A string. </returns>
-    public static string TryQueryIdentity( string address, string deviceInterfaceString )
-    {
-        try
-        {
-            return QueryIdentity( address, deviceInterfaceString );
-        }
-        catch ( DeviceException ex  )
-        {
-            return $"unable to query identity from TCPIP::{address}::{deviceInterfaceString}::INSTR because: {ex.Reason}({( int ) ex.Reason}) {ex.Message}";
-        }
-        catch ( Exception ex )
-        {
-            return $"unable to query identity from TCPIP::{address}::{deviceInterfaceString}::INSTR because: {ex.Message}";
-        }
-    }
-
     /// <summary>   Raises the thread exception event. </summary>
     /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        Event information to send to registered event handlers. </param>
@@ -228,5 +195,45 @@ to discover all the instruments listening on the local IPs of this machine.
         }
         return ipv4s.ToArray();
     }
+
+    #region " query device "
+
+    /// <summary>   Queries the instrument identity. </summary>
+    /// <remarks>   2023-02-06. </remarks>
+    /// <param name="address">                  The instrument network IPv4 address. </param>
+    /// <param name="deviceInterfaceString">    The device interface string, e.g., inst0 or gpib0,4. </param>
+    /// <returns>   The instrument identity. </returns>
+    public static string QueryIdentity( string address, string deviceInterfaceString )
+    {
+        using cc.isr.VXI11.Client.Vxi11Client instrument = new();
+        instrument.ThreadExceptionOccurred += OnThreadException;
+        instrument.Connect( address, deviceInterfaceString );
+        return instrument.QueryLine( "*IDN?" ).response;
+    }
+
+    /// <summary>   Try query identity. </summary>
+    /// <param name="address">                  The instrument network IPv4 address. </param>
+    /// <param name="deviceInterfaceString">    The device interface string, e.g., inst0 or gpib0,4. </param>
+    /// <returns>   A string. </returns>
+    public static string TryQueryIdentity( string address, string deviceInterfaceString )
+    {
+        try
+        {
+            return QueryIdentity( address, deviceInterfaceString );
+        }
+        catch ( DeviceException ex )
+        {
+            return $"unable to query identity from TCPIP::{address}::{deviceInterfaceString}::INSTR because: {ex.Reason}({( int ) ex.Reason}) {ex.Message}";
+        }
+        catch ( Exception ex )
+        {
+            return $"unable to query identity from TCPIP::{address}::{deviceInterfaceString}::INSTR because: {ex.Message}";
+        }
+    }
+
+    #endregion
+
+
 }
+
 

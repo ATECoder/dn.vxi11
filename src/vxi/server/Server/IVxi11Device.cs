@@ -191,11 +191,11 @@ public interface IVxi11Device : INotifyPropertyChanged
     bool TrySelectClient( int linkId );
 
     /// <summary>
-    /// Gets a value indicating whether a valid link exists between the <see cref="Client.Vxi11Client"/>
+    /// Gets a value indicating whether a valid link exists between the VXI-11 client
     /// and the <see cref="Vxi11Server"/>.
     /// </summary>
     /// <value>
-    /// True if a valid device link exists between the <see cref="Client.Vxi11Client"/>
+    /// True if a valid device link exists between the VXI-11 client
     /// and <see cref="Vxi11Server"/>.
     /// </value>
     bool DeviceLinked( int clientId );

@@ -23,7 +23,7 @@ public class Vxi11DiscovererBoardcastTests
         {
             _classTestContext = context;
             Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
-            Vxi11Discoverer.EnumerateHosts();
+            Vxi11DiscovererTests.EnumerateHosts();
 
             Logger.Writer.LogInformation( $"Starting the embedded Portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
@@ -129,10 +129,10 @@ public class Vxi11DiscovererBoardcastTests
 
         foreach ( IPEndPoint endpoint in endpoints )
         {
-            Logger.Writer.LogInformation( $"{endpoint}: {VXI11.Vxi11Discoverer.QueryIdentity( endpoint.Address.ToString() )}" );
+            Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.QueryIdentity( endpoint.Address.ToString() )}" );
         }
 
-        Assert.AreEqual( Vxi11Discoverer.PingedHosts.Count, endpoints.Count, "Device count is expected to equal pinged hosts count." );
+        Assert.AreEqual( Vxi11DiscovererTests.PingedHosts.Count, endpoints.Count, "Device count is expected to equal pinged hosts count." );
 
     }
 
@@ -178,11 +178,11 @@ public class Vxi11DiscovererBoardcastTests
 
         foreach ( IPAddress ip in addresses )
         {
-            Logger.Writer.LogInformation( $"{ip}: {VXI11.Vxi11Discoverer.QueryIdentity( ip.ToString() )}" );
+            Logger.Writer.LogInformation( $"{ip}: {Vxi11DiscovererTests.QueryIdentity( ip.ToString() )}" );
         }
 
 
-        Assert.AreEqual( Vxi11Discoverer.PingedHosts.Count, addresses.Count, "Device count is expected to equal pinged hosts count." );
+        Assert.AreEqual( Vxi11DiscovererTests.PingedHosts.Count, addresses.Count, "Device count is expected to equal pinged hosts count." );
 
     }
 
@@ -206,14 +206,14 @@ public class Vxi11DiscovererBoardcastTests
             if ( endpoint.Port == OncRpcPortmapConstants.OncRpcPortmapPortNumber ) { actualCount++; }
 
             if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
-                Logger.Writer.LogInformation( $"{endpoint}: {VXI11.Vxi11Discoverer.QueryIdentity( endpoint.Address.ToString() )}" );
+                Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.QueryIdentity( endpoint.Address.ToString() )}" );
         }
 
         int expectedCount = 0;
-        foreach ( var host in Vxi11Discoverer.PingedHosts )
+        foreach ( var host in Vxi11DiscovererTests.PingedHosts )
         {
             // count only hosts that are know to respond to the enumeration of registered servers
-            if ( !Vxi11Discoverer.NonRespondingHosts().Contains( host.ToString() ) )
+            if ( !Vxi11DiscovererTests.NonRespondingHosts().Contains( host.ToString() ) )
             {
                 expectedCount++;
             }

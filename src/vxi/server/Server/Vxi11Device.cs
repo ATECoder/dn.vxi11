@@ -44,13 +44,13 @@ public partial class Vxi11Device : IVxi11Device
         this._deviceName = string.Empty;
         this.DeviceNameParser = new DeviceNameParser( string.Empty );
         this.DeviceName = string.Empty;
-        this.MaxReceiveLength = VXI11.Client.Vxi11Client.MaxReceiveLengthDefault;
+        this.MaxReceiveLength = CoreChannelClient.MaxReceiveLengthDefault;
         this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
         this.Host = string.Empty;
         this._host = string.Empty;
-        this.ReadTermination = VXI11.Client.Vxi11Client.ReadTerminationDefault;
-        this.WriteTermination = VXI11.Client.Vxi11Client.WriteTerminationDefault;
-        this._writeTermination = VXI11.Client.Vxi11Client.WriteTerminationDefault;
+        this.ReadTermination = CoreChannelClient.ReadTerminationDefault;
+        this.WriteTermination = CoreChannelClient.WriteTerminationDefault;
+        this._writeTermination = CoreChannelClient.WriteTerminationDefault;
 
         this.ServerClients = new();
         this.Instrument.PropertyChanged += this.OnInstrumentPropertyChanged;
@@ -491,12 +491,12 @@ public partial class Vxi11Device : IVxi11Device
     }
 
     /// <summary>
-    /// Gets a value indicating whether a valid link exists between the <see cref="Client.Vxi11Client"/>
+    /// Gets a value indicating whether a valid link exists between the VXI-11 client
     /// and the <see cref="Vxi11Server"/>.
     /// </summary>
     /// <param name="clientId"> Identifier for the client. </param>
     /// <returns>
-    /// True if a valid device link exists between the <see cref="Client.Vxi11Client"/>
+    /// True if a valid device link exists between the VXI-11 client
     /// and <see cref="Vxi11Server"/>.
     /// </returns>
     public bool DeviceLinked( int clientId )
