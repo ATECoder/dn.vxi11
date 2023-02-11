@@ -249,9 +249,9 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <value> The identity. </value>
     string Identity { get; set; }
 
-    /// <summary>   Gets or sets information describing the identity. </summary>
-    /// <value> A string tuple of (Manufacturer, Model, SerialNumber, FirmwareRevision ) . </value>
-    (string Manufacturer, string Model, string SerialNumber, string FirmwareRevision ) IdentityInfo { get; }
+    /// <summary>   Gets information describing the identity. </summary>
+    /// <value> The identity parser. </value>
+    public IdentityParser IdentityParser { get; }
 
     #endregion
 

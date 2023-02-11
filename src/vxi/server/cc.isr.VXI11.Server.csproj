@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <AssemblyName>cc.isr.VXI11.Server</AssemblyName>
+    <RootNamespace>cc.isr.VXI11</RootNamespace>
+
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputType>Library</OutputType>
+    <NoWarn>1591</NoWarn>
+
+    <!-- Display name -->
+    <ApplicationTitle>cc.isr.VXI11.Server</ApplicationTitle>
+
+    <!-- App Identifier -->
+    <ApplicationId>cc.isr.vxi11.server</ApplicationId>
+
+    <!-- NuGet -->
+    <IsPackable>true</IsPackable>
+    <PackageId>cc.isr.VXI11.Client</PackageId>
+    <Description>A pure C# implementation of VXI-11 servers, instruments and interfaces.</Description>
+    <PackageTags>VXI-11 Client</PackageTags>
+
+    <!-- Documentation -->
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\vxi\cc.isr.VXI11.csproj" />
+  </ItemGroup>
+
+</Project>

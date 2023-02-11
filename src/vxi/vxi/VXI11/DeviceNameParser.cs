@@ -103,6 +103,31 @@ public class DeviceNameParser
     public int? UsbTmcInterfaceNumber { get; set; }
 
     /// <summary>   Builds a device name. </summary>
+    /// <remarks>   2023-02-11. </remarks>
+    /// <returns>   A string. </returns>
+    public string BuildDeviceName()
+    {
+        return this.InterfaceFamily.Equals( GenericInterfaceFamily )
+            ? this.InterfaceNumber is null ? this.InterfaceFamily : BuildGenericDeviceName( this.InterfaceNumber ?? 0 )
+            : this.InterfaceFamily.Equals( GpibInterfaceFamily )
+                ? this.InterfaceNumber is null
+                    ? this.InterfaceFamily
+                    : this.PrimaryAddress is null
+                        ? BuildGpibDeviceName( this.InterfaceNumber ?? 0 )
+                        : this.SecondaryAddress is null
+                            ? BuildGpibDeviceName( this.InterfaceNumber ?? 0, this.PrimaryAddress ?? 0 )
+                            : BuildGpibDeviceName( this.InterfaceNumber ?? 0, this.PrimaryAddress ?? 0, this.SecondaryAddress ?? 0 )
+                : this.InterfaceFamily.Equals( UsbInterfaceFamily )
+                    ? this.InterfaceNumber is null
+                        ? this.InterfaceFamily
+                        : this.ManufacturerId is null
+                            ? BuildDeviceName( this.InterfaceFamily, this.InterfaceNumber ?? 0 )
+                            : BuildUsbDeviceName( this.InterfaceNumber ?? 0, this.ManufacturerId ?? 0, this.ModelCode ?? 0, this.SerialNumber ?? string.Empty )
+                    : string.Empty;
+
+    }
+
+    /// <summary>   Builds a device name. </summary>
     /// <exception cref="ArgumentNullException">        Thrown when one or more required arguments
     ///                                                 are null. </exception>
     /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
@@ -174,7 +199,7 @@ public class DeviceNameParser
     /// <param name="primaryAddress">   The primary address. </param>
     /// <param name="secondaryAddress"> The secondary address. </param>
     /// <returns>   A string. </returns>
-    public static string BuildGpibIDeviceName( int interfaceNumber, int primaryAddress, int secondaryAddress )
+    public static string BuildGpibDeviceName( int interfaceNumber, int primaryAddress, int secondaryAddress )
     {
         return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
                 ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),

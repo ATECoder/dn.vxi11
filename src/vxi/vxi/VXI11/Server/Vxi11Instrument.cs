@@ -40,7 +40,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public Vxi11Instrument( string identity = "INTEGRATED SCIENTIFIC RESOURCES,MODEL IEEE488Mock,001,1.0.8434" )
     {
         this.MessageLog = new CircularList<(int LinkId, char IO, DateTimeOffset Timestamp, String Value)>( IOMessageCapacity );
-                this.Identity = identity;
+        this.IdentityParser = new IdentityParser( identity );
+        this.Identity = identity;
         this._identity = identity;
         this._readBuffer = Array.Empty<byte>();
         this.CharacterEncoding = CoreChannelClient.EncodingDefault;
@@ -486,23 +487,15 @@ public partial class Vxi11Instrument : IVxi11Instrument
         set {
             if ( this.OnPropertyChanged( ref this._identity, value ) )
             {
-                string[] values = string.IsNullOrWhiteSpace( value )
-                    ? new string[] { "Manufacturer", "Model", "Serial", "Firmware" }
-                    : value.Split( ',' );
-
-                this._identityInfo = (values.Length > 0 ? values[0] : "Manufacturer",
-                                      values.Length > 1 ? values[1] : "Model",
-                                      values.Length > 2 ? values[2] : "Serial",
-                                      values.Length > 3 ? values[3] : "Firmware");
-                this.OnPropertyChanged( nameof( Vxi11Instrument.IdentityInfo ) );
+                this.IdentityParser.Parse( value );
+                this.OnPropertyChanged( nameof( Vxi11Instrument.IdentityParser ) );
             }
         }
     }
 
-    private (string Manufacturer, string Model, string SerialNumber, string FirmwareRevision) _identityInfo;
     /// <summary>   Gets information describing the identity. </summary>
-    /// <value> A string tuple of (Manufacturer, Model, SerialNumber, FirmwareRevision ) . </value>
-    public (string Manufacturer, string Model, string SerialNumber, string FirmwareRevision) IdentityInfo => this._identityInfo;
+    /// <value> The identity parser. </value>
+    public IdentityParser IdentityParser { get; }
 
     #endregion
 
