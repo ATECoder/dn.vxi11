@@ -96,7 +96,7 @@ public partial class Vxi11Device : IVxi11Device
     {
         e.ErrorCodeValue = this.Instrument is null
                                 ? DeviceErrorCode.DeviceNotAccessible
-                                : this.Instrument.Abort().ErrorCode;
+                                : this.Instrument.Abort();
     }
 
     #endregion

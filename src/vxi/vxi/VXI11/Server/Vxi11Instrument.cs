@@ -89,7 +89,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.CLS, Vxi11InstrumentOperationType.Write )]
-    public bool CLS()
+    public virtual bool CLS()
     {
         // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared on device clear.
 
@@ -109,7 +109,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <param name="standardEventStatusMask">  The standard event status mask. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESE, Vxi11InstrumentOperationType.Write )]
-    public bool ESE( byte standardEventStatusMask )
+    public virtual bool ESE( byte standardEventStatusMask )
     {
         this.StandardEventStatus &= ~StandardEvents.OperationComplete;
         this.StandardEventStatusMask = standardEventStatusMask;
@@ -120,7 +120,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// Reads Standard Event Status: <see cref="Vxi11InstrumentCommands.ESERead"/>
     /// </summary>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESERead, Vxi11InstrumentOperationType.Read )]
-    public string ESERead()
+    public virtual string ESERead()
     {
 
         // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared reading ESE.
@@ -139,7 +139,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// </remarks>
     /// <returns>   A string. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESRRead, Vxi11InstrumentOperationType.Read )]
-    public string ESRRead()
+    public virtual string ESRRead()
     {
         // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared reading ESR.
 
@@ -150,7 +150,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <summary>   Reads the device identity string: <see cref="Vxi11InstrumentCommands.IDNRead"/></summary>
     /// <returns>   A string. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.IDNRead, Vxi11InstrumentOperationType.Read )]
-    public string IDNRead()
+    public virtual string IDNRead()
     {
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
         return this.Identity;
@@ -169,7 +169,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.OPC, Vxi11InstrumentOperationType.Write )]
-    public bool OPC()
+    public virtual bool OPC()
     {
         this.StandardEventStatus |= StandardEvents.OperationComplete;
         return true;
@@ -187,7 +187,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// </remarks>
     /// <returns>   Returns 1 when all previous commands complete. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.OPCRead, Vxi11InstrumentOperationType.Read )]
-    public string OPCRead()
+    public virtual string OPCRead()
     {
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
         return "1";
@@ -201,7 +201,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.RST, Vxi11InstrumentOperationType.Write )]
-    public bool RST()
+    public virtual bool RST()
     {
         // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared on reset.
 
@@ -230,7 +230,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <param name="serviceRequestEventMask">  The service request event mask. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.SRE, Vxi11InstrumentOperationType.Write )]
-    public bool SRE( int serviceRequestEventMask )
+    public virtual bool SRE( int serviceRequestEventMask )
     {
         this.ServiceRequestEventMask = serviceRequestEventMask;
         return true;
@@ -239,7 +239,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <summary>   Reads the service request enabled status: <see cref="Vxi11InstrumentCommands.SRERead"/> </summary>
     /// <returns>   A string. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.SRERead, Vxi11InstrumentOperationType.Read )]
-    public string SRERead()
+    public virtual string SRERead()
     {
         // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared reading SRE.
 
@@ -247,21 +247,38 @@ public partial class Vxi11Instrument : IVxi11Instrument
         return (( byte) this.ServiceRequestEventMask).ToString();
     }
 
-    /// <summary>   Gets or sets a value indicating whether the status byte active. </summary>
-    /// <value> True if status byte active, false if not. </value>
-    public bool StatusByteActive { get; set; }
+    private bool _requestingServiceEventRaised;
+    /// <summary>
+    /// Gets or sets a value indicating whether the <see cref="RequestingService"/> event was raised 
+    /// awaiting for the client to read the <see cref="ServiceRequestStatus"/> byte at which point
+    /// the <see cref="ServiceRequests.RequestingService"/> bit is turned on and this value
+    /// is set to <see langword="false"/>.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="RequestingServiceEventRaised"/> is set <see langword="true"/> upon
+    /// initiating the <see cref="RequestingService"/> event. The value is reset when the status byte
+    /// is read by the client thus acknowledging that the service request was handled.
+    /// </remarks>
+    /// <value> True if status byte signaling is active, false if not. </value>
+    public virtual bool RequestingServiceEventRaised
+    {
+        get => this._requestingServiceEventRaised;
+        set => _ = this.OnPropertyChanged( ref this._requestingServiceEventRaised, value );
+    }
 
     /// <summary>   Reads status byte. </summary>
     /// <remarks>   2023-02-10. </remarks>
     /// <returns>   The status byte. </returns>
-    public byte ReadStatusByte()
+    public virtual byte ReadStatusByte()
     {
-        if ( this.StatusByteActive )
+        if ( this.RequestingServiceEventRaised )
         {
             // set bit 6 (of 0..7) if SRQ is activated
 
             this.ServiceRequestStatus |= ServiceRequests.RequestingService;
-            this.StatusByteActive = false;
+
+            // reset the event indicator.
+            this.RequestingServiceEventRaised = false;
         }
 
         byte value = ( byte ) ( int )this.ServiceRequestStatus;
@@ -276,7 +293,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// Read the status byte: *STB?
     /// </summary>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.STBRead, Vxi11InstrumentOperationType.Read )]
-    public string STBRead()
+    public virtual string STBRead()
     {
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
         return this.ReadStatusByte().ToString();
@@ -290,7 +307,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.TRG, Vxi11InstrumentOperationType.Write )]
-    public bool TRG()
+    public virtual bool TRG()
     {
         return true;
     }
@@ -302,7 +319,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// </remarks>
     /// <returns>   Returns +0 (pass) or +1 (one or more tests failed). </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.TSTRead, Vxi11InstrumentOperationType.Read )]
-    public string TSTRead()
+    public virtual string TSTRead()
     {
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
         return "0";
@@ -317,7 +334,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// </remarks>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.WAI, Vxi11InstrumentOperationType.Write )]
-    public bool WAI()
+    public virtual bool WAI()
     {
         return true;
     }
@@ -346,7 +363,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     private bool _longOperationRunning;
     /// <summary>   Gets or sets a value indicating whether the long operation running. </summary>
     /// <value> True if long operation running, false if not. </value>
-    public bool LongOperationRunning
+    public virtual bool LongOperationRunning
     {
         get => this._longOperationRunning;
         set => _ = this.OnPropertyChanged( ref this._longOperationRunning, value );
@@ -382,7 +399,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     /// <summary>   Stops the long operation. </summary>
     /// <param name="cancelSource"> The cancel source. </param>
-    public void StopLongOperation( CancellationTokenSource cancelSource )
+    public virtual void StopLongOperation( CancellationTokenSource cancelSource )
     {
         cancelSource.Cancel();
     }
@@ -395,7 +412,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <param name="timeout">      (Optional) The timeout in milliseconds. </param>
     /// <param name="loopDelay">    (Optional) The loop delay in milliseconds. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    public bool TryStopLongOperation( int timeout = 100, int loopDelay = 5 )
+    public virtual bool TryStopLongOperation( int timeout = 100, int loopDelay = 5 )
     {
         List<Exception> exceptions = new();
 
@@ -461,7 +478,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <summary>
     /// Device identification string
     /// </summary>
-    public string Identity
+    public virtual string Identity
     {
         get => this._identity;
         set => _ = this.OnPropertyChanged( ref this._identity, value );
@@ -474,7 +491,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     private bool _interruptEnabled;
     /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
     /// <value> True if interrupt enabled, false if not. </value>
-    public bool InterruptEnabled => this._interruptEnabled;
+    public virtual bool InterruptEnabled => this._interruptEnabled;
 
     /// <summary>   the Handle of the interrupt as received when getting 
     ///             the <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/> RPC. </summary>
@@ -484,7 +501,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <remarks>   2023-02-09. </remarks>
     /// <param name="enable">   True to enable, false to disable. </param>
     /// <param name="handle">   The handle. </param>
-    public void EnableInterrupt( bool enable, byte[] handle )
+    public virtual void EnableInterrupt( bool enable, byte[] handle )
     {
         this._interruptHandle = handle;
         _ = this.OnPropertyChanged( ref this._interruptEnabled, enable, nameof( this.InterruptEnabled ) );
@@ -497,7 +514,16 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <param name="e">    Event information to send to registered event handlers. </param>
     protected virtual void OnRequestingService( Vxi11EventArgs e )
     {
-        if ( this.InterruptEnabled && e is not null ) RequestingService?.Invoke( this, e );
+        if ( this.InterruptEnabled && e is not null )
+        {
+            // set the flag indicating the service request was signaled
+
+            this.RequestingServiceEventRaised = true;
+
+            // invoke the service requesting event
+
+            RequestingService?.Invoke( this, e );
+        }
     }
 
     private int _activeClientId;
@@ -514,10 +540,18 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     #region " instrument state "
 
+    /// <summary>   Initializes the instrument. </summary>
+    /// <remarks>
+    /// override this method when sub-classing this class to initialize values such as the identity.
+    /// </remarks>
+    public virtual void Initialize()
+    {
+    }
+
     private bool _lockEnabled;
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
     /// <value> True if lock enabled, false if not. </value>
-    public bool LockEnabled
+    public virtual bool LockEnabled
     {
         get => this._lockEnabled;
         set => _ = this.OnPropertyChanged( ref this._lockEnabled, value );
@@ -526,7 +560,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     private bool _remoteEnabled;
     /// <summary>   Gets or sets a value indicating whether the remote is enabled. </summary>
     /// <value> True if remote enabled, false if not. </value>
-    public bool RemoteEnabled
+    public virtual bool RemoteEnabled
     {
         get => this._remoteEnabled;
         set => _ = this.OnPropertyChanged( ref this._remoteEnabled, value );
@@ -563,22 +597,22 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// The operation of <c>device_abort</c> SHALL NOT be affected by locking  </para>
     /// </remarks>
     /// <returns>   A DeviceError. </returns>
-    public DeviceError Abort()
+    public virtual DeviceErrorCode Abort()
     {
         if ( this.LongOperationRunning )
         {
             try
             {
                 return this.TryStopLongOperation()
-                    ? new DeviceError()
-                    : new DeviceError( DeviceErrorCode.IOError );
+                    ? DeviceErrorCode.NoError
+                    : DeviceErrorCode.IOError;
             }
             catch ( Exception )
             {
-                return new DeviceError( DeviceErrorCode.IOError );
+                return DeviceErrorCode.IOError;
             }
         }
-        return new DeviceError();
+        return DeviceErrorCode.NoError;
     }
 
     #endregion
@@ -638,7 +672,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// </remarks>
     /// <param name="deviceReadParameters"> Device read parameters. </param>
     /// <returns>   A Device_ReadResp. </returns>
-    public DeviceReadResp DeviceRead( DeviceReadParms deviceReadParameters )
+    public virtual DeviceReadResp DeviceRead( DeviceReadParms deviceReadParameters )
     {
         DeviceReadResp readRes = new();
         if ( this.CurrentOperationType == Vxi11InstrumentOperationType.None || this.CurrentOperationType == Vxi11InstrumentOperationType.Write )
@@ -646,7 +680,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
             this._readBuffer = Array.Empty<byte>();
             _ = this._asyncLocker.Reset();
         }
-        if ( !this._asyncLocker.WaitOne( this.WaitOnOutTime ) )
+        if ( !this._asyncLocker.WaitOne( deviceReadParameters.IOTimeout ) ) 
         {
             readRes.SetData( this._readBuffer );
             readRes.ErrorCode = DeviceErrorCode.IOTimeout; // timeout
@@ -736,7 +770,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <param name="compoundScpiCommand">  The compound SCPI command, which might consist of
     ///                                     commands separated with ';' or new line. </param>
     /// <returns>   A DeviceErrorCode. </returns>
-    public DeviceErrorCode DeviceWrite( string compoundScpiCommand )
+    public virtual DeviceErrorCode DeviceWrite( string compoundScpiCommand )
     {
         if ( string.IsNullOrWhiteSpace( compoundScpiCommand ) ) return DeviceErrorCode.IOError;
 
@@ -779,7 +813,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     /// <summary>   Enumerates the instrument operation methods. </summary>
     /// <returns>   A List{MethodInfo}; </returns>
-    public List<MethodInfo> InstrumentOperations()
+    public virtual List<MethodInfo> InstrumentOperations()
     {
         if ( this._instrumentOperations is null || this._instrumentOperations.Count == 0 )
         {
@@ -949,19 +983,10 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// system's default encoding is to be used.
     /// </summary>
     /// <value> The character encoding. </value>
-    public Encoding CharacterEncoding
+    public virtual Encoding CharacterEncoding
     {
         get => this._characterEncoding;
         set => _ = this.SetProperty( ref this._characterEncoding, value );
-    }
-
-    private int _waitOnOutTime = 1000;
-    /// <summary>   Timeout wait time ms. </summary>
-    /// <value> The wait on out time. </value>
-    public int WaitOnOutTime
-    {
-        get => this._waitOnOutTime;
-        set => _ = this.SetProperty( ref this._waitOnOutTime, value );
     }
 
     /// <summary>
@@ -977,7 +1002,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     private DeviceErrorCode _lastDeviceError;
     /// <summary>   Gets or sets the last device error. </summary>
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
-    public DeviceErrorCode LastDeviceError
+    public virtual DeviceErrorCode LastDeviceError
     {
         get => this._lastDeviceError;
         set => _ = this.SetProperty( ref this._lastDeviceError, value );

@@ -136,9 +136,19 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <returns>   A string. </returns>
     string SRERead();
 
-    /// <summary>   Gets or sets a value indicating whether the status byte active. </summary>
-    /// <value> True if status byte active, false if not. </value>
-    bool StatusByteActive { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether the <see cref="RequestingService"/> event was raised 
+    /// awaiting for the client to read the <see cref="ServiceRequestStatus"/> byte at which point
+    /// the <see cref="ServiceRequests.RequestingService"/> bit is turned on and this value
+    /// is set to <see langword="false"/>.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="RequestingServiceEventRaised"/> is set <see langword="true"/> upon
+    /// initiating the <see cref="RequestingService"/> event. The value is reset when the status byte
+    /// is read by the client thus acknowledging that the service request was handled.
+    /// </remarks>
+    /// <value> True if status byte signaling is active, false if not. </value>
+    bool RequestingServiceEventRaised { get; set; }
 
     /// <summary>   Reads status byte. </summary>
     /// <remarks>   2023-02-10. </remarks>
@@ -263,6 +273,12 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     #region " instrument state "
 
+    /// <summary>   Initializes the instrument. </summary>
+    /// <remarks>
+    /// override this method when sub-classing this class to initialize values such as the identity.
+    /// </remarks>
+    public void Initialize();
+
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
     /// <value> True if lock enabled, false if not. </value>
     public bool LockEnabled { get; set; }
@@ -275,7 +291,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     #region " RPC implementations "
 
-    /// <summary>   Aborts and returns the <see cref="DeviceError"/>. </summary>
+    /// <summary>   Aborts and returns the <see cref="DeviceErrorCode"/>. </summary>
     /// <remarks>
     /// To successfully complete a <c>device_abort</c> RPC, a network instrument server SHALL: <para>
     /// 
@@ -301,7 +317,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// 
     /// The operation of <c>device_abort</c> SHALL NOT be affected by locking  </para>
     /// </remarks>
-    DeviceError Abort();
+    DeviceErrorCode Abort();
 
     #endregion
 
@@ -452,10 +468,6 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <value> The number of I/O messages, which, in fact, flags the property change flag that can be used to 
     /// indicate the availability of new messages. </value>
     int MessageLogCount { get; set; }
-
-    /// <summary>   Timeout wait time ms. </summary>
-    /// <value> The wait on out time. </value>
-    public int WaitOnOutTime { get; set; }
 
     #endregion
 }
