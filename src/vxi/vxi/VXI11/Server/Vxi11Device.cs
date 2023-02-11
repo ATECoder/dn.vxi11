@@ -713,7 +713,7 @@ public partial class Vxi11Device : IVxi11Device
 
                 // TODO: Implement the specifications as defined above.
 
-                // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared on device clear.
+                reply.ErrorCode = this.Instrument.DeviceClear( request.Flags, request.IOTimeout );
            }
 
         }
@@ -800,7 +800,10 @@ public partial class Vxi11Device : IVxi11Device
         return reply;
     }
 
-    /// <summary>   Enables device local control. </summary>
+    /// <summary>
+    /// The device_local RPC is used to place a device in a local state wherein all programmable
+    /// local controls are enabled.
+    /// </summary>
     /// <remarks>
     /// To successfully complete a <c>device_local</c> RPC, a network instrument server SHALL: <para>
     /// 1. Place the associated device in a local state. </para><para>
@@ -818,8 +821,8 @@ public partial class Vxi11Device : IVxi11Device
     /// 
     /// If some other link has the lock, <c>device_local</c> SHALL examine the <c>waitlock</c> flag in
     /// <c>flags</c>. If the flag is set, <c>device_local</c> SHALL block until the lock is free. If
-    /// the flag is not set, <c>device_local</c> SHALL terminate with error set to 11, 
-    /// device locked by another link. </para><para>
+    /// the flag is not set, <c>device_local</c> SHALL terminate with error set to 11, device locked
+    /// by another link. </para><para>
     /// 
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_local</c>
     /// SHALL terminate with error set to 11, device locked by another link. </para><para>
@@ -861,6 +864,7 @@ public partial class Vxi11Device : IVxi11Device
                 // TODO: Implement the specifications as defined above.
 
                 this.RemoteEnabled = false;
+                this.Instrument.DeviceLocal( request.Flags, request.IOTimeout );
             }
         }
 
@@ -868,7 +872,10 @@ public partial class Vxi11Device : IVxi11Device
         return reply;
     }
 
-    /// <summary>   Enables device remote control. </summary>
+    /// <summary>
+    /// The device_remote RPC is used to place a device in a remote state wherein all programmable
+    /// local controls are disabled.
+    /// </summary>
     /// <remarks>
     /// Since not all devices directly support a remote state, how this operation is executed depends
     /// upon the interface between the network instrument server and the device. <para>
@@ -888,7 +895,8 @@ public partial class Vxi11Device : IVxi11Device
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_remote</c>
     /// SHALL terminate with error set to 11, device locked by another link.  </para><para>
     /// 
-    /// If after at least <c>io_timeout</c> milliseconds the operation is not complete, <c>device_remote</c>
+    /// If after at least <c>io_timeout</c> milliseconds the operation is not complete, <c>
+    /// device_remote</c>
     /// SHALL terminate with error set to 15, I/O timeout.  </para><para>
     /// 
     /// If the network instrument server encounters a device specific I/O error while attempting to
@@ -922,8 +930,8 @@ public partial class Vxi11Device : IVxi11Device
 
                 // TODO: Implement the specifications as defined above.
 
-                // TODO: Add device code
                 this.RemoteEnabled = true;
+                this.Instrument.DeviceRemote( request.Flags, request.IOTimeout );
             }
         }
 
@@ -1045,7 +1053,7 @@ public partial class Vxi11Device : IVxi11Device
 
                 // TODO: Implement the specifications as defined above.
 
-                // TODO: Add device code
+                reply.ErrorCode = this.Instrument.DeviceTrigger( request.Flags, request.IOTimeout );
             }
         }
 

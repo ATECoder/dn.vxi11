@@ -1,4 +1,7 @@
+using System.Net;
 using System.Reflection;
+using System.Threading;
+
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.EnumExtensions;
 using cc.isr.VXI11.Logging;
@@ -475,14 +478,31 @@ public partial class Vxi11Instrument : IVxi11Instrument
     #region  " instrument operation members "
 
     private string _identity;
-    /// <summary>
-    /// Device identification string
-    /// </summary>
-    public virtual string Identity
+    /// <summary>   Gets or sets the identity. </summary>
+    /// <value> The identity. </value>
+    public string Identity
     {
         get => this._identity;
-        set => _ = this.OnPropertyChanged( ref this._identity, value );
+        set {
+            if ( this.OnPropertyChanged( ref this._identity, value ) )
+            {
+                string[] values = string.IsNullOrWhiteSpace( value )
+                    ? new string[] { "Manufacturer", "Model", "Serial", "Firmware" }
+                    : value.Split( ',' );
+
+                this._identityInfo = (values.Length > 0 ? values[0] : "Manufacturer",
+                                      values.Length > 1 ? values[1] : "Model",
+                                      values.Length > 2 ? values[2] : "Serial",
+                                      values.Length > 3 ? values[3] : "Firmware");
+                this.OnPropertyChanged( nameof( Vxi11Instrument.IdentityInfo ) );
+            }
+        }
     }
+
+    private (string Manufacturer, string Model, string SerialNumber, string FirmwareRevision) _identityInfo;
+    /// <summary>   Gets information describing the identity. </summary>
+    /// <value> A string tuple of (Manufacturer, Model, SerialNumber, FirmwareRevision ) . </value>
+    public (string Manufacturer, string Model, string SerialNumber, string FirmwareRevision) IdentityInfo => this._identityInfo;
 
     #endregion
 
@@ -674,6 +694,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <returns>   A Device_ReadResp. </returns>
     public virtual DeviceReadResp DeviceRead( DeviceReadParms deviceReadParameters )
     {
+        // TODO: Go over the specs in the remarks above to ensure the correct errors are reported.
+
         DeviceReadResp readRes = new();
         if ( this.CurrentOperationType == Vxi11InstrumentOperationType.None || this.CurrentOperationType == Vxi11InstrumentOperationType.Write )
         {
@@ -772,6 +794,9 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <returns>   A DeviceErrorCode. </returns>
     public virtual DeviceErrorCode DeviceWrite( string compoundScpiCommand )
     {
+
+        // TODO: Go over the specs in the remarks above to ensure the correct errors are reported.
+
         if ( string.IsNullOrWhiteSpace( compoundScpiCommand ) ) return DeviceErrorCode.IOError;
 
         // holds one or more SCPI commands each with its arguments
@@ -933,6 +958,172 @@ public partial class Vxi11Instrument : IVxi11Instrument
         }
         this.LastDeviceError = result;
         return result;
+    }
+
+    /// <summary>   Performs a trigger. </summary>
+    /// <remarks>
+    /// If the device does not support a trigger and the network instrument server is able to detect
+    /// this, <c>device_trigger</c> SHALL terminate and set error to 8, operation not supported. <para>
+    /// 
+    /// IEEE 488.1 and similar interfaces may not be able to detect that the device does not support
+    /// a trigger. </para><para>
+    /// The <c>link id</c> parameter is compared against the link identifiers. If none match,
+    /// <c>device_trigger</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
+    /// 
+    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <c>waitlock</c> flag
+    /// in <c>flags</c> .If the flag is set, <c>device_trigger</c> SHALL block until the lock is free
+    /// before sending the trigger. If the flag is not set, <c>device_trigger</c> SHALL terminate and
+    /// set error to 11, device locked by another link. </para><para>
+    /// 
+    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_trigger</c>
+    /// SHALL terminate with error set to 11, device locked by another link. </para><para>
+    /// 
+    /// If after at least <c>io_timeout</c> milliseconds the operation is not complete, <c>
+    /// device_trigger</c>
+    /// SHALL terminate with error set to 15, I/O timeout. </para><para>
+    /// 
+    /// If the network instrument server encounters a device specific I/O error while sending to
+    /// trigger , <c>device_trigger</c> SHALL terminate with error set to 17, I/O error. </para><para>
+    /// 
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_trigger</c>
+    /// SHALL terminate with error set to 23, abort. </para>
+    /// </remarks>
+    /// <param name="flags">        The flags. </param>
+    /// <param name="ioTimeout">    The i/o timeout. </param>
+    /// <returns>
+    /// A response of type <see cref="DeviceErrorCode"/> to send to the remote procedure call.
+    /// </returns>
+    public virtual DeviceErrorCode DeviceTrigger( DeviceOperationFlags flags, int ioTimeout )
+    {
+        // TODO: Implement
+
+        return flags == DeviceOperationFlags.None && ioTimeout > 0 ? DeviceErrorCode.NoError : DeviceErrorCode.NoError;
+    }
+
+    /// <summary>   Device clear. </summary>
+    /// <remarks>
+    /// Since not all devices directly support a clear operation, how this operation is executed
+    /// depends upon the interface between the network instrument server and the device. <para>
+    /// If the device does not support a clear operation and the network instrument server is able to
+    /// detect this, device_clear SHALL terminate and set error to 8, operation not supported. </para>
+    /// <para>
+    /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
+    /// device_clear SHALL terminate with error set to 4, invalid link identifier. </para><para>
+    /// If some other link has the lock, device_clear SHALL examine the <c>waitlock</c> flag in <c>
+    /// flags</c> . If the flag is set, device_clear SHALL block until the lock is free. If the flag
+    /// is not set, device_clear SHALL terminate with error set to 11, device locked by another link.
+    /// </para><para>
+    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, device_clear SHALL
+    /// terminate with error set to 11, device locked by another device. </para><para>
+    /// If after at least <c>io_timeout</c> milliseconds the operation is not complete, device_clear
+    /// SHALL terminate with error set to 15, I/O timeout. </para><para>
+    /// If the network instrument server encounters a device specific I/O error while attempting to
+    /// clear the device, device_clear SHALL terminate with error set to 17, I/O error. </para><para>
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, device_clear SHALL
+    /// terminate with error set to 23, abort. </para>
+    /// </remarks>
+    /// <param name="flags">        The flags. </param>
+    /// <param name="ioTimeout">    The i/o timeout. </param>
+    /// <returns>
+    /// A response of type <see cref="DeviceErrorCode"/> to send to the remote procedure call.
+    /// </returns>
+    public virtual DeviceErrorCode DeviceClear( DeviceOperationFlags flags, int ioTimeout )
+    {
+        // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared on device clear.
+
+        return flags == DeviceOperationFlags.None && ioTimeout > 0 ? DeviceErrorCode.NoError : DeviceErrorCode.NoError;
+    }
+
+    /// <summary>
+    /// The device_remote RPC is used to place a device in a remote state wherein all programmable
+    /// local controls are disabled.
+    /// </summary>
+    /// <remarks>
+    /// Since not all devices directly support a remote state, how this operation is executed depends
+    /// upon the interface between the network instrument server and the device. <para>
+    /// 
+    /// If the device does not support a remote state and the network instrument server is able to
+    /// detect this,
+    /// <c>device_remote</c> SHALL terminate and set error to 8, operation not supported. </para><para>
+    /// 
+    /// The <c>link id</c> parameter is compared against the active link identifiers. If none match, <c>
+    /// device_remote</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
+    /// 
+    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <c>waitlock</c> flag
+    /// in <c>flags</c> . If the flag is set, <c>device_remote</c> SHALL block until the lock is
+    /// free. If the flag is not set, <c>device_remote</c> SHALL terminate with error set to 11,
+    /// device locked by another link.  </para><para>
+    /// 
+    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_remote</c>
+    /// SHALL terminate with error set to 11, device locked by another link.  </para><para>
+    /// 
+    /// If after at least <c>io_timeout</c> milliseconds the operation is not complete, <c>
+    /// device_remote</c>
+    /// SHALL terminate with error set to 15, I/O timeout.  </para><para>
+    /// 
+    /// If the network instrument server encounters a device specific I/O error while attempting to
+    /// place the device in the remote state, <c>device_remote</c> SHALL terminate with error set to
+    /// 17, I/O error. </para><para>
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_remote</c>
+    /// SHALL terminate with error set to 23, abort. </para>
+    /// </remarks>
+    /// <param name="flags">        The flags. </param>
+    /// <param name="ioTimeout">    The i/o timeout. </param>
+    /// <returns>
+    /// A response of type <see cref="DeviceErrorCode"/> to send to the remote procedure call.
+    /// </returns>
+    public virtual DeviceErrorCode DeviceRemote( DeviceOperationFlags flags, int ioTimeout )
+    {
+        this.RemoteEnabled = true;
+        return flags == DeviceOperationFlags.None && ioTimeout > 0 ? DeviceErrorCode.NoError : DeviceErrorCode.NoError;
+    }
+
+    /// <summary>
+    /// The device_local RPC is used to place a device in a local state wherein all programmable
+    /// local controls are enabled.
+    /// </summary>
+    /// <remarks>
+    /// To successfully complete a <c>device_local</c> RPC, a network instrument server SHALL: <para>
+    /// 1. Place the associated device in a local state. </para><para>
+    /// 2. Return with error set to zero, no error, to indicate successful completion. </para><para>
+    /// 
+    /// Since not all devices directly support a local state, how this operation is executed depends
+    /// upon the interface between the network instrument server and the device. </para><para>
+    /// If the device does not support a local state and the network instrument server is able to
+    /// detect this, <c>device_local</c> SHALL terminate and set error to 8, operation not supported.
+    /// </para>
+    /// <para>
+    /// 
+    /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
+    /// <c>device_local</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
+    /// 
+    /// If some other link has the lock, <c>device_local</c> SHALL examine the <c>waitlock</c> flag in
+    /// <c>flags</c>. If the flag is set, <c>device_local</c> SHALL block until the lock is free. If
+    /// the flag is not set, <c>device_local</c> SHALL terminate with error set to 11, device locked
+    /// by another link. </para><para>
+    /// 
+    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_local</c>
+    /// SHALL terminate with error set to 11, device locked by another link. </para><para>
+    /// 
+    /// If after at least <c>io_timeout</c> milliseconds the operation is not complete, <c>
+    /// device_local</c> SHALL terminate with error set to 15, I/O timeout. </para><para>
+    /// 
+    /// If the network instrument server encounters a device specific I/O error while attempting to
+    /// place the device in the local state, <c>device_local</c> SHALL terminate with error set to 17,
+    /// I/O error. </para><para>
+    /// 
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_local</c>
+    /// SHALL terminate with error set to 23, abort. </para>
+    /// </remarks>
+    /// <param name="flags">        The flags. </param>
+    /// <param name="ioTimeout">    The i/o timeout. </param>
+    /// <returns>
+    /// A response of type <see cref="DeviceErrorCode"/> to send to the remote procedure call.
+    /// </returns>
+    public virtual DeviceErrorCode DeviceLocal( DeviceOperationFlags flags, int ioTimeout )
+    {
+        this.RemoteEnabled = false;
+        return flags == DeviceOperationFlags.None && ioTimeout > 0 ? DeviceErrorCode.NoError : DeviceErrorCode.NoError;
     }
 
     #endregion
