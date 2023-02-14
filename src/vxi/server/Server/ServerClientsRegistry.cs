@@ -2,20 +2,27 @@
 using System.Collections.Concurrent;
 using System.ComponentModel.Design;
 
+using cc.isr.VXI11.Codecs;
+
 namespace cc.isr.VXI11.Server;
 
 
 /// <summary>   Manager for server clients. </summary>
 /// <remarks>   2023-02-09. </remarks>
-public class ServerClients
+public class ServerClientsRegistry
 {
 
     /// <summary>   Default constructor. </summary>
-    public ServerClients()
+    public ServerClientsRegistry()
     {
         this.LinkedClients = new();
-        this.ClientLinks = new(); 
+        this.ClientLinks = new();
+        this.ClientsQueue = new();
     }
+
+    /// <summary>   Gets or sets a queue of clients locking the instrument. </summary>
+    /// <value> A queue of clients locking the instrument. </value>
+    private ConcurrentQueue<ServerClientInfo> ClientsQueue { get; set; }
 
     /// <summary>   Gets or sets the dictionary of <see cref="ServerClientInfo"/> keyed by <see cref="ServerClientInfo.LinkId"/>. </summary>
     /// <value> The <see cref="ServerClientInfo"/> keyed by <see cref="ServerClientInfo.LinkId"/>. </value>
@@ -91,16 +98,32 @@ public class ServerClients
         return this.LinkedClients.ContainsKey( linkId );
     }
 
+    /// <summary>   Adds an active client. </summary>
+    /// <remarks>   2023-02-13. </remarks>
+    /// <param name="clientInfo">   Information describing the client. </param>
+    /// <returns>   The link id for the added client. </returns>
+    private int AddActiveClient( ServerClientInfo clientInfo )
+    {
+        // make this client the active server client and sent it the reply.
+        _ = this.LinkedClients.GetOrAdd( clientInfo.LinkId, clientInfo );
+        clientInfo.LockReleaseTime = clientInfo.LockDevice
+            ? DateTime.UtcNow.AddMilliseconds( clientInfo.LockTimeout )
+            : DateTime.UtcNow;
+        this.ClientsQueue.Enqueue( clientInfo );
+        return this.ClientLinks.GetOrAdd( clientInfo.ClientId, clientInfo.LinkId );
+    }
+
     /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
-    /// <param name="clientId"> Identifier for the client. </param>
-    /// <param name="linkId">   Identifier for the link. </param>
+    /// <remarks>   2023-02-13. </remarks>
+    /// <param name="createLinkParameters"> The parameters defining the created link. </param>
+    /// <param name="linkId">       Identifier for the link. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    public bool AddClient( int clientId, int linkId )
+    public bool AddClient( CreateLinkParms createLinkParameters, int linkId )
     {
         if ( this.LinkedClients.ContainsKey( linkId ) ) { return false; }
-        if ( this.ClientLinks.ContainsKey( clientId ) ) { return false; }
-        this.ActiveServerClient = this.LinkedClients.GetOrAdd( linkId, new ServerClientInfo( clientId, linkId ) );
-        int link = this.ClientLinks.GetOrAdd( clientId, linkId );
+        if ( this.ClientLinks.ContainsKey( createLinkParameters.ClientId) ) { return false; }
+        this.ActiveServerClient = new ( createLinkParameters, linkId );
+        int link = this.AddActiveClient( this.ActiveServerClient );
         return link == this.ActiveServerClient.LinkId;
     }
 
@@ -112,6 +135,7 @@ public class ServerClients
         {
             bool removed = this.LinkedClients.TryRemove( linkId, out ServerClientInfo removedClient )
                          & this.ClientLinks.TryRemove( removedClient.ClientId, out int removedLink );
+
             // check if removing the current info.
             if ( removed && removedClient.ClientId == this.ActiveServerClient?.ClientId
                  && removedLink == this.ActiveServerClient?.LinkId )

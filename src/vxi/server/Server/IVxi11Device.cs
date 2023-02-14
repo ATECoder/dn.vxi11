@@ -179,10 +179,11 @@ public interface IVxi11Device : INotifyPropertyChanged
     int LinkedClientsCount { get; }
 
     /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
-    /// <param name="clientId"> Identifier for the client. </param>
-    /// <param name="linkId">   Identifier for the link. </param>
+    /// <remarks>   2023-02-13. </remarks>
+    /// <param name="createLinkParameters"> The parameters defining the created link. </param>
+    /// <param name="linkId">               Identifier for the link. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    bool AddClient( int clientId, int linkId );
+    bool AddClient( CreateLinkParms createLinkParameters, int linkId );
 
     /// <summary>   Attempts to select client. </summary>
     /// <remarks>   2023-02-09. </remarks>
