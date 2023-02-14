@@ -18,7 +18,7 @@ namespace cc.isr.VXI11.Codecs;
 /// VXI-11 Specifications: </para>
 /// <code>
 /// typedef long Device_ErrorCode;
-/// struct <c>device_write</c> Resp {
+/// struct device_write_resp {
 ///    Device_ErrorCode error;
 ///    unsigned long size; /* Number of bytes written */
 /// };

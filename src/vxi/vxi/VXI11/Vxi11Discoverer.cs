@@ -55,7 +55,7 @@ public class Vxi11Discoverer
     ///                                 to wait for pinging the port . </param>
     /// <param name="transmitTimeout">  (Optional) The transmit timeout, which sets the socket
     ///                                 timeouts during the transmission of messages to the service. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public static bool PortmapPingHost( IPAddress host, int ioTimeout = 10, int transmitTimeout = 5 )
     {
         return OncRpcPortmapClient.TryPingPortmapService( host, ioTimeout, transmitTimeout );
@@ -402,7 +402,7 @@ public class Vxi11Discoverer
     /// <param name="ipv4Address">          The IPv4 address. </param>
     /// <param name="portNumber">           (Optional) The port number [5025]. </param>
     /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds [10]. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public static bool Paping( IPAddress ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
     {
         return Paping( ipv4Address.ToString(), portNumber, timeoutMilliseconds );
@@ -412,7 +412,7 @@ public class Vxi11Discoverer
     /// <param name="ipv4Address">          The IPv4 address. </param>
     /// <param name="portNumber">           (Optional) The port number [5025]. </param>
     /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds [10]. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public static bool Paping( string ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
     {
         return Paping( new IPEndPoint( IPAddress.Parse( ipv4Address ), portNumber ), timeoutMilliseconds );
@@ -422,7 +422,7 @@ public class Vxi11Discoverer
     /// <summary>   Pings port. </summary>
     /// <param name="endpoint">             The endpoint. </param>
     /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public static bool Paping( IPEndPoint endpoint, int timeoutMilliseconds = 10 )
     {
         bool pinged = false;
@@ -450,7 +450,7 @@ public class Vxi11Discoverer
     /// <summary>   Ping host. </summary>
     /// <param name="nameOrAddress">        The name or address. </param>
     /// <param name="timeoutMilliseconds">  (Optional) The timeout [100] ms. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public static bool PingHost( string nameOrAddress, int timeoutMilliseconds = 100 )
     {
         bool pingable = false;
@@ -470,7 +470,7 @@ public class Vxi11Discoverer
     /// <summary>   Ping host. </summary>
     /// <param name="address">              The address. </param>
     /// <param name="timeoutMilliseconds">  (Optional) The timeout [100] ms. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public static bool PingHost( IPAddress address, int timeoutMilliseconds = 100 )
     {
         bool pingable = false;

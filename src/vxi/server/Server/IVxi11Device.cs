@@ -182,14 +182,35 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <remarks>   2023-02-13. </remarks>
     /// <param name="createLinkParameters"> The parameters defining the created link. </param>
     /// <param name="linkId">               Identifier for the link. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     bool AddClient( CreateLinkParms createLinkParameters, int linkId );
 
     /// <summary>   Attempts to select client. </summary>
-    /// <remarks>   2023-02-09. </remarks>
-    /// <param name="linkId">   Identifier for the link. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
-    bool TrySelectClient( int linkId );
+    /// <remarks>
+    /// 2023-02-09. <para>
+    /// 
+    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.Waitlock"/>
+    /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
+    /// terminate that calling call and set error to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>
+    /// (11).
+    /// </para>
+    /// </remarks>
+    /// <param name="linkId">           Identifier for the link. </param>
+    /// <param name="operationFlags">   The operation flags. </param>
+    /// <param name="lockTimeout">      (Optional) The lock timeout. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    bool TrySelectClient( int linkId, DeviceOperationFlags operationFlags, int? lockTimeout = null );
+
+    /// <summary>   Attempts to select client. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">       Identifier for the link. </param>
+    /// <param name="waitLock">     <see langword="true"/> to wait for an existing lock; otherwise,
+    ///                                                     return <see langword="false"/> if the
+    ///                                                     active client is locked. </param>
+    /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    bool TrySelectClient( int linkId, bool waitLock, int? lockTimeout = null );
 
     /// <summary>
     /// Gets a value indicating whether a valid link exists between the VXI-11 client
@@ -200,6 +221,15 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// and <see cref="Vxi11Server"/>.
     /// </value>
     bool DeviceLinked( int clientId );
+
+    /// <summary>   Determines if we can device locked. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    public bool DeviceLocked();
+
+    /// <summary>   Await lock release asynchronously. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    bool AwaitLockReleaseAsync();
 
     #endregion
 
@@ -212,7 +242,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// 2. Return in <c>link id</c> a link identifier to be used with future calls. The value of <c>link id</c> SHALL be
     /// unique for all currently active links within a network instrument server.  </para><para>
     /// 3. Return in maxRecvSize the size of the largest data parameter the network instrument server
-    /// can accept in a <c>device_write</c>  RPC.This value SHALL be at least 1024.  </para><para>
+    /// can accept in a <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  RPC.This value SHALL be at least 1024.  </para><para>
     /// 4. Return in asyncPort the port number for asynchronous RPCs. See device_abort.  </para><para>
     /// 5. Return with error set to 0, no error, to indicate successful completion.  </para><para>
     /// 
@@ -236,8 +266,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// The operation of create_link SHALL ignore locks if lockDevice is false. </para><para>
     /// If lockDevice is true and the lock is not freed after at least <c>lock_timeout</c> milliseconds,
     /// create_link SHALL terminate without creating a link and return with error set to 11, device
-    /// locked by another link.Page 26 Section B: Network Instrument Protocol October 4, 2000
-    /// Printing VXIbus Specification: VXI-11 Revision 1.0 </para><para>
+    /// locked by another link. </para><para>
     /// 
     /// The execution of create_link SHALL have no effect on the state of any device associated with
     /// the network instrument server. </para><para>
@@ -287,7 +316,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <para>
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// device_clear SHALL terminate with error set to 4, invalid link identifier. </para><para>
-    /// If some other link has the lock, device_clear SHALL examine the <c>waitlock</c> flag in <c>flags</c> . If the
+    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the
     /// flag is set, device_clear SHALL block until the lock is free. If the flag is not set,
     /// device_clear SHALL terminate with error set to 11, device locked by another link. </para><para>
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, device_clear SHALL
@@ -345,7 +374,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_local</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_local</c> SHALL examine the <c>waitlock</c> flag in 
+    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in 
     /// <c>flags</c>. If the flag is set, <c>device_local</c> SHALL block until the lock is free. If the flag is not set,
     /// <c>device_local</c> SHALL terminate with error set to 11, device locked by another link. </para><para>
     /// 
@@ -378,7 +407,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match, <c>
     /// device_remote</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <c>waitlock</c> flag
+    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
     /// in <c>flags</c> . If the flag is set, <c>device_remote</c> SHALL block until the lock is
     /// free. If the flag is not set, <c>device_remote</c> SHALL terminate with error set to 11,
     /// device locked by another link.  </para><para>
@@ -416,7 +445,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_readstb</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, the procedure examines the <c>waitlock</c> flag in <c>flags</c>
+    /// If some other link has the lock, the procedure examines the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c>
     /// . If the flag is set, <c>device_readstb</c> blocks until the lock is free before retrieving
     /// the status byte. If the flag is not set, <c>device_readstb</c> SHALL terminate and set error
     /// to 11, device locked by another link.</para><para>
@@ -448,7 +477,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// The <c>link id</c> parameter is compared against the link identifiers. If none match,
     /// <c>device_trigger</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <c>waitlock</c> flag
+    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
     /// in <c>flags</c> .If the flag is set, <c>device_trigger</c> SHALL block until the lock is free
     /// before sending the trigger. If the flag is not set, <c>device_trigger</c> SHALL terminate and
     /// set error to 11, device locked by another link. </para><para>
@@ -485,7 +514,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// The <c>link id</c> parameter is compared against the active link identifiers . If none match, <c>device_lock</c> SHALL
     /// terminate, before trying to acquire the device's lock, with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_lock</c> SHALL examine the <c>waitlock</c> flag in <c>flags</c> . If the flag is set,
+    /// If some other link has the lock, <c>device_lock</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the flag is set,
     /// <c>device_lock</c> SHALL block until the lock is free. If the flag is not set, <c>device_lock</c> SHALL terminate with
     /// error set to 11, device locked by another link. </para><para>
     /// 
@@ -577,7 +606,7 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     /// <summary>   Process the device write procedure. </summary>
     /// <remarks>
-    /// To a successfully complete a <c>device_write</c>  RPC, the network instrument server SHALL: <para>
+    /// To a successfully complete a <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  RPC, the network instrument server SHALL: <para>
     /// 1. Transfer the contents of data to the device. </para><para>
     /// 2. Return in size parameter the number of bytes accepted by the device. </para><para>
     /// 3. Return with error set to 0, no error. </para><para>
@@ -586,7 +615,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// last byte in data. </para><para>
     /// 
     /// If a controller needs to send greater than maxRecvSize bytes to the device at one time, then
-    /// the network instrument client makes multiple calls to <c>device_write</c>  to accomplish the
+    /// the network instrument client makes multiple calls to <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  to accomplish the
     /// complete transaction.A network instrument server accepts at least 1,024 bytes in a single <c>
     /// device_write</c>
     /// call due to RULE B.6.3.  </para><para>
@@ -598,24 +627,22 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
     /// If data.data_len is greater than the value of maxRecvSize returned in create_link,
-    /// <c>device_write</c>  SHALL terminate without transferring any bytes to the device and SHALL
-    /// set error
-    /// to 5.Section B: Network Instrument Protocol Page 29 October 4, 2000 Printing VXIbus
-    /// Specification: VXI-11 Revision 1.0 </para><para>
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring any bytes to the device and SHALL
+    /// set error to 5. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_write</c>  SHALL examine the <c>waitlock</c> flag
-    /// in <c>flags</c> . If the flag is set, <c>device_write</c>  SHALL block until the lock is
+    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// in <c>flags</c> . If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the lock is
     /// free. If the flag is not set,
-    /// <c>device_write</c>  SHALL terminate and set error to 11, device already locked by another
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11, device already locked by another
     /// link. </para>
     /// <para>
     /// 
-    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_write</c>
-    /// SHALL terminate with error set to 11, device already locked by another link. </para><para>
+    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// SHALL terminate with error set to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>(11) . </para><para>
     /// 
     /// If after at least <c>io_timeout</c> milliseconds not all of data has been transferred to the
     /// device,
-    /// <c>device_write</c>  SHALL terminate with error set to 15, I/O timeout. This timeout is based
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 15, I/O timeout. This timeout is based
     /// on the
     /// entire transaction and not the time required to transfer single bytes. </para><para>
     /// 
@@ -623,26 +650,26 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// data. </para>
     /// <para>
     /// 
-    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_write</c>
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// SHALL terminate with error set to 23, abort. </para><para>
     /// 
     /// The number of bytes transferred to the device SHALL be returned in size, even when the call
     /// terminates due to a timeout or device_abort. </para><para>
     /// 
     /// If the network instrument server encounters a device specific I/O error while attempting to
-    /// write the data, <c>device_write</c>  SHALL terminate with error set to 17, I/O error. </para>
+    /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 17, I/O error. </para>
     ///  <list type="bullet">Abort shall cause the following errors: <item>
     /// 
-    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_write</c>
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// terminate with error set to 23, abort. </item><item>
     /// 
     /// If the network instrument server encounters a device specific I/O error while attempting to
-    /// write the data, <c>device_write</c>  SHALL terminate with error set to 17, I/O error. </item><item>
+    /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 17, I/O error. </item><item>
     /// 
     /// </item></list>
     /// </remarks>
     /// <param name="deviceWriteParameters">    Device write parameters. </param>
-    /// <returns>   A <c>device_write</c> Resp. </returns>
+    /// <returns>   A <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/> Resp. </returns>
     DeviceWriteResp DeviceWrite( DeviceWriteParms deviceWriteParameters );
 
     #endregion
@@ -653,6 +680,10 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// Event queue for all listeners interested in ThreadExceptionOccurred events.
     /// </summary>
     public event ThreadExceptionEventHandler? ThreadExceptionOccurred;
+
+    /// <summary>   Executes the <see cref="ThreadExceptionOccurred"/> event. </summary>
+    /// <param name="e">    Event information to send to registered event handlers. </param>
+    void OnThreadException( ThreadExceptionEventArgs e );
 
     #endregion
 

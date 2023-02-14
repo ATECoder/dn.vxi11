@@ -71,7 +71,7 @@ public partial class Vxi11Device : IVxi11Device
 
     /// <summary>   Executes the <see cref="ThreadExceptionOccurred"/> event. </summary>
     /// <param name="e">    Event information to send to registered event handlers. </param>
-    protected virtual void OnThreadException( ThreadExceptionEventArgs e )
+    public virtual void OnThreadException( ThreadExceptionEventArgs e )
     {
         var handler = this.ThreadExceptionOccurred;
         handler?.Invoke( this, e );
@@ -417,7 +417,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <remarks>   2023-02-13. </remarks>
     /// <param name="createLinkParameters"> The parameters defining the created link. </param>
     /// <param name="linkId">               Identifier for the link. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool AddClient( CreateLinkParms createLinkParameters, int linkId )
     {
         if ( this.ServerClientRegistry.AddClient( createLinkParameters, linkId ))
@@ -437,15 +437,54 @@ public partial class Vxi11Device : IVxi11Device
     }
 
     /// <summary>   Attempts to select client. </summary>
-    /// <remarks>   2023-02-09. </remarks>
-    /// <param name="linkId">   Identifier for the link. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
-    public bool TrySelectClient( int linkId )
+    /// <remarks>
+    /// 2023-02-09. <para>
+    /// 
+    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.Waitlock"/>
+    /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
+    /// terminate that calling call and set error to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>
+    /// (11).
+    /// </para>
+    /// </remarks>
+    /// <param name="linkId">           Identifier for the link. </param>
+    /// <param name="operationFlags">   The operation flags. </param>
+    /// <param name="lockTimeout">      (Optional) The lock timeout. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    public bool TrySelectClient( int linkId, DeviceOperationFlags operationFlags, int? lockTimeout = null )
     {
-        if ( linkId == ( this.ActiveServerClient?.LinkId ?? 0 ) )
+        return this.TrySelectClient( linkId, DeviceOperationFlags.None != ( operationFlags & DeviceOperationFlags.Waitlock ), lockTimeout );
+    }
+
+    /// <summary>   Attempts to select client. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">       Identifier for the link. </param>
+    /// <param name="waitLock">     Set <see langword="true"/> to wait for an existing lock;
+    ///                             otherwise, return <see langword="false"/> if the active client is
+    ///                             locked. </param>
+    /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    public bool TrySelectClient( int linkId, bool waitLock, int? lockTimeout = null )
+    {
+        if ( linkId == (this.ActiveServerClient?.LinkId ?? 0) )
             // if the client was already selected, we are done.
             return true;
-        if ( this.ServerClientRegistry.TrySelectClient( linkId ) )
+
+        if ( this.DeviceLocked() )
+        {
+            if ( waitLock )
+            {
+                // wait for the active client lock to expire
+                if ( !this.AwaitLockReleaseAsync() )
+                    return false;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        if ( this.ServerClientRegistry.TrySelectClient( linkId, lockTimeout ) )
         {
             this.ActiveServerClient = this.ServerClientRegistry.ActiveServerClient;
             this.ActiveClientId = this.ActiveServerClient!.ClientId;
@@ -505,6 +544,21 @@ public partial class Vxi11Device : IVxi11Device
         return this.ServerClientRegistry.IsClientLinked( clientId );
     }
 
+    /// <summary>   Determines if we can device locked. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    public bool DeviceLocked()
+    {
+        return this.ServerClientRegistry.IsActiveClientLocked();
+    }
+
+    /// <summary>   Await lock release asynchronously. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    public bool AwaitLockReleaseAsync()
+    {
+        return this.ServerClientRegistry.AwaitLockReleaseAsync();
+    }
+
     #endregion
 
     #region " link id generator "
@@ -523,16 +577,14 @@ public partial class Vxi11Device : IVxi11Device
 
     #region " LXI-11 ONC/RPC Calls "
 
-    private readonly object _createLinkLock = new ();
-
-    /// <summary>   Creates server client link. </summary>
+    /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>
     /// To successfully complete a create_link RPC, a network instrument server SHALL: <para>
     /// 1. If lockDevice is set to true, acquire the lock for the device. </para><para>
     /// 2. Return in <c>link id</c> a link identifier to be used with future calls. The value of <c>link id</c> SHALL be
     /// unique for all currently active links within a network instrument server.  </para><para>
     /// 3. Return in maxRecvSize the size of the largest data parameter the network instrument server
-    /// can accept in a <c>device_write</c>  RPC.This value SHALL be at least 1024.  </para><para>
+    /// can accept in a <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  RPC.This value SHALL be at least 1024.  </para><para>
     /// 4. Return in asyncPort the port number for asynchronous RPCs. See device_abort.  </para><para>
     /// 5. Return with error set to 0, no error, to indicate successful completion.  </para><para>
     /// 
@@ -556,8 +608,7 @@ public partial class Vxi11Device : IVxi11Device
     /// The operation of create_link SHALL ignore locks if lockDevice is false. </para><para>
     /// If lockDevice is true and the lock is not freed after at least <c>lock_timeout</c> milliseconds,
     /// create_link SHALL terminate without creating a link and return with error set to 11, device
-    /// locked by another link.Page 26 Section B: Network Instrument Protocol October 4, 2000
-    /// Printing VXIbus Specification: VXI-11 Revision 1.0 </para><para>
+    /// locked by another link. </para><para>
     /// 
     /// The execution of create_link SHALL have no effect on the state of any device associated with
     /// the network instrument server. </para><para>
@@ -571,7 +622,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <returns>
     /// A response of type <see cref="CreateLinkResp"/> to send to the remote procedure call.
     /// </returns>
-    private CreateLinkResp CreateServerClientLink( CreateLinkParms request )
+    public CreateLinkResp CreateLink( CreateLinkParms request )
     {
         CreateLinkResp reply;
         if ( this.ServerClientRegistry.IsClientLinked( request.ClientId ) )
@@ -617,61 +668,6 @@ public partial class Vxi11Device : IVxi11Device
         }
         this.LastDeviceError = reply.ErrorCode;
         return reply;
-    }
-
-
-    /// <summary>   Create a device connection; Opens a link to a device. </summary>
-    /// <remarks>
-    /// To successfully complete a create_link RPC, a network instrument server SHALL: <para>
-    /// 1. If lockDevice is set to true, acquire the lock for the device. </para><para>
-    /// 2. Return in <c>link id</c> a link identifier to be used with future calls. The value of <c>link id</c> SHALL be
-    /// unique for all currently active links within a network instrument server.  </para><para>
-    /// 3. Return in maxRecvSize the size of the largest data parameter the network instrument server
-    /// can accept in a <c>device_write</c>  RPC.This value SHALL be at least 1024.  </para><para>
-    /// 4. Return in asyncPort the port number for asynchronous RPCs. See device_abort.  </para><para>
-    /// 5. Return with error set to 0, no error, to indicate successful completion.  </para><para>
-    /// 
-    /// The device parameter is a string which identifies the device for communications.See the
-    /// document(s) referred to in section A.6, Related Documents, for definitions of this string.  </para>
-    /// <para>
-    /// 
-    /// A network instrument server should be able to maintain at least two separate links
-    /// simultaneously over a single network instrument connection. </para><para>
-    /// 
-    /// The network instrument client sends an identifying number in the clientId parameter.While
-    /// this protocol requires no special behavior based on the value of clientId, the device may
-    /// provide a local means to examine its value to help a user identify communication problems. </para>
-    /// <para>
-    /// 
-    /// The network instrument server SHALL NOT alter its function based on the clientId. </para><para>
-    /// 
-    /// If create_link is called when another link is not available, create_link SHALL terminate and
-    /// set error to 9. </para><para>
-    /// 
-    /// The operation of create_link SHALL ignore locks if lockDevice is false. </para><para>
-    /// If lockDevice is true and the lock is not freed after at least <c>lock_timeout</c> milliseconds,
-    /// create_link SHALL terminate without creating a link and return with error set to 11, device
-    /// locked by another link.Page 26 Section B: Network Instrument Protocol October 4, 2000
-    /// Printing VXIbus Specification: VXI-11 Revision 1.0 </para><para>
-    /// 
-    /// The execution of create_link SHALL have no effect on the state of any device associated with
-    /// the network instrument server. </para><para>
-    /// 
-    /// A create_link RPC cannot be aborted since a valid link identifier is not yet available.A
-    /// network instrument client should set <c>lock_timeout</c> to a reasonable value to avoid locking up
-    /// the server. </para>
-    /// </remarks>
-    /// <param name="request">  The request of type <see cref="CreateLinkParms"/> to use with
-    ///                         the remote procedure call. </param>
-    /// <returns>
-    /// A response of type <see cref="CreateLinkResp"/> to send to the remote procedure call.
-    /// </returns>
-    public CreateLinkResp CreateLink( CreateLinkParms request )
-    {
-        lock ( this._createLinkLock )
-        {
-            return this.CreateServerClientLink( request );
-        }
     }
 
     /// <summary>   Destroy a connection. </summary>
@@ -735,7 +731,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <para>
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// device_clear SHALL terminate with error set to 4, invalid link identifier. </para><para>
-    /// If some other link has the lock, device_clear SHALL examine the <c>waitlock</c> flag in <c>flags</c> . If the
+    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the
     /// flag is set, device_clear SHALL block until the lock is free. If the flag is not set,
     /// device_clear SHALL terminate with error set to 11, device locked by another link. </para><para>
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, device_clear SHALL
@@ -765,14 +761,18 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId ) )
+            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
                 // TODO: Implement the specifications as defined above.
 
                 reply.ErrorCode = this.Instrument.DeviceClear( request.Flags, request.IOTimeout );
-           }
+            }
+            else
+            {
+                reply.ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink;
+            }
 
         }
 
@@ -802,14 +802,20 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId ) )
+            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
                 // run the commands on the interface
 
-                reply = this.Vxi11Interface?.DeviceDoCmd( request ) ?? reply; 
+                reply = this.Vxi11Interface?.DeviceDoCmd( request ) ?? reply;
+
             }
+            else
+            {
+                reply.ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink;
+            }
+
         }
         this.LastDeviceError = reply.ErrorCode;
         return reply;
@@ -838,20 +844,15 @@ public partial class Vxi11Device : IVxi11Device
             reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
-            // Select the client for this link. This maybe the existing client or a 
-            // new client. Either was this should return true because we checked that 
-            // the link was created so a client exists for this link
+            // enable or disable interrupt of the specified server client
 
-            if ( this.TrySelectClient( request.Link.LinkId ) )
-            {
-                // now this is the active client.
+            _ = this.ServerClientRegistry.EnableInterrupt( request.Link.LinkId, request.Enable, request.GetHandle() );
 
-                // enable/disable the interrupt for this client.
+            // if the request comes for the current server client, apply to the instrument.
 
-                // TODO: Implement the specifications as defined above.
-
+            if ( request.Link.LinkId == ( this.ActiveServerClient?.LinkId ?? 0 ) )
                 this.EnableInterrupt( request.Enable, request.GetHandle() );
-            }
+
         }
 
         this.LastDeviceError = reply.ErrorCode;
@@ -877,7 +878,7 @@ public partial class Vxi11Device : IVxi11Device
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_local</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_local</c> SHALL examine the <c>waitlock</c> flag in
+    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in
     /// <c>flags</c>. If the flag is set, <c>device_local</c> SHALL block until the lock is free. If
     /// the flag is not set, <c>device_local</c> SHALL terminate with error set to 11, device locked
     /// by another link. </para><para>
@@ -913,7 +914,7 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId ) )
+            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
@@ -922,7 +923,11 @@ public partial class Vxi11Device : IVxi11Device
                 // TODO: Implement the specifications as defined above.
 
                 this.RemoteEnabled = false;
-                this.Instrument.DeviceLocal( request.Flags, request.IOTimeout );
+                reply.ErrorCode = this.Instrument.DeviceLocal( request.Flags, request.IOTimeout );
+            }
+            else
+            {
+                reply.ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink;
             }
         }
 
@@ -945,7 +950,7 @@ public partial class Vxi11Device : IVxi11Device
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match, <c>
     /// device_remote</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <c>waitlock</c> flag
+    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
     /// in <c>flags</c> . If the flag is set, <c>device_remote</c> SHALL block until the lock is
     /// free. If the flag is not set, <c>device_remote</c> SHALL terminate with error set to 11,
     /// device locked by another link.  </para><para>
@@ -982,14 +987,18 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId ) )
+            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
                 // TODO: Implement the specifications as defined above.
 
                 this.RemoteEnabled = true;
-                this.Instrument.DeviceRemote( request.Flags, request.IOTimeout );
+                reply.ErrorCode = this.Instrument.DeviceRemote( request.Flags, request.IOTimeout );
+            }
+            else
+            {
+                reply.ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink;
             }
         }
 
@@ -1013,7 +1022,7 @@ public partial class Vxi11Device : IVxi11Device
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_readstb</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, the procedure examines the <c>waitlock</c> flag in <c>flags</c>
+    /// If some other link has the lock, the procedure examines the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c>
     /// . If the flag is set, <c>device_readstb</c> blocks until the lock is free before retrieving
     /// the status byte. If the flag is not set, <c>device_readstb</c> SHALL terminate and set error
     /// to 11, device locked by another link.</para><para>
@@ -1048,11 +1057,15 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId ) )
+            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
                 reply.Stb = this.Instrument!.ReadStatusByte();
+            }
+            else
+            {
+                reply.ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink;
             }
         }
 
@@ -1070,7 +1083,7 @@ public partial class Vxi11Device : IVxi11Device
     /// The <c>link id</c> parameter is compared against the link identifiers. If none match,
     /// <c>device_trigger</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <c>waitlock</c> flag
+    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
     /// in <c>flags</c> .If the flag is set, <c>device_trigger</c> SHALL block until the lock is free
     /// before sending the trigger. If the flag is not set, <c>device_trigger</c> SHALL terminate and
     /// set error to 11, device locked by another link. </para><para>
@@ -1105,13 +1118,17 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId ) )
+            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
                 // TODO: Implement the specifications as defined above.
 
                 reply.ErrorCode = this.Instrument.DeviceTrigger( request.Flags, request.IOTimeout );
+            }
+            else
+            {
+                reply.ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink;
             }
         }
 
@@ -1134,9 +1151,9 @@ public partial class Vxi11Device : IVxi11Device
     /// The <c>link id</c> parameter is compared against the active link identifiers . If none match, <c>device_lock</c> SHALL
     /// terminate, before trying to acquire the device's lock, with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_lock</c> SHALL examine the <c>waitlock</c> flag in <c>flags</c> . If the flag is set,
-    /// <c>device_lock</c> SHALL block until the lock is free. If the flag is not set, <c>device_lock</c> SHALL terminate with
-    /// error set to 11, device locked by another link. </para><para>
+    /// If some other link has the lock, <c>device_lock</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in 
+    /// <see cref="DeviceLockParms.Flags"/>. If the flag is set, <c>device_lock</c> SHALL block until the lock is free.
+    /// If the flag is not set, <c>device_lock</c> SHALL terminate with error set to 11, device locked by another link. </para><para>
     /// 
     /// The network instrument server blocks if another link has the lock, but does not block if another link is
     /// performing an I/O operation so long as the lock is available. </para><para>
@@ -1169,15 +1186,14 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId ) )
+            if ( this.TrySelectClient( request.Link.LinkId, request.Flags, request.LockTimeout ) )
             {
-                // now this is the active client.
-
-                // TODO: Implement the specifications as defined above.
-
-                // TODO: Add device code
-                this.LockTimeout = request.LockTimeout;
-                this.LockEnabled = true;
+                // selecting a  new active client sets its lock.
+                
+            }
+            else
+            {
+                reply.ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink;
             }
         }
 
@@ -1207,24 +1223,31 @@ public partial class Vxi11Device : IVxi11Device
     {
         DeviceError reply = new();
         if ( !this.ServerClientRegistry.IsLinkCreated( deviceLink.LinkId ) )
-            reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+            reply.ErrorCode = DeviceErrorCode.ChannelNotEstablished;
         else if ( this.Instrument is null )
-            reply = new ( DeviceErrorCode.DeviceNotAccessible );
+            reply.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
         else
         {
-            // Select the client for this link. This maybe the existing client or a 
-            // new client. Either was this should return true because we checked that 
-            // the link was created so a client exists for this link
-
-            if ( this.TrySelectClient( deviceLink.LinkId ) )
+            if ( this.ServerClientRegistry.IsLinkCreated( deviceLink.LinkId ))
             {
-                // now this is the active client.
+                if ( this.ServerClientRegistry.IsLocked( deviceLink.LinkId ) )
+                {
+                    _ = this.ServerClientRegistry.ReleaseLock( deviceLink.LinkId );
 
-                // TODO: Implement the specifications as defined above.
+                    if ( ( this.ActiveServerClient?.LinkId ?? 0 ) == deviceLink.LinkId )
+                        this.ActiveServerClient?.ReleaseLockTimeout();
+                }
+                else
+                {
+                    reply.ErrorCode = DeviceErrorCode.NoLockHeldByThisLink;
+                }
 
-                // TODO: Add device code
-                this.LockEnabled = false;
             }
+            else
+            {
+                reply.ErrorCode = DeviceErrorCode.InvalidLinkIdentifier;
+            }
+
         }
 
         this.LastDeviceError = reply.ErrorCode;
@@ -1296,14 +1319,13 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId ) )
+            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
             {
-                // now this is the active client.
-
-                // TODO: Implement the specifications as defined above.
-
-                // TODO: Add device code
                 reply = this.Instrument.DeviceRead( request );
+            }
+            else
+            {
+                reply.ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink;
             }
         }
 
@@ -1313,7 +1335,7 @@ public partial class Vxi11Device : IVxi11Device
 
     /// <summary>   Process the device write procedure. </summary>
     /// <remarks>
-    /// To a successfully complete a <c>device_write</c>  RPC, the network instrument server SHALL: <para>
+    /// To a successfully complete a <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  RPC, the network instrument server SHALL: <para>
     /// 1. Transfer the contents of data to the device. </para><para>
     /// 2. Return in size parameter the number of bytes accepted by the device. </para><para>
     /// 3. Return with error set to 0, no error. </para><para>
@@ -1322,58 +1344,51 @@ public partial class Vxi11Device : IVxi11Device
     /// last byte in data. </para><para>
     /// 
     /// If a controller needs to send greater than maxRecvSize bytes to the device at one time, then
-    /// the network instrument client makes multiple calls to <c>device_write</c>  to accomplish the
-    /// complete transaction.A network instrument server accepts at least 1,024 bytes in a single <c>
-    /// device_write</c>
-    /// call due to RULE B.6.3.  </para><para>
+    /// the network instrument client makes multiple calls to <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  to accomplish the
+    /// complete transaction.A network instrument server accepts at least 1,024 bytes in a single 
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/> call due to RULE B.6.3.  </para><para>
+    /// 
     /// The value of data.data_len may be zero, in which case no device actions are performed.  </para>
     /// <para>
     /// 
     /// The <c>link id</c> parameter is compared to the active link identifiers. If none match, <c>
-    /// device_write</c>
-    /// SHALL terminate and set error to 4, invalid link identifier. </para><para>
+    /// device_write</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
     /// If data.data_len is greater than the value of maxRecvSize returned in create_link,
-    /// <c>device_write</c>  SHALL terminate without transferring any bytes to the device and SHALL
-    /// set error
-    /// to 5.Section B: Network Instrument Protocol Page 29 October 4, 2000 Printing VXIbus
-    /// Specification: VXI-11 Revision 1.0 </para><para>
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring any bytes to the device and SHALL
+    /// set error to 5 </para><para>
     /// 
-    /// If some other link has the lock, <c>device_write</c>  SHALL examine the <c>waitlock</c> flag
-    /// in <c>flags</c> . If the flag is set, <c>device_write</c>  SHALL block until the lock is
-    /// free. If the flag is not set,
-    /// <c>device_write</c>  SHALL terminate and set error to 11, device already locked by another
-    /// link. </para>
-    /// <para>
+    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// in <c>flags</c> . If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/> SHALL block until the lock is
+    /// free. If the flag is not set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/> SHALL terminate and set error to 11, 
+    /// device already locked by another link. </para><para>
     /// 
-    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_write</c>
-    /// SHALL terminate with error set to 11, device already locked by another link. </para><para>
+    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// SHALL terminate with error set to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>(11) . </para><para>
     /// 
     /// If after at least <c>io_timeout</c> milliseconds not all of data has been transferred to the
-    /// device,
-    /// <c>device_write</c>  SHALL terminate with error set to 15, I/O timeout. This timeout is based
-    /// on the
-    /// entire transaction and not the time required to transfer single bytes. </para><para>
+    /// device, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 15, I/O timeout. This timeout 
+    /// is based on the entire transaction and not the time required to transfer single bytes. </para><para>
     /// 
     /// The <c>io_timeout</c> value set by the application may need to change based on the size of
     /// data. </para>
     /// <para>
     /// 
-    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_write</c>
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// SHALL terminate with error set to 23, abort. </para><para>
     /// 
     /// The number of bytes transferred to the device SHALL be returned in size, even when the call
     /// terminates due to a timeout or device_abort. </para><para>
     /// 
     /// If the network instrument server encounters a device specific I/O error while attempting to
-    /// write the data, <c>device_write</c>  SHALL terminate with error set to 17, I/O error. </para>
+    /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 17, I/O error. </para>
     ///  <list type="bullet">Abort shall cause the following errors: <item>
     /// 
-    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_write</c>
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// terminate with error set to 23, abort. </item><item>
     /// 
     /// If the network instrument server encounters a device specific I/O error while attempting to
-    /// write the data, <c>device_write</c>  SHALL terminate with error set to 17, I/O error. </item><item>
+    /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 17, I/O error. </item><item>
     /// 
     /// </item></list>
     /// </remarks>
@@ -1395,7 +1410,7 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId ) )
+            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
@@ -1403,6 +1418,10 @@ public partial class Vxi11Device : IVxi11Device
 
                 // TODO: Add device code
                 reply = this.DeviceWrite( request.Link.LinkId, request.GetData() );
+            }
+            else
+            {
+                reply.ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink;
             }
         }
 
@@ -1412,7 +1431,7 @@ public partial class Vxi11Device : IVxi11Device
 
     /// <summary>   Process the device write procedure. </summary>
     /// <remarks>
-    /// To a successfully complete a <c>device_write</c>  RPC, the network instrument server SHALL: <para>
+    /// To a successfully complete a <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  RPC, the network instrument server SHALL: <para>
     /// 1. Transfer the contents of data to the device. </para><para>
     /// 2. Return in size parameter the number of bytes accepted by the device. </para><para>
     /// 3. Return with error set to 0, no error. </para><para>
@@ -1421,7 +1440,7 @@ public partial class Vxi11Device : IVxi11Device
     /// last byte in data. </para><para>
     /// 
     /// If a controller needs to send greater than maxRecvSize bytes to the device at one time, then
-    /// the network instrument client makes multiple calls to <c>device_write</c>  to accomplish the
+    /// the network instrument client makes multiple calls to <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  to accomplish the
     /// complete transaction.A network instrument server accepts at least 1,024 bytes in a single <c>
     /// device_write</c>
     /// call due to RULE B.6.3.  </para><para>
@@ -1433,44 +1452,43 @@ public partial class Vxi11Device : IVxi11Device
     /// SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
     /// If data.data_len is greater than the value of maxRecvSize returned in create_link,
-    /// <c>device_write</c>  SHALL terminate without transferring any bytes to the device and SHALL
-    /// set error to 5.Section B: Network Instrument Protocol Page 29 October 4, 2000 Printing VXIbus
-    /// Specification: VXI-11 Revision 1.0 </para><para>
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring any bytes to the device and SHALL
+    /// set error to 5. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_write</c>  SHALL examine the <c>waitlock</c> flag
-    /// in <c>flags</c> . If the flag is set, <c>device_write</c>  SHALL block until the lock is
+    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// in <c>flags</c> . If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the lock is
     /// free. If the flag is not set,
-    /// <c>device_write</c>  SHALL terminate and set error to 11, device already locked by another
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11, device already locked by another
     /// link. </para>
     /// <para>
     /// 
-    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_write</c>
-    /// SHALL terminate with error set to 11, device already locked by another link. </para><para>
+    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// SHALL terminate with error set to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>(11) . </para><para>
     /// 
     /// If after at least <c>io_timeout</c> milliseconds not all of data has been transferred to the
     /// device,
-    /// <c>device_write</c>  SHALL terminate with error set to 15, I/O timeout. This timeout is based
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 15, I/O timeout. This timeout is based
     /// on the entire transaction and not the time required to transfer single bytes. </para><para>
     /// 
     /// The <c>io_timeout</c> value set by the application may need to change based on the size of
     /// data. </para>
     /// <para>
     /// 
-    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_write</c>
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// SHALL terminate with error set to 23, abort. </para><para>
     /// 
     /// The number of bytes transferred to the device SHALL be returned in size, even when the call
     /// terminates due to a timeout or device_abort. </para><para>
     /// 
     /// If the network instrument server encounters a device specific I/O error while attempting to
-    /// write the data, <c>device_write</c>  SHALL terminate with error set to 17, I/O error. </para>
+    /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 17, I/O error. </para>
     ///  <list type="bullet">Abort shall cause the following errors: <item>
     /// 
-    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_write</c>
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// terminate with error set to 23, abort. </item><item>
     /// 
     /// If the network instrument server encounters a device specific I/O error while attempting to
-    /// write the data, <c>device_write</c>  SHALL terminate with error set to 17, I/O error. </item><item>
+    /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 17, I/O error. </item><item>
     /// 
     /// </item></list>
     /// </remarks>

@@ -232,7 +232,7 @@ public class Vxi11InterfaceClient : Vxi11Client
     /// </remarks>
     /// <param name="value">    The value. Note that a <see cref="bool"/> <see langword="true"/>
     ///                         is XDR encoded as 1. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public virtual bool SetRenLine( bool value )
     {
         return value == (this.SendCommand( InterfaceCommand.RemoteEnableControl, 2, value ? 1 : 0 ) == 1);
@@ -245,7 +245,7 @@ public class Vxi11InterfaceClient : Vxi11Client
     /// bitwise OR-ed with 0x80. The returned `data_out` is the same as the received `data_in`.
     /// </remarks>
     /// <param name="addr"> The address. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public virtual bool PassControl( int addr )
     {
         return this.DeviceLink is not null && this.CoreClient is not null
@@ -262,7 +262,7 @@ public class Vxi11InterfaceClient : Vxi11Client
     /// </remarks>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
     /// <param name="addr"> The address. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public virtual bool SetBusAddress( int addr )
     {
         if ( this.DeviceLink is null || this.CoreClient is null ) return false;

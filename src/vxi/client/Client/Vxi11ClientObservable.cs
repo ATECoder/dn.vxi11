@@ -22,7 +22,7 @@ public partial class Vxi11Client : INotifyPropertyChanged
     /// <param name="backingField"> [in,out] The backing field. </param>
     /// <param name="value">        The value. </param>
     /// <param name="propertyName"> (Optional) Name of the property. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     protected virtual bool OnPropertyChanged<T>( ref T backingField, T value, [CallerMemberName] string? propertyName = "" )
     {
         if ( EqualityComparer<T>.Default.Equals( backingField, value ) )
@@ -38,7 +38,7 @@ public partial class Vxi11Client : INotifyPropertyChanged
     /// <param name="prop">         [in,out] The property. </param>
     /// <param name="value">        The value. </param>
     /// <param name="propertyName"> (Optional) Name of the property. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     protected bool SetProperty<T>( ref T prop, T value, [CallerMemberName] string? propertyName = null )
     {
         if ( EqualityComparer<T>.Default.Equals( prop, value ) ) return false;

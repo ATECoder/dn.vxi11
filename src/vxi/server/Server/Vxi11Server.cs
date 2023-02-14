@@ -403,9 +403,11 @@ public abstract class Vxi11Server : CoreChannelServerBase
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.DeviceName ) );
     }
 
-#endregion
+    #endregion
 
-#region " remote procedure call handlers "
+    #region " remote procedure call handlers "
+
+    private readonly object _lock = new();
 
     /// <summary>   Gets the active device link between the VXI-11 client
     /// and this <see cref="Vxi11Server"/>. </summary>
@@ -420,7 +422,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// link id</c> SHALL be unique for all currently active links within a network instrument
     /// server.  </para><para>
     /// 3. Return in maxRecvSize the size of the largest data parameter the network instrument server
-    /// can accept in a <c>device_write</c>  RPC.This value SHALL be at least 1024.  </para><para>
+    /// can accept in a <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  RPC.This value SHALL be at least 1024.  </para><para>
     /// 4. Return in asyncPort the port number for asynchronous RPCs. See device_abort.  </para><para>
     /// 5. Return with error set to 0, no error, to indicate successful completion.  </para><para>
     /// 
@@ -444,8 +446,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// The operation of create_link SHALL ignore locks if lockDevice is false. </para><para>
     /// If lockDevice is true and the lock is not freed after at least <c>lock_timeout</c>
     /// milliseconds, create_link SHALL terminate without creating a link and return with error set
-    /// to 11, device locked by another link.Page 26 Section B: Network Instrument Protocol October 4,
-    /// 2000 Printing VXIbus Specification: VXI-11 Revision 1.0 </para><para>
+    /// to 11, device locked by another link. </para><para>
     /// 
     /// The execution of create_link SHALL have no effect on the state of any device associated with
     /// the network instrument server. </para><para>
@@ -461,9 +462,27 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override CreateLinkResp CreateLink( CreateLinkParms request )
     {
-        return this.Device is null
-            ? new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-            : this.Device.CreateLink( request );
+        lock ( this._lock )
+        {
+            return this.Device?.AwaitLockReleaseAsync() ?? true
+                ? this.CreateLinkUnlocked( request )
+                : new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink };
+        }
+    }
+
+    /// <summary>   Creates link unlocked. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="request">  The request of type <see cref="CreateLinkParms"/> to use with the
+    ///                         remote procedure call. </param>
+    /// <returns>   The new link unlocked. </returns>
+    private CreateLinkResp CreateLinkUnlocked( CreateLinkParms request )
+    {
+        lock ( this._lock )
+        {
+            return this.Device is null
+                ? new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                : this.Device.CreateLink( request );
+        }
     }
 
     /// <summary>   Destroy a connection. </summary>
@@ -491,6 +510,16 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DestroyLink( DeviceLink request )
     {
+        lock ( this._lock ) { return this.DestroyLinkUnlocked( request ); }
+    }
+
+    /// <summary>   Destroys the link unlocked described by request. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="request">  The request of type of type <see cref="DeviceLink"/> to use with the
+    ///                         remote procedure call. </param>
+    /// <returns>   A DeviceError. </returns>
+    private DeviceError DestroyLinkUnlocked( DeviceLink request )
+    {
         if ( this.Device is null )
             return new DeviceError( DeviceErrorCode.DeviceNotAccessible );
 
@@ -505,9 +534,20 @@ public abstract class Vxi11Server : CoreChannelServerBase
 
             if ( this.Device.LinkedClientsCount == 0 )
             {
+                AbortChannelServer? abortServer = this.AbortServer;
+                Task? abortServerTask = abortServer?.ShutdownAsync();
+                abortServerTask?.Start();
+
                 InterruptChannelClient? interruptClient = this.InterruptClient;
                 interruptClient?.Close();
+                if ( !interruptClient?.IsDisposed ?? false )
+                    Logger.Writer.LogWarning( $"{nameof( DestroyLink )} failed closing the interrupt client." );
+
                 this.InterruptClient = null;
+
+                if ( !abortServerTask?.Wait( AbortServerDisableTimeoutDefault ) ?? false )
+                    Logger.Writer.LogWarning( $"{nameof(DestroyLink)} failed stopping the abort server.") ; 
+               
             }
         }
         catch ( Exception )
@@ -606,7 +646,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <para>
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// device_clear SHALL terminate with error set to 4, invalid link identifier. </para><para>
-    /// If some other link has the lock, device_clear SHALL examine the <c>waitlock</c> flag in <c>flags</c> . If the
+    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the
     /// flag is set, device_clear SHALL block until the lock is free. If the flag is not set,
     /// device_clear SHALL terminate with error set to 11, device locked by another link. </para><para>
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, device_clear SHALL
@@ -625,6 +665,16 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceClear( DeviceGenericParms request )
     {
+        lock ( this ) { return this.DeviceClearUnlocked( request ); }
+    }
+
+    /// <summary>   Device clear unlocked. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    ///                         to use with the remote procedure call. </param>
+    /// <returns>   A DeviceError. </returns>
+    private DeviceError DeviceClearUnlocked( DeviceGenericParms request )
+    {
         return this.Device is null
             ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
             : this.Device.DeviceClear( request );
@@ -639,9 +689,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
     {
-        return this.Device is null
-            ? new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-            : this.Device.DeviceDoCmd( request );
+        lock ( this._lock )
+        {
+            return this.Device is null
+                ? new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                : this.Device.DeviceDoCmd( request );
+        }
     }
 
     /// <summary>   The device enables or does not enable the Send Request service. </summary>
@@ -660,9 +713,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
     {
-        return this.Device is null
-            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-            : this.Device.DeviceEnableSrq( request );
+        lock ( this._lock )
+        {
+            return this.Device is null
+                ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                : this.Device.DeviceEnableSrq( request );
+        }
     }
 
     /// <summary>   Enables device local control. </summary>
@@ -679,7 +735,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_local</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_local</c> SHALL examine the <c>waitlock</c> flag in 
+    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in 
     /// <c>flags</c>. If the flag is set, <c>device_local</c> SHALL block until the lock is free. If the flag is not set,
     /// <c>device_local</c> SHALL terminate with error set to 11, device locked by another link. </para><para>
     /// 
@@ -703,9 +759,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceLocal( DeviceGenericParms request )
     {
-        return this.Device is null
-            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-            : this.Device.DeviceLocal( request );
+        lock ( this._lock )
+        {
+            return this.Device is null
+                ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                : this.Device.DeviceLocal( request );
+        }
     }
 
     /// <summary>   Enables device remote control. </summary>
@@ -720,7 +779,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match, <c>
     /// device_remote</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <c>waitlock</c> flag
+    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
     /// in <c>flags</c> . If the flag is set, <c>device_remote</c> SHALL block until the lock is
     /// free. If the flag is not set, <c>device_remote</c> SHALL terminate with error set to 11,
     /// device locked by another link.  </para><para>
@@ -744,9 +803,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceRemote( DeviceGenericParms request )
     {
-        return this.Device is null
-            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-            : this.Device.DeviceRemote( request );
+        lock ( this._lock )
+        {
+            return this.Device is null
+                ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                : this.Device.DeviceRemote( request );
+        }
     }
 
     /// <summary>   Returns the device status byte. </summary>
@@ -765,7 +827,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_readstb</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, the procedure examines the <c>waitlock</c> flag in <c>flags</c>
+    /// If some other link has the lock, the procedure examines the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c>
     /// . If the flag is set, <c>device_readstb</c> blocks until the lock is free before retrieving
     /// the status byte. If the flag is not set, <c>device_readstb</c> SHALL terminate and set error
     /// to 11, device locked by another link.</para><para>
@@ -789,9 +851,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
     {
-        return this.Device is null
-            ? new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-            : this.Device.DeviceReadStb( request );
+        lock ( this._lock )
+        {
+            return this.Device is null
+                ? new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                : this.Device.DeviceReadStb( request );
+        }
     }
 
     /// <summary>   Performs a trigger. </summary>
@@ -804,7 +869,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// The <c>link id</c> parameter is compared against the link identifiers. If none match,
     /// <c>device_trigger</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <c>waitlock</c> flag
+    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
     /// in <c>flags</c> .If the flag is set, <c>device_trigger</c> SHALL block until the lock is free
     /// before sending the trigger. If the flag is not set, <c>device_trigger</c> SHALL terminate and
     /// set error to 11, device locked by another link. </para><para>
@@ -828,9 +893,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceTrigger( DeviceGenericParms request )
     {
-        return this.Device is null
-            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-            : this.Device.DeviceTrigger( request );
+        lock ( this._lock )
+        {
+            return this.Device is null
+                ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                : this.Device.DeviceTrigger( request );
+        }
     }
 
     /// <summary>   Lock the device. </summary>
@@ -848,7 +916,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// The <c>link id</c> parameter is compared against the active link identifiers . If none match, <c>device_lock</c> SHALL
     /// terminate, before trying to acquire the device's lock, with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_lock</c> SHALL examine the <c>waitlock</c> flag in <c>flags</c> . If the flag is set,
+    /// If some other link has the lock, <c>device_lock</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the flag is set,
     /// <c>device_lock</c> SHALL block until the lock is free. If the flag is not set, <c>device_lock</c> SHALL terminate with
     /// error set to 11, device locked by another link. </para><para>
     /// 
@@ -872,9 +940,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceLock( DeviceLockParms request )
     {
-        return this.Device is null
-            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-            : this.Device.DeviceLock( request );
+        lock ( this._lock )
+        {
+            return this.Device is null
+                ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                : this.Device.DeviceLock( request );
+        }
     }
 
     /// <summary>   Unlock the device. </summary>
@@ -897,9 +968,12 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DeviceUnlock( DeviceLink deviceLink )
     {
-        return this.Device is null
-            ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-            : this.Device.DeviceUnlock( deviceLink );
+        lock ( this._lock )
+        {
+            return this.Device is null
+                ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+                : this.Device.DeviceUnlock( deviceLink );
+        }
     }
 
     /// <summary>   Read a message. </summary>
@@ -956,18 +1030,21 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceReadResp DeviceRead( DeviceReadParms request )
     {
-        DeviceReadResp readRes = new();
-        if ( this.Device is null )
-            readRes.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
-        else
-            readRes = this.Device.DeviceRead( request );
-        return readRes;
+        lock ( this._lock )
+        {
+            DeviceReadResp readRes = new();
+            if ( this.Device is null )
+                readRes.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
+            else
+                readRes = this.Device.DeviceRead( request );
+            return readRes;
+        }
     }
 
 
     /// <summary>   Process the device write procedure. </summary>
     /// <remarks>
-    /// To a successfully complete a <c>device_write</c>  RPC, the network instrument server SHALL: <para>
+    /// To a successfully complete a <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  RPC, the network instrument server SHALL: <para>
     /// 1. Transfer the contents of data to the device. </para><para>
     /// 2. Return in size parameter the number of bytes accepted by the device. </para><para>
     /// 3. Return with error set to 0, no error. </para><para>
@@ -976,7 +1053,7 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// last byte in data. </para><para>
     /// 
     /// If a controller needs to send greater than maxRecvSize bytes to the device at one time, then
-    /// the network instrument client makes multiple calls to <c>device_write</c>  to accomplish the
+    /// the network instrument client makes multiple calls to <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  to accomplish the
     /// complete transaction.A network instrument server accepts at least 1,024 bytes in a single <c>
     /// device_write</c>
     /// call due to RULE B.6.3.  </para><para>
@@ -988,24 +1065,22 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
     /// If data.data_len is greater than the value of maxRecvSize returned in create_link,
-    /// <c>device_write</c>  SHALL terminate without transferring any bytes to the device and SHALL
-    /// set error
-    /// to 5.Section B: Network Instrument Protocol Page 29 October 4, 2000 Printing VXIbus
-    /// Specification: VXI-11 Revision 1.0 </para><para>
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring any bytes to the device and SHALL
+    /// set error to 5. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_write</c>  SHALL examine the <c>waitlock</c> flag
-    /// in <c>flags</c> . If the flag is set, <c>device_write</c>  SHALL block until the lock is
+    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// in <c>flags</c> . If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the lock is
     /// free. If the flag is not set,
-    /// <c>device_write</c>  SHALL terminate and set error to 11, device already locked by another
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11, device already locked by another
     /// link. </para>
     /// <para>
     /// 
-    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_write</c>
-    /// SHALL terminate with error set to 11, device already locked by another link. </para><para>
+    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// SHALL terminate with error set to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>(11) . </para><para>
     /// 
     /// If after at least <c>io_timeout</c> milliseconds not all of data has been transferred to the
     /// device,
-    /// <c>device_write</c>  SHALL terminate with error set to 15, I/O timeout. This timeout is based
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 15, I/O timeout. This timeout is based
     /// on the
     /// entire transaction and not the time required to transfer single bytes. </para><para>
     /// 
@@ -1013,21 +1088,21 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// data. </para>
     /// <para>
     /// 
-    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_write</c>
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// SHALL terminate with error set to 23, abort. </para><para>
     /// 
     /// The number of bytes transferred to the device SHALL be returned in size, even when the call
     /// terminates due to a timeout or device_abort. </para><para>
     /// 
     /// If the network instrument server encounters a device specific I/O error while attempting to
-    /// write the data, <c>device_write</c>  SHALL terminate with error set to 17, I/O error. </para>
+    /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 17, I/O error. </para>
     ///  <list type="bullet">Abort shall cause the following errors: <item>
     /// 
-    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_write</c>
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// terminate with error set to 23, abort. </item><item>
     /// 
     /// If the network instrument server encounters a device specific I/O error while attempting to
-    /// write the data, <c>device_write</c>  SHALL terminate with error set to 17, I/O error. </item><item>
+    /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 17, I/O error. </item><item>
     /// 
     /// </item></list>
     /// </remarks>
@@ -1038,12 +1113,15 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceWriteResp DeviceWrite( DeviceWriteParms request )
     {
-        DeviceWriteResp writeRes = new();
-        if ( this.Device is null )
-            writeRes.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
-        else
-            writeRes = this.Device.DeviceWrite( request );
-        return writeRes;
+        lock ( this._lock )
+        {
+            DeviceWriteResp writeRes = new();
+            if ( this.Device is null )
+                writeRes.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
+            else
+                writeRes = this.Device.DeviceWrite( request );
+            return writeRes;
+        }
     }
 
 #endregion

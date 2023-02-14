@@ -62,6 +62,22 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
     /// <value> The lock release time. </value>
     public DateTime LockReleaseTime { get; set; }
 
+    /// <summary>   Active lock timeout. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    public void ActivateLockTimeout( int? lockTimeout = null )
+    {
+        this.LockReleaseTime = this.LockDevice
+            ? DateTime.UtcNow.AddMilliseconds( lockTimeout ?? this.LockTimeout )
+            : DateTime.UtcNow;
+    }
+
+    /// <summary>   Releases the lock timeout. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    public void ReleaseLockTimeout()
+    {
+        this.LockReleaseTime = DateTime.UtcNow;
+    }
+
     /// <summary>   Query if this device is locked by this client. </summary>
     /// <remarks>   2023-02-13. </remarks>
     /// <returns>   True if locked, false if not. </returns>

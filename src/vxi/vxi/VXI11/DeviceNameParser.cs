@@ -227,7 +227,7 @@ public class DeviceNameParser
 
     /// <summary>   Parses the device name. </summary>
     /// <param name="deviceName">   The device name, e.g., <c>gpib0,12,8</c>. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool Parse( string deviceName )
     {
         this.Clear();
@@ -240,7 +240,7 @@ public class DeviceNameParser
 
     /// <summary>   Parses a genetic (inst) or GPIB device name into its components. </summary>
     /// <param name="deviceName">   The device name, e.g., <c>gpib0,12,8</c>. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     private bool ParseDeviceName( string deviceName )
     {
         this.Clear();
@@ -291,7 +291,7 @@ public class DeviceNameParser
     /// interface number 1 </item> </list>
     /// </remarks>
     /// <param name="usbDeviceName">    The USB device name. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     private bool ParseUsbDeviceName( string usbDeviceName )
     {
         this.Clear();

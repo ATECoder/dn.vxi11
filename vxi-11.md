@@ -215,10 +215,10 @@ The interrupt mechanism allows the device to send a notification call to the con
 |                      | <= acknowledge
 | <c>device_enable_srq</c> => | 
 |                      | <= acknowledge
-| <c>device_write</c>  =>      | <i>SRQ in the middle of another call</i>:
+| <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  =>      | <i>SRQ in the middle of another call</i>:
 |                      | <= device_intr_srq
 |                      | <= acknowledge to write
-| <c>device_write</c>  =>      | <i>SRQ after another call</i>:
+| <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  =>      | <i>SRQ after another call</i>:
 |                      | <= acknowledge to write
 |                      | <= device_intr_srq
 

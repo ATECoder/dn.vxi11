@@ -19,7 +19,7 @@ namespace cc.isr.VXI11.Codecs;
 /// <code>
 /// typedef long Device_Flags;
 /// typedef long Device_Link;
-/// struct <c>device_write</c> Parms {
+/// struct device_write_parms {
 ///    Device_Link lid;             /* link id from create_link */
 ///    unsigned long io_timeout;    /* time to wait for I/O */
 ///    unsigned long lock_timeout;  /* time to wait for lock */

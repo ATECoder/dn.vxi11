@@ -159,7 +159,7 @@ public partial class Vxi11Interface : IVxi11Interface
     /// </remarks>
     /// <param name="value">    The value. Note that a <see cref="bool"/> <see langword="true"/>
     ///                         is XDR encoded as 1. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public virtual bool SetRenLine( bool value )
     {
         throw new NotImplementedException();
@@ -172,7 +172,7 @@ public partial class Vxi11Interface : IVxi11Interface
     /// bitwise OR-ed with 0x80. The returned `data_out` is the same as the received `data_in`.
     /// </remarks>
     /// <param name="addr"> The address. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public virtual bool PassControl( int addr )
     {
         throw new NotImplementedException();
@@ -186,7 +186,7 @@ public partial class Vxi11Interface : IVxi11Interface
     /// </remarks>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
     /// <param name="addr"> The address. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public virtual bool SetBusAddress( int addr )
     {
         throw new NotImplementedException();
