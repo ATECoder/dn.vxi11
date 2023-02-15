@@ -5,7 +5,7 @@ using cc.isr.ONC.RPC.Portmap;
 
 try
 {
-    using cc.isr.VXI11.Server.Vxi11SingleClientServer server = new();
+    using cc.isr.VXI11.Server.Vxi11Server server = new();
     server.ThreadExceptionOccurred += OnThreadExcetion;
 
     Logger.Writer.LogInformation( "Starting the embedded port map service" );
@@ -17,7 +17,7 @@ try
 
     _ = server.ServerStarted( 2 * Constants.ServerStartTimeTypical, Constants.ServerStartLoopDelay );
 
-    Logger.Writer.LogInformation( $"{nameof( cc.isr.VXI11.Server.Vxi11SingleClientServer )} is {(server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
+    Logger.Writer.LogInformation( $"{nameof( cc.isr.VXI11.Server.Vxi11Server )} is {(server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
 
     char DoneKey = 'S';
     Console.Write( $"Press {DoneKey} to stop: " );
@@ -36,7 +36,7 @@ Console.WriteLine( "VXI-11 IEEE 488 Server stopped." );
 static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
 {
     string name = "unknown";
-    if ( sender is cc.isr.VXI11.Server.Vxi11SingleClientServer ) name = nameof( cc.isr.VXI11.Server.Vxi11SingleClientServer );
+    if ( sender is cc.isr.VXI11.Server.Vxi11Server ) name = nameof( cc.isr.VXI11.Server.Vxi11Server );
     if ( sender is cc.isr.ONC.RPC.Server.OncRpcServerStubBase ) name = nameof( cc.isr.ONC.RPC.Server.OncRpcServerStubBase );
 
     Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );

@@ -7,14 +7,12 @@ using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.Server;
 
-/// <summary>   A abstract VXI-11 server. </summary>
+/// <summary>   A VXI-11 server. </summary>
 /// <remarks>
 /// Implements the minimum requirements for a VXI-11 server including an <see cref="AbortChannelServer"/>
-/// and <see cref="InterruptChannelClient"/> without handling locks. Intended to be inherited by
-/// either a <see cref="Vxi11SingleClientServer"/>
-/// or a <see cref="Vxi11MultiClientServer"/> server.
+/// and <see cref="InterruptChannelClient"/> without handling locks. 
 /// </remarks>
-public abstract class Vxi11Server : CoreChannelServerBase
+public class Vxi11Server : CoreChannelServerBase
 {
 
     #region " construction and cleanup "
@@ -464,7 +462,8 @@ public abstract class Vxi11Server : CoreChannelServerBase
     {
         lock ( this._lock )
         {
-            return this.Device?.AwaitLockReleaseAsync() ?? true
+            Logger.Writer.LogVerbose( $"@{nameof(Vxi11Server.CreateLink)} client {request.ClientId} lock {request.LockDevice} timeout {request.LockTimeout}" );
+            return this.Device?.AwaitLockReleaseAsync( request.LockTimeout ) ?? true
                 ? this.CreateLinkUnlocked( request )
                 : new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink };
         }
@@ -477,12 +476,9 @@ public abstract class Vxi11Server : CoreChannelServerBase
     /// <returns>   The new link unlocked. </returns>
     private CreateLinkResp CreateLinkUnlocked( CreateLinkParms request )
     {
-        lock ( this._lock )
-        {
-            return this.Device is null
-                ? new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
-                : this.Device.CreateLink( request );
-        }
+        return this.Device is null
+            ? new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
+            : this.Device.CreateLink( request );
     }
 
     /// <summary>   Destroy a connection. </summary>

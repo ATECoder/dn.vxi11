@@ -8,7 +8,7 @@ using cc.isr.VXI11.Server;
 namespace cc.isr.VXI11.MSTest;
 
 [TestClass]
-public class Vxi11SingleClientServerTests
+public class Vxi11DualClientServerTests
 {
 
     /// <summary>   Gets or sets the server start time typical. </summary>
@@ -41,14 +41,14 @@ public class Vxi11SingleClientServerTests
 
                 Logger.Writer.LogInformation( "starting the server task; this takes ~2.5 seconds." );
                 _server.Run();
-            } ).ContinueWith( failedTask => Vxi11SingleClientServerTests.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception! ) ),
+            } ).ContinueWith( failedTask => Vxi11DualClientServerTests.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception! ) ),
                                                                                  TaskContinuationOptions.OnlyOnFaulted );
 
             Logger.Writer.LogInformation( $"{nameof( Vxi11Server )} waiting running {DateTime.Now:ss.fff}" );
 
             // because the initializing task is not awaited, we need to wait for the server to start here.
 
-            if ( !_server.ServerStarted( 2 * Vxi11SingleClientServerTests.ServerStartTimeTypical, Vxi11SingleClientServerTests.ServerStartLoopDelay ) )
+            if ( !_server.ServerStarted( 2 * Vxi11DualClientServerTests.ServerStartTimeTypical, Vxi11DualClientServerTests.ServerStartLoopDelay ) )
                 throw new InvalidOperationException( "failed starting the ONC/RPC server." );
 
             Logger.Writer.LogInformation( $"{nameof( Vxi11Server )} is {(_server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
@@ -130,96 +130,32 @@ public class Vxi11SingleClientServerTests
         Assert.IsTrue( _server?.Running );
     }
 
+    private static VXI11.Client.Vxi11Client AssertOpenClient( string ipv4Address, int lockTimeout, int interfaceNumber )
+    {
+        VXI11.Client.Vxi11Client client = new();
+        client.LockEnabled = true;
+        client.LockTimeout = lockTimeout;
+        client.ThreadExceptionOccurred += OnThreadException;
+        client.Connect( ipv4Address, DeviceNameParser.BuildDeviceName( DeviceNameParser.GenericInterfaceFamily, interfaceNumber ) );
+        return client;
+    }
+
     /// <summary>   Assert identity should query. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="ipv4Address">      The IPv4 address. </param>
     /// <param name="repeatCount">      Number of repeats. </param>
     /// <param name="interfaceNumber">  (Optional) The interface number. </param>
-    private static void AssertIdentityShouldQuery( string ipv4Address, int repeatCount, int interfaceNumber = 0 )
+    private static void AssertSecondClientShouldOpenAftertimeout( string ipv4Address )
     {
-        using VXI11.Client.Vxi11Client vxi11Client = new();
-        vxi11Client.ThreadExceptionOccurred += OnThreadException;
+        using VXI11.Client.Vxi11Client instr0a = AssertOpenClient( ipv4Address, 100, 0 );
 
-        string identity = _server!.Device!.Instrument!.Identity;
-        string command = Vxi11InstrumentCommands.IDNRead;
-        vxi11Client.Connect( ipv4Address, DeviceNameParser.BuildDeviceName( DeviceNameParser.GenericInterfaceFamily, interfaceNumber ) );
-        Console.WriteLine();
-        Logger.Writer.LogVerbose( $"Querying {vxi11Client.DeviceName} {repeatCount} times" );
-        int count = repeatCount;
-        while ( repeatCount > 0 )
-        {
-            repeatCount--;
-            (_, string response) = vxi11Client.Query( $"{command}\n", 0 );
-            Assert.AreEqual( identity, response, $"@count = {count - repeatCount}" );
-        }
-
+        using VXI11.Client.Vxi11Client instr0b = AssertOpenClient( ipv4Address, 100, 0 );
     }
 
-    /// <summary>   (Unit Test Method) identity should query. </summary>
-    /// <remarks>
-    /// <code>
-    /// Standard Output: 
-    ///    2023-02-08 11:54:38.666,cc.isr.VXI11.MSTest.Vxi11ServerTests.Vxi11ServerTests
-    ///    2023-02-08 11:54:38.677,Vxi11Server waiting running 38.677
-    ///    2023-02-08 11:54:38.677,starting the embedded port map service; this takes ~3.5 seconds.
-    ///    2023-02-08 11:54:38.678,Checking for Portmap service
-    ///    2023-02-08 11:54:38.712, No Portmap service available.
-    ///    2023-02-08 11:54:38.712,Creating embedded Portmap instance
-    ///    2023-02-08 11:54:38.923, Portmap service started; checked 34.4 ms.
-    ///    2023-02-08 11:54:38.924,starting the server task; this takes ~2.5 seconds.
-    ///    2023-02-08 11:54:38.930,Running set to True
-    ///    2023-02-08 11:54:45.770, Vxi11Server is running  45.770
-    ///    2023-02-08 11:54:45.782,creating link to inst0
-    ///    2023-02-08 11:54:45.786, link ID: 1 -> Received：*IDN?
-    ///
-    ///    2023-02-08 11:54:45.786,Processing '*IDN?'
-    ///    2023-02-08 11:54:45.787,Query results： INTEGRATED SCIENTIFIC RESOURCES,MODEL IEEE488Mock,001,1.0.8434。
-    ///    2023-02-08 11:54:45.804, Running set to False
-    /// </code>
-    /// </remarks>
     [TestMethod]
-    public void IdentityShouldQueryMultipleTimes()
+    public void ClientShouldOpenAfterTimeout()
     {
-        int count = 5;
-        AssertIdentityShouldQuery( _ipv4Address!, count );
-    }
-
-
-    /// <summary>   (Unit Test Method) identity should query multiple device names. </summary>
-    /// <remarks>   2023-02-14.
-    /// <code>
-    /// Standard Output: 
-    /// 2023-02-14 15:54:14.175,cc.isr.VXI11.MSTest.Vxi11SingleClientServerTests.Vxi11SingleClientServerTests
-    /// 2023-02-14 15:54:14.187,Vxi11Server waiting running 14.187
-    /// 2023-02-14 15:54:14.187,starting the embedded port map service; this takes ~3.5 seconds.
-    /// 2023-02-14 15:54:14.188,Checking for Portmap service
-    /// 2023-02-14 15:54:14.226, No Portmap service available.
-    /// 2023-02-14 15:54:14.226,Creating embedded Portmap instance
-    /// 2023-02-14 15:54:14.451, Portmap service started; checked 37.3 ms.
-    /// 2023-02-14 15:54:14.452,starting the server task; this takes ~2.5 seconds.
-    /// 2023-02-14 15:54:14.458,Running set to True
-    /// 2023-02-14 15:54:21.219, Vxi11Server is running  21.219
-    /// 2023-02-14 15:54:21.232,creating link to inst0
-    /// 2023-02-14 15:54:21.236, Querying inst0 1 times
-    /// 2023-02-14 15:54:21.238,link ID: 1 -> Received：*IDN?
-    ///
-    /// 2023-02-14 15:54:21.238,Processing '*IDN?'
-    /// 2023-02-14 15:54:21.241,Query results： INTEGRATED SCIENTIFIC RESOURCES,MODEL IEEE488Mock,001,1.0.8434。
-    /// 2023-02-14 15:54:21.249, creating link to inst1
-    /// 2023-02-14 15:54:21.249,Querying inst1 1 times
-    /// 2023-02-14 15:54:21.249,link ID: 2 -> Received：*IDN?
-    ///
-    /// 2023-02-14 15:54:21.249,Processing '*IDN?'
-    /// 2023-02-14 15:54:21.249,Query results： INTEGRATED SCIENTIFIC RESOURCES,MODEL IEEE488Mock,001,1.0.8434。
-    /// 2023-02-14 15:54:21.261, Running set to False
-    /// </code>
-    /// </remarks>
-    [TestMethod]
-    public void IdentityShouldQueryMultipleDeviceNames()
-    {
-        int count = 1;
-        AssertIdentityShouldQuery( _ipv4Address!, count, 0 );
-        AssertIdentityShouldQuery( _ipv4Address!, count, 1 );
+        AssertSecondClientShouldOpenAftertimeout( _ipv4Address! );
     }
 
 }

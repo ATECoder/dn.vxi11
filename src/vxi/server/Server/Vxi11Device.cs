@@ -475,7 +475,7 @@ public partial class Vxi11Device : IVxi11Device
             if ( waitLock )
             {
                 // wait for the active client lock to expire
-                if ( !this.AwaitLockReleaseAsync() )
+                if ( !this.AwaitLockReleaseAsync( this.ActiveServerClient!.LockTimeout ) )
                     return false;
             }
             else
@@ -554,9 +554,11 @@ public partial class Vxi11Device : IVxi11Device
 
     /// <summary>   Await lock release asynchronously. </summary>
     /// <remarks>   2023-02-14. </remarks>
-    public bool AwaitLockReleaseAsync()
+    /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public bool AwaitLockReleaseAsync( int timeout )
     {
-        return this.ServerClientRegistry.AwaitLockReleaseAsync();
+        return this.ServerClientRegistry.AwaitLockReleaseAsync( timeout );
     }
 
     #endregion
@@ -639,7 +641,7 @@ public partial class Vxi11Device : IVxi11Device
                 AbortPort = this.AbortPortNumber
             };
 
-            Logger.Writer.LogVerbose( $"creating link to {request.DeviceName}" );
+            Logger.Writer.LogVerbose( $"creating link to {request.DeviceName} for client {request.ClientId}" );
 
             this.DeviceName = request.DeviceName;
 

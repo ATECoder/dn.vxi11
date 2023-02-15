@@ -83,7 +83,7 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
     /// <returns>   True if locked, false if not. </returns>
     public bool IsLocked()
     {
-        return this.LockDevice && this.LockReleaseTime < DateTime.UtcNow;
+        return this.LockDevice && this.LockReleaseTime > DateTime.UtcNow;
     }
 
     /// <summary>

@@ -229,7 +229,9 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     /// <summary>   Await lock release asynchronously. </summary>
     /// <remarks>   2023-02-14. </remarks>
-    bool AwaitLockReleaseAsync();
+    /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    bool AwaitLockReleaseAsync( int timeout );
 
     #endregion
 

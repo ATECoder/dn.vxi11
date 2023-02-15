@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.ComponentModel.Design;
 
+using cc.isr.ONC.RPC.Logging;
 using cc.isr.ONC.RPC.Server;
 using cc.isr.VXI11.Codecs;
 
@@ -102,12 +103,17 @@ public class ServerClientsRegistry
 
     /// <summary>   Await lock release asynchronous. </summary>
     /// <remarks>   2023-02-14. </remarks>
-    public bool AwaitLockReleaseAsync()
+    /// <param name="timeout">  The timeout for awaiting the release of the lock. </param>
+    /// <returns>   The awaiting task. </returns>
+    public bool AwaitLockReleaseAsync( int timeout )
     {
         if ( this.ActiveServerClient is not null )
         {
-            Task<bool> awaitingTask = this.AwaitLockReleaseAsync( this.ActiveServerClient.LockTimeout, 5 );
-            return awaitingTask.Wait( this.ActiveServerClient.LockTimeout + 2 ) && awaitingTask.Result;
+            int loopDelay = 5;
+            Task<bool> awaitingTask = this.AwaitLockReleaseAsync( timeout, 5 );
+            // Logger.Writer.LogVerbose( $"@{nameof( ServerClientsRegistry.AwaitLockReleaseAsync )} await task await is {(awaitingTask.Wait( timeout + 2 ) ? "true" : "false")}" );
+            // Logger.Writer.LogVerbose( $"@{nameof( ServerClientsRegistry.AwaitLockReleaseAsync )} await task result {(awaitingTask.Result ? "true" : "false")}" );
+            return awaitingTask.Wait( timeout + 2 * loopDelay ) && awaitingTask.Result;
         }
         return true;
     }
@@ -121,6 +127,7 @@ public class ServerClientsRegistry
     {
         bool result = false;
         await Task.Factory.StartNew( () => { result = this.AwaitLockRelease( this.ActiveServerClient!.LockTimeout, loopDelay ); } );
+        // Logger.Writer.LogVerbose( $"exit {nameof( ServerClientsRegistry.AwaitLockReleaseAsync )} result is {(result ? "true" : "false")}" );
         return result;
     }
 
@@ -131,13 +138,17 @@ public class ServerClientsRegistry
     /// <returns>   <see langword="true"/> if it the lock was released; otherwise, <see langword="false"/>  if it fails. </returns>
     public bool AwaitLockRelease( int timeout, int loopDelay )
     {
+        Logger.Writer.LogVerbose( $"enter {nameof(ServerClientsRegistry.AwaitLockRelease)} {this.ActiveServerClient?.DeviceName} client {this.ActiveServerClient?.ClientId} is {((this.ActiveServerClient?.IsLocked() ?? false) ? "locked" : "not locked")}" );
+
         // await for the server to stop running
         DateTime endTime = DateTime.Now.AddMilliseconds( timeout );
         while ( ( this.ActiveServerClient?.IsLocked() ?? false) && endTime > DateTime.Now )
         {
             Task.Delay( loopDelay ).Wait();
         }
-        return  !( this.ActiveServerClient?.IsLocked() ?? false ); 
+        Logger.Writer.LogVerbose( $"exit {nameof( ServerClientsRegistry.AwaitLockRelease )} {this.ActiveServerClient?.DeviceName} client {this.ActiveServerClient?.ClientId} is {((this.ActiveServerClient?.IsLocked() ?? false) ? "locked" : "not locked")}" );
+
+        return !( this.ActiveServerClient?.IsLocked() ?? false ); 
     }
 
     /// <summary>   Query if 'clientId' is active client. </summary>
