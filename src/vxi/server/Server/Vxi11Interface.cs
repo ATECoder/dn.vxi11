@@ -30,9 +30,198 @@ public partial class Vxi11Interface : IVxi11Interface
 {
     #region " construction and cleanup "
 
-    public Vxi11Interface()
+    /// <summary>   Constructor. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="deviceName">   The device name. </param>
+    public Vxi11Interface(string deviceName )
     {
         this.MessageLog = new CircularList<(int LinkId, char IO, DateTimeOffset Timestamp, String Value)>( IOMessageCapacity );
+        this.DeviceName = deviceName;
+        this._deviceName = string.Empty;
+        this.DeviceNameParser = new DeviceNameParser( string.Empty );
+        this.ServerClientRegistry = new();
+    }
+
+    #endregion
+
+    #region " device name "
+
+    private string _deviceName;
+    /// <summary>
+    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
+    /// </summary>
+    /// <value> The device name. </value>
+    public string DeviceName
+    {
+        get => this._deviceName;
+        set {
+            if ( this.SetProperty( ref this._deviceName, value ) )
+                _ = this.DeviceNameParser.Parse( value );
+        }
+    }
+
+    /// <summary>   Gets or sets the parser for the device name. </summary>
+    /// <value> The device name parser. </value>
+    public DeviceNameParser DeviceNameParser { get; }
+
+    /// <summary>   Query if this device has valid device name. </summary>
+    /// <remarks> This is required for validating the device name when creating the link. </remarks>
+    /// <returns>   True if valid device name, false if not. </returns>
+    public bool IsValidDeviceName()
+    {
+        DeviceNameParser parser = new( this.DeviceName );
+        return parser.IsValid();
+    }
+
+    #endregion
+
+    #region " client device link management "
+
+    /// <summary>   Gets or sets the server clients. </summary>
+    /// <value> The server clients. </value>
+    private ServerClientsRegistry ServerClientRegistry { get; set; }
+
+    /// <summary>   Gets the number of linked clients. </summary>
+    /// <value> The number of linked clients. </value>
+    public int LinkedClientsCount => this.ServerClientRegistry.Count;
+
+    /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
+    /// <remarks>   2023-02-13. </remarks>
+    /// <param name="createLinkParameters"> The parameters defining the created link. </param>
+    /// <param name="linkId">               Identifier for the link. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    public bool AddClient( CreateLinkParms createLinkParameters, int linkId )
+    {
+        if ( this.ServerClientRegistry.AddClient( createLinkParameters, linkId ) )
+        {
+            this.ActiveServerClient = this.ServerClientRegistry.ActiveServerClient;
+            this.ActiveClientId = this.ActiveServerClient!.ClientId;
+            return this.ActiveServerClient is not null;
+        }
+        else
+        {
+            this.ActiveServerClient = null;
+            this.ActiveClientId = 0;
+            return false;
+        }
+    }
+
+    /// <summary>   Attempts to select client. </summary>
+    /// <remarks>
+    /// 2023-02-09. <para>
+    /// 
+    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.Waitlock"/>
+    /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
+    /// terminate that calling call and set error to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>
+    /// (11).
+    /// </para>
+    /// </remarks>
+    /// <param name="linkId">           Identifier for the link. </param>
+    /// <param name="operationFlags">   The operation flags. </param>
+    /// <param name="lockTimeout">      (Optional) The lock timeout. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    public bool TrySelectClient( int linkId, DeviceOperationFlags operationFlags, int? lockTimeout = null )
+    {
+        return this.TrySelectClient( linkId, DeviceOperationFlags.None != (operationFlags & DeviceOperationFlags.Waitlock), lockTimeout );
+    }
+
+    /// <summary>   Attempts to select client. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">       Identifier for the link. </param>
+    /// <param name="waitLock">     Set <see langword="true"/> to wait for an existing lock;
+    ///                             otherwise, return <see langword="false"/> if the active client is
+    ///                             locked. </param>
+    /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    public bool TrySelectClient( int linkId, bool waitLock, int? lockTimeout = null )
+    {
+        if ( linkId == (this.ActiveServerClient?.LinkId ?? 0) )
+            // if the client was already selected, we are done.
+            return true;
+
+        if ( this.DeviceLocked() )
+        {
+            if ( waitLock )
+            {
+                // wait for the active client lock to expire
+                if ( !this.AwaitLockReleaseAsync( this.ActiveServerClient!.LockTimeout ) )
+                    return false;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        if ( this.ServerClientRegistry.TrySelectActiveClient( linkId, lockTimeout ) )
+        {
+            this.ActiveServerClient = this.ServerClientRegistry.ActiveServerClient;
+            this.ActiveClientId = this.ActiveServerClient!.ClientId;
+            return this.ActiveServerClient is not null;
+        }
+        else
+        {
+            this.ActiveServerClient = null;
+            this.ActiveClientId = 0;
+            return false;
+        }
+    }
+
+    private ServerClientInfo? _activeServerClient;
+    /// <summary>   Gets or sets the <see cref="ServerClientInfo"/> of the active client. </summary>
+    /// <value> Information describing the server client. </value>
+    public ServerClientInfo? ActiveServerClient
+    {
+        get => this._activeServerClient;
+        set {
+            if ( this.OnPropertyChanged( ref this._activeServerClient, value ) )
+            {
+                this.ActiveClientId = value?.ClientId ?? 0;
+            }
+        }
+
+    }
+
+    private int _activeClientId;
+    /// <summary>   Gets or sets the identifier of the active client. </summary>
+    /// <remarks> Used solely for generating log messages. </remarks>
+    /// <value> The identifier of the active client. </value>
+    public int ActiveClientId
+    {
+        get => this._activeClientId;
+        set => _ = this.OnPropertyChanged( ref this._activeClientId, value );
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether a valid link exists between the VXI-11 client
+    /// and the <see cref="Vxi11Server"/>.
+    /// </summary>
+    /// <param name="clientId"> Identifier for the client. </param>
+    /// <returns>
+    /// True if a valid device link exists between the VXI-11 client
+    /// and <see cref="Vxi11Server"/>.
+    /// </returns>
+    public bool DeviceLinked( int clientId )
+    {
+        return this.ServerClientRegistry.IsClientLinked( clientId );
+    }
+
+    /// <summary>   Determines if we can device locked. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    public bool DeviceLocked()
+    {
+        return this.ServerClientRegistry.IsActiveClientLocked();
+    }
+
+    /// <summary>   Await lock release asynchronously. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public bool AwaitLockReleaseAsync( int timeout )
+    {
+        return this.ServerClientRegistry.AwaitLockReleaseAsync( timeout );
     }
 
     #endregion
@@ -353,16 +542,6 @@ public partial class Vxi11Interface : IVxi11Interface
                 break;
         }
         return reply;
-    }
-
-    private int _activeClientId;
-    /// <summary>   Gets or sets the identifier of the active client. </summary>
-    /// <remarks> Used solely for generating log messages. </remarks>
-    /// <value> The identifier of the active client. </value>
-    public int ActiveClientId
-    {
-        get => this._activeClientId;
-        set => _ = this.OnPropertyChanged( ref this._activeClientId, value );
     }
 
     /// <summary>   Gets or sets the i/o message capacity. </summary>

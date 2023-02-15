@@ -33,6 +33,103 @@ namespace cc.isr.VXI11.Server;
 public interface IVxi11Instrument : INotifyPropertyChanged
 {
 
+    #region " device name "
+
+    /// <summary>
+    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
+    /// </summary>
+    /// <value> The device name. </value>
+    string DeviceName { get; set; }
+
+    /// <summary>   Gets or sets the parser for the device name. </summary>
+    /// <value> The device name parser. </value>
+    DeviceNameParser DeviceNameParser { get; }
+
+    /// <summary>   Query if this device has valid device name. </summary>
+    /// <remarks> This is required for validating the device name when creating the link. </remarks>
+    /// <returns>   True if valid device name, false if not. </returns>
+    bool IsValidDeviceName();
+
+    #endregion
+
+    #region " client device link management "
+
+    /// <summary>   Gets the number of linked clients. </summary>
+    /// <value> The number of linked clients. </value>
+    public int LinkedClientsCount { get; }
+
+    /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
+    /// <remarks>   2023-02-13. </remarks>
+    /// <param name="createLinkParameters"> The parameters defining the created link. </param>
+    /// <param name="linkId">               Identifier for the link. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    bool AddClient( CreateLinkParms createLinkParameters, int linkId );
+
+    /// <summary>   Removes the client described by linkId. </summary>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    bool RemoveClient( int linkId );
+
+    /// <summary>   Attempts to select client. </summary>
+    /// <remarks>
+    /// 2023-02-09. <para>
+    /// 
+    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.Waitlock"/>
+    /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
+    /// terminate that calling call and set error to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>
+    /// (11).
+    /// </para>
+    /// </remarks>
+    /// <param name="linkId">           Identifier for the link. </param>
+    /// <param name="operationFlags">   The operation flags. </param>
+    /// <param name="lockTimeout">      (Optional) The lock timeout. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    bool TrySelectClient( int linkId, DeviceOperationFlags operationFlags, int? lockTimeout = null );
+
+    /// <summary>   Attempts to select client. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">       Identifier for the link. </param>
+    /// <param name="waitLock">     Set <see langword="true"/> to wait for an existing lock;
+    ///                             otherwise, return <see langword="false"/> if the active client is
+    ///                             locked. </param>
+    /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    bool TrySelectClient( int linkId, bool waitLock, int? lockTimeout = null );
+
+    /// <summary>   Gets or sets the <see cref="ServerClientInfo"/> of the active client. </summary>
+    /// <value> Information describing the server client. </value>
+    ServerClientInfo? ActiveServerClient { get; set; }
+
+    /// <summary>   Gets or sets the identifier of the active client. </summary>
+    /// <remarks> Used solely for generating log messages. </remarks>
+    /// <value> The identifier of the active client. </value>
+    int ActiveClientId { get; set; }
+
+    /// <summary>
+    /// Gets a value indicating whether a valid link exists between the VXI-11 client
+    /// and the <see cref="Vxi11Server"/>.
+    /// </summary>
+    /// <param name="clientId"> Identifier for the client. </param>
+    /// <returns>
+    /// True if a valid device link exists between the VXI-11 client
+    /// and <see cref="Vxi11Server"/>.
+    /// </returns>
+    bool DeviceLinked( int clientId );
+
+    /// <summary>   Determines if we can device locked. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    bool DeviceLocked();
+
+    /// <summary>   Await lock release asynchronously. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    bool AwaitLockReleaseAsync( int timeout );
+
+    #endregion
+
     #region " instrument operations "
 
     /// <summary>   Gets or sets the service request status. </summary>
@@ -268,10 +365,6 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
     public event EventHandler<cc.isr.VXI11.Vxi11EventArgs>? RequestingService;
-
-    /// <summary>   Gets or sets the identifier of the active client. </summary>
-    /// <value> The identifier of the active client. </value>
-    public int ActiveClientId { get; set; }
 
     #endregion
 

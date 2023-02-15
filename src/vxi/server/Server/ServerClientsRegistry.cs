@@ -20,6 +20,7 @@ public class ServerClientsRegistry
         this.LinkedClients = new();
         this.ClientLinks = new();
         this.ClientsQueue = new();
+        this.InstrumentClients= new();
     }
 
     /// <summary>   Gets or sets a queue of clients locking the instrument. </summary>
@@ -29,6 +30,10 @@ public class ServerClientsRegistry
     /// <summary>   Gets or sets the dictionary of <see cref="ServerClientInfo"/> keyed by <see cref="ServerClientInfo.LinkId"/>. </summary>
     /// <value> The <see cref="ServerClientInfo"/> keyed by <see cref="ServerClientInfo.LinkId"/>. </value>
     private ConcurrentDictionary<int, ServerClientInfo> LinkedClients { get; set; }
+
+    /// <summary>   Gets or sets the instrument clients keyed by <see cref="ServerClientInfo.DeviceName"/>. </summary>
+    /// <value> The instrument clients. </value>
+    private ConcurrentDictionary<string, ServerClientInfo> InstrumentClients { get; set; }
 
     /// <summary>   Gets or sets the dictionary of links keyed by <see cref="ServerClientInfo.ClientId"/>. </summary>
     /// <value> The links keyed by <see cref="ServerClientInfo.ClientId"/>. </value>
@@ -42,12 +47,12 @@ public class ServerClientsRegistry
     /// <value> Information describing the active server client. </value>
     public ServerClientInfo? ActiveServerClient { get; set; }
 
-    /// <summary>   Attempts to select a client. </summary>
+    /// <summary>   Attempts to select the active client. </summary>
     /// <remarks>   2023-02-09. </remarks>
     /// <param name="linkId">       The link identifier. </param>
     /// <param name="lockTimeout">  (Optional) The update lock timeout. </param>
     /// <returns>   The client. </returns>
-    public bool TrySelectClient( int linkId, int? lockTimeout = null )
+    public bool TrySelectActiveClient( int linkId, int? lockTimeout = null )
     {
         if ( this.LinkedClients.TryGetValue( linkId, out ServerClientInfo value ) )
         {
@@ -62,6 +67,15 @@ public class ServerClientsRegistry
         return false;
     }
 
+    /// <summary>   Attempts to select a client. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <param name="client">   [out] The client. </param>
+    /// <returns>   The client. </returns>
+    public bool TrySelectClient( int linkId, out ServerClientInfo client )
+    {
+        return this.LinkedClients.TryGetValue( linkId, out client );
+    }
 
     /// <summary>   Query if this object is active client linked. </summary>
     /// <returns>   True if active client linked, false if not. </returns>
@@ -175,12 +189,21 @@ public class ServerClientsRegistry
         return this.ClientLinks.ContainsKey( clientId );
     }
 
-    /// <summary>   Query if a link identified by the 'linkId' was created. </summary>
+    /// <summary>   Query if <see cref="ServerClientsRegistry"/> contains an link <paramref name="linkId"/>. </summary>
     /// <param name="linkId">   Identifier for the link. </param>
     /// <returns>   True if link created, false if not. </returns>
-    public bool IsLinkCreated( int linkId )
+    public bool ContainsLink( int linkId )
     {
         return this.LinkedClients.ContainsKey( linkId );
+    }
+
+    /// <summary>   Query if <see cref="ServerClientsRegistry"/> contains an instrument <paramref name="deviceName"/>. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="deviceName">   Name of the device. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public bool ContainsInstrument( string deviceName )
+    {
+        return this.InstrumentClients.ContainsKey( deviceName );
     }
 
     /// <summary>   Adds an active client. </summary>
@@ -195,6 +218,29 @@ public class ServerClientsRegistry
         this.ClientsQueue.Enqueue( clientInfo );
         return this.ClientLinks.GetOrAdd( clientInfo.ClientId, clientInfo.LinkId );
     }
+
+    private int AddClient( ServerClientInfo clientInfo )
+    {
+        // make this client the active server client and sent it the reply.
+        _ = this.LinkedClients.GetOrAdd( clientInfo.LinkId, clientInfo );
+        this.ClientsQueue.Enqueue( clientInfo );
+        return this.ClientLinks.GetOrAdd( clientInfo.ClientId, clientInfo.LinkId );
+    }
+
+    /// <summary>   Attempts to add client an int from the given CreateLinkParms. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="createLinkParameters"> The parameters defining the created link. </param>
+    /// <param name="linkId">               The link identifier. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public bool TryAddClient( CreateLinkParms createLinkParameters, int linkId )
+    {
+        if ( this.LinkedClients.ContainsKey( linkId ) ) { return false; }
+        if ( this.ClientLinks.ContainsKey( createLinkParameters.ClientId ) ) { return false; }
+        ServerClientInfo client = new( createLinkParameters, linkId );
+        int link = this.AddClient( client );
+        return link == client.LinkId;
+    }
+
 
     /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
     /// <remarks>   2023-02-13. </remarks>

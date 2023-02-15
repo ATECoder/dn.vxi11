@@ -18,7 +18,7 @@ public class Vxi11Server : CoreChannelServerBase
     #region " construction and cleanup "
 
     /// <summary>   Default constructor. </summary>
-    public Vxi11Server() : this( new Vxi11Device ( new Vxi11Instrument(), new Vxi11Interface() ), IPAddress.Any, 0 )
+    public Vxi11Server() : this( new Vxi11Device ( new Vxi11InstrumentFactory(), new Vxi11InterfaceFactory() ), IPAddress.Any, 0 )
     {
     }
 
@@ -58,7 +58,6 @@ public class Vxi11Server : CoreChannelServerBase
 
             if ( this.Device is not null )
             {
-                this.Device.Instrument = null;
                 this.Device = null;
             }
 
@@ -398,7 +397,6 @@ public class Vxi11Server : CoreChannelServerBase
         if ( sender is not IVxi11Device ) return;
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.AbortPortNumber ) );
         this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.CharacterEncoding ) );
-        this.OnDevicePropertyChanged( sender, nameof( IVxi11Device.DeviceName ) );
     }
 
     #endregion
@@ -406,11 +404,6 @@ public class Vxi11Server : CoreChannelServerBase
     #region " remote procedure call handlers "
 
     private readonly object _lock = new();
-
-    /// <summary>   Gets the active device link between the VXI-11 client
-    /// and this <see cref="Vxi11Server"/>. </summary>
-    /// <value> The device link. </value>
-    public DeviceLink DeviceLink => new ( this.Device?.ActiveServerClient?.LinkId ?? 0 );
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>

@@ -21,7 +21,7 @@ public class Vxi11DeviceTests
             _classTestContext = context;
             Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
 
-            _vxi11Device = new Vxi11Device( new Vxi11Instrument(), new Vxi11Interface() );
+            _vxi11Device = new Vxi11Device( new Vxi11InstrumentFactory(), new Vxi11InterfaceFactory() );
 
         }
         catch ( Exception ex )
@@ -211,7 +211,7 @@ public class Vxi11DeviceTests
         Assert.AreEqual( DeviceErrorCode.NoError, writeResp.ErrorCode );
         Assert.AreEqual( command.Length, writeResp.Size );
 
-        string expectedValue = _vxi11Device?.Instrument?.Identity ?? string.Empty;
+        string expectedValue = _vxi11Device?.ActiveInstrument?.Identity ?? string.Empty;
         DeviceReadResp readResp = Receive( _vxi11Device, _vxi11Device!.MaxReceiveLength );
         Assert.AreEqual( DeviceErrorCode.NoError, readResp.ErrorCode );
         Assert.AreEqual( expectedValue, _vxi11Device!.CharacterEncoding.GetString( readResp.GetData() ) );

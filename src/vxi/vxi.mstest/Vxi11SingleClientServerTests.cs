@@ -140,7 +140,7 @@ public class Vxi11SingleClientServerTests
         using VXI11.Client.Vxi11Client vxi11Client = new();
         vxi11Client.ThreadExceptionOccurred += OnThreadException;
 
-        string identity = _server!.Device!.Instrument!.Identity;
+        string identity = _server!.Device!.ActiveInstrument!.Identity;
         string command = Vxi11InstrumentCommands.IDNRead;
         vxi11Client.Connect( ipv4Address, DeviceNameParser.BuildDeviceName( DeviceNameParser.GenericInterfaceFamily, interfaceNumber ) );
         Console.WriteLine();

@@ -22,6 +22,14 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
         this._handle = Array.Empty<byte>();
     }
 
+    /// <summary>   Returns a string that represents the current object. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <returns>   A string that represents the current object. </returns>
+    public override string ToString()
+    {
+        return $"{this.DeviceName} client {this.ClientId} link {this.LinkId}";
+    }
+
     /// <summary>   Gets or sets a value indicating whether the link created. </summary>
     /// <remarks> This is used by the server device to enumerate all the clients which 
     /// are awaiting a reply to their create link query. </remarks>

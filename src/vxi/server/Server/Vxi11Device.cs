@@ -1,5 +1,7 @@
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.Logging;
+
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Net;
 
@@ -32,32 +34,21 @@ public partial class Vxi11Device : IVxi11Device
 
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-09. </remarks>
-    /// <param name="instrument">       An implementation of the <see cref="IVxi11Instrument"/>. </param>
-    /// <param name="vxi11Interface">   A reference to the implemented <see cref="IVxi11Interface"/>
-    ///                                 VXI-11 Interface. </param>
-    public Vxi11Device( IVxi11Instrument instrument, IVxi11Interface vxi11Interface )
+    /// <param name="instrumentFactory">    The instrument factory. </param>
+    /// <param name="interfaceFactory">     The interface factory. </param>
+    public Vxi11Device( Vxi11InstrumentFactory instrumentFactory, Vxi11InterfaceFactory interfaceFactory )
     {
-        this.Instrument = instrument;
-        this.Vxi11Interface = vxi11Interface;
+        this.InstrumentFactory = instrumentFactory;
+        this.InterfaceFactory = interfaceFactory;
+
         this.CharacterEncoding = CoreChannelClient.EncodingDefault;
         this._characterEncoding = CoreChannelClient.EncodingDefault;
-        this._deviceName = string.Empty;
-        this.DeviceNameParser = new DeviceNameParser( string.Empty );
-        this.DeviceName = string.Empty;
         this.MaxReceiveLength = CoreChannelClient.MaxReceiveLengthDefault;
         this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
-        this.Host = string.Empty;
-        this._host = string.Empty;
         this.ReadTermination = CoreChannelClient.ReadTerminationDefault;
         this.WriteTermination = CoreChannelClient.WriteTerminationDefault;
         this._writeTermination = CoreChannelClient.WriteTerminationDefault;
-
-        this.ServerClientRegistry = new();
-        this.Instrument.PropertyChanged += this.OnInstrumentPropertyChanged;
-        this.OnInstrumentPropertiesChanges( this.Instrument );
-        this.Instrument.RequestingService += this.OnRequestingService;
-
-        this.Vxi11Interface.PropertyChanged += this.OnInterfacePropertyChanged;
+        this.ServerClientsRegistry = new();
     }
 
     #endregion
@@ -94,9 +85,9 @@ public partial class Vxi11Device : IVxi11Device
     /// <param name="e">        Device error event information. </param>
     public void HandleAbortRequest( DeviceErrorEventArgs e )
     {
-        e.ErrorCodeValue = this.Instrument is null
+        e.ErrorCodeValue = this.ActiveInstrument is null
                                 ? DeviceErrorCode.DeviceNotAccessible
-                                : this.Instrument.Abort();
+                                : this.ActiveInstrument.Abort();
     }
 
     #endregion
@@ -113,7 +104,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <param name="handle">   The handle. </param>
     public void EnableInterrupt( bool enable, byte[] handle )
     {
-        this.Instrument?.EnableInterrupt( enable, handle );
+        this.ActiveInstrument?.EnableInterrupt( enable, handle );
         _ = this.OnPropertyChanged( ref this._interruptEnabled, enable, nameof( this.InterruptEnabled ) );
     }
 
@@ -154,43 +145,6 @@ public partial class Vxi11Device : IVxi11Device
     {
         get => this._lastDeviceError;
         set => _ = this.SetProperty( ref this._lastDeviceError, value );
-    }
-
-    private string _host;
-    /// <summary>   Gets or sets the host IPv4 Address. </summary>
-    /// <value> The host. </value>
-    public string Host
-    {
-        get => this._host;
-        set => _ = this.SetProperty( ref this._host, value );
-    }
-
-    private string _deviceName;
-    /// <summary>
-    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
-    /// </summary>
-    /// <value> The device name. </value>
-    public string DeviceName
-    {
-        get => this._deviceName;
-        set
-        {
-            if ( this.SetProperty( ref this._deviceName, value ) )
-                _ = this.DeviceNameParser.Parse( value );
-        } 
-    }
-
-    /// <summary>   Gets or sets the parser for the device name. </summary>
-    /// <value> The device name parser. </value>
-    public DeviceNameParser DeviceNameParser { get; }
-
-    /// <summary>   Query if this device has valid device name. </summary>
-    /// <remarks> This is required for validating the device name when creating the link. </remarks>
-    /// <returns>   True if valid device name, false if not. </returns>
-    public bool IsValidDeviceName()
-    {
-        DeviceNameParser parser = new( this.DeviceName );
-        return parser.IsValid();
     }
 
     private byte _readTermination;
@@ -276,7 +230,7 @@ public partial class Vxi11Device : IVxi11Device
         get => this._characterEncoding;
         set {
             if ( this.SetProperty( ref this._characterEncoding, value ) )
-                if ( this.Instrument is not null ) this.Instrument.CharacterEncoding = value;
+                if ( this.ActiveInstrument is not null ) this.ActiveInstrument.CharacterEncoding = value;
         }
     }
 
@@ -301,66 +255,53 @@ public partial class Vxi11Device : IVxi11Device
         get => this._lockEnabled;
         set
         {
-            if ( this.SetProperty( ref this._lockEnabled, value ) && this.Instrument is not null )
-                this.Instrument.LockEnabled = value;
+            if ( this.SetProperty( ref this._lockEnabled, value ) && this.ActiveInstrument is not null )
+                this.ActiveInstrument.LockEnabled = value;
         }
     }
 
     private bool _remoteEnabled;
-    /// <summary>   Gets or sets a value indicating whether Remote is enabeld on the device. </summary>
+    /// <summary>   Gets or sets a value indicating whether Remote is enabled on the device. </summary>
     /// <value> True if remote is enabled, false if not. </value>
     public bool RemoteEnabled
     {
         get => this._remoteEnabled;
         set {
-            if ( this.SetProperty( ref this._remoteEnabled, value ) && this.Instrument is not null )
-                this.Instrument.RemoteEnabled = value;
+            if ( this.SetProperty( ref this._remoteEnabled, value ) && this.ActiveInstrument is not null )
+                this.ActiveInstrument.RemoteEnabled = value;
         }
     }
 
     #endregion
 
-    #region " VXI-11 instrument and interface "
+    #region " instrument management "
 
-    /// <summary>
-    /// Gets or sets a reference to the implemented <see cref="IVxi11Interface"/> VXI-11 Interface.
-    /// </summary>
-    /// <remarks>   The setter is provided for detaching the reference. </remarks>
-    /// <value> A reference to the implemented <see cref="IVxi11Interface"/> VXI-11 Interface. </value>
-    public IVxi11Interface? Vxi11Interface { get; set; }
+    private Vxi11InstrumentFactory InstrumentFactory { get; }
 
-    /// <summary>   Executes the interface property changed action. </summary>
-    /// <remarks>   2023-02-09. </remarks>
-    /// <param name="sender">   Source of the event. </param>
-    /// <param name="e">        Event information to send to registered event handlers. </param>
-    private void OnInterfacePropertyChanged( object sender, PropertyChangedEventArgs e )
+    private ServerClientsRegistry ServerClientsRegistry { get; }
+
+    /// <summary>   Gets the number of linked clients. </summary>
+    /// <value> The number of linked clients. </value>
+    public int LinkedClientsCount => this.ServerClientsRegistry.Count;
+
+    private ConcurrentDictionary<string, IVxi11Instrument> Instruments { get; } = new();
+
+    /// <summary>   Gets or sets the active instrument. </summary>
+    /// <value> The active instrument. </value>
+    public IVxi11Instrument? ActiveInstrument { get; set; }
+
+    /// <summary>   Gets the active server client. </summary>
+    /// <value> The active server client. </value>
+    public ServerClientInfo ActiveServerClient => this.ActiveInstrument?.ActiveServerClient ?? new ServerClientInfo( new CreateLinkParms(), 0 );
+
+    /// <summary>   Await lock release asynchronously. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public bool AwaitLockReleaseAsync( int timeout )
     {
-        if ( sender is not IVxi11Interface) return;
-        this.OnInterfacePropertyChanged( ( IVxi11Interface ) sender, e.PropertyName );
+        return this.ActiveInstrument?.AwaitLockReleaseAsync( timeout ) ?? true;
     }
-
-    /// <summary>   Executes the interface property changed action. </summary>
-    /// <remarks>   2023-02-09. </remarks>
-    /// <param name="sender">       Source of the event. </param>
-    /// <param name="propertyName"> Name of the property. </param>
-    private void OnInterfacePropertyChanged( IVxi11Interface sender, string propertyName )
-    {
-        if ( sender is not IVxi11Interface || string.IsNullOrWhiteSpace( propertyName ) ) return;
-        {
-            switch ( propertyName )
-            {
-                case nameof( IVxi11Interface.LastDeviceError ):
-                    this.LastDeviceError = sender.LastDeviceError;
-                    break;
-
-            }
-        }
-    }
-
-    /// <summary>   Get a reference to the implemented <see cref="IVxi11Instrument"/> VXI-11 instrument. </summary>
-    /// <remarks>   The setter is provided for detaching the reference. </remarks>
-    /// <value> A reference to the implemented <see cref="IVxi11Instrument"/> VXI-11 instrument. </value>
-    public IVxi11Instrument? Instrument { get; set; }
 
     /// <summary>   Raises the instrument property changed event. </summary>
     /// <remarks>   2023-02-09. </remarks>
@@ -394,171 +335,97 @@ public partial class Vxi11Device : IVxi11Device
         }
     }
 
-    private void OnInstrumentPropertiesChanges( IVxi11Instrument sender )
+    /// <summary>   Attempts to select active client instrument. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">       Identifier for the link. </param>
+    /// <param name="flags">        The flags. </param>
+    /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    private bool TrySelectActiveClientInstrument( int linkId, DeviceOperationFlags flags, int? lockTimeout = null )
     {
-        if ( sender is not IVxi11Instrument ) return;
-        this.OnInstrumentPropertyChanged( sender, nameof( IVxi11Instrument.CharacterEncoding ) );
-        this.OnInstrumentPropertyChanged( sender, nameof( IVxi11Instrument.LastDeviceError ) );
+        return this.TrySelectActiveClientInstrument( linkId, DeviceOperationFlags.Waitlock == ( flags & DeviceOperationFlags.Waitlock ), lockTimeout );
     }
+
+    /// <summary>   Attempts to select active client instrument. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">       Identifier for the link. </param>
+    /// <param name="waitLock">     True to lock, false to unlock the wait. </param>
+    /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    private bool TrySelectActiveClientInstrument( int linkId, bool waitLock, int? lockTimeout = null )
+    {
+        if ( this.ServerClientsRegistry.TrySelectClient( linkId, out ServerClientInfo client ) )
+        {
+            IVxi11Instrument instrument = this.Instruments[client.DeviceName];
+
+            if ( this.ActiveInstrument is null
+                || !string.Equals( this.ActiveInstrument.DeviceName, instrument.DeviceName, StringComparison.OrdinalIgnoreCase ) )
+            {
+                this.ActiveInstrument = instrument;
+                _ = this.ActiveInstrument.TrySelectClient( linkId, waitLock, lockTimeout );
+            }
+        }
+        return false;
+    }
+
 
     #endregion
 
-    #region " client device link management "
+    #region " Interface management "
 
-    /// <summary>   Gets or sets the server clients. </summary>
-    /// <value> The server clients. </value>
-    private ServerClientsRegistry ServerClientRegistry { get; set;  }
+    private Vxi11InterfaceFactory InterfaceFactory { get; }
 
-    /// <summary>   Gets the number of linked clients. </summary>
-    /// <value> The number of linked clients. </value>
-    public int LinkedClientsCount => this.ServerClientRegistry.Count;
+    private ConcurrentDictionary<string, IVxi11Interface> Interfaces { get; } = new();
 
-    /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
-    /// <remarks>   2023-02-13. </remarks>
-    /// <param name="createLinkParameters"> The parameters defining the created link. </param>
-    /// <param name="linkId">               Identifier for the link. </param>
-    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    public bool AddClient( CreateLinkParms createLinkParameters, int linkId )
-    {
-        if ( this.ServerClientRegistry.AddClient( createLinkParameters, linkId ))
-        {
-            this.ActiveServerClient = this.ServerClientRegistry.ActiveServerClient;
-            this.ActiveClientId = this.ActiveServerClient!.ClientId;
-            this.EnableInterrupt( this.ActiveServerClient.InterruptEnabled, this.ActiveServerClient.GetHandle() );
-            return this.ActiveServerClient is not null;
-        }
-        else
-        {
-            this.ActiveServerClient = null;
-            this.ActiveClientId = 0;
-            this.EnableInterrupt( false, Array.Empty<byte>() );
-            return false;
-        }
-    }
-
-    /// <summary>   Attempts to select client. </summary>
-    /// <remarks>
-    /// 2023-02-09. <para>
-    /// 
-    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.Waitlock"/>
-    /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
-    /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
-    /// terminate that calling call and set error to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>
-    /// (11).
-    /// </para>
-    /// </remarks>
-    /// <param name="linkId">           Identifier for the link. </param>
-    /// <param name="operationFlags">   The operation flags. </param>
-    /// <param name="lockTimeout">      (Optional) The lock timeout. </param>
-    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    public bool TrySelectClient( int linkId, DeviceOperationFlags operationFlags, int? lockTimeout = null )
-    {
-        return this.TrySelectClient( linkId, DeviceOperationFlags.None != ( operationFlags & DeviceOperationFlags.Waitlock ), lockTimeout );
-    }
-
-    /// <summary>   Attempts to select client. </summary>
+    /// <summary>   Select active interface. </summary>
     /// <remarks>   2023-02-14. </remarks>
-    /// <param name="linkId">       Identifier for the link. </param>
-    /// <param name="waitLock">     Set <see langword="true"/> to wait for an existing lock;
-    ///                             otherwise, return <see langword="false"/> if the active client is
-    ///                             locked. </param>
-    /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
-    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    public bool TrySelectClient( int linkId, bool waitLock, int? lockTimeout = null )
-    {
-        if ( linkId == (this.ActiveServerClient?.LinkId ?? 0) )
-            // if the client was already selected, we are done.
-            return true;
-
-        if ( this.DeviceLocked() )
-        {
-            if ( waitLock )
-            {
-                // wait for the active client lock to expire
-                if ( !this.AwaitLockReleaseAsync( this.ActiveServerClient!.LockTimeout ) )
-                    return false;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        if ( this.ServerClientRegistry.TrySelectClient( linkId, lockTimeout ) )
-        {
-            this.ActiveServerClient = this.ServerClientRegistry.ActiveServerClient;
-            this.ActiveClientId = this.ActiveServerClient!.ClientId;
-            this.EnableInterrupt( this.ActiveServerClient.InterruptEnabled, this.ActiveServerClient.GetHandle() );
-            return this.ActiveServerClient is not null;
-        }
-        else
-        {
-            this.ActiveServerClient = null;
-            this.ActiveClientId = 0;
-            this.EnableInterrupt( false, Array.Empty<byte>() );
-            return false;
-        }
-    }
-
-    private ServerClientInfo? _activeServerClient;
-    /// <summary>   Gets or sets the <see cref="ServerClientInfo"/> of the active client. </summary>
-    /// <value> Information describing the server client. </value>
-    public ServerClientInfo? ActiveServerClient
-    {
-        get => this._activeServerClient;
-        set
-        {
-            if ( this.OnPropertyChanged(ref this._activeServerClient, value ) )
-            {
-                this.ActiveClientId = value?.ClientId ?? 0;
-            }
-        }
-
-    }
-
-    /// <summary>   Gets or sets the active client id. </summary>
-    /// <value> The active client. </value>
-    public int ActiveClientId
-    {
-        get => this.Instrument?.ActiveClientId ?? 0;
-        set {
-            if ( this.Instrument is not null &&
-                 this.SetProperty( this.Instrument.ActiveClientId, value, () => this.Instrument.ActiveClientId = value ) )
-            {
-                if ( this.Vxi11Interface is not null ) this.Vxi11Interface.ActiveClientId = value;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets a value indicating whether a valid link exists between the VXI-11 client
-    /// and the <see cref="Vxi11Server"/>.
-    /// </summary>
-    /// <param name="clientId"> Identifier for the client. </param>
-    /// <returns>
-    /// True if a valid device link exists between the VXI-11 client
-    /// and <see cref="Vxi11Server"/>.
-    /// </returns>
-    public bool DeviceLinked( int clientId )
-    {
-        return this.ServerClientRegistry.IsClientLinked( clientId );
-    }
-
-    /// <summary>   Determines if we can device locked. </summary>
-    /// <remarks>   2023-02-14. </remarks>
-    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    public bool DeviceLocked()
-    {
-        return this.ServerClientRegistry.IsActiveClientLocked();
-    }
-
-    /// <summary>   Await lock release asynchronously. </summary>
-    /// <remarks>   2023-02-14. </remarks>
-    /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
+    /// <param name="linkId">   Identifier for the link. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
-    public bool AwaitLockReleaseAsync( int timeout )
+    private bool TrySelectActiveInterface( int linkId )
     {
-        return this.ServerClientRegistry.AwaitLockReleaseAsync( timeout );
+        if ( this.ActiveInterface is not null ) this.ActiveInterface.PropertyChanged -= this.OnInterfacePropertyChanged;
+        if ( this.ServerClientsRegistry.TrySelectClient( linkId, out ServerClientInfo client ) )
+        {
+            DeviceNameParser parser = new( client.DeviceName );
+            string interfaceName = parser.InterfaceName;
+            this.ActiveInterface = this.Interfaces.GetOrAdd( interfaceName, this.InterfaceFactory.Interface( interfaceName ) );
+            this.ActiveInterface.PropertyChanged += this.OnInterfacePropertyChanged;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>   Gets or sets the active Interface. </summary>
+    /// <value> The active Interface. </value>
+    private IVxi11Interface? ActiveInterface { get; set; }
+
+    /// <summary>   Executes the interface property changed action. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="sender">   Source of the event. </param>
+    /// <param name="e">        Event information to send to registered event handlers. </param>
+    private void OnInterfacePropertyChanged( object sender, PropertyChangedEventArgs e )
+    {
+        if ( sender is not IVxi11Interface) return;
+        this.OnInterfacePropertyChanged( ( IVxi11Interface ) sender, e.PropertyName );
+    }
+
+    /// <summary>   Executes the interface property changed action. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="sender">       Source of the event. </param>
+    /// <param name="propertyName"> Name of the property. </param>
+    private void OnInterfacePropertyChanged( IVxi11Interface sender, string propertyName )
+    {
+        if ( sender is not IVxi11Interface || string.IsNullOrWhiteSpace( propertyName ) ) return;
+        {
+            switch ( propertyName )
+            {
+                case nameof( IVxi11Interface.LastDeviceError ):
+                    this.LastDeviceError = sender.LastDeviceError;
+                    break;
+
+            }
+        }
     }
 
     #endregion
@@ -572,7 +439,13 @@ public partial class Vxi11Device : IVxi11Device
     /// <returns>   The next link identifier. </returns>
     public static int GetNextLinkId()
     {
-        return ++_lastLinkId == int.MaxValue ? 0 : _lastLinkId;
+        _lastLinkId = GetCandidateLinkId( _lastLinkId );
+        return _lastLinkId;
+    }
+
+    public static int GetCandidateLinkId( int currentId )
+    {
+        return ++currentId == int.MaxValue ? 0 : currentId;
     }
 
     #endregion
@@ -627,45 +500,52 @@ public partial class Vxi11Device : IVxi11Device
     public CreateLinkResp CreateLink( CreateLinkParms request )
     {
         CreateLinkResp reply;
-        if ( this.ServerClientRegistry.IsClientLinked( request.ClientId ) )
+        if ( this.ServerClientsRegistry.IsClientLinked( request.ClientId ) )
             reply = new CreateLinkResp() { ErrorCode = DeviceErrorCode.ChannelAlreadyEstablished };
-        else if ( this.Instrument is null )
-            reply = new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
         else
         {
-            // set the active device link
-
             reply = new() {
-                DeviceLink = new DeviceLink( Vxi11Device.GetNextLinkId() ),
                 MaxReceiveSize = this.MaxReceiveLength,
                 AbortPort = this.AbortPortNumber
             };
 
+            DeviceNameParser parser = new( request.DeviceName );
+            reply.ErrorCode = parser.IsValid()
+                ? DeviceErrorCode.NoError
+                : DeviceErrorCode.InvalidLinkIdentifier;
+
+            if ( reply.ErrorCode != DeviceErrorCode.NoError)
+            {
+                return reply;
+            }
+
+            int linkId = Vxi11Device.GetCandidateLinkId( _lastLinkId );
+
+            // see if we need to add an instrument.
+
+            if ( !this.Instruments.ContainsKey( request.DeviceName ) )
+            {
+                _ = this.Instruments.TryAdd( request.DeviceName, this.InstrumentFactory.Instrument( request.DeviceName ) );
+
+                // select the existing instrument
+
+                this.ActiveInstrument = this.Instruments[request.DeviceName];
+
+                // set this instrument properties.
+
+                _ = this.ActiveInstrument.AddClient( request, linkId );
+
+                this.ActiveInstrument.RemoteEnabled = true;
+            }
+
+            // select the existing instrument
+            this.ActiveInstrument = this.Instruments[request.DeviceName];
+            this.ActiveInstrument.ActiveServerClient?.ActivateLockTimeout( request.LockTimeout );
+
             Logger.Writer.LogVerbose( $"creating link to {request.DeviceName} for client {request.ClientId}" );
 
-            this.DeviceName = request.DeviceName;
-
-            // add the client to the client manage and set the active client.
-
-            if ( this.AddClient( request, reply.DeviceLink.LinkId ) )
-            {
-                // set the active client.
-
-                this.ActiveClientId = request.ClientId;
-
-                reply.ErrorCode = this.DeviceNameParser.IsValid()
-                    ? DeviceErrorCode.NoError
-                    : DeviceErrorCode.InvalidLinkIdentifier;
-
-                // enable remote 
-                this.RemoteEnabled = true;
-            }
-            else
-            {
-                reply.ErrorCode = DeviceErrorCode.InvalidLinkIdentifier;
-            }
-
-            // TODO: Implement the specifications as defined above.
+            _lastLinkId = linkId;
+            reply.DeviceLink = new DeviceLink( linkId );
 
         }
         this.LastDeviceError = reply.ErrorCode;
@@ -700,26 +580,34 @@ public partial class Vxi11Device : IVxi11Device
         DeviceError reply = new ();
         try
         {
-            if ( this.ServerClientRegistry.IsLinkCreated( request.LinkId ) )
-                reply.ErrorCode = this.ServerClientRegistry.RemoveClient( request.LinkId )
-                    ? DeviceErrorCode.NoError
-                    : DeviceErrorCode.InvalidLinkIdentifier;
-            else
-                reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
+            if ( this.ServerClientsRegistry.TrySelectClient( request.LinkId, out ServerClientInfo client ) )
+            {
+                IVxi11Instrument instrument = this.Instruments[client.DeviceName];
+                _ = instrument.RemoveClient( request.LinkId );
+
+                // remove the instrument if it no longer has clients.
+
+                if ( instrument.LinkedClientsCount == 0 )
+                {
+
+                    _ = this.Instruments.TryRemove( client.DeviceName, out _ );
+
+                    // remove the active instrument is it was removed not having clients.
+
+                    if ( this.ActiveInstrument is not null && string.Equals( this.ActiveInstrument.DeviceName, instrument.DeviceName, StringComparison.OrdinalIgnoreCase ) )
+                        this.ActiveInstrument = null;
+
+                }
+            }
+            reply.ErrorCode = this.ServerClientsRegistry.RemoveClient( request.LinkId )
+                ? DeviceErrorCode.NoError
+                : DeviceErrorCode.InvalidLinkIdentifier;
         }
         catch ( Exception )
         {
             reply = new DeviceError( DeviceErrorCode.IOError );
         }
-        finally
-        {
-            // refresh the active client in case the client changed
-            this.ActiveServerClient = this.ServerClientRegistry.ActiveServerClient;
-            if ( this.Instrument is not null ) this.Instrument.ActiveClientId = (this.ServerClientRegistry?.ActiveServerClient?.ClientId ?? 0);
-        }
-
-        // TODO: Implement the specifications as defined above.
-
+       
         this.LastDeviceError = reply.ErrorCode;
         return reply;
     }
@@ -753,23 +641,21 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceError DeviceClear( DeviceGenericParms request )
     {
         DeviceError reply = new ();
-        if ( !this.ServerClientRegistry.IsLinkCreated( request.Link.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( this.Instrument is null )
-            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
             // Select the client for this link. This maybe the existing client or a 
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
+            if ( this.TrySelectActiveClientInstrument( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
                 // TODO: Implement the specifications as defined above.
 
-                reply.ErrorCode = this.Instrument.DeviceClear( request.Flags, request.IOTimeout );
+                reply.ErrorCode = this.ActiveInstrument!.DeviceClear( request.Flags, request.IOTimeout );
             }
             else
             {
@@ -793,10 +679,8 @@ public partial class Vxi11Device : IVxi11Device
     {
         DeviceDoCmdResp reply = new ();
 
-        if ( !this.ServerClientRegistry.IsLinkCreated( request.Link.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
-        else if ( this.Instrument is null )
-            reply = new() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
         else
         {
 
@@ -804,14 +688,20 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
+            if ( this.TrySelectActiveClientInstrument( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
-                // run the commands on the interface
+                if ( this.TrySelectActiveInterface( request.Link.LinkId ) )
+                {
+                    // run the commands on the interface
 
-                reply = this.Vxi11Interface?.DeviceDoCmd( request ) ?? reply;
-
+                    reply = this.ActiveInterface?.DeviceDoCmd( request ) ?? reply;
+                }
+                else
+                {
+                    reply.ErrorCode = DeviceErrorCode.InvalidLinkIdentifier;
+                }
             }
             else
             {
@@ -840,20 +730,18 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceError DeviceEnableSrq( DeviceEnableSrqParms request )
     {
         DeviceError reply = new();
-        if ( !this.ServerClientRegistry.IsLinkCreated( request.Link.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( this.Instrument is null )
-            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
             // enable or disable interrupt of the specified server client
 
-            _ = this.ServerClientRegistry.EnableInterrupt( request.Link.LinkId, request.Enable, request.GetHandle() );
+            _ = this.ServerClientsRegistry.EnableInterrupt( request.Link.LinkId, request.Enable, request.GetHandle() );
 
             // if the request comes for the current server client, apply to the instrument.
 
-            if ( request.Link.LinkId == ( this.ActiveServerClient?.LinkId ?? 0 ) )
-                this.EnableInterrupt( request.Enable, request.GetHandle() );
+            if ( request.Link.LinkId == ( this.ActiveInstrument?.ActiveServerClient?.LinkId ?? 0 ) )
+                this.ActiveInstrument?.EnableInterrupt( request.Enable, request.GetHandle() );
 
         }
 
@@ -906,26 +794,21 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceError DeviceLocal( DeviceGenericParms request )
     {
         DeviceError reply = new ();
-        if ( !this.ServerClientRegistry.IsLinkCreated( request.Link.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( this.Instrument is null )
-            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
             // Select the client for this link. This maybe the existing client or a 
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
+            if ( this.TrySelectActiveClientInstrument( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
                 // enable/disable the interrupt for this client.
 
-                // TODO: Implement the specifications as defined above.
-
-                this.RemoteEnabled = false;
-                reply.ErrorCode = this.Instrument.DeviceLocal( request.Flags, request.IOTimeout );
+                reply.ErrorCode = this.ActiveInstrument!.DeviceLocal( request.Flags, request.IOTimeout );
             }
             else
             {
@@ -978,10 +861,8 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceError DeviceRemote( DeviceGenericParms request )
     {
         DeviceError reply = new ();
-        if ( !this.ServerClientRegistry.IsLinkCreated( request.Link.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( this.Instrument is null )
-            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
 
@@ -989,14 +870,13 @@ public partial class Vxi11Device : IVxi11Device
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
+            if ( this.TrySelectActiveClientInstrument( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
                 // TODO: Implement the specifications as defined above.
 
-                this.RemoteEnabled = true;
-                reply.ErrorCode = this.Instrument.DeviceRemote( request.Flags, request.IOTimeout );
+                reply.ErrorCode = this.ActiveInstrument!.DeviceRemote( request.Flags, request.IOTimeout );
             }
             else
             {
@@ -1049,21 +929,19 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
     {
         DeviceReadStbResp reply = new ();
-        if ( !this.ServerClientRegistry.IsLinkCreated( request.Link.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
-        else if ( this.Instrument is null )
-            reply = new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
         else
         {
             // Select the client for this link. This maybe the existing client or a 
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
+            if ( this.TrySelectActiveClientInstrument( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
-                reply.Stb = this.Instrument!.ReadStatusByte();
+                reply.Stb = this.ActiveInstrument!.ReadStatusByte();
             }
             else
             {
@@ -1110,23 +988,21 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceError DeviceTrigger( DeviceGenericParms request )
     {
         DeviceError reply = new();
-        if ( !this.ServerClientRegistry.IsLinkCreated( request.Link.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( this.Instrument is null )
-            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
             // Select the client for this link. This maybe the existing client or a 
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
+            if ( this.TrySelectActiveClientInstrument( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
                 // TODO: Implement the specifications as defined above.
 
-                reply.ErrorCode = this.Instrument.DeviceTrigger( request.Flags, request.IOTimeout );
+                reply.ErrorCode = this.ActiveInstrument!.DeviceTrigger( request.Flags, request.IOTimeout );
             }
             else
             {
@@ -1178,17 +1054,15 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceError DeviceLock( DeviceLockParms request )
     {
         DeviceError reply = new();
-        if ( !this.ServerClientRegistry.IsLinkCreated( request.Link.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
-        else if ( this.Instrument is null )
-            reply = new( DeviceErrorCode.DeviceNotAccessible );
         else
         {
             // Select the client for this link. This maybe the existing client or a 
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId, request.Flags, request.LockTimeout ) )
+            if ( this.TrySelectActiveClientInstrument( request.Link.LinkId, request.Flags, request.LockTimeout ) )
             {
                 // selecting a  new active client sets its lock.
                 
@@ -1224,20 +1098,18 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceError DeviceUnlock( DeviceLink deviceLink )
     {
         DeviceError reply = new();
-        if ( !this.ServerClientRegistry.IsLinkCreated( deviceLink.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( deviceLink.LinkId ) )
             reply.ErrorCode = DeviceErrorCode.ChannelNotEstablished;
-        else if ( this.Instrument is null )
-            reply.ErrorCode = DeviceErrorCode.DeviceNotAccessible;
         else
         {
-            if ( this.ServerClientRegistry.IsLinkCreated( deviceLink.LinkId ))
+            if ( this.ServerClientsRegistry.ContainsLink( deviceLink.LinkId ))
             {
-                if ( this.ServerClientRegistry.IsLocked( deviceLink.LinkId ) )
+                if ( this.ServerClientsRegistry.IsLocked( deviceLink.LinkId ) )
                 {
-                    _ = this.ServerClientRegistry.ReleaseLock( deviceLink.LinkId );
+                    _ = this.ServerClientsRegistry.ReleaseLock( deviceLink.LinkId );
 
-                    if ( ( this.ActiveServerClient?.LinkId ?? 0 ) == deviceLink.LinkId )
-                        this.ActiveServerClient?.ReleaseLockTimeout();
+                    if ( ( this.ActiveInstrument?.ActiveServerClient?.LinkId ?? 0 ) == deviceLink.LinkId )
+                        this.ActiveInstrument!.ActiveServerClient?.ReleaseLockTimeout();
                 }
                 else
                 {
@@ -1311,19 +1183,17 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceReadResp DeviceRead( DeviceReadParms request )
     {
         DeviceReadResp reply = new();
-        if ( !this.ServerClientRegistry.IsLinkCreated( request.Link.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
-        else if ( this.Instrument is null )
-            reply = new DeviceReadResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
         else
         {
             // Select the client for this link. This maybe the existing client or a 
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
+            if ( this.TrySelectActiveClientInstrument( request.Link.LinkId, request.Flags ) )
             {
-                reply = this.Instrument.DeviceRead( request );
+                reply = this.ActiveInstrument!.DeviceRead( request );
             }
             else
             {
@@ -1402,24 +1272,21 @@ public partial class Vxi11Device : IVxi11Device
     public DeviceWriteResp DeviceWrite( DeviceWriteParms request )
     {
         DeviceWriteResp reply = new();
-        if ( !this.ServerClientRegistry.IsLinkCreated( request.Link.LinkId ) )
+        if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
-        else if ( this.Instrument is null )
-            reply = new DeviceWriteResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
         else
         {
             // Select the client for this link. This maybe the existing client or a 
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
 
-            if ( this.TrySelectClient( request.Link.LinkId, request.Flags ) )
+            if ( this.TrySelectActiveClientInstrument( request.Link.LinkId, request.Flags ) )
             {
                 // now this is the active client.
 
                 // TODO: Implement the specifications as defined above.
 
-                // TODO: Add device code
-                reply = this.DeviceWrite( request.Link.LinkId, request.GetData() );
+                reply = this.DeviceWrite( request.GetData() );
             }
             else
             {
@@ -1494,15 +1361,14 @@ public partial class Vxi11Device : IVxi11Device
     /// 
     /// </item></list>
     /// </remarks>
-    /// <param name="linkId">   Identifier for the link. </param>
     /// <param name="data">     The data. </param>
     /// <returns>
     /// A response of type <see cref="DeviceWriteResp"/> to send to the remote procedure call.
     /// </returns>
-    private DeviceWriteResp DeviceWrite( int linkId, byte[] data )
+    private DeviceWriteResp DeviceWrite( byte[] data )
     {
         DeviceWriteResp reply = new() {
-            ErrorCode = this.Instrument is null
+            ErrorCode = this.ActiveInstrument is null
                             ? DeviceErrorCode.DeviceNotAccessible
                             : data is null
                                 ? DeviceErrorCode.IOError
@@ -1512,8 +1378,8 @@ public partial class Vxi11Device : IVxi11Device
         if ( reply.ErrorCode == DeviceErrorCode.NoError )
         {
             string cmd = this.CharacterEncoding.GetString( data );
-            Logger.Writer.LogVerbose( $"link ID: {linkId} -> Received：{cmd}" );
-            reply.ErrorCode = this.Instrument!.DeviceWrite( cmd );
+            Logger.Writer.LogVerbose( $"{this.ActiveInstrument!.ActiveServerClient} -> Received：{cmd}" );
+            reply.ErrorCode = this.ActiveInstrument!.DeviceWrite( cmd );
         }
 
         this.LastDeviceError = reply.ErrorCode;
