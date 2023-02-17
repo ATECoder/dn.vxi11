@@ -31,7 +31,7 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
 
         case ErrorHandlerExample.InsideEventErrorHandler:
             exampleDescription = "Solution1: Inside Event Error Handler";
-            handler = async (s, e) =>
+            handler = async (sender, e) =>
             {
                 Console.WriteLine( $"[{exampleDescription}] Starting the event handler..." );
                 Exception? ex = null;
@@ -56,7 +56,7 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
         case ErrorHandlerExample.TryAsyncErrorCallback:
             exampleDescription = "Solution 2: TryAsync Error Callback";
             handler = EventHandlers.TryAsync<EventArgs>(
-                async ( s, e ) => {
+                async ( sender, e ) => {
                     Console.WriteLine( $"[{exampleDescription}] Starting the event handler..." );
                     await TaskThatThrowsAsync();
                     Console.WriteLine( $"[{exampleDescription}] Event handler completed." );

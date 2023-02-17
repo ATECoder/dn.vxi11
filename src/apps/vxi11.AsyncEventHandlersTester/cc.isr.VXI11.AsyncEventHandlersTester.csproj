@@ -3,8 +3,20 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <RootNamespace>cc.isr.VXI11.AsyncEventHandlersTester</RootNamespace>
+    <AssemblyName>cc.isr.VXI11.AsyncEventHandlersTester</AssemblyName>
+
+    <!-- Display name -->
+    <ApplicationTitle>cc.isr.VXI11.ClientTester</ApplicationTitle>
+
+    <!-- App Identifier -->
+    <ApplicationId>cc.isr.vxi11.ClientTester</ApplicationId>
+
   </PropertyGroup>
 
 </Project>
