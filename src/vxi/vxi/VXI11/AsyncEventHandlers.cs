@@ -6,7 +6,7 @@ namespace cc.isr.VXI11;
 /// (c) 2023 <see href="https://www.codeproject.com/script/Membership/View.aspx?mid=8784357">Dev Leader</see>. </para><para>
 /// 
 /// References:
-/// <see href="https://www.codeproject.com/Articles/5354588/Async-EventHandlers-A-Simple-Safety-Net-to-the-Res">Code project articles</see>,
+/// <see href="https://www.codeproject.com/Articles/5354588/Async-EventHandlers-A-Simple-Safety-Net-to-the-Res">Code project article</see>,
 /// <see href="https://github.com/ncosentino/DevLeader/blob/master/AsyncEvents/AsyncEvents.Wrapper/Program.cs">Repository</see>,
 /// <see href="https://codeblog.jonskeet.uk/category/eduasync/">John Skeet on Async</see>
 ///</para>

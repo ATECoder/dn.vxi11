@@ -4,19 +4,27 @@ Console.WriteLine("Starting example...");
 
 ErrorHandlerExample currentExample = ErrorHandlerExample.NotSpecified;
 string exampleDescription = string.Empty;
+string notes = string.Empty;
 
 System.AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+
+// added per @DevLeader 20230214
+TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobsserverException;
+
 
 var raisingObject = new RaisingObject();
 
 foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExample)))
 {
+    Exception? ex = null;
     currentExample = example;
     EventHandler<EventArgs>? handler = null;
     switch ( currentExample )
     {
         case ErrorHandlerExample.NoErrorHandler:
             exampleDescription = "Base case: No Error Handler";
+            notes = "this elicits an unhandled exception which crashes the application";
+
 #if false
             handler = async ( s, e) =>
             {
@@ -31,6 +39,7 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
 
         case ErrorHandlerExample.InsideEventErrorHandler:
             exampleDescription = "Solution1: Inside Event Error Handler";
+            notes = "";
             handler = async (sender, e) =>
             {
                 Console.WriteLine( $"[{exampleDescription}] Starting the event handler..." );
@@ -55,6 +64,7 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
 
         case ErrorHandlerExample.TryAsyncErrorCallback:
             exampleDescription = "Solution 2: TryAsync Error Callback";
+            notes = "";
             handler = EventHandlers.TryAsync<EventArgs>(
                 async ( sender, e ) => {
                     Console.WriteLine( $"[{exampleDescription}] Starting the event handler..." );
@@ -65,8 +75,14 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
             break;
         case ErrorHandlerExample.ContinueWith:
             exampleDescription = "Solution 3: Continue With Error Handler";
+            notes = "the IDE halts displaying a dialog indicating that an exception was thrown " +
+                      "'but was not handled in user code'. Per @DevLeader, 'that's probably because there is " +
+                      "legitimately no try/catch in the vicinity of where the exception is thrown. " +
+                      "It's likely crossing some async boundary before it's caught.' Still, the exception " +
+                      "is handled by the continuation, as, indeed, neither the unhandled exception hander nor the " +
+                      "unobserved exception handler report the exception";
             Console.WriteLine( $"[{exampleDescription}] Starting the event handler..." );
-            Exception? ex = null;
+            ex = null;
             try
             {
                 await AsyncTaskThatThrowsAsync( (ex ) =>
@@ -74,7 +90,7 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
                     Console.WriteLine( $"[{exampleDescription}] Our exception handler caught aggregate exception: {ex.Message}\n" );
                     foreach ( Exception exep in ex.InnerExceptions)
                         Console.WriteLine( $"[{exampleDescription}] inner exception: {exep.Message}\nStack Trace: \n{exep.StackTrace}" );
-                });
+                } );
             }
             catch ( Exception excep )
             {
@@ -89,7 +105,77 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
             }
             Console.WriteLine( $"[{exampleDescription}] completed.\n" );
             break;
-        default:
+
+        case ErrorHandlerExample.ContinueWithAndThrowInsideTryCatch:
+            exampleDescription = "Solution 4: Continue With Error Handler and throw inside Try Catch";
+            notes = "..similar to solution 3 with an exception thrown within the error handler, which " +
+                "is now reported as caught by the try catch block of the 'exception hander'.";
+
+            Console.WriteLine( $"[{exampleDescription}] Starting the event handler..." );
+            ex = null;
+            try
+            {
+                await AsyncTaskThatThrowsAsync( ( ex ) => {
+                    Console.WriteLine( $"[{exampleDescription}] Our exception handler caught aggregate exception: {ex.Message}\n" );
+                    foreach ( Exception exep in ex.InnerExceptions )
+                        Console.WriteLine( $"[{exampleDescription}] inner exception: {exep.Message}\nStack Trace: \n{exep.StackTrace}" );
+
+                    // @DevLeader I added this line!!
+                    throw new InvalidOperationException( "Re-thrown from error handler!!", ex );
+                } );
+            }
+            catch ( Exception excep )
+            {
+                // @DevLeader: 'ONLY with my new line will this now catch the exception.
+                // The original exception is truly handled by the continuation already!'
+                ex = excep;
+            }
+            finally
+            {
+                if ( ex is null )
+                    Console.WriteLine( $"[{exampleDescription}] Event handler completed; exception not caught." );
+                else
+                    Console.WriteLine( $"[{exampleDescription}] Our exception handler caught: {ex.Message}\nStack Trace: \n{ex.StackTrace}" );
+            }
+            Console.WriteLine( $"[{exampleDescription}] completed.\n" );
+            break;
+
+        case ErrorHandlerExample.ContinueWithEventHandler:
+            exampleDescription = "Solution 5: Continue With inside of Event Handler";
+            notes = "@DevLeader: 'works to protect the event handler. If your continuation doesn't blow up, " +
+                    "it successfully keeps execution working properly.'";
+            handler += async ( sender, e ) =>
+            {
+                await AsyncTaskThatThrowsAsync( ( ex ) =>
+                {
+                    Console.WriteLine( $"[{exampleDescription}] Our exception handler caught aggregate exception: {ex.Message}\n" );
+                    foreach ( Exception exep in ex.InnerExceptions )
+                        Console.WriteLine( $"[{exampleDescription}] inner exception: {exep.Message}\nStack Trace: \n{exep.StackTrace}" );
+
+                } );
+            };
+            break;
+        case ErrorHandlerExample.ContinueWithThrowsEventHandler:
+            exampleDescription = "Solution 6: Continue With inside of Event Handler";
+            notes = notes = "@DevLeader: 'is almost the same, except that I throw inside the continuation. And as I expected, " +
+                            "because this exception now needs to bubble up and cross that async void boundary, I do truly get " +
+                            "an unhandled exception printed out and that extra console writeline inside scenario 6 is never written.";
+            handler += async ( sender, e ) =>
+            {
+                await AsyncTaskThatThrowsAsync( ( ex ) =>
+                {
+                    Console.WriteLine( $"[{exampleDescription}] Our exception handler caught aggregate exception: {ex.Message}\n" );
+                    foreach ( Exception exep in ex.InnerExceptions )
+                        Console.WriteLine( $"[{exampleDescription}] inner exception: {exep.Message}\nStack Trace: \n{exep.StackTrace}" );
+
+                    throw new InvalidOperationException( "Re-thrown from error handler!!", ex );
+                } );
+
+                Console.WriteLine( $"[{exampleDescription}] Does anything still run in the event handler after an awaited task blows up?" );
+            };
+            break;
+
+            default:
             break;
     }
 
@@ -105,9 +191,9 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
             Console.WriteLine( "Raising our event..." );
             raisingObject.Raise( EventArgs.Empty );
         }
-        catch ( Exception ex )
+        catch ( Exception ex1 )
         {
-            caughtException = ex;
+            caughtException = ex1;
         }
 
         Console.WriteLine();
@@ -124,7 +210,7 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
     }
 
     // allow time for handling unhandled exceptions.
-    Task.Delay( 100 ).Wait();
+    await Task.Delay( 100 );
 }
 
 Console.WriteLine("Example complete.");
@@ -151,6 +237,11 @@ async Task AsyncTaskThatThrowsAsync( Action<AggregateException> errorHandler )
 void OnUnhandledException( object sender, UnhandledExceptionEventArgs e )
 {
     Console.WriteLine( $"\n[{exampleDescription}] Unhandled exception occurred in {currentExample}: {e.ExceptionObject}\n");
+}
+
+void OnTaskSchedulerUnobsserverException( object? sender, UnobservedTaskExceptionEventArgs e )
+{
+    Console.WriteLine( $"\n[{exampleDescription}] {(e.Observed ? "" : "un")}observed exception occurred in {currentExample}: {e.Exception}\n" );
 }
 
 #endregion
@@ -223,4 +314,7 @@ internal enum ErrorHandlerExample
     InsideEventErrorHandler,
     TryAsyncErrorCallback,
     ContinueWith,
+    ContinueWithAndThrowInsideTryCatch,
+    ContinueWithEventHandler,
+    ContinueWithThrowsEventHandler,
 }
