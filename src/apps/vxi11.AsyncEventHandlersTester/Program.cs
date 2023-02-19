@@ -23,7 +23,14 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
     {
         case ErrorHandlerExample.NoErrorHandler:
             exampleDescription = "Base case: No Error Handler";
-            notes = "this elicits an unhandled exception which crashes the application";
+            notes = "this elicits an unhandled exception which crashes the application;" +
+                "@DevLeader: the pitfall of async void is that exceptions are not able to properly " +
+                "'cross the boundary' between async void code and the caller of an async void. I believe " +
+                "this is primarily because async void cannot be awaited (only Tasks can be awaited), " +
+                "so there is no 'context' (for lack of a better word here?) that is able to handle the " +
+                "exception. \r\n\r\nFundamentally, all of the solutions I am proposing here (except in my " +
+                "original article[^] that spawned all of this) just ensure that we prevent exceptions from " +
+                "crossing boundary of async void, or avoiding async void all together.";
 
 #if false
             handler = async ( s, e) =>
@@ -159,7 +166,9 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
             exampleDescription = "Solution 6: Continue With inside of Event Handler";
             notes = notes = "@DevLeader: 'is almost the same, except that I throw inside the continuation. And as I expected, " +
                             "because this exception now needs to bubble up and cross that async void boundary, I do truly get " +
-                            "an unhandled exception printed out and that extra console writeline inside scenario 6 is never written.";
+                            "an unhandled exception printed out and that extra console writeline inside scenario 6 is never written." +
+                            "@DevLeader: I found example 6 *does* throw an unhandled exception, but I needed to wait longer than 100ms. " +
+                            "10 seconds was super aggressive to run all of those samples, but it definitely gave it more than enough time. ";
             handler += async ( sender, e ) =>
             {
                 await AsyncTaskThatThrowsAsync( ( ex ) =>
