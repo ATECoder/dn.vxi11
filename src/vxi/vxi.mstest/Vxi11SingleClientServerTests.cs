@@ -78,7 +78,7 @@ public class Vxi11SingleClientServerTests
             }
             catch ( Exception ex )
             {
-                Logger.Writer.LogError( "Failed cleaning up the fixture" , ex );
+                Logger.Writer.LogError( "Failed cleaning up the fixture", ex );
             }
             finally
             {
@@ -140,16 +140,17 @@ public class Vxi11SingleClientServerTests
         using VXI11.Client.Vxi11Client vxi11Client = new();
         vxi11Client.ThreadExceptionOccurred += OnThreadException;
 
-        string identity = _server!.Device!.ActiveInstrument!.Identity;
         string command = Vxi11InstrumentCommands.IDNRead;
         vxi11Client.Connect( ipv4Address, DeviceNameParser.BuildDeviceName( DeviceNameParser.GenericInterfaceFamily, interfaceNumber ) );
         Console.WriteLine();
         Logger.Writer.LogVerbose( $"Querying {vxi11Client.DeviceName} {repeatCount} times" );
+        string identity = _server!.Device!.ActiveInstrument!.Identity;
         int count = repeatCount;
         while ( repeatCount > 0 )
         {
             repeatCount--;
-            (_, string response) = vxi11Client.Query( $"{command}\n", 0 );
+            (string response, DeviceErrorCode errorCode, string errorDetails) = vxi11Client.TryQuery( $"{command}\n", 0 );
+            Assert.AreEqual( DeviceErrorCode.NoError, errorCode , errorDetails );
             Assert.AreEqual( identity, response, $"@count = {count - repeatCount}" );
         }
 

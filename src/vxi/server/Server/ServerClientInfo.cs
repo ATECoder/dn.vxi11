@@ -124,8 +124,8 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
 
     public bool Equals( ServerClientInfo other )
     {
-        return ( other is not null )
-            && Enumerable.SequenceEqual( this._handle , other.GetHandle() )
+        return (other is not null)
+            && Enumerable.SequenceEqual( this._handle, other.GetHandle() )
             && this.ClientId == other.ClientId
             && this.LinkId == other.LinkId
             && this.InterruptEnabled == other.InterruptEnabled;

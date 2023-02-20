@@ -15,11 +15,11 @@ else
         // discover the instruments on the network.
         LxiDiscover.Discover( CommandLineParser.I.GetString( CommandLineParser.IPKey ),
                               CommandLineParser.I.GetInt( CommandLineParser.TimeoutKey ),
-                              CommandLineParser.I.GetString( CommandLineParser.DeviceInterfaceStringKey ) );
+                              CommandLineParser.I.GetString( CommandLineParser.DeviceNameKey ) );
     }
     catch ( Exception ex )
     {
-        Logger.Writer.LogError( "There has been an exception, find the details below.." , ex );
+        Logger.Writer.LogError( "There has been an exception, find the details below..", ex );
     }
 }
 

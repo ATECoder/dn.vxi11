@@ -78,7 +78,7 @@ public class Vxi11DualClientServerTests
             }
             catch ( Exception ex )
             {
-                Logger.Writer.LogError( "Failed cleaning up the fixture" , ex );
+                Logger.Writer.LogError( "Failed cleaning up the fixture", ex );
             }
             finally
             {

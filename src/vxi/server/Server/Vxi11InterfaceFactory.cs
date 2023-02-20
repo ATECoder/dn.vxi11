@@ -11,7 +11,7 @@ namespace cc.isr.VXI11.Server
         /// <remarks>   2023-02-14. </remarks>
         public Vxi11InterfaceFactory()
         {
-            this._interfaces = new ();
+            this._interfaces = new();
         }
 
         private readonly ConcurrentDictionary<string, IVxi11Interface> _interfaces;

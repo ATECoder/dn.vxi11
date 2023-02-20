@@ -542,7 +542,7 @@ public partial class Vxi11Client : ICloseable
     /// <returns>   True if ends with the termination, false if not. </returns>
     private static bool EndsWith( byte[] data, byte[] termination )
     {
-        bool terminated = ( termination?.Length > 0 ) && ( data?.Length > termination?.Length );
+        bool terminated = (termination?.Length > 0) && (data?.Length > termination?.Length);
         if ( !terminated ) return terminated;
         for ( int i = 0; i < termination!.Length; i++ )
             terminated &= data![^(i + 1)] == termination[i];
@@ -581,7 +581,7 @@ public partial class Vxi11Client : ICloseable
     /// <returns>   True if ends with the termination, false if not. </returns>
     private static bool EndsWith( string message, byte[] termination )
     {
-        bool terminated = ( termination?.Length > 0 ) && ( message?.Length > termination?.Length );
+        bool terminated = (termination?.Length > 0) && (message?.Length > termination?.Length);
         if ( !terminated ) return terminated;
         for ( int i = 0; i < termination!.Length; i++ )
             terminated &= message![^(i + 1)] == termination[i];
@@ -718,10 +718,15 @@ public partial class Vxi11Client : ICloseable
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
     /// <param name="data">                 The data to write to the instrument. </param>
     /// <param name="appendTermination">    (Optional) True to append the <see cref="WriteTermination"/>. </param>
-    /// <returns>   The total amount of data that was written. </returns>
-    public virtual int WriteRaw( string data, bool appendTermination = true )
+    /// <returns>   A Tuple: number of bytes sent, error code, error details. </returns>
+    public virtual (int BytesSent, DeviceErrorCode ErrorCode, string ErrorDetails) WriteRaw( string data, bool appendTermination = true )
     {
-        if ( this.DeviceLink is null || this.CoreClient is null || string.IsNullOrWhiteSpace( data ) ) return 0;
+        if ( this.DeviceLink is null )
+            return (0, DeviceErrorCode.ChannelNotEstablished, $"A link was not established to the device");
+        if ( this.CoreClient is null )
+            return (0, DeviceErrorCode.ChannelNotEstablished, $"The core client was not created");
+        if ( string.IsNullOrEmpty( data ) )
+            return (0, DeviceErrorCode.IOError, $"the data to write is empty");
 
         if ( appendTermination )
             data += this.CharacterEncoding.GetString( this.WriteTermination );
@@ -738,17 +743,17 @@ public partial class Vxi11Client : ICloseable
 
             if ( reply.ErrorCode != DeviceErrorCode.NoError )
             {
-                throw new DeviceException( $"; {nameof( WriteRaw )}({nameof( data )}: {data}, {nameof( appendTermination )}: {appendTermination} ) block '{block}' failed.", reply.ErrorCode );
+                return (total, reply.ErrorCode, $"{nameof( WriteRaw )}({nameof( data )}: {data}, {nameof( appendTermination )}: {appendTermination} ) block '{block}' failed.");
             }
             else if ( reply.Size < block.Length )
             {
-                throw new DeviceException( $"; {nameof( WriteRaw )}({nameof( data )}: {data}, {nameof( appendTermination )}: {appendTermination} ) incomplete block '{block}' {reply.Size}/{block.Length} was written", DeviceErrorCode.IOError );
+                return (total, DeviceErrorCode.IOError, $"; {nameof( WriteRaw )}({nameof( data )}: {data}, {nameof( appendTermination )}: {appendTermination} ) incomplete block '{block}' {reply.Size}/{block.Length} was written");
             }
             offset += reply.Size;
             remaining -= reply.Size;
             total += reply.Size;
         }
-        return total;
+        return (total, DeviceErrorCode.NoError, string.Empty);
     }
 
     public int MaxReadRawLength { get; private set; }
@@ -761,8 +766,8 @@ public partial class Vxi11Client : ICloseable
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
     /// <param name="byteCount">    (Optional) Number of bytes to read from the device; [-1] defaults
     ///                             to reading all available data from the device. </param>
-    /// <returns>   The data. </returns>
-    public byte[] ReadRaw( int byteCount = -1 )
+    /// <returns>   A Tuple: received data, error code, error details. </returns>
+    public (byte[] Data, DeviceErrorCode ErrorCode, string ErrorDetails) ReadRaw( int byteCount = -1 )
     {
 
         int requestByteCount = (byteCount > 0) ? Math.Min( byteCount, this.MaxReadRawLength ) : this.MaxReadRawLength;
@@ -784,7 +789,7 @@ public partial class Vxi11Client : ICloseable
 
             if ( reply.ErrorCode != DeviceErrorCode.NoError )
             {
-                throw new DeviceException( $"; {nameof( ReadRaw )}({nameof( byteCount )}: {byteCount}) failed reading", reply.ErrorCode );
+                return (values, reply.ErrorCode, $"; {nameof( ReadRaw )}({nameof( byteCount )}: {byteCount}) failed reading");
             }
 
             // extend the data by the amount of data received
@@ -801,7 +806,7 @@ public partial class Vxi11Client : ICloseable
                 }
             }
         }
-        return values;
+        return (values, DeviceErrorCode.NoError, string.Empty);
     }
 
     /// <summary>   Queries the device in raw mode. </summary>
@@ -811,23 +816,26 @@ public partial class Vxi11Client : ICloseable
     ///                                         1] defaults to reading all available data from the
     ///                                         device. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay. </param>
-    /// <returns>   A Tuple of sent count and received data. </returns>
-    public virtual (int SentCount, byte[] Received) QueryRaw( string data, int byteCount = -1, int millisecondsReadDelay = 3 )
+    /// <returns>   A Tuple: number of bytes sent, received data, error code, error details. </returns>
+    public virtual (int SentCount, byte[] Received, DeviceErrorCode ErrorCode, string ErrorDetails) QueryRaw( string data, int byteCount = -1, int millisecondsReadDelay = 3 )
     {
-        int sentCount = this.WriteRaw( data );
+        (int sentCount, DeviceErrorCode errorCode, string details) = this.WriteRaw( data );
+        if ( errorCode != DeviceErrorCode.NoError )
+            return (sentCount, Array.Empty<byte>(), errorCode, details);
         if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
-        return (sentCount, this.ReadRaw( byteCount ));
+        (byte[] values, errorCode, details) = this.ReadRaw( byteCount );
+        return (sentCount, values, errorCode, details);
     }
 
     #endregion
 
     #region " Write "
 
-    /// <summary>   Sends a message to the VXI-11 server. </summary>
+    /// <summary>   Sends a message to the VXI-11 server using <see cref="WriteRaw(string, bool)"/>. </summary>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
     /// <param name="message">  The message. </param>
-    /// <returns>   An int. </returns>
-    public int Write( string message )
+    /// <returns>   A Tuple: number of bytes sent, error code, error details. </returns>
+    public (int BytesSent, DeviceErrorCode ErrorCode, string ErrorDetails) Write( string message )
     {
         return this.WriteRaw( message, false );
 #if false
@@ -844,15 +852,12 @@ public partial class Vxi11Client : ICloseable
 #endif
     }
 
-    /// <summary>   Sends a message with termination to the VXI-11 server. </summary>
+    /// <summary>   Sends a message with termination to the VXI-11 server using <see cref="WriteRaw(string, bool)"/>. </summary>
     /// <param name="message">  The message. </param>
-    /// <returns>   An int. </returns>
-    public int WriteLine( string message )
+    /// <returns>   A Tuple: number of bytes sent, error code, error details. </returns>
+    public (int BytesSent, DeviceErrorCode ErrorCode, string ErrorDetails) WriteLine( string message )
     {
         return this.WriteRaw( message, true );
-#if false
-        return this.Write( $"{message}{this.WriteTermination}" );
-#endif
     }
 
     /// <summary>
@@ -860,44 +865,51 @@ public partial class Vxi11Client : ICloseable
     /// </summary>
     /// <param name="message">  The message. </param>
     /// <returns>   A Tuple. </returns>
-    public (bool success, int length, string response) TryWrite( string message )
+    public (int BytesSent, DeviceErrorCode ErrorCode, string ErrorDetails) TryWrite( string message )
     {
         try
         {
-            return (true, this.Write( message ), string.Empty);
+            return this.WriteRaw( message, false );
         }
         catch ( Exception ex )
         {
-            return (false, 0, ex.Message);
+            return (0, DeviceErrorCode.IOError, ex.Message);
         }
     }
 
-    /// <summary>
-    /// Sends a message with termination to the VXI-11 server and returns an exception message or the
-    /// message length.
-    /// </summary>
+    /// <summary>   Sends a message with termination to the VXI-11 server using <see cref="WriteRaw(string, bool)"/>
+    /// trapping any exception and returning the exception message. </summary>
     /// <param name="message">  The message. </param>
-    /// <returns>   A Tuple. </returns>
-    public (bool success, int length, string response) TryWriteLine( string message )
+    /// <returns>   A Tuple: number of bytes sent, error code, error details. </returns>
+    public (int BytesSent, DeviceErrorCode ErrorCode, string ErrorDetails) TryWriteLine( string message )
     {
-        return this.TryWrite( $"{message}{this.WriteTermination}" );
+        try
+        {
+            return this.WriteRaw( message, true );
+        }
+        catch ( Exception ex )
+        {
+            return (0, DeviceErrorCode.IOError, ex.Message);
+        }
     }
 
     #endregion
 
     #region " Read "
 
-    /// <summary>   Receives a message from the VXI-11 server. </summary>
+    /// <summary>   Receives a message from the VXI-11 server using <see cref="ReadRaw(int)"/>. </summary>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
     /// <param name="trimEnd">  (Optional) True to trim end. </param>
-    /// <returns>   A string. </returns>
-    public string Read( bool trimEnd = false )
+    /// <returns>   A Tuple: reply, error code, error details. </returns>
+    public (string Reply, DeviceErrorCode ErrorCode, string Details) Read( bool trimEnd = false )
     {
-        byte[] data = this.ReadRaw();
+        (byte[] data, DeviceErrorCode errorCode, string details) = this.ReadRaw();
+        if ( errorCode != DeviceErrorCode.NoError )
+            return (string.Empty, errorCode, details);
         int len = data is null ? 0 : data.Length - (trimEnd && this.ReadTermination != 0 ? 1 : 0);
         return len > 0
-            ? this.CharacterEncoding.GetString( data, 0, len )
-            : string.Empty;
+            ? (this.CharacterEncoding.GetString( data, 0, len ), errorCode, details)
+            : (string.Empty, errorCode, details);
 #if false
         DeviceReadResp readResponse = this.Receive();
 
@@ -916,18 +928,19 @@ public partial class Vxi11Client : ICloseable
 #endif
     }
 
-    /// <summary>   Tries to receive a message from the VXI-11 server. </summary>
+    /// <summary>   Tries to receives a message from the VXI-11 server using <see cref="ReadRaw(int)"/>
+    /// catching any exception and returning the exception message. </summary>
     /// <param name="trimEnd">  (Optional) True to trim end. </param>
-    /// <returns>   A Tuple. </returns>
-    public (bool success, string response) TryRead( bool trimEnd = false )
+    /// <returns>   A Tuple: reply, error code, error details. </returns>
+    public (string Reply, DeviceErrorCode ErrorCode, string Details) TryRead( bool trimEnd = false )
     {
         try
         {
-            return (true, this.Read( trimEnd ));
+            return this.Read( trimEnd );
         }
         catch ( Exception ex )
         {
-            return (false, ex.Message);
+            return (string.Empty, DeviceErrorCode.IOError, ex.Message);
         }
     }
 
@@ -938,21 +951,23 @@ public partial class Vxi11Client : ICloseable
     /// <param name="offset">   The offset into the received bytes. </param>
     /// <param name="count">    Number of single precision values. </param>
     /// <param name="values">   [in,out] the single precision values. </param>
-    /// <returns>
-    /// The number of output bytes, which will be the minimum of <paramref name="count"/>
-    /// and length of <paramref name="values"/>.
+    /// <returns>  A tuple: The number of output bytes, which will be the minimum of <paramref name="count"/>
+    /// and length of <paramref name="values"/>, error code, error details).
     /// </returns>
-    public int Read( int offset, int count, ref float[] values )
+    public (int BytesReceived, DeviceErrorCode ErrorCode, string Details) Read( int offset, int count, ref float[] values )
     {
-        if ( count == 0 ) return 0;
+        if ( count == 0 )
+            return (0, DeviceErrorCode.IOError, $"requested count is zero");
         int length = count * 4 + offset + 1;
-        byte[] data = this.ReadRaw( length );
+        (byte[] data, DeviceErrorCode errorCode, string details) = this.ReadRaw( length );
+        if ( errorCode != DeviceErrorCode.NoError )
+            return (0, errorCode, details);
         int receivedLen = data.Length;
         int outputLen = Math.Min( count, values.Length ) * 4;
         if ( receivedLen < outputLen )
-            throw new InvalidOperationException( $"{nameof( Read )}(int, int, ref float[]) received {receivedLen} of the requested byte output {outputLen}" );
+            return ( receivedLen, DeviceErrorCode.IOError, $"{nameof( Read )}(int, int, ref float[]) received {receivedLen} of the requested byte output {outputLen}" );
         Buffer.BlockCopy( data, offset, values, 0, outputLen );
-        return outputLen;
+        return (outputLen, DeviceErrorCode.NoError, string.Empty);
 #if false
         DeviceReadResp readResponse = this.Receive( count * 4 + offset + 1 );
         // Need to convert to the byte array into single
@@ -971,20 +986,16 @@ public partial class Vxi11Client : ICloseable
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay . </param>
     /// <param name="trimEnd">                  (Optional) True to trim end. </param>
-    /// <returns>
-    /// A Tuple ( success: <see langword="true"/> if data was sent and read; otherwise, <see langword="false"/>
-    /// , data).
+    /// <returns>  A Tuple ( reply, error code, error details ).
     /// </returns>
-    public (bool success, string response) Query( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
+    public (string Reply, DeviceErrorCode ErrorCode, string Details) Query( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
-        int sentCount = this.Write( message );
-        if ( sentCount > 0 )
-        {
-            if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
-            return (true, this.Read( trimEnd ));
-        }
-        return (false, string.Empty);
-
+        (int sentCount, DeviceErrorCode errorCode, string details) = this.WriteRaw(message, false);
+        if ( errorCode != DeviceErrorCode.NoError )
+            return ( string.Empty, errorCode, details);
+        if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
+        return this.Read( trimEnd );
+        
 #if false
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
 
@@ -1013,16 +1024,14 @@ public partial class Vxi11Client : ICloseable
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay . </param>
     /// <param name="trimEnd">                  (Optional) True to trim end. </param>
-    /// <returns>   The line. </returns>
-    public (bool success, string response) QueryLine( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
+    /// <returns>  A Tuple ( reply, error code, error details ). </returns>
+    public (string Reply, DeviceErrorCode ErrorCode, string Details) QueryLine( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
-        int sentCount = this.WriteLine( message );
-        if ( sentCount > 0 )
-        {
-            if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
-            return (true, this.Read( trimEnd ));
-        }
-        return (false, string.Empty);
+        (_, DeviceErrorCode errorCode, string details) = this.WriteRaw( message, true );
+        if ( errorCode != DeviceErrorCode.NoError )
+            return (string.Empty, errorCode, details);
+        if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
+        return this.Read( trimEnd );
     }
 
 
@@ -1033,8 +1042,8 @@ public partial class Vxi11Client : ICloseable
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay . </param>
     /// <param name="trimEnd">                  (Optional) True to trim end. </param>
-    /// <returns>   A Tuple. </returns>
-    public (bool success, string response) TryQuery( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
+    /// <returns>  A Tuple ( reply, error code, error details ). </returns>
+    public (string Reply, DeviceErrorCode ErrorCode, string Details) TryQuery( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
         try
         {
@@ -1042,7 +1051,7 @@ public partial class Vxi11Client : ICloseable
         }
         catch ( Exception ex )
         {
-            return (false, ex.Message);
+            return (string.Empty, DeviceErrorCode.IOError, ex.Message);
         }
     }
 
@@ -1053,10 +1062,17 @@ public partial class Vxi11Client : ICloseable
     /// <param name="message">                  The message. </param>
     /// <param name="millisecondsReadDelay">    (Optional) The milliseconds read delay . </param>
     /// <param name="trimEnd">                  (Optional) True to trim end. </param>
-    /// <returns>   A Tuple. </returns>
-    public (bool success, string response) TryQueryLine( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
+    /// <returns>  A Tuple ( reply, error code, error details ). </returns>
+    public (string Reply, DeviceErrorCode ErrorCode, string Details) TryQueryLine( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
-        return this.TryQuery( $"{message}{this.WriteTermination}", millisecondsReadDelay, trimEnd );
+        try
+        {
+            return this.QueryLine( message, millisecondsReadDelay, trimEnd );
+        }
+        catch ( Exception ex )
+        {
+            return (string.Empty, DeviceErrorCode.IOError, ex.Message);
+        }
     }
 
     /// <summary>   Sends a query message and reads the reply as a single-precision values. </summary>
@@ -1064,12 +1080,18 @@ public partial class Vxi11Client : ICloseable
     /// <param name="offset">   The offset into the received bytes. </param>
     /// <param name="count">    Number of single precision values. </param>
     /// <param name="values">   [in,out] the single precision values. </param>
-    /// <returns>   The number of received bytes. </returns>
-    public int Query( string message, int offset, int count, ref float[] values )
+    /// <returns>  A tuple: the number of bytes sent, The number of output bytes, which will be the minimum of <paramref name="count"/>
+    /// and length of <paramref name="values"/>, error code, error details).
+    /// </returns>
+    public (int BytesSent,int BytesReceived, DeviceErrorCode ErrorCode, string Details) Query( string message, int offset, int count, ref float[] values )
     {
-        if ( string.IsNullOrEmpty( message ) ) return 0;
-        _ = this.Write( message );
-        return this.Read( offset, count, ref values );
+        if ( count == 0 )
+            return (0, 0, DeviceErrorCode.IOError, $"requested count is zero");
+        (int sentCount, DeviceErrorCode errorCode, string details) = this.WriteRaw( message, false );
+        if ( errorCode != DeviceErrorCode.NoError )
+            return (sentCount, 0, errorCode, details);
+        (int receivedCount, errorCode, details) = this.Read( offset, count, ref values );
+        return (sentCount, receivedCount, errorCode, details);
     }
 
     /// <summary>   Sends a query message with termination and reads the reply as a single-precision values. </summary>
@@ -1077,12 +1099,18 @@ public partial class Vxi11Client : ICloseable
     /// <param name="offset">   The offset into the received bytes. </param>
     /// <param name="count">    Number of single precision values. </param>
     /// <param name="values">   [in,out] the single precision values. </param>
-    /// <returns>   The number of received bytes. </returns>
-    public int QueryLine( string message, int offset, int count, ref float[] values )
+    /// <returns>  A tuple: the number of bytes sent, The number of output bytes, which will be the minimum of <paramref name="count"/>
+    /// and length of <paramref name="values"/>, error code, error details).
+    /// </returns>
+    public (int BytesSent, int BytesReceived, DeviceErrorCode ErrorCode, string Details) QueryLine( string message, int offset, int count, ref float[] values )
     {
-        if ( string.IsNullOrEmpty( message ) ) return 0;
-        _ = this.WriteLine( message );
-        return this.Read( offset, count, ref values );
+        if ( count == 0 )
+            return (0, 0, DeviceErrorCode.IOError, $"requested count is zero");
+        (int sentCount, DeviceErrorCode errorCode, string details) = this.WriteRaw( message, true );
+        if ( errorCode != DeviceErrorCode.NoError )
+            return (sentCount, 0, errorCode, details);
+        (int receivedCount, errorCode, details) = this.Read( offset, count, ref values );
+        return (sentCount, receivedCount, errorCode, details);
     }
 
     #endregion

@@ -87,23 +87,25 @@ public class Vxi11DiscovererTests
     /// <param name="address">  The instrument <see cref="System.Net.Sockets.AddressFamily.InterNetwork"/>
     ///                         (IPv4) address. </param>
     /// <returns>   The identity. </returns>
-    public static string QueryIdentity( string address )
+    public static string TryQueryIdentity( string address )
     {
-        return QueryIdentity( address, "inst0" );
+        return TryQueryIdentity( address, "inst0" );
     }
 
-    /// <summary>   Queries the instrument identity. </summary>
-    /// <remarks>   2023-02-08. </remarks>
-    /// <param name="address">      The instrument <see cref="System.Net.Sockets.AddressFamily.InterNetwork"/>
-    ///                             (IPv4) address. </param>
-    /// <param name="deviceName">   The device name,, e.g., inst0 or gpib0,4. </param>
-    /// <returns>   The identity. </returns>
-    public static string QueryIdentity( string address, string deviceName )
+    /// <summary>   Tries to query the instrument identity. </summary>
+    /// <remarks>   2023-02-06. </remarks>
+    /// <param name="address">      The instrument network IPv4 address. </param>
+    /// <param name="deviceName">   The device name, e.g., inst0 or gpib0,4. </param>
+    /// <returns>   The instrument identity. </returns>
+    public static string TryQueryIdentity( string address, string deviceName )
     {
-        using Client.Vxi11Client instrument = new();
+        using cc.isr.VXI11.Client.Vxi11Client instrument = new();
         instrument.ThreadExceptionOccurred += OnThreadException;
         instrument.Connect( address, deviceName );
-        return instrument.QueryLine( "*IDN?" ).response;
+        (string reply, DeviceErrorCode errorCode, string errorDetails) = instrument.TryQueryLine( "*IDN?" );
+        return errorCode == DeviceErrorCode.NoError
+            ? reply
+            : $"unable to query identity from TCPIP::{address}::{deviceName}::INSTR because: {DeviceException.BuildErrorMessage( $"; {errorDetails}", errorCode )}";
     }
 
     #endregion
@@ -241,7 +243,7 @@ public class Vxi11DiscovererTests
                 Stopwatch sw = Stopwatch.StartNew();
                 Assert.IsTrue( VXI11.Vxi11Discoverer.PortmapPingHost( host, 10 ), $"port map at {host} should reply to a ping" );
                 Logger.Writer.LogInformation( $"{host} portmap pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms." );
-                Logger.Writer.LogInformation( $"{host}: {Vxi11DiscovererTests.QueryIdentity( host.ToString() )}" );
+                Logger.Writer.LogInformation( $"{host}: {Vxi11DiscovererTests.TryQueryIdentity( host.ToString() )}" );
             }
             else
             {
@@ -288,7 +290,7 @@ public class Vxi11DiscovererTests
     {
         Stopwatch sw = Stopwatch.StartNew();
 
-        var devices = VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints( PingedHosts, 100,false, true );
+        var devices = VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints( PingedHosts, 100, false, true );
         Assert.IsNotNull( devices );
         Logger.Writer.LogInformation(
             $"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints )} found {devices.Count} Core VXI-11 device(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:\n" );
@@ -300,7 +302,7 @@ public class Vxi11DiscovererTests
             Assert.IsTrue( VXI11.Vxi11Discoverer.Paping( endpoint ) );
             Logger.Writer.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
             if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
-                Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.QueryIdentity( endpoint.Address.ToString() )}" );
+                Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
         }
         Assert.AreEqual( PingedHosts.Count, devices.Count, "Device count is expected to equal pinged hosts count." );
     }
@@ -324,7 +326,7 @@ public class Vxi11DiscovererTests
 
             if ( endpoint.Port == OncRpcPortmapConstants.OncRpcPortmapPortNumber ) { actualCount++; }
             if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
-                Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.QueryIdentity( endpoint.Address.ToString() )}" );
+                Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
 
         }
 

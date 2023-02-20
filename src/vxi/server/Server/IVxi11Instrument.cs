@@ -41,10 +41,6 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <value> The device name. </value>
     string DeviceName { get; set; }
 
-    /// <summary>   Gets or sets the parser for the device name. </summary>
-    /// <value> The device name parser. </value>
-    DeviceNameParser DeviceNameParser { get; }
-
     /// <summary>   Query if this device has valid device name. </summary>
     /// <remarks> This is required for validating the device name when creating the link. </remarks>
     /// <returns>   True if valid device name, false if not. </returns>

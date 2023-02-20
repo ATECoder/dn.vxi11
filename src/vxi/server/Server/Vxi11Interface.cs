@@ -33,7 +33,7 @@ public partial class Vxi11Interface : IVxi11Interface
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="deviceName">   The device name. </param>
-    public Vxi11Interface(string deviceName )
+    public Vxi11Interface( string deviceName )
     {
         this.MessageLog = new CircularList<(int LinkId, char IO, DateTimeOffset Timestamp, String Value)>( IOMessageCapacity );
         this.DeviceName = deviceName;
@@ -136,7 +136,7 @@ public partial class Vxi11Interface : IVxi11Interface
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool TrySelectClient( int linkId, bool waitLock, int? lockTimeout = null )
     {
-        if ( linkId == (this.ActiveServerClient?.LinkId ?? 0) )
+        if ( linkId == (this.ActiveServerClient?.LinkId ?? int.MinValue) )
             // if the client was already selected, we are done.
             return true;
 
@@ -424,10 +424,10 @@ public partial class Vxi11Interface : IVxi11Interface
     /// <returns>   True if supported command, false if not. </returns>
     public bool IsSupportedCommand( int command )
     {
-        return ( command >= ( int )  InterfaceCommandOption.ListenerStatus
-                && command <= ( int ) InterfaceCommandOption.BusAddressStatus )
-            || ( command >= ( int ) InterfaceCommand.SendCommand
-                && command <= ( int ) InterfaceCommand.InterfaceClearControl );
+        return (command >= ( int ) InterfaceCommandOption.ListenerStatus
+                && command <= ( int ) InterfaceCommandOption.BusAddressStatus)
+            || (command >= ( int ) InterfaceCommand.SendCommand
+                && command <= ( int ) InterfaceCommand.InterfaceClearControl);
     }
 
     /// <summary>   The device executes a command. </summary>
@@ -439,14 +439,14 @@ public partial class Vxi11Interface : IVxi11Interface
     {
         // TODO: Implement interface operations here based on the parsing of the request.
 
-        if ( !this.IsSupportedCommand(  request.Cmd ) )
+        if ( !this.IsSupportedCommand( request.Cmd ) )
         {
             Logger.Writer.LogVerbose( $"{request.Cmd} is not a supported interface command." );
             return new DeviceDoCmdResp();
         }
         else if ( request.Cmd < ( int ) InterfaceCommand.SendCommand )
         {
-            InterfaceCommandOption cmd = ( ( int ) request.Cmd).ToInterfaceCommandOption();
+            InterfaceCommandOption cmd = (( int ) request.Cmd).ToInterfaceCommandOption();
             Logger.Writer.LogVerbose( $"Implementing： {cmd}({request.Cmd})" );
             return this.DeviceDoCmd( cmd );
         }

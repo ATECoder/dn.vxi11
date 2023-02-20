@@ -12,21 +12,21 @@ internal class CommandLineParser
     /// <summary>
     /// Constructor that prevents a default instance of this class from being created.
     /// </summary>
-    private CommandLineParser()  {}
+    private CommandLineParser() { }
 
     static CommandLineParser()
     {
-        StringBuilder sb = new ();
-        _ = sb.Append( $"{CommandLineParser.TimeoutKey}{CommandLineParser.EqualsSign}{CommandLineParser.TimeoutDefault}");
+        StringBuilder sb = new();
+        _ = sb.Append( $"{CommandLineParser.TimeoutKey}{CommandLineParser.EqualsSign}{CommandLineParser.TimeoutDefault}" );
         _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.IPKey}{CommandLineParser.EqualsSign}{CommandLineParser.BroadcastAddressDefault}" );
-        _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.DeviceInterfaceStringKey}{CommandLineParser.EqualsSign}{CommandLineParser.DeviceInstrumentStringDefault}" );
+        _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.DeviceNameKey}{CommandLineParser.EqualsSign}{CommandLineParser.DeviceInstrumentStringDefault}" );
         CommandLineParser.DefaultArgs = sb.ToString();
         _ = sb.Clear();
 
         _ = sb.Append( $"Usage: ./{nameof( LxiDiscover )} " );
         _ = sb.Append( $"{CommandLineParser.TimeoutKey}{CommandLineParser.EqualsSign}<timeout_milliseconds>" );
         _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.IPKey}{CommandLineParser.EqualsSign}<address>" );
-        _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.DeviceInterfaceStringKey}{CommandLineParser.EqualsSign}inst0" );
+        _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.DeviceNameKey}{CommandLineParser.EqualsSign}inst0" );
         _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.HelpKey}" );
         CommandLineParser.Usage = sb.ToString();
         _ = sb.Clear();
@@ -68,9 +68,9 @@ internal class CommandLineParser
     /// <value> The broadcast address default. </value>
     public static string BroadcastAddressDefault { get; set; } = IPAddress.Any.ToString();
 
-    /// <summary>   Gets the device interface string key. </summary>
-    /// <value> The device interface string key. </value>
-    public static string DeviceInterfaceStringKey { get; } = "--dev";
+    /// <summary>   Gets the device name key. </summary>
+    /// <value> The device name key. </value>
+    public static string DeviceNameKey { get; } = "--dev";
 
     /// <summary>   Gets or sets the device instrument string default. </summary>
     /// <value> The device instrument string default. </value>

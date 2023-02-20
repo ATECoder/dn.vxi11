@@ -11,7 +11,7 @@ namespace cc.isr.VXI11.Server
         /// <remarks>   2023-02-14. </remarks>
         public Vxi11InstrumentFactory()
         {
-            this._instruments = new ();
+            this._instruments = new();
         }
 
         private readonly ConcurrentDictionary<string, IVxi11Instrument> _instruments;

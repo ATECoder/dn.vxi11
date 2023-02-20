@@ -8,14 +8,14 @@ namespace cc.isr.VXI11
         /// <summary>   Constructor. </summary>
         /// <remarks>   2023-02-11. </remarks>
         /// <param name="identity"> The identity. </param>
-        public IdentityParser( string identity)
+        public IdentityParser( string identity )
         {
             this.Identity = identity;
             this.Manufacturer = string.Empty;
             this.Model = string.Empty;
             this.Serial = string.Empty;
             this.Firmware = string.Empty;
-            this.FirmwareDetails = new ();
+            this.FirmwareDetails = new();
             this.Parse( identity );
         }
 
@@ -37,15 +37,15 @@ namespace cc.isr.VXI11
 
         /// <summary>   Gets or sets the firmware. </summary>
         /// <value> The firmware. </value>
-        public string Firmware {  get; set; }
+        public string Firmware { get; set; }
 
         /// <summary>   Gets or sets the firmware details. </summary>
         /// <value> The firmware details. </value>
-        public Dictionary<string, string> FirmwareDetails { get;set; }
+        public Dictionary<string, string> FirmwareDetails { get; set; }
 
         private void Clear()
         {
-            this.Identity = nameof(IdentityParser.Identity);
+            this.Identity = nameof( IdentityParser.Identity );
             this.Manufacturer = nameof( IdentityParser.Manufacturer );
             this.Model = nameof( IdentityParser.Model );
             this.Serial = nameof( IdentityParser.Serial );
@@ -67,7 +67,7 @@ namespace cc.isr.VXI11
 
             if ( values.Length > 0 ) this.Manufacturer = values[0];
             if ( values.Length > 1 ) this.Model = values[1];
-            if ( values.Length > 2 ) this.Serial =values[2];
+            if ( values.Length > 2 ) this.Serial = values[2];
             if ( values.Length > 3 ) this.Firmware = values[3];
 
             this.ParseFirmware();

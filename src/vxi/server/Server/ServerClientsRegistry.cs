@@ -20,7 +20,7 @@ public class ServerClientsRegistry
         this.LinkedClients = new();
         this.ClientLinks = new();
         this.ClientsQueue = new();
-        this.InstrumentClients= new();
+        this.InstrumentClients = new();
     }
 
     /// <summary>   Gets or sets a queue of clients locking the instrument. </summary>
@@ -81,7 +81,7 @@ public class ServerClientsRegistry
     /// <returns>   True if active client linked, false if not. </returns>
     public bool IsActiveClientLinked()
     {
-        return 0 != (this.ActiveServerClient?.LinkId ?? 0);
+        return int.MinValue != (this.ActiveServerClient?.LinkId ?? int.MinValue);
     }
 
     /// <summary>   Query if this object is active client locked. </summary>
@@ -98,7 +98,7 @@ public class ServerClientsRegistry
     /// <returns>   True if locked, false if not. </returns>
     public bool IsLocked( int linkId )
     {
-        return this.LinkedClients.ContainsKey( linkId)  && this.LinkedClients[linkId].IsLocked();
+        return this.LinkedClients.ContainsKey( linkId ) && this.LinkedClients[linkId].IsLocked();
     }
 
     /// <summary>   Releases the lock described by linkId. </summary>
@@ -152,17 +152,17 @@ public class ServerClientsRegistry
     /// <returns>   <see langword="true"/> if it the lock was released; otherwise, <see langword="false"/>  if it fails. </returns>
     public bool AwaitLockRelease( int timeout, int loopDelay )
     {
-        Logger.Writer.LogVerbose( $"enter {nameof(ServerClientsRegistry.AwaitLockRelease)} {this.ActiveServerClient?.DeviceName} client {this.ActiveServerClient?.ClientId} is {((this.ActiveServerClient?.IsLocked() ?? false) ? "locked" : "not locked")}" );
+        Logger.Writer.LogVerbose( $"enter {nameof( ServerClientsRegistry.AwaitLockRelease )} {this.ActiveServerClient?.DeviceName} client {this.ActiveServerClient?.ClientId} is {((this.ActiveServerClient?.IsLocked() ?? false) ? "locked" : "not locked")}" );
 
         // await for the server to stop running
         DateTime endTime = DateTime.Now.AddMilliseconds( timeout );
-        while ( ( this.ActiveServerClient?.IsLocked() ?? false) && endTime > DateTime.Now )
+        while ( (this.ActiveServerClient?.IsLocked() ?? false) && endTime > DateTime.Now )
         {
             Task.Delay( loopDelay ).Wait();
         }
         Logger.Writer.LogVerbose( $"exit {nameof( ServerClientsRegistry.AwaitLockRelease )} {this.ActiveServerClient?.DeviceName} client {this.ActiveServerClient?.ClientId} is {((this.ActiveServerClient?.IsLocked() ?? false) ? "locked" : "not locked")}" );
 
-        return !( this.ActiveServerClient?.IsLocked() ?? false ); 
+        return !(this.ActiveServerClient?.IsLocked() ?? false);
     }
 
     /// <summary>   Query if 'clientId' is active client. </summary>
@@ -178,7 +178,7 @@ public class ServerClientsRegistry
     /// <returns>   True if active link, false if not. </returns>
     public bool IsActiveLink( int linkId )
     {
-        return linkId == (this.ActiveServerClient?.LinkId ?? 0);
+        return linkId == (this.ActiveServerClient?.LinkId ?? int.MinValue);
     }
 
     /// <summary>   Query if a client, identified by the 'clientId' was linked. </summary>
@@ -250,8 +250,8 @@ public class ServerClientsRegistry
     public bool AddClient( CreateLinkParms createLinkParameters, int linkId )
     {
         if ( this.LinkedClients.ContainsKey( linkId ) ) { return false; }
-        if ( this.ClientLinks.ContainsKey( createLinkParameters.ClientId) ) { return false; }
-        this.ActiveServerClient = new ( createLinkParameters, linkId );
+        if ( this.ClientLinks.ContainsKey( createLinkParameters.ClientId ) ) { return false; }
+        this.ActiveServerClient = new( createLinkParameters, linkId );
         int link = this.AddActiveClient( this.ActiveServerClient );
         return link == this.ActiveServerClient.LinkId;
     }
@@ -260,7 +260,7 @@ public class ServerClientsRegistry
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool RemoveClient( int linkId )
     {
-        if ( linkId != 0 )
+        if ( linkId != 0 && this.LinkedClients.Any() )
         {
             bool removed = this.LinkedClients.TryRemove( linkId, out ServerClientInfo removedClient )
                          & this.ClientLinks.TryRemove( removedClient.ClientId, out int removedLink );

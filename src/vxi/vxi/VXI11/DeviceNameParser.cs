@@ -5,7 +5,7 @@ public class DeviceNameParser
 {
 
     /// <summary>   Default constructor. </summary>
-    public DeviceNameParser() : this ( string.Empty ) 
+    public DeviceNameParser() : this( string.Empty )
     {
     }
 
@@ -140,13 +140,13 @@ public class DeviceNameParser
         return string.IsNullOrEmpty( interfaceFamily )
             ? throw new ArgumentNullException( nameof( interfaceFamily ) )
             : MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
-                ? throw new ArgumentOutOfRangeException(nameof( interfaceNumber ),
+                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
                     $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
                 : string.Equals( interfaceFamily, GenericInterfaceFamily, StringComparison.OrdinalIgnoreCase )
                   || string.Equals( interfaceFamily, GpibInterfaceFamily, StringComparison.OrdinalIgnoreCase )
                     ? $"{interfaceFamily}{interfaceNumber}"
                     : throw new ArgumentOutOfRangeException( nameof( interfaceFamily ),
-                        $"{interfaceFamily} must be either {GenericInterfaceFamily} or {GpibInterfaceFamily}");
+                        $"{interfaceFamily} must be either {GenericInterfaceFamily} or {GpibInterfaceFamily}" );
     }
 
     /// <summary>   Builds generic device name. </summary>

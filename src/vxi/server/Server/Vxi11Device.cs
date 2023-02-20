@@ -253,8 +253,7 @@ public partial class Vxi11Device : IVxi11Device
     public bool LockEnabled
     {
         get => this._lockEnabled;
-        set
-        {
+        set {
             if ( this.SetProperty( ref this._lockEnabled, value ) && this.ActiveInstrument is not null )
                 this.ActiveInstrument.LockEnabled = value;
         }
@@ -343,7 +342,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <returns>   True if it succeeds, false if it fails. </returns>
     private bool TrySelectActiveClientInstrument( int linkId, DeviceOperationFlags flags, int? lockTimeout = null )
     {
-        return this.TrySelectActiveClientInstrument( linkId, DeviceOperationFlags.Waitlock == ( flags & DeviceOperationFlags.Waitlock ), lockTimeout );
+        return this.TrySelectActiveClientInstrument( linkId, DeviceOperationFlags.Waitlock == (flags & DeviceOperationFlags.Waitlock), lockTimeout );
     }
 
     /// <summary>   Attempts to select active client instrument. </summary>
@@ -406,7 +405,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <param name="e">        Event information to send to registered event handlers. </param>
     private void OnInterfacePropertyChanged( object sender, PropertyChangedEventArgs e )
     {
-        if ( sender is not IVxi11Interface) return;
+        if ( sender is not IVxi11Interface ) return;
         this.OnInterfacePropertyChanged( ( IVxi11Interface ) sender, e.PropertyName );
     }
 
@@ -514,7 +513,7 @@ public partial class Vxi11Device : IVxi11Device
                 ? DeviceErrorCode.NoError
                 : DeviceErrorCode.InvalidLinkIdentifier;
 
-            if ( reply.ErrorCode != DeviceErrorCode.NoError)
+            if ( reply.ErrorCode != DeviceErrorCode.NoError )
             {
                 return reply;
             }
@@ -577,7 +576,7 @@ public partial class Vxi11Device : IVxi11Device
     /// </returns>
     public DeviceError DestroyLink( DeviceLink request )
     {
-        DeviceError reply = new ();
+        DeviceError reply = new();
         try
         {
             if ( this.ServerClientsRegistry.TrySelectClient( request.LinkId, out ServerClientInfo client ) )
@@ -607,7 +606,7 @@ public partial class Vxi11Device : IVxi11Device
         {
             reply = new DeviceError( DeviceErrorCode.IOError );
         }
-       
+
         this.LastDeviceError = reply.ErrorCode;
         return reply;
     }
@@ -640,7 +639,7 @@ public partial class Vxi11Device : IVxi11Device
     /// </returns>
     public DeviceError DeviceClear( DeviceGenericParms request )
     {
-        DeviceError reply = new ();
+        DeviceError reply = new();
         if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
         else
@@ -677,7 +676,7 @@ public partial class Vxi11Device : IVxi11Device
     /// </returns>
     public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
     {
-        DeviceDoCmdResp reply = new ();
+        DeviceDoCmdResp reply = new();
 
         if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
@@ -740,7 +739,7 @@ public partial class Vxi11Device : IVxi11Device
 
             // if the request comes for the current server client, apply to the instrument.
 
-            if ( request.Link.LinkId == ( this.ActiveInstrument?.ActiveServerClient?.LinkId ?? 0 ) )
+            if ( request.Link.LinkId == (this.ActiveInstrument?.ActiveServerClient?.LinkId ?? int.MinValue) )
                 this.ActiveInstrument?.EnableInterrupt( request.Enable, request.GetHandle() );
 
         }
@@ -793,7 +792,7 @@ public partial class Vxi11Device : IVxi11Device
     /// </returns>
     public DeviceError DeviceLocal( DeviceGenericParms request )
     {
-        DeviceError reply = new ();
+        DeviceError reply = new();
         if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
         else
@@ -860,7 +859,7 @@ public partial class Vxi11Device : IVxi11Device
     /// </returns>
     public DeviceError DeviceRemote( DeviceGenericParms request )
     {
-        DeviceError reply = new ();
+        DeviceError reply = new();
         if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
         else
@@ -928,7 +927,7 @@ public partial class Vxi11Device : IVxi11Device
     /// </returns>
     public DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
     {
-        DeviceReadStbResp reply = new ();
+        DeviceReadStbResp reply = new();
         if ( !this.ServerClientsRegistry.ContainsLink( request.Link.LinkId ) )
             reply = new DeviceReadStbResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
         else
@@ -1065,7 +1064,7 @@ public partial class Vxi11Device : IVxi11Device
             if ( this.TrySelectActiveClientInstrument( request.Link.LinkId, request.Flags, request.LockTimeout ) )
             {
                 // selecting a  new active client sets its lock.
-                
+
             }
             else
             {
@@ -1102,13 +1101,13 @@ public partial class Vxi11Device : IVxi11Device
             reply.ErrorCode = DeviceErrorCode.ChannelNotEstablished;
         else
         {
-            if ( this.ServerClientsRegistry.ContainsLink( deviceLink.LinkId ))
+            if ( this.ServerClientsRegistry.ContainsLink( deviceLink.LinkId ) )
             {
                 if ( this.ServerClientsRegistry.IsLocked( deviceLink.LinkId ) )
                 {
                     _ = this.ServerClientsRegistry.ReleaseLock( deviceLink.LinkId );
 
-                    if ( ( this.ActiveInstrument?.ActiveServerClient?.LinkId ?? 0 ) == deviceLink.LinkId )
+                    if ( (this.ActiveInstrument?.ActiveServerClient?.LinkId ?? int.MinValue) == deviceLink.LinkId )
                         this.ActiveInstrument!.ActiveServerClient?.ReleaseLockTimeout();
                 }
                 else

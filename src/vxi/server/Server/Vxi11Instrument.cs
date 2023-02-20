@@ -44,7 +44,6 @@ public partial class Vxi11Instrument : IVxi11Instrument
         this.MessageLog = new CircularList<(int LinkId, char IO, DateTimeOffset Timestamp, String Value)>( IOMessageCapacity );
         this.DeviceName = deviceName;
         this._deviceName = string.Empty;
-        this.DeviceNameParser = new DeviceNameParser( string.Empty );
         this.IdentityParser = new IdentityParser( identity );
         this.Identity = identity;
         this._identity = identity;
@@ -69,15 +68,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public string DeviceName
     {
         get => this._deviceName;
-        set {
-            if ( this.SetProperty( ref this._deviceName, value ) )
-                _ = this.DeviceNameParser.Parse( value );
-        }
+        set => _ = this.OnPropertyChanged( ref this._deviceName, value );
     }
-
-    /// <summary>   Gets or sets the parser for the device name. </summary>
-    /// <value> The device name parser. </value>
-    public DeviceNameParser DeviceNameParser { get; }
 
     /// <summary>   Query if this device has valid device name. </summary>
     /// <remarks> This is required for validating the device name when creating the link. </remarks>
@@ -167,7 +159,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool TrySelectClient( int linkId, bool waitLock, int? lockTimeout = null )
     {
-        if ( linkId == (this.ActiveServerClient?.LinkId ?? 0) )
+        if ( linkId == (this.ActiveServerClient?.LinkId ?? int.MinValue) )
             // if the client was already selected, we are done.
             return true;
 
@@ -270,16 +262,15 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public ServiceRequests ServiceRequestStatus
     {
         get => this._serviceRequestStatus;
-        set
-        {
+        set {
             if ( this.OnPropertyChanged( ref this._serviceRequestStatus, value ) )
             {
                 if ( this.InterruptEnabled
-                    && ( ( byte ) this._serviceRequestStatus & this.ServiceRequestEventMask ) != 0 )
+                    && (( byte ) this._serviceRequestStatus & this.ServiceRequestEventMask) != 0 )
                     // note that the interrupt handle should include the id of the current client.
                     this.OnRequestingService( new Vxi11EventArgs( this._interruptHandle ) );
             }
-        } 
+        }
     }
 
     /// <summary>   Gets or sets the standard event status mask. </summary>
@@ -335,7 +326,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
         this.StandardEventStatus &= ~StandardEvents.OperationComplete;
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
-        return (( byte) this.StandardEventStatus).ToString();
+        return (( byte ) this.StandardEventStatus).ToString();
     }
 
     /// <summary>   Standard Event Status Register Query: <see cref="Vxi11InstrumentCommands.ESRRead"/>. </summary>
@@ -452,7 +443,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
         // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared reading SRE.
 
         this.ServiceRequestStatus |= ServiceRequests.MessageAvailable;
-        return (( byte) this.ServiceRequestEventMask).ToString();
+        return (( byte ) this.ServiceRequestEventMask).ToString();
     }
 
     private bool _requestingServiceEventRaised;
@@ -489,7 +480,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
             this.RequestingServiceEventRaised = false;
         }
 
-        byte value = ( byte ) ( int )this.ServiceRequestStatus;
+        byte value = ( byte ) ( int ) this.ServiceRequestStatus;
 
         // per the specs, the status byte is cleared after reading.
         this.ServiceRequestStatus = ServiceRequests.None;
@@ -889,7 +880,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
             this._readBuffer = Array.Empty<byte>();
             _ = this._asyncLocker.Reset();
         }
-        if ( !this._asyncLocker.WaitOne( deviceReadParameters.IOTimeout ) ) 
+        if ( !this._asyncLocker.WaitOne( deviceReadParameters.IOTimeout ) )
         {
             readRes.SetData( this._readBuffer );
             readRes.ErrorCode = DeviceErrorCode.IOTimeout; // timeout
@@ -1017,7 +1008,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
 
     /// <summary>   Lists the instrument operations. </summary>
-    private List<MethodInfo> _instrumentOperations = new ();
+    private List<MethodInfo> _instrumentOperations = new();
 
     /// <summary>   Enumerates the instrument operation methods. </summary>
     /// <returns>   A List{MethodInfo}; </returns>
@@ -1025,8 +1016,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     {
         if ( this._instrumentOperations is null || this._instrumentOperations.Count == 0 )
         {
-            this._instrumentOperations = this.GetType().GetMethods().ToList().Where( (o) =>
-            {
+            this._instrumentOperations = this.GetType().GetMethods().ToList().Where( ( o ) => {
                 return o.GetCustomAttribute( typeof( Vxi11InstrumentOperationAttribute ) ) is Vxi11InstrumentOperationAttribute;
             } ).ToList();
         }

@@ -3,6 +3,9 @@
 using cc.isr.ONC.RPC.Logging;
 using cc.isr.ONC.RPC.Portmap;
 
+AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobsserverException;
+
 try
 {
     using cc.isr.VXI11.Server.Vxi11Server server = new();
@@ -42,6 +45,21 @@ static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
     Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
 }
 
+#region " Unhandled exception handling "
+
+static void OnUnhandledException( object sender, UnhandledExceptionEventArgs e )
+{
+    Console.WriteLine( $"\n Unhandled exception occurred: {e.ExceptionObject}\n" );
+}
+
+static void OnTaskSchedulerUnobsserverException( object? sender, UnobservedTaskExceptionEventArgs e )
+{
+    Console.WriteLine( $"{(e.Observed ? "" : "un")}observed exception occurred: {e.Exception}\n" );
+}
+
+#endregion
+
+
 static bool KeyDone( char doneKey )
 {
     return Console.KeyAvailable && string.Equals( Console.ReadKey().KeyChar, doneKey );
@@ -57,3 +75,4 @@ internal static class Constants
     /// <value> The server start loop delay. </value>
     public static int ServerStartLoopDelay { get; set; } = 100;
 }
+

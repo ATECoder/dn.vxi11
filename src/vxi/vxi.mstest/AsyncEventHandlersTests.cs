@@ -88,8 +88,7 @@ public class AsyncEventHandlersTests
                     } );
                     Console.WriteLine( $"Exiting the async callback method." );
                 },
-                ( ex ) =>
-                {
+                ( ex ) => {
                     Console.WriteLine( $"Entered the error handling method." );
                     handledException = ex;
                     actulaExceptionMessage = ex.Message;

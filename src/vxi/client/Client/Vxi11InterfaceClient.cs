@@ -41,10 +41,10 @@ public class Vxi11InterfaceClient : Vxi11Client
     {
         if ( this.DeviceLink is null || this.CoreClient is null )
             throw new InvalidOperationException( "Interface connection has yet to be established" );
-           
+
         DeviceDoCmdResp reply = this.CoreClient.DeviceDoCmd( this.DeviceLink, DeviceOperationFlags.None, this.LockTimeout, this.IOTimeout,
                                                              commandCode, true, dataSize, data );
-        
+
         if ( reply is null )
             throw new DeviceException( DeviceErrorCode.IOError );
         else if ( reply.ErrorCode != DeviceErrorCode.NoError )

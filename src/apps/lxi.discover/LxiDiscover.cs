@@ -64,11 +64,11 @@ from the broadcast address. For example, 192.168.0.255 entails 254 such
 IP addresses. Thus, it is expected to take at least 2.54 seconds to scan
 this broadcast address with the default timeout of 10ms.
 
-A device interface string, such as 'inst0' is required for reporting the
-instruments identity (*IDN) strings. Otherwise, only the instrument addresses
-are reported. If USB or GPIB instruments, which have a different device interface
-string, reside on the network, {nameof( LxiDiscover )} will catch the exceptions
-from the identity query thus slowing the discovery.
+A device name, such as 'inst0' is required for reporting the instruments identity
+(*IDN) strings. Otherwise, only the instrument addresses are reported. If USB or
+GPIB instruments, which have a different device name, reside on the network,
+{nameof( LxiDiscover )} will catch the exceptions from the identity query
+thus slowing the discovery.
 
 Command Line: {CommandLineParser.Usage}
 
@@ -82,62 +82,62 @@ to discover all the instruments listening on the local IPs of this machine.
 
     /// <summary>   Discover endpoints. </summary>
     /// <remarks>   2023-02-06. </remarks>
-    /// <param name="broadcastAddress">         The broadcast address such as "192.169.0.255" or null
-    ///                                         (<see cref="System.Net.IPAddress.Any"/> (0.0.0.0). </param>
-    /// <param name="timeout">                  The timeout. </param>
-    /// <param name="deviceInterfaceString">    The device interface string, e.g., inst0 or gpib0,4. </param>
-    private static void DiscoverEndpoints( string broadcastAddress, int timeout, string deviceInterfaceString )
+    /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="System.Net.IPAddress.Any"/>
+    ///                                 (0.0.0.0). </param>
+    /// <param name="timeout">          The timeout. </param>
+    /// <param name="deviceName">       The device name, e.g., inst0 or gpib0,4. </param>
+    private static void DiscoverEndpoints( string broadcastAddress, int timeout, string deviceName )
     {
-        Console.WriteLine( $"Discovering {deviceInterfaceString} instruments on {broadcastAddress}...." );
+        Console.WriteLine( $"Discovering {deviceName} instruments on {broadcastAddress}...." );
 
         List<IPEndPoint> endpoints = Vxi11Discoverer.ListCoreDevicesEndpoints( IPAddress.Parse( broadcastAddress ), timeout, true );
 
         Console.WriteLine( $"Found {endpoints.Count} instruments on {broadcastAddress}\n" );
         foreach ( IPEndPoint endpoint in endpoints )
         {
-            if ( string.IsNullOrWhiteSpace( deviceInterfaceString ))
+            if ( string.IsNullOrWhiteSpace( deviceName ) )
                 Console.WriteLine( endpoint.ToString() );
             else
-                Console.WriteLine( $"{endpoint}: {TryQueryIdentity( endpoint.Address.ToString(), deviceInterfaceString )}" );
+                Console.WriteLine( $"{endpoint}: {TryQueryIdentity( endpoint.Address.ToString(), deviceName )}" );
         }
     }
 
     /// <summary>   Discover addresses. </summary>
     /// <remarks>   2023-02-06. </remarks>
-    /// <param name="broadcastAddress">         The broadcast address such as "192.169.0.255" or null
-    ///                                         (<see cref="System.Net.IPAddress.Any"/> (0.0.0.0). </param>
-    /// <param name="timeout">                  The timeout. </param>
-    /// <param name="deviceInterfaceString">    The device interface string, e.g., inst0 or gpib0,4. </param>
-    private static void DiscoverAddresses( string broadcastAddress, int timeout, string deviceInterfaceString )
+    /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="System.Net.IPAddress.Any"/>
+    ///                                 (0.0.0.0). </param>
+    /// <param name="timeout">          The timeout. </param>
+    /// <param name="deviceName">       The device name, e.g., inst0 or gpib0,4. </param>
+    private static void DiscoverAddresses( string broadcastAddress, int timeout, string deviceName )
     {
-        Console.WriteLine( $"Discovering {deviceInterfaceString} instruments on {broadcastAddress}...." );
+        Console.WriteLine( $"Discovering {deviceName} instruments on {broadcastAddress}...." );
 
         List<IPAddress> addresses = Vxi11Discoverer.ListCoreDevicesAddresses( IPAddress.Parse( broadcastAddress ), timeout, true );
 
         Console.WriteLine( $"Found {addresses.Count} instruments on {broadcastAddress}\n" );
         foreach ( IPAddress address in addresses )
         {
-            if ( string.IsNullOrWhiteSpace( deviceInterfaceString ) )
+            if ( string.IsNullOrWhiteSpace( deviceName ) )
                 Console.WriteLine( address.ToString() );
             else
-                Console.WriteLine( $"{address}: {TryQueryIdentity( address.ToString(), deviceInterfaceString )}" );
+                Console.WriteLine( $"{address}: {TryQueryIdentity( address.ToString(), deviceName )}" );
         }
     }
 
     /// <summary>   Discovers th devices on the specified broadcast address. </summary>
     /// <remarks>   2023-02-06. </remarks>
-    /// <param name="broadcastAddress">         The broadcast address such as "192.169.0.255" or null
-    ///                                         (<see cref="System.Net.IPAddress.Any"/> (0.0.0.0). </param>
-    /// <param name="timeout">                  The timeout. </param>
-    /// <param name="deviceInterfaceString">    The device interface string, e.g., inst0 or gpib0,4. </param>
-    public static void Discover( string broadcastAddress, int timeout, string deviceInterfaceString )
+    /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="System.Net.IPAddress.Any"/>
+    ///                                 (0.0.0.0). </param>
+    /// <param name="timeout">          The timeout. </param>
+    /// <param name="deviceName">       The device name, e.g., inst0 or gpib0,4. </param>
+    public static void Discover( string broadcastAddress, int timeout, string deviceName )
     {
 
-        Console.WriteLine( $"Discovering {deviceInterfaceString} devices on {broadcastAddress} with a timeout of {timeout} ms\n" );
+        Console.WriteLine( $"Discovering {deviceName} devices on {broadcastAddress} with a timeout of {timeout} ms\n" );
 
         // IPAddress does not override '==', which implements reference equality. Must use Equals()
 
-        if ( string.IsNullOrWhiteSpace(broadcastAddress ) || IPAddress.Parse( broadcastAddress ).Equals( IPAddress.Any ) )
+        if ( string.IsNullOrWhiteSpace( broadcastAddress ) || IPAddress.Parse( broadcastAddress ).Equals( IPAddress.Any ) )
         {
             double totalTimeout = 0;
             foreach ( IPAddress address in GetLocalBroadcastAddresses() )
@@ -148,14 +148,14 @@ to discover all the instruments listening on the local IPs of this machine.
             Console.WriteLine( $"Discovery is estimated to take {totalTimeout / 1000} seconds...\n" );
             foreach ( IPAddress address in GetLocalBroadcastAddresses() )
             {
-                DiscoverAddresses( address.ToString(), timeout, deviceInterfaceString );
+                DiscoverAddresses( address.ToString(), timeout, deviceName );
             }
         }
         else
         {
             IPAddress[] ips = Vxi11Discoverer.EnumerateAddresses( IPAddress.Parse( broadcastAddress ) );
             Console.WriteLine( $"Discovery is estimated to take {ips.Length * ( double ) timeout / 1000} seconds...\n" );
-            DiscoverAddresses( broadcastAddress, timeout, deviceInterfaceString );
+            DiscoverAddresses( broadcastAddress, timeout, deviceName );
         }
         StringBuilder builder = new();
         _ = builder.AppendLine( "LXI Instruments Discovery complete. If you did not find your instrument" );
@@ -198,37 +198,20 @@ to discover all the instruments listening on the local IPs of this machine.
 
     #region " query device "
 
-    /// <summary>   Queries the instrument identity. </summary>
+    /// <summary>   Tries to query the instrument identity. </summary>
     /// <remarks>   2023-02-06. </remarks>
-    /// <param name="address">                  The instrument network IPv4 address. </param>
-    /// <param name="deviceInterfaceString">    The device interface string, e.g., inst0 or gpib0,4. </param>
+    /// <param name="address">      The instrument network IPv4 address. </param>
+    /// <param name="deviceName">   The device name, e.g., inst0 or gpib0,4. </param>
     /// <returns>   The instrument identity. </returns>
-    public static string QueryIdentity( string address, string deviceInterfaceString )
+    public static string TryQueryIdentity( string address, string deviceName )
     {
         using cc.isr.VXI11.Client.Vxi11Client instrument = new();
         instrument.ThreadExceptionOccurred += OnThreadException;
-        instrument.Connect( address, deviceInterfaceString );
-        return instrument.QueryLine( "*IDN?" ).response;
-    }
-
-    /// <summary>   Try query identity. </summary>
-    /// <param name="address">                  The instrument network IPv4 address. </param>
-    /// <param name="deviceInterfaceString">    The device interface string, e.g., inst0 or gpib0,4. </param>
-    /// <returns>   A string. </returns>
-    public static string TryQueryIdentity( string address, string deviceInterfaceString )
-    {
-        try
-        {
-            return QueryIdentity( address, deviceInterfaceString );
-        }
-        catch ( DeviceException ex )
-        {
-            return $"unable to query identity from TCPIP::{address}::{deviceInterfaceString}::INSTR because: {ex.Reason}({( int ) ex.Reason}) {ex.Message}";
-        }
-        catch ( Exception ex )
-        {
-            return $"unable to query identity from TCPIP::{address}::{deviceInterfaceString}::INSTR because: {ex.Message}";
-        }
+        instrument.Connect( address, deviceName );
+        (string reply, DeviceErrorCode errorCode, string errorDetails) = instrument.TryQueryLine( "*IDN?" );
+        return errorCode == DeviceErrorCode.NoError
+            ? reply
+            : $"unable to query identity from TCPIP::{address}::{deviceName}::INSTR because: {DeviceException.BuildErrorMessage( $"; {errorDetails}", errorCode)}";
     }
 
     #endregion

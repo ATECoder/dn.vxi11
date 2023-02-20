@@ -18,7 +18,7 @@ public class Vxi11Server : CoreChannelServerBase
     #region " construction and cleanup "
 
     /// <summary>   Default constructor. </summary>
-    public Vxi11Server() : this( new Vxi11Device ( new Vxi11InstrumentFactory(), new Vxi11InterfaceFactory() ), IPAddress.Any, 0 )
+    public Vxi11Server() : this( new Vxi11Device( new Vxi11InstrumentFactory(), new Vxi11InterfaceFactory() ), IPAddress.Any, 0 )
     {
     }
 
@@ -129,8 +129,8 @@ public class Vxi11Server : CoreChannelServerBase
     public int AbortPortNumber
     {
         get => this._abortPortNumber;
-        set
-        { if ( this.SetProperty( ref this._abortPortNumber, value ) && this.Device is not null )
+        set {
+            if ( this.SetProperty( ref this._abortPortNumber, value ) && this.Device is not null )
                 this.Device.AbortPortNumber = value;
         }
     }
@@ -271,8 +271,8 @@ public class Vxi11Server : CoreChannelServerBase
     /// <returns>   True if interrupt created, false if not. </returns>
     private bool IsInterruptChannelRequested()
     {
-        return !( ( this.InterruptAddress.Equals( IPAddress.Any ) || this.InterruptAddress.Equals( IPAddress.None ) )
-                 && this.InterruptPort > 0 );
+        return !((this.InterruptAddress.Equals( IPAddress.Any ) || this.InterruptAddress.Equals( IPAddress.None ))
+                 && this.InterruptPort > 0);
     }
 
     /// <summary>   The interrupt address as set when getting the <see cref="CreateIntrChan(DeviceRemoteFunc)"/> RPC. </summary>
@@ -324,7 +324,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// <exception cref="DeviceException">  Thrown when a VXI-11 error condition occurs. </exception>
     protected virtual void OnRequestingService( Vxi11EventArgs e )
     {
-        if ( this.InterruptClient is not null &&  this.IsInterruptChannelRequested() )
+        if ( this.InterruptClient is not null && this.IsInterruptChannelRequested() )
             this.InterruptClient?.DeviceIntrSrq( e.ServiceRequestCodec.GetHandle() );
     }
 
@@ -334,12 +334,12 @@ public class Vxi11Server : CoreChannelServerBase
     /// <param name="e">        Event information to send to registered event handlers. </param>
     private void OnRequestingService( object sender, Vxi11EventArgs e )
     {
-        this.OnRequestingService ( e );
+        this.OnRequestingService( e );
     }
 
-#endregion
+    #endregion
 
-#region " members "
+    #region " members "
 
     /// <summary>
     /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
@@ -349,16 +349,15 @@ public class Vxi11Server : CoreChannelServerBase
     public override Encoding CharacterEncoding
     {
         get => base.CharacterEncoding;
-        set
-        {
+        set {
             if ( this.SetProperty( base.CharacterEncoding!, value, () => base.CharacterEncoding = value ) )
                 if ( this.Device is not null ) { this.Device.CharacterEncoding = value; }
-        } 
+        }
     }
 
-#endregion
+    #endregion
 
-#region " device "
+    #region " device "
 
     /// <summary>
     /// Gets a reference to the implementation of the <see cref="IVxi11Device"/> interface.
@@ -455,7 +454,7 @@ public class Vxi11Server : CoreChannelServerBase
     {
         lock ( this._lock )
         {
-            Logger.Writer.LogVerbose( $"@{nameof(Vxi11Server.CreateLink)} client {request.ClientId} lock {request.LockDevice} timeout {request.LockTimeout}" );
+            Logger.Writer.LogVerbose( $"@{nameof( Vxi11Server.CreateLink )} client {request.ClientId} lock {request.LockDevice} timeout {request.LockTimeout}" );
             return this.Device?.AwaitLockReleaseAsync( request.LockTimeout ) ?? true
                 ? this.CreateLinkUnlocked( request )
                 : new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink };
@@ -535,13 +534,13 @@ public class Vxi11Server : CoreChannelServerBase
                 this.InterruptClient = null;
 
                 if ( !abortServerTask?.Wait( AbortServerDisableTimeoutDefault ) ?? false )
-                    Logger.Writer.LogWarning( $"{nameof(DestroyLink)} failed stopping the abort server.") ; 
-               
+                    Logger.Writer.LogWarning( $"{nameof( DestroyLink )} failed stopping the abort server." );
+
             }
         }
         catch ( Exception )
         {
-            reply = new ( DeviceErrorCode.IOError );
+            reply = new( DeviceErrorCode.IOError );
         }
         finally
         {
@@ -579,7 +578,7 @@ public class Vxi11Server : CoreChannelServerBase
 
         DeviceError result = this.IsInterruptChannelRequested()
             ? (new())
-            : (new( DeviceErrorCode.ParameterError));
+            : (new( DeviceErrorCode.ParameterError ));
 
         if ( result.ErrorCode == DeviceErrorCode.NoError )
         {
@@ -602,7 +601,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// </returns>
     public override DeviceError DestroyIntrChan()
     {
-        DeviceError reply = new ();
+        DeviceError reply = new();
         try
         {
             // no calls are required on the device. 
@@ -1113,6 +1112,6 @@ public class Vxi11Server : CoreChannelServerBase
         }
     }
 
-#endregion
+    #endregion
 
 }

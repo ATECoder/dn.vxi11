@@ -44,8 +44,7 @@ public class CircularListTests
 
     #region " random numbers generator "
 
-    /// <summary>   The random. </summary>
-    private static readonly Random? _rnd;
+    private static readonly Random? _rnd = new ();
 
     /// <summary>   Generates a random byte array. </summary>
     /// <remarks>   David, 2020-09-09. </remarks>

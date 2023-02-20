@@ -129,7 +129,7 @@ public class Vxi11DiscovererBoardcastTests
 
         foreach ( IPEndPoint endpoint in endpoints )
         {
-            Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.QueryIdentity( endpoint.Address.ToString() )}" );
+            Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
         }
 
         Assert.AreEqual( Vxi11DiscovererTests.PingedHosts.Count, endpoints.Count, "Device count is expected to equal pinged hosts count." );
@@ -178,7 +178,7 @@ public class Vxi11DiscovererBoardcastTests
 
         foreach ( IPAddress ip in addresses )
         {
-            Logger.Writer.LogInformation( $"{ip}: {Vxi11DiscovererTests.QueryIdentity( ip.ToString() )}" );
+            Logger.Writer.LogInformation( $"{ip}: {Vxi11DiscovererTests.TryQueryIdentity( ip.ToString() )}" );
         }
 
 
@@ -206,7 +206,7 @@ public class Vxi11DiscovererBoardcastTests
             if ( endpoint.Port == OncRpcPortmapConstants.OncRpcPortmapPortNumber ) { actualCount++; }
 
             if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
-                Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.QueryIdentity( endpoint.Address.ToString() )}" );
+                Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
         }
 
         int expectedCount = 0;

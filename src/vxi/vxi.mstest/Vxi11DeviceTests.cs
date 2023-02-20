@@ -99,7 +99,7 @@ public class Vxi11DeviceTests
     {
         if ( vxi11Device is null )
             return new DeviceError() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
-        DeviceLink? link = new ( ( vxi11Device.ActiveServerClient?.LinkId ?? 0 ) );
+        DeviceLink? link = new( (vxi11Device.ActiveServerClient?.LinkId ?? int.MinValue) );
         try
         {
             return link is not null ? vxi11Device.DestroyLink( link ) : new DeviceError();
@@ -126,7 +126,7 @@ public class Vxi11DeviceTests
         if ( vxi11Device is null )
             return new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
-        if ( vxi11Device.ActiveServerClient?.LinkId == 0 )
+        if ( vxi11Device.ActiveServerClient?.LinkId == int.MinValue )
             return new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
         if ( data is null || data.Length == 0 ) return new DeviceWriteResp();
@@ -150,7 +150,7 @@ public class Vxi11DeviceTests
         if ( vxi11Device is null )
             return new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
-        if ( vxi11Device.ActiveServerClient?.LinkId == 0 )
+        if ( vxi11Device.ActiveServerClient?.LinkId == int.MinValue )
             return new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
         DeviceReadParms readParam = new() {
@@ -170,7 +170,7 @@ public class Vxi11DeviceTests
     /// <remarks>   2023-02-03. </remarks>
     private static void AssertShouldCreateLink()
     {
-        if ( 0 == ( _vxi11Device?.ActiveServerClient?.LinkId ?? 0 ) )
+        if ( int.MinValue == (_vxi11Device?.ActiveServerClient?.LinkId ?? int.MinValue) )
         {
             CreateLinkResp linkResp = CreateLink( _vxi11Device, "inst0" );
             Assert.AreEqual( DeviceErrorCode.NoError, linkResp.ErrorCode );
@@ -180,7 +180,7 @@ public class Vxi11DeviceTests
     /// <summary>   Assert should destroy link. </summary>
     private static void AssertShouldDestroyLink()
     {
-        if ( 0 != (_vxi11Device?.ActiveServerClient?.LinkId ?? 0) )
+        if ( int.MinValue != (_vxi11Device?.ActiveServerClient?.LinkId ?? int.MinValue) )
         {
             DeviceError deviceError = DestroyLink( _vxi11Device );
             Assert.IsNotNull( deviceError );

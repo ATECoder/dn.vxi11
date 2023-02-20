@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-Console.WriteLine("Starting example...");
+Console.WriteLine( "Starting example..." );
 
 ErrorHandlerExample currentExample = ErrorHandlerExample.NotSpecified;
 string exampleDescription = string.Empty;
@@ -14,7 +14,7 @@ TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobsserverException;
 
 var raisingObject = new RaisingObject();
 
-foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExample)))
+foreach ( ErrorHandlerExample example in Enum.GetValues( typeof( ErrorHandlerExample ) ) )
 {
     Exception? ex = null;
     currentExample = example;
@@ -47,8 +47,7 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
         case ErrorHandlerExample.InsideEventErrorHandler:
             exampleDescription = "Solution1: Inside Event Error Handler";
             notes = "";
-            handler = async (sender, e) =>
-            {
+            handler = async ( sender, e ) => {
                 Console.WriteLine( $"[{exampleDescription}] Starting the event handler..." );
                 Exception? ex = null;
                 try
@@ -92,10 +91,9 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
             ex = null;
             try
             {
-                await AsyncTaskThatThrowsAsync( (ex ) =>
-                {
+                await AsyncTaskThatThrowsAsync( ( ex ) => {
                     Console.WriteLine( $"[{exampleDescription}] Our exception handler caught aggregate exception: {ex.Message}\n" );
-                    foreach ( Exception exep in ex.InnerExceptions)
+                    foreach ( Exception exep in ex.InnerExceptions )
                         Console.WriteLine( $"[{exampleDescription}] inner exception: {exep.Message}\nStack Trace: \n{exep.StackTrace}" );
                 } );
             }
@@ -151,10 +149,8 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
             exampleDescription = "Solution 5: Continue With inside of Event Handler";
             notes = "@DevLeader: 'works to protect the event handler. If your continuation doesn't blow up, " +
                     "it successfully keeps execution working properly.'";
-            handler += async ( sender, e ) =>
-            {
-                await AsyncTaskThatThrowsAsync( ( ex ) =>
-                {
+            handler += async ( sender, e ) => {
+                await AsyncTaskThatThrowsAsync( ( ex ) => {
                     Console.WriteLine( $"[{exampleDescription}] Our exception handler caught aggregate exception: {ex.Message}\n" );
                     foreach ( Exception exep in ex.InnerExceptions )
                         Console.WriteLine( $"[{exampleDescription}] inner exception: {exep.Message}\nStack Trace: \n{exep.StackTrace}" );
@@ -169,10 +165,8 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
                             "an unhandled exception printed out and that extra console writeline inside scenario 6 is never written." +
                             "@DevLeader: I found example 6 *does* throw an unhandled exception, but I needed to wait longer than 100ms. " +
                             "10 seconds was super aggressive to run all of those samples, but it definitely gave it more than enough time. ";
-            handler += async ( sender, e ) =>
-            {
-                await AsyncTaskThatThrowsAsync( ( ex ) =>
-                {
+            handler += async ( sender, e ) => {
+                await AsyncTaskThatThrowsAsync( ( ex ) => {
                     Console.WriteLine( $"[{exampleDescription}] Our exception handler caught aggregate exception: {ex.Message}\n" );
                     foreach ( Exception exep in ex.InnerExceptions )
                         Console.WriteLine( $"[{exampleDescription}] inner exception: {exep.Message}\nStack Trace: \n{exep.StackTrace}" );
@@ -184,7 +178,7 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
             };
             break;
 
-            default:
+        default:
             break;
     }
 
@@ -193,7 +187,7 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
 
         raisingObject.Event += handler;
 
-        Exception? caughtException  = null;
+        Exception? caughtException = null;
         try
         {
             Console.WriteLine( $"\n\n{currentExample}: {exampleDescription}:" );
@@ -222,7 +216,7 @@ foreach ( ErrorHandlerExample example in Enum.GetValues(typeof(ErrorHandlerExamp
     await Task.Delay( 100 );
 }
 
-Console.WriteLine("Example complete.");
+Console.WriteLine( "Example complete." );
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 async Task TaskThatThrowsAsync()
@@ -245,7 +239,7 @@ async Task AsyncTaskThatThrowsAsync( Action<AggregateException> errorHandler )
 
 void OnUnhandledException( object sender, UnhandledExceptionEventArgs e )
 {
-    Console.WriteLine( $"\n[{exampleDescription}] Unhandled exception occurred in {currentExample}: {e.ExceptionObject}\n");
+    Console.WriteLine( $"\n[{exampleDescription}] Unhandled exception occurred in {currentExample}: {e.ExceptionObject}\n" );
 }
 
 void OnTaskSchedulerUnobsserverException( object? sender, UnobservedTaskExceptionEventArgs e )
@@ -261,9 +255,9 @@ internal class RaisingObject
     // you could in theory have your own event arguments here
     public event EventHandler<EventArgs>? Event;
 
-    public void Raise(EventArgs e)
+    public void Raise( EventArgs e )
     {
-        Event?.Invoke(this, e);
+        Event?.Invoke( this, e );
     }
 }
 
@@ -283,33 +277,31 @@ internal static class EventHandlers
 {
     public static EventHandler<TEventArgs> TryAsync<TEventArgs>(
         Func<object, TEventArgs, Task> callback,
-        Action<Exception> errorHandler)
+        Action<Exception> errorHandler )
         where TEventArgs : EventArgs
             => TryAsync<TEventArgs>(
             callback,
-            ex =>
-            {
-                errorHandler.Invoke(ex);
+            ex => {
+                errorHandler.Invoke( ex );
                 return Task.CompletedTask;
-            });
+            } );
 
     public static EventHandler<TEventArgs> TryAsync<TEventArgs>(
         Func<object, TEventArgs, Task> callback,
-        Func<Exception, Task> errorHandler)
+        Func<Exception, Task> errorHandler )
         where TEventArgs : EventArgs
     {
-        return new EventHandler<TEventArgs>(async (object? sender, TEventArgs e) =>
-        {
+        return new EventHandler<TEventArgs>( async ( object? sender, TEventArgs e ) => {
             try
             {
                 if ( sender is not null )
-                    await callback.Invoke(sender, e);
+                    await callback.Invoke( sender, e );
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
-                await errorHandler.Invoke(ex);
+                await errorHandler.Invoke( ex );
             }
-        });
+        } );
     }
 
 }

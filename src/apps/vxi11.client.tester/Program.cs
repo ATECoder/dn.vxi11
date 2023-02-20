@@ -1,11 +1,13 @@
-using System.Diagnostics.SymbolStore;
-
+using cc.isr.VXI11;
 using cc.isr.VXI11.Logging;
+
+AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobsserverException;
 
 Console.WriteLine( $"VXI-11 {nameof( cc.isr.VXI11.Client.Vxi11Client )} Tester" );
 
 string ipv4Address = "192.168.0.144"; // "127.0.0.1";
-string deviceInterfaceString = "inst0";
+string deviceName = "inst0";
 
 bool ready = false;
 while ( !ready )
@@ -27,9 +29,9 @@ Console.WriteLine();
 Console.Write( $"Press key to Connect to {ipv4Address}: " );
 Console.ReadKey();
 
-Console.WriteLine( $"Connecting to TCPIP::{ipv4Address}::{deviceInterfaceString}::INSTR" );
+Console.WriteLine( $"Connecting to TCPIP::{ipv4Address}::{deviceName}::INSTR" );
 
-vxi11Client.Connect( ipv4Address, deviceInterfaceString );
+vxi11Client.Connect( ipv4Address, deviceName );
 
 if ( ipv4Address == "127.0.0.1" )
 {
@@ -66,12 +68,16 @@ void SendCommand( string command )
 {
     Console.WriteLine( $"Hit any key to send {command} to {ipv4Address}" );
     _ = Console.ReadKey();
-    int sentCount = vxi11Client.WriteLine( command );
-    if ( sentCount == 0 )
+    (int sentCount, DeviceErrorCode errorCode, string errorDetails) = vxi11Client.TryWriteLine( command );
+    if ( errorCode != DeviceErrorCode.NoError )
+        Console.WriteLine( $"{command} write failed;  {DeviceException.BuildErrorMessage( $"; {errorDetails}", errorCode )}" );
+    else if ( sentCount == 0 )
         Console.WriteLine( $"{command} not sent" );
     else if ( vxi11Client.IsQuery( command ) )
     {
-        string response = vxi11Client.Read();
+        (string response, errorCode, errorDetails) = vxi11Client.TryRead();
+        if (errorCode != DeviceErrorCode.NoError )
+            Console.WriteLine( $"{command} read failed;  {DeviceException.BuildErrorMessage( $"; {errorDetails}", errorCode )}" );
         Console.WriteLine( $"{command} sent{(string.IsNullOrEmpty( response ) ? string.Empty : $"; received: {response}")}" );
     }
     else
@@ -85,3 +91,20 @@ static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
 
     Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
 }
+
+
+#region " Unhandled exception handling "
+
+static void OnUnhandledException( object sender, UnhandledExceptionEventArgs e )
+{
+    Console.WriteLine( $"\n Unhandled exception occurred: {e.ExceptionObject}\n" );
+}
+
+static void OnTaskSchedulerUnobsserverException( object? sender, UnobservedTaskExceptionEventArgs e )
+{
+    Console.WriteLine( $"{(e.Observed ? "" : "un")}observed exception occurred: {e.Exception}\n" );
+}
+
+#endregion
+
+
