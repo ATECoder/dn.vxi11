@@ -122,6 +122,15 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
         this.InterruptEnabled = enable;
     }
 
+    /// <summary>
+    /// Indicates whether the current object is equal to another object of the same type.
+    /// </summary>
+    /// <remarks>   2023-02-20. </remarks>
+    /// <param name="other">    An object to compare with this object. </param>
+    /// <returns>
+    /// true if the current object is equal to the <paramref name="other">other</paramref> parameter;
+    /// otherwise, false.
+    /// </returns>
     public bool Equals( ServerClientInfo other )
     {
         return (other is not null)
@@ -129,7 +138,6 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
             && this.ClientId == other.ClientId
             && this.LinkId == other.LinkId
             && this.InterruptEnabled == other.InterruptEnabled;
-        throw new NotImplementedException();
     }
 
 }

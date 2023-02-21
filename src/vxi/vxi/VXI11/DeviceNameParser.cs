@@ -1,7 +1,7 @@
 namespace cc.isr.VXI11;
 
 /// <summary>   An VXI-11 device name parser. </summary>
-public class DeviceNameParser
+public class DeviceNameParser : IEquatable<DeviceNameParser>
 {
 
     /// <summary>   Default constructor. </summary>
@@ -33,6 +33,12 @@ public class DeviceNameParser
     /// <summary>   (Immutable) the USB interface family. </summary>
     public const string UsbInterfaceFamily = "usb";
 
+    /// <summary>   (Immutable) the minimum Board number. </summary>
+    public const int MinimumBoardNumber = 0;
+
+    /// <summary>   (Immutable) the maximum Board number. </summary>
+    public const int MaximumBoardNumber = 127;
+
     /// <summary>   (Immutable) the minimum interface number. </summary>
     public const int MinimumInterfaceNumber = 0;
 
@@ -57,7 +63,7 @@ public class DeviceNameParser
     /// <summary>
     /// Gets or sets the device name also called device name, e.g., <c>gpib0,12,13</c>,
     /// where <c>gpib</c> is the <see cref="InterfaceFamily"/>
-    /// and <c>0</c> is the <see cref="InterfaceNumber"/> and 12 and 13 are the primary and secondary
+    /// and <c>0</c> is the <see cref="BoardNumber"/> and 12 and 13 are the primary and secondary
     /// addresses.
     /// </summary>
     /// <value> The device name. </value>
@@ -69,14 +75,14 @@ public class DeviceNameParser
 
     /// <summary>
     /// Gets or sets the name of the interface, e.g., <c>gpib0</c>, where <c>gpib</c> is the <see cref="InterfaceFamily"/>
-    /// and <c>0</c> is the <see cref="InterfaceNumber"/>.
+    /// and <c>0</c> is the <see cref="BoardNumber"/>.
     /// </summary>
     /// <value> The name of the interface. </value>
     public string InterfaceName { get; set; }
 
-    /// <summary>   Gets or sets the interface number as parsed from the <see cref="InterfaceName"/>. </summary>
-    /// <value> The interface number. </value>
-    public int? InterfaceNumber { get; set; }
+    /// <summary>   Gets or sets the board number as parsed from the <see cref="InterfaceName"/>. </summary>
+    /// <value> The board number. </value>
+    public int? BoardNumber { get; set; }
 
     /// <summary>   Gets or sets the primary address of the <see cref="GpibInterfaceFamily"/> gpib interface. </summary>
     /// <value> The primary address. </value>
@@ -108,109 +114,107 @@ public class DeviceNameParser
     public string BuildDeviceName()
     {
         return this.InterfaceFamily.Equals( GenericInterfaceFamily )
-            ? this.InterfaceNumber is null ? this.InterfaceFamily : BuildGenericDeviceName( this.InterfaceNumber ?? 0 )
+            ? this.BoardNumber is null ? this.InterfaceFamily : BuildGenericDeviceName( this.BoardNumber ?? 0 )
             : this.InterfaceFamily.Equals( GpibInterfaceFamily )
-                ? this.InterfaceNumber is null
+                ? this.BoardNumber is null
                     ? this.InterfaceFamily
                     : this.PrimaryAddress is null
-                        ? BuildGpibDeviceName( this.InterfaceNumber ?? 0 )
+                        ? BuildGpibDeviceName( this.BoardNumber ?? 0 )
                         : this.SecondaryAddress is null
-                            ? BuildGpibDeviceName( this.InterfaceNumber ?? 0, this.PrimaryAddress ?? 0 )
-                            : BuildGpibDeviceName( this.InterfaceNumber ?? 0, this.PrimaryAddress ?? 0, this.SecondaryAddress ?? 0 )
+                            ? BuildGpibDeviceName( this.BoardNumber ?? 0, this.PrimaryAddress ?? 0 )
+                            : BuildGpibDeviceName( this.BoardNumber ?? 0, this.PrimaryAddress ?? 0, this.SecondaryAddress ?? 0 )
                 : this.InterfaceFamily.Equals( UsbInterfaceFamily )
-                    ? this.InterfaceNumber is null
+                    ? this.BoardNumber is null
                         ? this.InterfaceFamily
                         : this.ManufacturerId is null
-                            ? BuildDeviceName( this.InterfaceFamily, this.InterfaceNumber ?? 0 )
-                            : BuildUsbDeviceName( this.InterfaceNumber ?? 0, this.ManufacturerId ?? 0, this.ModelCode ?? 0, this.SerialNumber ?? string.Empty )
+                            ? BuildDeviceName( this.InterfaceFamily, this.BoardNumber ?? 0 )
+                            : BuildUsbDeviceName( this.BoardNumber ?? 0, this.UsbTmcInterfaceNumber ?? 0, this.ManufacturerId ?? 0, this.ModelCode ?? 0, this.SerialNumber ?? string.Empty )
                     : string.Empty;
 
     }
 
     /// <summary>   Builds a device name. </summary>
+    /// <remarks>   2023-02-20. </remarks>
     /// <exception cref="ArgumentNullException">        Thrown when one or more required arguments
     ///                                                 are null. </exception>
     /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
     ///                                                 the required range. </exception>
     /// <param name="interfaceFamily">  The interface family. </param>
-    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <param name="boardNumber">      The board number. </param>
     /// <returns>   A string. </returns>
-    public static string BuildDeviceName( string interfaceFamily, int interfaceNumber )
+    public static string BuildDeviceName( string interfaceFamily, int boardNumber )
     {
         return string.IsNullOrEmpty( interfaceFamily )
             ? throw new ArgumentNullException( nameof( interfaceFamily ) )
-            : MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
-                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
-                    $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
-                : string.Equals( interfaceFamily, GenericInterfaceFamily, StringComparison.OrdinalIgnoreCase )
-                  || string.Equals( interfaceFamily, GpibInterfaceFamily, StringComparison.OrdinalIgnoreCase )
-                    ? $"{interfaceFamily}{interfaceNumber}"
-                    : throw new ArgumentOutOfRangeException( nameof( interfaceFamily ),
-                        $"{interfaceFamily} must be either {GenericInterfaceFamily} or {GpibInterfaceFamily}" );
+            : MinimumInterfaceNumber > boardNumber || MaximumInterfaceNumber < boardNumber
+                ? throw new ArgumentOutOfRangeException( nameof( boardNumber ),
+                    $"{boardNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+                : $"{interfaceFamily}{boardNumber}";
     }
 
     /// <summary>   Builds generic device name. </summary>
     /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
     ///                                                 the required range. </exception>
-    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <param name="boardNumber">  The board number. </param>
     /// <returns>   A string. </returns>
-    public static string BuildGenericDeviceName( int interfaceNumber )
+    public static string BuildGenericDeviceName( int boardNumber )
     {
-        return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
-                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
-                        $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
-                : $"{GenericInterfaceFamily}{interfaceNumber}";
+        return MinimumInterfaceNumber > boardNumber || MaximumInterfaceNumber < boardNumber
+                ? throw new ArgumentOutOfRangeException( nameof( boardNumber ),
+                        $"{boardNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+                : $"{GenericInterfaceFamily}{boardNumber}";
     }
 
     /// <summary>   Builds GPIB device name. </summary>
     /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
     ///                                                 the required range. </exception>
-    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <param name="boardNumber">  The board number. </param>
     /// <returns>   A string. </returns>
-    public static string BuildGpibDeviceName( int interfaceNumber )
+    public static string BuildGpibDeviceName( int boardNumber )
     {
-        return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
-                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
-                        $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
-                : $"{GpibInterfaceFamily}{interfaceNumber}";
+        return MinimumInterfaceNumber > boardNumber || MaximumInterfaceNumber < boardNumber
+                ? throw new ArgumentOutOfRangeException( nameof( boardNumber ),
+                        $"{boardNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+                : $"{GpibInterfaceFamily}{boardNumber}";
     }
 
     /// <summary>   Builds a GPIB device name. </summary>
+    /// <remarks>   2023-02-20. </remarks>
     /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
     ///                                                 the required range. </exception>
-    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <param name="boardNumber">      The board number. </param>
     /// <param name="primaryAddress">   The primary address. </param>
     /// <returns>   A string. </returns>
-    public static string BuildGpibDeviceName( int interfaceNumber, int primaryAddress )
+    public static string BuildGpibDeviceName( int boardNumber, int primaryAddress )
     {
-        return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
-                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
-                        $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+        return MinimumInterfaceNumber > boardNumber || MaximumInterfaceNumber < boardNumber
+                ? throw new ArgumentOutOfRangeException( nameof( boardNumber ),
+                        $"{boardNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
                 : MinimumGpibAddress > primaryAddress || MaximumGpibAddress < primaryAddress
                     ? throw new ArgumentOutOfRangeException( nameof( primaryAddress ),
                         $"{primaryAddress} must be within [{MinimumGpibAddress},{MaximumGpibAddress}]." )
-                    : $"{GpibInterfaceFamily}{interfaceNumber},{primaryAddress}";
+                    : $"{GpibInterfaceFamily}{boardNumber},{primaryAddress}";
     }
 
     /// <summary>   Builds a GPIB device name. </summary>
     /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
     ///                                                 the required range. </exception>
-    /// <param name="interfaceNumber">  The interface number. </param>
+    /// <param name="boardNumber">  The board number. </param>
     /// <param name="primaryAddress">   The primary address. </param>
     /// <param name="secondaryAddress"> The secondary address. </param>
     /// <returns>   A string. </returns>
-    public static string BuildGpibDeviceName( int interfaceNumber, int primaryAddress, int secondaryAddress )
+    public static string BuildGpibDeviceName( int boardNumber, int primaryAddress, int secondaryAddress )
     {
-        return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
-                ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
-                        $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
+        return MinimumInterfaceNumber > boardNumber || MaximumInterfaceNumber < boardNumber
+                ? throw new ArgumentOutOfRangeException( nameof( boardNumber ),
+                        $"{boardNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
                 : MinimumGpibAddress > primaryAddress || MaximumGpibAddress < primaryAddress
                     ? throw new ArgumentOutOfRangeException( nameof( primaryAddress ),
                         $"{primaryAddress} must be within [{MinimumGpibAddress},{MaximumGpibAddress}]." )
                     : MinimumGpibAddress > secondaryAddress || MaximumGpibAddress < secondaryAddress
                         ? throw new ArgumentOutOfRangeException( nameof( secondaryAddress ),
                             $"{secondaryAddress} must be within [{MinimumGpibAddress},{MaximumGpibAddress}]." )
-                        : $"{GpibInterfaceFamily}{interfaceNumber},{primaryAddress},{secondaryAddress}";
+                        : $"{GpibInterfaceFamily}{boardNumber},{primaryAddress},{secondaryAddress}";
     }
 
     /// <summary>   Clears this object to its blank/initial state. </summary>
@@ -245,7 +249,7 @@ public class DeviceNameParser
     {
         this.Clear();
         if ( string.IsNullOrEmpty( deviceName ) ) return false;
-        this.InterfaceNumber = 0;
+        this.BoardNumber = 0;
         this.DeviceName = deviceName;
         string[] info = deviceName.Split( ',' );
         this.InterfaceName = info[0];
@@ -257,7 +261,7 @@ public class DeviceNameParser
                 if ( this.InterfaceName.Length > this.InterfaceFamily.Length )
                 {
                     if ( int.TryParse( this.InterfaceName[(this.InterfaceFamily.Length)..], out int interfaceNumber ) )
-                        this.InterfaceNumber = interfaceNumber;
+                        this.BoardNumber = interfaceNumber;
                 }
             }
         this.PrimaryAddress = info.Length > 1 ? Convert.ToInt16( info[1] ) : new int?();
@@ -266,29 +270,33 @@ public class DeviceNameParser
     }
 
     /// <summary>   Builds USB device name. </summary>
+    /// <remarks>   2023-02-20. </remarks>
     /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
     ///                                                 the required range. </exception>
+    /// <param name="boardNumber">      The board number. </param>
     /// <param name="interfaceNumber">  The interface number. </param>
     /// <param name="manufacturerId">   The identifier of the manufacturer. </param>
     /// <param name="modelCode">        The model code. </param>
     /// <param name="serialNumber">     The serial number. </param>
     /// <returns>   A string. </returns>
-    public static string BuildUsbDeviceName( int interfaceNumber, int manufacturerId, int modelCode, string serialNumber )
+    public static string BuildUsbDeviceName(int boardNumber, int interfaceNumber, int manufacturerId, int modelCode, string serialNumber )
     {
         return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
                 ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
                         $"{interfaceNumber} must be within [{MinimumInterfaceNumber},{MaximumInterfaceNumber}]." )
-                : $"{UsbInterfaceFamily}::0x{manufacturerId:X}::0x{modelCode}::{serialNumber}::{interfaceNumber}";
+                : $"{UsbInterfaceFamily}{boardNumber}[0x{manufacturerId:X}::0x{modelCode:X}::{serialNumber}::{interfaceNumber}]";
     }
 
     /// <summary>   Parse the USB device name. </summary>
     /// <remarks>
     /// For example:
-    /// <list type="bullet">USB::0x5678::0x33::SN999::1<item>
-    /// manufacturer ID 0x5678 </item><item>
-    /// mode code 0x33 </item><item>
-    /// serial number SN999 </item><item>
-    /// interface number 1 </item> </list>
+    /// <list type="bullet">USB0::0x5678::0x33::SN999::1<item>
+    /// interface name: usb  </item><item>
+    /// board number: 0  </item><item>
+    /// manufacturer ID: 0x5678 </item><item>
+    /// mode code: 0x33 </item><item>
+    /// serial number: SN999 </item><item>
+    /// interface number: 1 </item> </list>
     /// </remarks>
     /// <param name="usbDeviceName">    The USB device name. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
@@ -300,13 +308,13 @@ public class DeviceNameParser
         this.SerialNumber = null;
         this.ModelCode = null;
         this.UsbTmcInterfaceNumber = null;
-        this.InterfaceNumber = 0;
+        this.BoardNumber = 0;
         string[] info = usbDeviceName.TrimEnd( ']' ).Split( '[' );
         this.InterfaceName = info[0];
         this.InterfaceFamily = UsbInterfaceFamily;
         if ( this.InterfaceName.Length > this.InterfaceFamily.Length )
             if ( int.TryParse( this.InterfaceName[(this.InterfaceFamily.Length)..], out int interfaceNumber ) )
-                this.InterfaceNumber = interfaceNumber;
+                this.BoardNumber = interfaceNumber;
         if ( info.Length < 2 ) return true; // address is like 'usb0'
         info = info[1].Split( ':' );
         this.ManufacturerId = Vxi11Support.ToInt( info[0] );
@@ -342,7 +350,7 @@ public class DeviceNameParser
     {
         return !string.IsNullOrEmpty( this.DeviceName )
             && !string.IsNullOrEmpty( this.InterfaceName )
-            && this.InterfaceNumber.HasValue && MinimumInterfaceNumber <= this.InterfaceNumber.Value
+            && this.BoardNumber.HasValue && MinimumInterfaceNumber <= this.BoardNumber.Value
             && (this.IsGenericInstrumentDevice()
                  || this.IsUsbInstrumentDevice()
                  || this.IsGpibInstrumentDevice()
@@ -353,4 +361,61 @@ public class DeviceNameParser
 
               );
     }
+
+
+    /// <summary>   Check if we have an equal Generic device name. </summary>
+    /// <remarks>   2023-02-20. </remarks>
+    /// <param name="other">    An object to compare with this object. </param>
+    /// <returns>   True if equals generic device name, false if not. </returns>
+    private bool EqualsGenericDeviceName( DeviceNameParser other )
+    {
+        return string.Equals( this.InterfaceFamily, other.InterfaceFamily, StringComparison.OrdinalIgnoreCase )
+            && this.BoardNumber == other.BoardNumber;
+    }
+
+
+    /// <summary>   Check if we have an equal GPUB device name. </summary>
+    /// <remarks>   2023-02-20. </remarks>
+    /// <param name="other">    An object to compare with this object. </param>
+    /// <returns>   True if equals gpib device name, false if not. </returns>
+    private bool EqualsGpibDeviceName( DeviceNameParser other )
+    {
+        return string.Equals( this.InterfaceFamily, other.InterfaceFamily, StringComparison.OrdinalIgnoreCase )
+            && this.BoardNumber == other.BoardNumber
+            && this.PrimaryAddress.Equals( other.PrimaryAddress )
+            && this.SecondaryAddress.Equals( other.SecondaryAddress );
+    }
+
+    /// <summary>   Check if we have an equal USB device name. </summary>
+    /// <remarks>   2023-02-20. </remarks>
+    /// <param name="other">    An object to compare with this object. </param>
+    /// <returns>   True if equals USB device name, false if not. </returns>
+    private bool EqualsUsbDeviceName( DeviceNameParser other )
+    {
+        return string.Equals( this.InterfaceFamily, other.InterfaceFamily, StringComparison.OrdinalIgnoreCase )
+            && this.BoardNumber == other.BoardNumber
+            && this.ManufacturerId == other.ManufacturerId
+            && string.Equals( this.SerialNumber, other.SerialNumber )
+            && this.ModelCode == other.ModelCode
+            && this.UsbTmcInterfaceNumber == other.UsbTmcInterfaceNumber;
+    }
+
+    /// <summary>
+    /// Indicates whether the current object is equal to another object of the same type.
+    /// </summary>
+    /// <param name="other">    An object to compare with this object. </param>
+    /// <returns>
+    /// true if the current object is equal to the <paramref name="other">other</paramref> parameter;
+    /// otherwise, false.
+    /// </returns>
+    public bool Equals( DeviceNameParser other )
+    {
+        return other is not null
+            && (this.IsGenericInstrumentDevice()
+                ? this.EqualsGenericDeviceName( other )
+                : this.IsGpibInstrumentDevice()
+                    ? this.EqualsGpibDeviceName( other )
+                    : this.EqualsUsbDeviceName( other )); 
+    }
+
 }
