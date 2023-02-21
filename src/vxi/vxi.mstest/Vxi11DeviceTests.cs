@@ -98,8 +98,15 @@ public class Vxi11DeviceTests
     public static DeviceError DestroyLink( IVxi11Device? vxi11Device )
     {
         if ( vxi11Device is null )
+            return new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
+
+        if ( vxi11Device.ActiveInstrument is null )
+            return new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
+
+        if ( vxi11Device.ActiveInstrument.ActiveServerClient is null )
             return new DeviceError() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
-        DeviceLink? link = new( (vxi11Device.ActiveServerClient?.LinkId ?? int.MinValue) );
+
+        DeviceLink? link = new( vxi11Device.ActiveInstrument.ActiveServerClient.LinkId );
         try
         {
             return link is not null ? vxi11Device.DestroyLink( link ) : new DeviceError();
@@ -116,29 +123,32 @@ public class Vxi11DeviceTests
 
     public static DeviceWriteResp Send( IVxi11Device? vxi11Device, string message )
     {
-        return vxi11Device is null
+        return vxi11Device is null || vxi11Device.ActiveInstrument is null
             ? new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished }
-            : Send( vxi11Device, vxi11Device.CharacterEncoding.GetBytes( message ) );
+            : Send( vxi11Device, vxi11Device.ActiveInstrument.CharacterEncoding.GetBytes( message ) );
     }
 
     public static DeviceWriteResp Send( IVxi11Device? vxi11Device, byte[] data )
     {
         if ( vxi11Device is null )
-            return new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
+            return new DeviceWriteResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
 
-        if ( vxi11Device.ActiveServerClient?.LinkId == int.MinValue )
+        if ( vxi11Device.ActiveInstrument is null )
+            return new DeviceWriteResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
+
+        if ( vxi11Device.ActiveInstrument.ActiveServerClient is null )
             return new DeviceWriteResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
         if ( data is null || data.Length == 0 ) return new DeviceWriteResp();
 
-        if ( data.Length > vxi11Device.MaxReceiveLength )
-            throw new DeviceException( $"Data size {data.Length} exceed {nameof( Vxi11Device.MaxReceiveLength )}({vxi11Device.MaxReceiveLength})", DeviceErrorCode.IOError );
+        if ( data.Length > vxi11Device.ActiveInstrument.MaxReceiveLength )
+            throw new DeviceException( $"Data size {data.Length} exceed {nameof( Vxi11Device.ActiveInstrument.MaxReceiveLength )}({vxi11Device.ActiveInstrument.MaxReceiveLength})", DeviceErrorCode.IOError );
 
-        bool eoi = data.Length < vxi11Device.MaxReceiveLength;
+        bool eoi = data.Length < vxi11Device.ActiveInstrument.MaxReceiveLength;
         DeviceWriteParms writeParam = new() {
-            Link = new DeviceLink( vxi11Device.ActiveServerClient!.LinkId ),
-            IOTimeout = vxi11Device.IOTimeout, // in ms
-            LockTimeout = vxi11Device.LockTimeout, // in ms
+            Link = new DeviceLink( vxi11Device.ActiveInstrument.ActiveServerClient.LinkId ),
+            IOTimeout = vxi11Device.ActiveInstrument.IOTimeout, // in ms
+            LockTimeout = vxi11Device.ActiveInstrument.LockTimeout, // in ms
             Flags = eoi ? DeviceOperationFlags.EndIndicator : DeviceOperationFlags.None,
         };
         writeParam.SetData( data );
@@ -148,18 +158,21 @@ public class Vxi11DeviceTests
     public static DeviceReadResp Receive( IVxi11Device? vxi11Device, int byteCount )
     {
         if ( vxi11Device is null )
-            return new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
+            return new DeviceReadResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
 
-        if ( vxi11Device.ActiveServerClient?.LinkId == int.MinValue )
+        if ( vxi11Device.ActiveInstrument is null )
+            return new DeviceReadResp() { ErrorCode = DeviceErrorCode.DeviceNotAccessible };
+
+        if ( vxi11Device.ActiveInstrument.ActiveServerClient is null )
             return new DeviceReadResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
 
         DeviceReadParms readParam = new() {
-            Link = new DeviceLink( vxi11Device.ActiveServerClient!.LinkId ),
+            Link = new DeviceLink( vxi11Device.ActiveInstrument.ActiveServerClient.LinkId ),
             RequestSize = byteCount,
-            IOTimeout = vxi11Device.IOTimeout,
-            LockTimeout = vxi11Device.LockTimeout,
-            Flags = vxi11Device.ReadTermination > 0 ? DeviceOperationFlags.TerminationCharacterSet : DeviceOperationFlags.None,
-            TermChar = vxi11Device.ReadTermination
+            IOTimeout = vxi11Device.ActiveInstrument.IOTimeout,
+            LockTimeout = vxi11Device.ActiveInstrument.LockTimeout,
+            Flags = vxi11Device.ActiveInstrument.ReadTermination > 0 ? DeviceOperationFlags.TerminationCharacterSet : DeviceOperationFlags.None,
+            TermChar = vxi11Device.ActiveInstrument.ReadTermination
         };
         return vxi11Device.DeviceRead( readParam );
     }
@@ -170,7 +183,9 @@ public class Vxi11DeviceTests
     /// <remarks>   2023-02-03. </remarks>
     private static void AssertShouldCreateLink()
     {
-        if ( int.MinValue == (_vxi11Device?.ActiveServerClient?.LinkId ?? int.MinValue) )
+        Assert.IsNotNull( _vxi11Device, nameof( _vxi11Device ) );
+        Assert.IsNotNull( _vxi11Device.ActiveInstrument, nameof( _vxi11Device.ActiveInstrument ) );
+        if ( _vxi11Device.ActiveInstrument.ActiveServerClient is null )
         {
             CreateLinkResp linkResp = CreateLink( _vxi11Device, "inst0" );
             Assert.AreEqual( DeviceErrorCode.NoError, linkResp.ErrorCode );
@@ -180,7 +195,9 @@ public class Vxi11DeviceTests
     /// <summary>   Assert should destroy link. </summary>
     private static void AssertShouldDestroyLink()
     {
-        if ( int.MinValue != (_vxi11Device?.ActiveServerClient?.LinkId ?? int.MinValue) )
+        Assert.IsNotNull( _vxi11Device, nameof( _vxi11Device ) );
+        Assert.IsNotNull( _vxi11Device.ActiveInstrument, nameof( _vxi11Device.ActiveInstrument ) );
+        if ( _vxi11Device.ActiveInstrument.ActiveServerClient is not null )
         {
             DeviceError deviceError = DestroyLink( _vxi11Device );
             Assert.IsNotNull( deviceError );
@@ -212,8 +229,8 @@ public class Vxi11DeviceTests
         Assert.AreEqual( command.Length, writeResp.Size );
 
         string expectedValue = _vxi11Device?.ActiveInstrument?.Identity ?? string.Empty;
-        DeviceReadResp readResp = Receive( _vxi11Device, _vxi11Device!.MaxReceiveLength );
+        DeviceReadResp readResp = Receive( _vxi11Device, _vxi11Device!.ActiveInstrument!.MaxReceiveLength );
         Assert.AreEqual( DeviceErrorCode.NoError, readResp.ErrorCode );
-        Assert.AreEqual( expectedValue, _vxi11Device!.CharacterEncoding.GetString( readResp.GetData() ) );
+        Assert.AreEqual( expectedValue, _vxi11Device!.ActiveInstrument!.CharacterEncoding.GetString( readResp.GetData() ) );
     }
 }

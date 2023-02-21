@@ -14,6 +14,9 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
     /// <param name="linkId">               The identifier of the link. </param>
     public ServerClientInfo( CreateLinkParms createLinkParameters, int linkId )
     {
+        // ensure that we have a valid link parameters.
+        if ( string.IsNullOrWhiteSpace( createLinkParameters.DeviceName  ))
+            throw new ArgumentException( $"{nameof( createLinkParameters.DeviceName )} must be specified", nameof( createLinkParameters ) );
         this.ClientId = createLinkParameters.ClientId;
         this.DeviceName = createLinkParameters.DeviceName;
         this.LockDevice = createLinkParameters.LockDevice;

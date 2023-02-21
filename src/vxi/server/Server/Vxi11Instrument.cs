@@ -54,6 +54,14 @@ public partial class Vxi11Instrument : IVxi11Instrument
         this.ServerClientsRegistry = new();
         this.StandardEventStatusMask = Vxi11EnumExtensions.StandardEventsAll();
         this.ServiceRequestEventMask = Vxi11EnumExtensions.ServiceRequestsAll();
+
+        this.CharacterEncoding = CoreChannelClient.EncodingDefault;
+        this._characterEncoding = CoreChannelClient.EncodingDefault;
+        this.MaxReceiveLength = CoreChannelClient.MaxReceiveLengthDefault;
+        this.ReadTermination = CoreChannelClient.ReadTerminationDefault;
+        this.WriteTermination = CoreChannelClient.WriteTerminationDefault;
+        this._writeTermination = CoreChannelClient.WriteTerminationDefault;
+
     }
 
     #endregion
@@ -78,6 +86,112 @@ public partial class Vxi11Instrument : IVxi11Instrument
     {
         DeviceNameParser parser = new( this.DeviceName );
         return parser.IsValid();
+    }
+
+    #endregion
+
+    #region " members "
+
+    private DeviceErrorCode _lastDeviceError;
+    /// <summary>   Gets or sets the last device error. </summary>
+    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
+    public DeviceErrorCode LastDeviceError
+    {
+        get => this._lastDeviceError;
+        set => _ = this.SetProperty( ref this._lastDeviceError, value );
+    }
+
+    private byte _readTermination;
+    /// <summary>   Gets or sets the read termination. </summary>
+    /// <value> The read termination. </value>
+    public byte ReadTermination
+    {
+        get => this._readTermination;
+        set => _ = this.SetProperty( ref this._readTermination, value );
+    }
+
+    private int _connectTimeout;
+    /// <summary>   Gets or sets the connect timeout. </summary>
+    /// <remarks>
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value.
+    /// </remarks>
+    /// <value> The connect timeout. </value>
+    public int ConnectTimeout
+    {
+        get => this._connectTimeout;
+        set => _ = this.SetProperty( ref this._connectTimeout, value );
+    }
+
+    private int _ioTimeout;
+    /// <summary>   Gets or sets the I/O timeout. </summary>
+    /// <value> The I/O timeout. </value>
+    public int IOTimeout
+    {
+        get => this._ioTimeout;
+        set => _ = this.SetProperty( ref this._ioTimeout, value );
+    }
+
+    private int _transmitTimeout;
+    /// <summary>   
+    /// Gets or sets the timeout during the phase where data is sent within RPC calls, or data is
+    /// received within RPC replies. The <see cref="TransmitTimeout"/> timeout must be greater than 0.
+    /// </summary>
+    /// <value> The Transmit timeout. </value>
+    public int TransmitTimeout
+    {
+        get => this._transmitTimeout;
+        set => _ = this.SetProperty( ref this._transmitTimeout, value );
+    }
+
+    private int _lockTimeout;
+    /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
+    /// <remarks>
+    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
+    /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
+    /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
+    /// milliseconds for a lock to be released. <para>
+    /// 
+    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
+    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
+    /// value. </para>
+    /// </remarks>
+    /// <value> The lock timeout. </value>
+    public int LockTimeout
+    {
+        get => this._lockTimeout;
+        set => _ = this.SetProperty( ref this._lockTimeout, value );
+    }
+
+    private byte[] _writeTermination;
+    /// <summary>   Gets or sets the write termination. </summary>
+    /// <value> The write termination. </value>
+    public byte[] WriteTermination
+    {
+        get => this._writeTermination;
+        set => _ = this.SetProperty( ref this._writeTermination, value );
+    }
+
+    private int _maxReceiveLength;
+    /// <summary>   Gets or sets the maximum length of the receive. </summary>
+    /// <value> The maximum length of the receive. </value>
+    public int MaxReceiveLength
+    {
+        get => this._maxReceiveLength;
+        set => _ = this.SetProperty( ref this._maxReceiveLength, value );
+    }
+
+    private Encoding _characterEncoding;
+    /// <summary>
+    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
+    /// system's default encoding is to be used.
+    /// </summary>
+    /// <value> The character encoding. </value>
+    public virtual Encoding CharacterEncoding
+    {
+        get => this._characterEncoding;
+        set => _ = this.SetProperty( ref this._characterEncoding, value );
     }
 
     #endregion
@@ -107,14 +221,12 @@ public partial class Vxi11Instrument : IVxi11Instrument
         if ( this.ServerClientsRegistry.AddClient( createLinkParameters, linkId ) )
         {
             this.ActiveServerClient = this.ServerClientsRegistry.ActiveServerClient;
-            this.ActiveClientId = this.ActiveServerClient!.ClientId;
-            this.EnableInterrupt( this.ActiveServerClient.InterruptEnabled, this.ActiveServerClient.GetHandle() );
+            this.EnableInterrupt( this.ActiveServerClient!.InterruptEnabled, this.ActiveServerClient.GetHandle() );
             return this.ActiveServerClient is not null;
         }
         else
         {
             this.ActiveServerClient = null;
-            this.ActiveClientId = 0;
             this.EnableInterrupt( false, Array.Empty<byte>() );
             return false;
         }
@@ -159,7 +271,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool TrySelectClient( int linkId, bool waitLock, int? lockTimeout = null )
     {
-        if ( linkId == (this.ActiveServerClient?.LinkId ?? int.MinValue) )
+        if ( this.IsActiveLinkId ( linkId ) )
             // if the client was already selected, we are done.
             return true;
 
@@ -180,14 +292,12 @@ public partial class Vxi11Instrument : IVxi11Instrument
         if ( this.ServerClientsRegistry.TrySelectActiveClient( linkId, lockTimeout ) )
         {
             this.ActiveServerClient = this.ServerClientsRegistry.ActiveServerClient;
-            this.ActiveClientId = this.ActiveServerClient!.ClientId;
-            this.EnableInterrupt( this.ActiveServerClient.InterruptEnabled, this.ActiveServerClient.GetHandle() );
+            this.EnableInterrupt( this.ActiveServerClient!.InterruptEnabled, this.ActiveServerClient.GetHandle() );
             return this.ActiveServerClient is not null;
         }
         else
         {
             this.ActiveServerClient = null;
-            this.ActiveClientId = 0;
             this.EnableInterrupt( false, Array.Empty<byte>() );
             return false;
         }
@@ -202,19 +312,25 @@ public partial class Vxi11Instrument : IVxi11Instrument
         set {
             if ( this.OnPropertyChanged( ref this._activeServerClient, value ) )
             {
-                this.ActiveClientId = value?.ClientId ?? 0;
             }
         }
     }
 
-    private int _activeClientId;
-    /// <summary>   Gets or sets the identifier of the active client. </summary>
-    /// <remarks> Used solely for generating log messages. </remarks>
-    /// <value> The identifier of the active client. </value>
-    public int ActiveClientId
+    /// <summary>   Query if 'linkId' is active client link identifier. </summary>
+    /// <remarks>   2023-02-20. </remarks>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if active client link identifier, false if not. </returns>
+    public bool IsActiveLinkId( int linkId )
     {
-        get => this._activeClientId;
-        set => _ = this.OnPropertyChanged( ref this._activeClientId, value );
+        return this.ActiveServerClient is not null && this.ActiveServerClient.LinkId == linkId;
+    }
+
+    /// <summary>   Query if 'clientId' is active client identifier. </summary>
+    /// <param name="clientId"> Identifier for the client. </param>
+    /// <returns>   True if active client identifier, false if not. </returns>
+    public bool IsActiveClientId( int clientId )
+    {
+        return this.ActiveServerClient is not null && this.ActiveServerClient.ClientId == clientId;
     }
 
     /// <summary>
@@ -1006,6 +1122,84 @@ public partial class Vxi11Instrument : IVxi11Instrument
         return result;
     }
 
+    /// <summary>   Process the device write procedure. </summary>
+    /// <remarks>
+    /// To a successfully complete a <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  RPC,
+    /// the network instrument server SHALL: <para>
+    /// 1. Transfer the contents of data to the device. </para><para>
+    /// 2. Return in size parameter the number of bytes accepted by the device. </para><para>
+    /// 3. Return with error set to 0, no error. </para><para>
+    /// 
+    /// If the end flag in <c>flags</c>  is set, then an END indicator SHALL be associated with the
+    /// last byte in data. </para><para>
+    /// 
+    /// If a controller needs to send greater than maxRecvSize bytes to the device at one time, then
+    /// the network instrument client makes multiple calls to <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// to accomplish the complete transaction.A network instrument server accepts at least 1,024
+    /// bytes in a single <c>
+    /// device_write</c>
+    /// call due to RULE B.6.3.  </para><para>
+    /// The value of data.data_len may be zero, in which case no device actions are performed.  </para>
+    /// <para>
+    /// 
+    /// The <c>link id</c> parameter is compared to the active link identifiers. If none match, <c>
+    /// device_write</c>
+    /// SHALL terminate and set error to 4, invalid link identifier. </para><para>
+    /// 
+    /// If data.data_len is greater than the value of maxRecvSize returned in create_link,
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring
+    /// any bytes to the device and SHALL set error to 5. </para><para>
+    /// 
+    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the
+    /// flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the
+    /// lock is free. If the flag is not set,
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11,
+    /// device already locked by another link. </para>
+    /// <para>
+    /// 
+    /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// SHALL terminate with error set to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>(11)
+    /// . </para><para>
+    /// 
+    /// If after at least <c>io_timeout</c> milliseconds not all of data has been transferred to the
+    /// device,
+    /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 15,
+    /// I/O timeout. This timeout is based on the entire transaction and not the time required to
+    /// transfer single bytes. </para><para>
+    /// 
+    /// The <c>io_timeout</c> value set by the application may need to change based on the size of
+    /// data. </para>
+    /// <para>
+    /// 
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// SHALL terminate with error set to 23, abort. </para><para>
+    /// 
+    /// The number of bytes transferred to the device SHALL be returned in size, even when the call
+    /// terminates due to a timeout or device_abort. </para><para>
+    /// 
+    /// If the network instrument server encounters a device specific I/O error while attempting to
+    /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with
+    /// error set to 17, I/O error. </para>
+    ///  <list type="bullet">Abort shall cause the following errors: <item>
+    /// 
+    /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
+    /// terminate with error set to 23, abort. </item><item>
+    /// 
+    /// If the network instrument server encounters a device specific I/O error while attempting to
+    /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with
+    /// error set to 17, I/O error. </item><item>
+    /// 
+    /// </item></list>
+    /// </remarks>
+    /// <param name="data"> The data. </param>
+    /// <returns>   A DeviceErrorCode. </returns>
+    public virtual DeviceErrorCode DeviceWrite( byte[] data )
+    {
+        string cmd = this.CharacterEncoding.GetString( data );
+        Logger.Writer.LogVerbose( $"{this.ActiveServerClient} -> Received：{cmd}" );
+        return this.DeviceWrite( cmd );
+    }
 
     /// <summary>   Lists the instrument operations. </summary>
     private List<MethodInfo> _instrumentOperations = new();
@@ -1337,20 +1531,9 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <param name="value">            The value. </param>
     private void LogMessage( char operationType, string value )
     {
-        this.MessageLog.Add( (this.ActiveClientId, operationType, DateTimeOffset.Now, value) );
+        if ( this.ActiveServerClient is null ) return;
+        this.MessageLog.Add( (this.ActiveServerClient.ClientId, operationType, DateTimeOffset.Now, value) );
         this.MessageLogCount++;
-    }
-
-    private Encoding _characterEncoding;
-    /// <summary>
-    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
-    /// system's default encoding is to be used.
-    /// </summary>
-    /// <value> The character encoding. </value>
-    public virtual Encoding CharacterEncoding
-    {
-        get => this._characterEncoding;
-        set => _ = this.SetProperty( ref this._characterEncoding, value );
     }
 
     /// <summary>
@@ -1362,15 +1545,6 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// Read cache buffer
     /// </summary>
     private byte[] _readBuffer = Array.Empty<byte>();
-
-    private DeviceErrorCode _lastDeviceError;
-    /// <summary>   Gets or sets the last device error. </summary>
-    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
-    public virtual DeviceErrorCode LastDeviceError
-    {
-        get => this._lastDeviceError;
-        set => _ = this.SetProperty( ref this._lastDeviceError, value );
-    }
 
     #endregion
 

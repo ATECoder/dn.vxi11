@@ -77,13 +77,6 @@ public class ServerClientsRegistry
         return this.LinkedClients.TryGetValue( linkId, out client );
     }
 
-    /// <summary>   Query if this object is active client linked. </summary>
-    /// <returns>   True if active client linked, false if not. </returns>
-    public bool IsActiveClientLinked()
-    {
-        return int.MinValue != (this.ActiveServerClient?.LinkId ?? int.MinValue);
-    }
-
     /// <summary>   Query if this object is active client locked. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <returns>   True if active client locked, false if not. </returns>
@@ -178,7 +171,7 @@ public class ServerClientsRegistry
     /// <returns>   True if active link, false if not. </returns>
     public bool IsActiveLink( int linkId )
     {
-        return linkId == (this.ActiveServerClient?.LinkId ?? int.MinValue);
+        return this.ActiveServerClient is not null && linkId == this.ActiveServerClient.LinkId;
     }
 
     /// <summary>   Query if a client, identified by the 'clientId' was linked. </summary>
@@ -206,53 +199,34 @@ public class ServerClientsRegistry
         return this.InstrumentClients.ContainsKey( deviceName );
     }
 
-    /// <summary>   Adds an active client. </summary>
+    /// <summary>   Adds a client. </summary>
     /// <remarks>   2023-02-13. </remarks>
-    /// <param name="clientInfo">   Information describing the client. </param>
+    /// <param name="clientInfo">           Information describing the client. </param>
+    /// <param name="activateLockTimeout"> (Optional) True to activate lock timeout. </param>
     /// <returns>   The link id for the added client. </returns>
-    private int AddActiveClient( ServerClientInfo clientInfo )
+    private int AddClient( ServerClientInfo clientInfo, bool activateLockTimeout = false )
     {
         // make this client the active server client and sent it the reply.
         _ = this.LinkedClients.GetOrAdd( clientInfo.LinkId, clientInfo );
-        clientInfo.ActivateLockTimeout();
+        if ( activateLockTimeout )
+            clientInfo.ActivateLockTimeout();
         this.ClientsQueue.Enqueue( clientInfo );
         return this.ClientLinks.GetOrAdd( clientInfo.ClientId, clientInfo.LinkId );
     }
-
-    private int AddClient( ServerClientInfo clientInfo )
-    {
-        // make this client the active server client and sent it the reply.
-        _ = this.LinkedClients.GetOrAdd( clientInfo.LinkId, clientInfo );
-        this.ClientsQueue.Enqueue( clientInfo );
-        return this.ClientLinks.GetOrAdd( clientInfo.ClientId, clientInfo.LinkId );
-    }
-
-    /// <summary>   Attempts to add client an int from the given CreateLinkParms. </summary>
-    /// <remarks>   2023-02-14. </remarks>
-    /// <param name="createLinkParameters"> The parameters defining the created link. </param>
-    /// <param name="linkId">               The link identifier. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
-    public bool TryAddClient( CreateLinkParms createLinkParameters, int linkId )
-    {
-        if ( this.LinkedClients.ContainsKey( linkId ) ) { return false; }
-        if ( this.ClientLinks.ContainsKey( createLinkParameters.ClientId ) ) { return false; }
-        ServerClientInfo client = new( createLinkParameters, linkId );
-        int link = this.AddClient( client );
-        return link == client.LinkId;
-    }
-
 
     /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
     /// <remarks>   2023-02-13. </remarks>
     /// <param name="createLinkParameters"> The parameters defining the created link. </param>
-    /// <param name="linkId">       Identifier for the link. </param>
+    /// <param name="linkId">               Identifier for the link. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool AddClient( CreateLinkParms createLinkParameters, int linkId )
     {
+        // the create link parameters must be established with a valid device name.
+        if ( string.IsNullOrWhiteSpace( createLinkParameters.DeviceName ) ) { return false; }
         if ( this.LinkedClients.ContainsKey( linkId ) ) { return false; }
         if ( this.ClientLinks.ContainsKey( createLinkParameters.ClientId ) ) { return false; }
         this.ActiveServerClient = new( createLinkParameters, linkId );
-        int link = this.AddActiveClient( this.ActiveServerClient );
+        int link = this.AddClient( this.ActiveServerClient, true );
         return link == this.ActiveServerClient.LinkId;
     }
 

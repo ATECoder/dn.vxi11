@@ -95,13 +95,11 @@ public partial class Vxi11Interface : IVxi11Interface
         if ( this.ServerClientRegistry.AddClient( createLinkParameters, linkId ) )
         {
             this.ActiveServerClient = this.ServerClientRegistry.ActiveServerClient;
-            this.ActiveClientId = this.ActiveServerClient!.ClientId;
             return this.ActiveServerClient is not null;
         }
         else
         {
             this.ActiveServerClient = null;
-            this.ActiveClientId = 0;
             return false;
         }
     }
@@ -136,7 +134,7 @@ public partial class Vxi11Interface : IVxi11Interface
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool TrySelectClient( int linkId, bool waitLock, int? lockTimeout = null )
     {
-        if ( linkId == (this.ActiveServerClient?.LinkId ?? int.MinValue) )
+        if ( this.IsActiveLinkId( linkId ) )
             // if the client was already selected, we are done.
             return true;
 
@@ -157,13 +155,11 @@ public partial class Vxi11Interface : IVxi11Interface
         if ( this.ServerClientRegistry.TrySelectActiveClient( linkId, lockTimeout ) )
         {
             this.ActiveServerClient = this.ServerClientRegistry.ActiveServerClient;
-            this.ActiveClientId = this.ActiveServerClient!.ClientId;
             return this.ActiveServerClient is not null;
         }
         else
         {
             this.ActiveServerClient = null;
-            this.ActiveClientId = 0;
             return false;
         }
     }
@@ -177,20 +173,26 @@ public partial class Vxi11Interface : IVxi11Interface
         set {
             if ( this.OnPropertyChanged( ref this._activeServerClient, value ) )
             {
-                this.ActiveClientId = value?.ClientId ?? 0;
             }
         }
 
     }
 
-    private int _activeClientId;
-    /// <summary>   Gets or sets the identifier of the active client. </summary>
-    /// <remarks> Used solely for generating log messages. </remarks>
-    /// <value> The identifier of the active client. </value>
-    public int ActiveClientId
+    /// <summary>   Query if 'linkId' is active client link identifier. </summary>
+    /// <remarks>   2023-02-20. </remarks>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if active client link identifier, false if not. </returns>
+    public bool IsActiveLinkId( int linkId )
     {
-        get => this._activeClientId;
-        set => _ = this.OnPropertyChanged( ref this._activeClientId, value );
+        return this.ActiveServerClient is not null && this.ActiveServerClient.LinkId == linkId;
+    }
+
+    /// <summary>   Query if 'clientId' is active client identifier. </summary>
+    /// <param name="clientId"> Identifier for the client. </param>
+    /// <returns>   True if active client identifier, false if not. </returns>
+    public bool IsActiveClientId( int clientId )
+    {
+        return this.ActiveServerClient is not null && this.ActiveServerClient.ClientId == clientId;
     }
 
     /// <summary>
@@ -570,7 +572,8 @@ public partial class Vxi11Interface : IVxi11Interface
     /// <param name="value">            The value. </param>
     private void LogMessage( char operationType, string value )
     {
-        this.MessageLog.Add( (this.ActiveClientId, operationType, DateTimeOffset.Now, value) );
+        if ( this.ActiveServerClient is null ) return;
+        this.MessageLog.Add( ( this.ActiveServerClient.ClientId, operationType, DateTimeOffset.Now, value) );
         this.MessageLogCount++;
     }
 

@@ -40,15 +40,10 @@ public partial class Vxi11Device : IVxi11Device
     {
         this.InstrumentFactory = instrumentFactory;
         this.InterfaceFactory = interfaceFactory;
-
+        this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
+        this.ServerClientsRegistry = new();
         this.CharacterEncoding = CoreChannelClient.EncodingDefault;
         this._characterEncoding = CoreChannelClient.EncodingDefault;
-        this.MaxReceiveLength = CoreChannelClient.MaxReceiveLengthDefault;
-        this.AbortPortNumber = AbortChannelServer.AbortPortDefault;
-        this.ReadTermination = CoreChannelClient.ReadTerminationDefault;
-        this.WriteTermination = CoreChannelClient.WriteTerminationDefault;
-        this._writeTermination = CoreChannelClient.WriteTerminationDefault;
-        this.ServerClientsRegistry = new();
     }
 
     #endregion
@@ -136,143 +131,6 @@ public partial class Vxi11Device : IVxi11Device
 
     #endregion
 
-    #region " members "
-
-    private DeviceErrorCode _lastDeviceError;
-    /// <summary>   Gets or sets the last device error. </summary>
-    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
-    public DeviceErrorCode LastDeviceError
-    {
-        get => this._lastDeviceError;
-        set => _ = this.SetProperty( ref this._lastDeviceError, value );
-    }
-
-    private byte _readTermination;
-    /// <summary>   Gets or sets the read termination. </summary>
-    /// <value> The read termination. </value>
-    public byte ReadTermination
-    {
-        get => this._readTermination;
-        set => _ = this.SetProperty( ref this._readTermination, value );
-    }
-
-    private int _connectTimeout;
-    /// <summary>   Gets or sets the connect timeout. </summary>
-    /// <remarks>
-    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
-    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
-    /// value.
-    /// </remarks>
-    /// <value> The connect timeout. </value>
-    public int ConnectTimeout
-    {
-        get => this._connectTimeout;
-        set => _ = this.SetProperty( ref this._connectTimeout, value );
-    }
-
-    private int _ioTimeout;
-    /// <summary>   Gets or sets the I/O timeout. </summary>
-    /// <value> The I/O timeout. </value>
-    public int IOTimeout
-    {
-        get => this._ioTimeout;
-        set => _ = this.SetProperty( ref this._ioTimeout, value );
-    }
-
-    private int _transmitTimeout;
-    /// <summary>   
-    /// Gets or sets the timeout during the phase where data is sent within RPC calls, or data is
-    /// received within RPC replies. The <see cref="TransmitTimeout"/> timeout must be greater than 0.
-    /// </summary>
-    /// <value> The Transmit timeout. </value>
-    public int TransmitTimeout
-    {
-        get => this._transmitTimeout;
-        set => _ = this.SetProperty( ref this._transmitTimeout, value );
-    }
-
-    private int _lockTimeout;
-    /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
-    /// <remarks>
-    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
-    /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
-    /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
-    /// milliseconds for a lock to be released. <para>
-    /// 
-    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
-    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
-    /// value. </para>
-    /// </remarks>
-    /// <value> The lock timeout. </value>
-    public int LockTimeout
-    {
-        get => this._lockTimeout;
-        set => _ = this.SetProperty( ref this._lockTimeout, value );
-    }
-
-    private byte[] _writeTermination;
-    /// <summary>   Gets or sets the write termination. </summary>
-    /// <value> The write termination. </value>
-    public byte[] WriteTermination
-    {
-        get => this._writeTermination;
-        set => _ = this.SetProperty( ref this._writeTermination, value );
-    }
-
-    private Encoding _characterEncoding;
-    /// <summary>
-    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
-    /// system's default encoding is to be used.
-    /// </summary>
-    /// <value> The character encoding. </value>
-    public Encoding CharacterEncoding
-    {
-        get => this._characterEncoding;
-        set {
-            if ( this.SetProperty( ref this._characterEncoding, value ) )
-                if ( this.ActiveInstrument is not null ) this.ActiveInstrument.CharacterEncoding = value;
-        }
-    }
-
-    private int _maxReceiveLength;
-    /// <summary>   Gets or sets the maximum length of the receive. </summary>
-    /// <value> The maximum length of the receive. </value>
-    public int MaxReceiveLength
-    {
-        get => this._maxReceiveLength;
-        set => _ = this.SetProperty( ref this._maxReceiveLength, value );
-    }
-
-    #endregion
-
-    #region " device state "
-
-    private bool _lockEnabled;
-    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
-    /// <value> True if lock enabled, false if not. </value>
-    public bool LockEnabled
-    {
-        get => this._lockEnabled;
-        set {
-            if ( this.SetProperty( ref this._lockEnabled, value ) && this.ActiveInstrument is not null )
-                this.ActiveInstrument.LockEnabled = value;
-        }
-    }
-
-    private bool _remoteEnabled;
-    /// <summary>   Gets or sets a value indicating whether Remote is enabled on the device. </summary>
-    /// <value> True if remote is enabled, false if not. </value>
-    public bool RemoteEnabled
-    {
-        get => this._remoteEnabled;
-        set {
-            if ( this.SetProperty( ref this._remoteEnabled, value ) && this.ActiveInstrument is not null )
-                this.ActiveInstrument.RemoteEnabled = value;
-        }
-    }
-
-    #endregion
-
     #region " instrument management "
 
     private Vxi11InstrumentFactory InstrumentFactory { get; }
@@ -289,9 +147,14 @@ public partial class Vxi11Device : IVxi11Device
     /// <value> The active instrument. </value>
     public IVxi11Instrument? ActiveInstrument { get; set; }
 
-    /// <summary>   Gets the active server client. </summary>
-    /// <value> The active server client. </value>
-    public ServerClientInfo ActiveServerClient => this.ActiveInstrument?.ActiveServerClient ?? new ServerClientInfo( new CreateLinkParms(), 0 );
+    /// <summary>   Query if 'linkId' is active client link identifier. </summary>
+    /// <remarks>   2023-02-20. </remarks>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if active client link identifier, false if not. </returns>
+    public bool IsActiveLinkId( int linkId )
+    {
+        return this.ActiveInstrument is not null && this.ActiveInstrument.IsActiveLinkId( linkId );
+    }
 
     /// <summary>   Await lock release asynchronously. </summary>
     /// <remarks>   2023-02-14. </remarks>
@@ -322,10 +185,6 @@ public partial class Vxi11Device : IVxi11Device
         {
             switch ( propertyName )
             {
-                case nameof( IVxi11Instrument.CharacterEncoding ):
-                    this.CharacterEncoding = sender.CharacterEncoding;
-                    break;
-
                 case nameof( IVxi11Instrument.LastDeviceError ):
                     this.LastDeviceError = sender.LastDeviceError;
                     break;
@@ -367,6 +226,17 @@ public partial class Vxi11Device : IVxi11Device
         return false;
     }
 
+    private Encoding _characterEncoding;
+    /// <summary>
+    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
+    /// system's default encoding is to be used.
+    /// </summary>
+    /// <value> The character encoding. </value>
+    public virtual Encoding CharacterEncoding
+    {
+        get => this._characterEncoding;
+        set => _ = this.SetProperty( ref this._characterEncoding, value );
+    }
 
     #endregion
 
@@ -451,6 +321,15 @@ public partial class Vxi11Device : IVxi11Device
 
     #region " LXI-11 ONC/RPC Calls "
 
+    private DeviceErrorCode _lastDeviceError;
+    /// <summary>   Gets or sets the last device error. </summary>
+    /// <value> The las <see cref="DeviceErrorCode"/> . </value>
+    public DeviceErrorCode LastDeviceError
+    {
+        get => this._lastDeviceError;
+        set => _ = this.SetProperty( ref this._lastDeviceError, value );
+    }
+
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>
     /// To successfully complete a create_link RPC, a network instrument server SHALL: <para>
@@ -504,7 +383,6 @@ public partial class Vxi11Device : IVxi11Device
         else
         {
             reply = new() {
-                MaxReceiveSize = this.MaxReceiveLength,
                 AbortPort = this.AbortPortNumber
             };
 
@@ -524,7 +402,14 @@ public partial class Vxi11Device : IVxi11Device
 
             if ( !this.Instruments.ContainsKey( request.DeviceName ) )
             {
-                _ = this.Instruments.TryAdd( request.DeviceName, this.InstrumentFactory.Instrument( request.DeviceName ) );
+                // spawn a new instrument
+
+                IVxi11Instrument instrument = this.InstrumentFactory.Instrument( request.DeviceName );
+                instrument.CharacterEncoding = this.CharacterEncoding;
+
+                // add the instrument to the registry
+
+                _ = this.Instruments.TryAdd( request.DeviceName, instrument );
 
                 // select the existing instrument
 
@@ -545,6 +430,7 @@ public partial class Vxi11Device : IVxi11Device
 
             _lastLinkId = linkId;
             reply.DeviceLink = new DeviceLink( linkId );
+            reply.MaxReceiveSize = this.ActiveInstrument.MaxReceiveLength;
 
         }
         this.LastDeviceError = reply.ErrorCode;
@@ -737,9 +623,9 @@ public partial class Vxi11Device : IVxi11Device
 
             _ = this.ServerClientsRegistry.EnableInterrupt( request.Link.LinkId, request.Enable, request.GetHandle() );
 
-            // if the request comes for the current server client, apply to the instrument.
+            // if the request addresses the current server client, apply to the instrument.
 
-            if ( request.Link.LinkId == (this.ActiveInstrument?.ActiveServerClient?.LinkId ?? int.MinValue) )
+            if ( this.IsActiveLinkId( request.Link.LinkId ) )
                 this.ActiveInstrument?.EnableInterrupt( request.Enable, request.GetHandle() );
 
         }
@@ -1107,7 +993,7 @@ public partial class Vxi11Device : IVxi11Device
                 {
                     _ = this.ServerClientsRegistry.ReleaseLock( deviceLink.LinkId );
 
-                    if ( (this.ActiveInstrument?.ActiveServerClient?.LinkId ?? int.MinValue) == deviceLink.LinkId )
+                    if ( this.IsActiveLinkId( deviceLink.LinkId ) )
                         this.ActiveInstrument!.ActiveServerClient?.ReleaseLockTimeout();
                 }
                 else
@@ -1376,9 +1262,7 @@ public partial class Vxi11Device : IVxi11Device
         };
         if ( reply.ErrorCode == DeviceErrorCode.NoError )
         {
-            string cmd = this.CharacterEncoding.GetString( data );
-            Logger.Writer.LogVerbose( $"{this.ActiveInstrument!.ActiveServerClient} -> Received：{cmd}" );
-            reply.ErrorCode = this.ActiveInstrument!.DeviceWrite( cmd );
+            reply.ErrorCode = this.ActiveInstrument!.DeviceWrite( data! );
         }
 
         this.LastDeviceError = reply.ErrorCode;

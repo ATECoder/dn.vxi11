@@ -95,10 +95,15 @@ public interface IVxi11Interface : INotifyPropertyChanged
     /// <value> Information describing the server client. </value>
     ServerClientInfo? ActiveServerClient { get; set; }
 
-    /// <summary>   Gets or sets the identifier of the active client. </summary>
-    /// <remarks> Used solely for generating log messages. </remarks>
-    /// <value> The identifier of the active client. </value>
-    int ActiveClientId { get; set; }
+    /// <summary>   Query if 'linkId' is active client link identifier. </summary>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if active client link identifier, false if not. </returns>
+    bool IsActiveLinkId( int linkId );
+
+    /// <summary>   Query if 'clientId' is active client identifier. </summary>
+    /// <param name="clientId"> Identifier for the client. </param>
+    /// <returns>   True if active client identifier, false if not. </returns>
+    bool IsActiveClientId( int clientId );
 
     /// <summary>
     /// Gets a value indicating whether a valid link exists between the VXI-11 client

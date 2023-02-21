@@ -66,63 +66,6 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     #endregion
 
-    #region " members "
-
-    /// <summary>   Gets or sets the read termination. </summary>
-    /// <value> The read termination. </value>
-    public byte ReadTermination { get; set; }
-
-    /// <summary>   Gets or sets the connect timeout. </summary>
-    /// <remarks>
-    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
-    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
-    /// value.
-    /// </remarks>
-    /// <value> The connect timeout. </value>
-    public int ConnectTimeout { get; set; }
-
-    /// <summary>   Gets or sets the I/O timeout. </summary>
-    /// <value> The I/O timeout. </value>
-    public int IOTimeout { get; set; }
-
-    /// <summary>   
-    /// Gets or sets the timeout during the phase where data is sent within RPC calls, or data is
-    /// received within RPC replies. The <see cref="TransmitTimeout"/> timeout must be greater than 0.
-    /// </summary>
-    /// <value> The Transmit timeout. </value>
-    public int TransmitTimeout { get; set; }
-
-    /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
-    /// <remarks>
-    /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
-    /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
-    /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
-    /// milliseconds for a lock to be released. <para>
-    /// 
-    /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
-    /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
-    /// value. </para>
-    /// </remarks>
-    /// <value> The lock timeout. </value>
-    public int LockTimeout { get; set; }
-
-    /// <summary>   Gets or sets the write termination. </summary>
-    /// <value> The write termination. </value>
-    public byte[] WriteTermination { get; set; }
-
-    /// <summary>
-    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
-    /// system's default encoding is to be used.
-    /// </summary>
-    /// <value> The character encoding. </value>
-    public Encoding CharacterEncoding { get; set; }
-
-    /// <summary>   Gets or sets the maximum length of the receive. </summary>
-    /// <value> The maximum length of the receive. </value>
-    public int MaxReceiveLength { get; set; }
-
-    #endregion
-
     #region " instrument management "
 
     /// <summary>   Await lock release asynchronously. </summary>
@@ -135,25 +78,21 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <value> The number of linked clients. </value>
     int LinkedClientsCount { get; }
 
-    /// <summary>  The active server client. </summary>
-    ServerClientInfo ActiveServerClient { get; }
+    /// <summary>   Query if 'linkId' is active client link identifier. </summary>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if active client link identifier, false if not. </returns>
+    bool IsActiveLinkId( int linkId );
 
     /// <summary>   Gets or sets the active instrument. </summary>
     /// <value> The active instrument. </value>
     IVxi11Instrument? ActiveInstrument { get; set; }
 
-    #endregion
-
-
-    #region " Device state "
-
-    /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
-    /// <value> True if lock enabled, false if not. </value>
-    public bool LockEnabled { get; set; }
-
-    /// <summary>   Gets or sets a value indicating whether the remote is enabled. </summary>
-    /// <value> True if remote enabled, false if not. </value>
-    bool RemoteEnabled { get; set; }
+    /// <summary>
+    /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
+    /// system's default encoding is to be used.
+    /// </summary>
+    /// <value> The character encoding. </value>
+    Encoding CharacterEncoding { get; set; }
 
     #endregion
 
