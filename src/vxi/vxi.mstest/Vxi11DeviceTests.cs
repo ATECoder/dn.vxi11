@@ -184,8 +184,7 @@ public class Vxi11DeviceTests
     private static void AssertShouldCreateLink()
     {
         Assert.IsNotNull( _vxi11Device, nameof( _vxi11Device ) );
-        Assert.IsNotNull( _vxi11Device.ActiveInstrument, nameof( _vxi11Device.ActiveInstrument ) );
-        if ( _vxi11Device.ActiveInstrument.ActiveServerClient is null )
+        if ( _vxi11Device.ActiveInstrument?.ActiveServerClient is null )
         {
             CreateLinkResp linkResp = CreateLink( _vxi11Device, "inst0" );
             Assert.AreEqual( DeviceErrorCode.NoError, linkResp.ErrorCode );
@@ -196,8 +195,7 @@ public class Vxi11DeviceTests
     private static void AssertShouldDestroyLink()
     {
         Assert.IsNotNull( _vxi11Device, nameof( _vxi11Device ) );
-        Assert.IsNotNull( _vxi11Device.ActiveInstrument, nameof( _vxi11Device.ActiveInstrument ) );
-        if ( _vxi11Device.ActiveInstrument.ActiveServerClient is not null )
+        if ( _vxi11Device.ActiveInstrument?.ActiveServerClient is not null )
         {
             DeviceError deviceError = DestroyLink( _vxi11Device );
             Assert.IsNotNull( deviceError );

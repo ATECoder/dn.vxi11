@@ -53,6 +53,13 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <param name="handle">   The handle. </param>
     void EnableInterrupt( bool enable, byte[] handle );
 
+    /// <summary>   Enables or disables the interrupt for the client referenced by the <paramref name="linkId"/>. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <param name="enable">   True to enable, false to disable. </param>
+    /// <param name="handle">   The handle. </param>
+    void EnableInterrupt( int linkId, bool enable, byte[] handle );
+
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
     event EventHandler<Vxi11EventArgs> RequestingService;
 
@@ -74,14 +81,40 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <returns>   True if it succeeds, false if it fails. </returns>
     bool AwaitLockReleaseAsync( int timeout );
 
+    /// <summary>   Query if 'clientId' is client linked. </summary>
+    /// <remarks>   2023-02-21. </remarks>
+    /// <param name="clientId"> Identifier for the client. </param>
+    /// <returns>   True if client linked, false if not. </returns>
+    bool IsClientLinked( int clientId );
+
     /// <summary>   Gets the number of linked clients. </summary>
     /// <value> The number of linked clients. </value>
     int LinkedClientsCount { get; }
+
+    /// <summary>
+    /// Query if any of the instruments' <see cref="ServerClientsRegistry"/> contains an link <paramref name="linkId"/>.
+    /// </summary>
+    /// <remarks>   2023-02-21. </remarks>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if link created, false if not. </returns>
+    bool ContainsLink( int linkId );
 
     /// <summary>   Query if 'linkId' is active client link identifier. </summary>
     /// <param name="linkId">   Identifier for the link. </param>
     /// <returns>   True if active client link identifier, false if not. </returns>
     bool IsActiveLinkId( int linkId );
+
+    /// <summary>   Query if the client with the specified <paramref name="linkId"/> locked its instrument. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <returns>   True if locked, false if not. </returns>
+    bool IsLocked( int linkId );
+
+    /// <summary>   Releases the lock for the client with the specified <paramref name="linkId"/>. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    bool ReleaseLock( int linkId );
 
     /// <summary>   Gets or sets the active instrument. </summary>
     /// <value> The active instrument. </value>

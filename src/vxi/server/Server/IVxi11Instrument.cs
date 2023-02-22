@@ -109,7 +109,24 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     /// <summary>   Gets the number of linked clients. </summary>
     /// <value> The number of linked clients. </value>
-    public int LinkedClientsCount { get; }
+    int LinkedClientsCount { get; }
+
+    /// <summary>   Query if <see cref="ServerClientsRegistry"/> contains an link <paramref name="linkId"/>. </summary>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if link created, false if not. </returns>
+    bool ContainsLink( int linkId );
+
+    /// <summary>   Query if the client with the specified <paramref name="linkId"/> locked its instrument. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <returns>   True if locked, false if not. </returns>
+    bool IsLocked( int linkId );
+
+    /// <summary>   Releases the lock for the client with the specified <paramref name="linkId"/>. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    bool ReleaseLock( int linkId );
 
     /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
     /// <remarks>   2023-02-13. </remarks>
@@ -122,6 +139,20 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <param name="linkId">   Identifier for the link. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     bool RemoveClient( int linkId );
+
+    /// <summary>   Attempts to get an existing a client using the <paramref name="linkId"/>. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <param name="client">   [out] The client. </param>
+    /// <returns>   The client. </returns>
+    bool TryGetClient( int linkId, out ServerClientInfo client );
+
+    /// <summary>   Attempts to select active client an int from the given int. </summary>
+    /// <remarks>   2023-02-21. </remarks>
+    /// <param name="linkId">       Identifier for the link. </param>
+    /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    bool TrySelectActiveClient( int linkId, int? lockTimeout = null );
 
     /// <summary>   Attempts to select client. </summary>
     /// <remarks>
@@ -164,6 +195,12 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <returns>   True if active client identifier, false if not. </returns>
     bool IsActiveClientId( int clientId );
 
+    /// <summary>   Query if 'clinetId' is client linked. </summary>
+    /// <remarks>   2023-02-21. </remarks>
+    /// <param name="clientId"> Identifier for the client. </param>
+    /// <returns>   True if client linked, false if not. </returns>
+    bool IsClientLinked( int clientId );
+
     /// <summary>
     /// Gets a value indicating whether a valid link exists between the VXI-11 client
     /// and the <see cref="Vxi11Server"/>.
@@ -185,6 +222,14 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>
     bool AwaitLockReleaseAsync( int timeout );
+
+    /// <summary>   Await lock release. </summary>
+    /// <remarks>   2023-02-21. </remarks>
+    /// <param name="waitLock"> Set <see langword="true"/> to wait for an existing lock;
+    ///                         otherwise, return <see langword="false"/> if the active client is
+    ///                         locked. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    bool AwaitLockRelease( bool waitLock );
 
     #endregion
 
@@ -420,6 +465,14 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <param name="enable">   True to enable, false to disable. </param>
     /// <param name="handle">   The handle. </param>
     void EnableInterrupt( bool enable, byte[] handle );
+
+    /// <summary>   Enables or disables the interrupt for the client referenced by the <paramref name="linkId"/>. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <param name="enable">   True to enable, false to disable. </param>
+    /// <param name="handle">   The handle. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    bool EnableInterrupt( int linkId, bool enable, byte[] handle );
 
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
     public event EventHandler<cc.isr.VXI11.Vxi11EventArgs>? RequestingService;

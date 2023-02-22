@@ -67,12 +67,12 @@ public class ServerClientsRegistry
         return false;
     }
 
-    /// <summary>   Attempts to select a client. </summary>
+    /// <summary>   Attempts to get an existing a client using the <paramref name="linkId"/>. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="linkId">   The link identifier. </param>
     /// <param name="client">   [out] The client. </param>
     /// <returns>   The client. </returns>
-    public bool TrySelectClient( int linkId, out ServerClientInfo client )
+    public bool TryGetClient( int linkId, out ServerClientInfo client )
     {
         return this.LinkedClients.TryGetValue( linkId, out client );
     }
@@ -94,7 +94,7 @@ public class ServerClientsRegistry
         return this.LinkedClients.ContainsKey( linkId ) && this.LinkedClients[linkId].IsLocked();
     }
 
-    /// <summary>   Releases the lock described by linkId. </summary>
+    /// <summary>   Releases the lock for the client with the specified <paramref name="linkId"/>. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="linkId">   The link identifier. </param>
     /// <returns>   True if it succeeds, false if it fails. </returns>

@@ -1,3 +1,4 @@
+using System.ComponentModel.Design;
 using System.Net;
 using System.Reflection;
 using System.Threading;
@@ -202,9 +203,39 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <value> The server clients. </value>
     private ServerClientsRegistry ServerClientsRegistry { get; }
 
-    public bool IsClientLinked( int clinetId )
+    /// <summary>   Query if <see cref="ServerClientsRegistry"/> contains an link <paramref name="linkId"/>. </summary>
+    /// <param name="linkId">   Identifier for the link. </param>
+    /// <returns>   True if link created, false if not. </returns>
+    public bool ContainsLink( int linkId )
     {
-        return this.ServerClientsRegistry.IsClientLinked( clinetId );
+        return this.ServerClientsRegistry.ContainsLink( linkId );
+    }
+
+    /// <summary>   Query if the client with the specified <paramref name="linkId"/> locked this instrument. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <returns>   True if locked, false if not. </returns>
+    public bool IsLocked( int linkId )
+    {
+        return this.ServerClientsRegistry.IsLocked( linkId );
+    }
+
+    /// <summary>   Releases the lock for the client with the specified <paramref name="linkId"/>. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public bool ReleaseLock( int linkId )
+    {
+        return this.ServerClientsRegistry.ReleaseLock( linkId );
+    }
+
+    /// <summary>   Query if 'clinetId' is client linked. </summary>
+    /// <remarks>   2023-02-21. </remarks>
+    /// <param name="clientId"> Identifier for the client. </param>
+    /// <returns>   True if client linked, false if not. </returns>
+    public bool IsClientLinked( int clientId )
+    {
+        return this.ServerClientsRegistry.IsClientLinked( clientId );
     }
 
     /// <summary>   Gets the number of linked clients. </summary>
@@ -241,6 +272,41 @@ public partial class Vxi11Instrument : IVxi11Instrument
         return this.ServerClientsRegistry.RemoveClient( linkId );
     }
 
+    /// <summary>   Attempts to get an existing a client using the <paramref name="linkId"/>. </summary>
+    /// <remarks>   2023-02-14. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <param name="client">   [out] The client. </param>
+    /// <returns>   The client. </returns>
+    public bool TryGetClient( int linkId, out ServerClientInfo client )
+    {
+        return this.ServerClientsRegistry.TryGetClient( linkId, out client );
+    }
+
+    /// <summary>   Attempts to select active client an int from the given int. </summary>
+    /// <remarks>   2023-02-21. </remarks>
+    /// <param name="linkId">       Identifier for the link. </param>
+    /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public bool TrySelectActiveClient( int linkId, int? lockTimeout = null )
+    {
+        if ( this.IsActiveLinkId( linkId ) )
+            // if the client was already selected, we are done.
+            return true;
+
+        if ( this.ServerClientsRegistry.TrySelectActiveClient( linkId, lockTimeout ) )
+        {
+            this.ActiveServerClient = this.ServerClientsRegistry.ActiveServerClient;
+            this.EnableInterrupt( this.ActiveServerClient!.InterruptEnabled, this.ActiveServerClient.GetHandle() );
+            return this.ActiveServerClient is not null;
+        }
+        else
+        {
+            this.ActiveServerClient = null;
+            this.EnableInterrupt( false, Array.Empty<byte>() );
+            return false;
+        }
+    }
+
     /// <summary>   Attempts to select client. </summary>
     /// <remarks>
     /// 2023-02-09. <para>
@@ -275,19 +341,8 @@ public partial class Vxi11Instrument : IVxi11Instrument
             // if the client was already selected, we are done.
             return true;
 
-        if ( this.DeviceLocked() )
-        {
-            if ( waitLock )
-            {
-                // wait for the active client lock to expire
-                if ( !this.AwaitLockReleaseAsync( this.ActiveServerClient!.LockTimeout ) )
-                    return false;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        if ( !this.AwaitLockRelease( waitLock) )
+            return false;
 
         if ( this.ServerClientsRegistry.TrySelectActiveClient( linkId, lockTimeout ) )
         {
@@ -362,6 +417,33 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public bool AwaitLockReleaseAsync( int timeout )
     {
         return this.ServerClientsRegistry.AwaitLockReleaseAsync( timeout );
+    }
+
+    /// <summary>   Await lock release. </summary>
+    /// <remarks>   2023-02-21. </remarks>
+    /// <param name="waitLock"> Set <see langword="true"/> to wait for an existing lock;
+    ///                         otherwise, return <see langword="false"/> if the active client is
+    ///                         locked. </param>
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    public bool AwaitLockRelease( bool waitLock )
+    {
+        bool released = true;
+        if ( this.DeviceLocked() )
+        {
+            if ( waitLock )
+            {
+                // wait for the active client lock to expire
+
+                released = this.AwaitLockReleaseAsync( this.ActiveServerClient!.LockTimeout );
+            }
+            else
+
+                // if not waiting on a locked device, return false indicating that
+                // the device is locked.
+
+                released = false;
+        }
+        return released;
     }
 
     #endregion
@@ -829,6 +911,17 @@ public partial class Vxi11Instrument : IVxi11Instrument
     {
         this._interruptHandle = handle;
         _ = this.OnPropertyChanged( ref this._interruptEnabled, enable, nameof( this.InterruptEnabled ) );
+    }
+
+    /// <summary>   Enables or disables the interrupt for the client referenced by the <paramref name="linkId"/>. </summary>
+    /// <remarks>   2023-02-09. </remarks>
+    /// <param name="linkId">   The link identifier. </param>
+    /// <param name="enable">   True to enable, false to disable. </param>
+    /// <param name="handle">   The handle. </param>
+    /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
+    public bool EnableInterrupt( int linkId, bool enable, byte[] handle )
+    {
+        return this.ServerClientsRegistry.EnableInterrupt( linkId, enable, handle );
     }
 
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
