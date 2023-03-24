@@ -22,15 +22,121 @@
 	* [Binding Protocols for ONC RPC Version 2 (August 1995)]
 * [VXI Bus Specification]
 
+## Terminology
+
+In implementing the [VXI Bus Specification] [ISR's VXI-11] adopted the following terms to describe the software elements that are often associated with hardware components:
+
+### _VXI-11 Instrument Client_ or _VXI-Client_ or _Client_ or _Virtual Instrument_ or _VI_
+
+The _VXI-11 Instrument Client_ or _Client_ or _VI_ is a purely software entity that is capable of controlling an LXI piece of hardware using, in this case, the VXI-11 protocols. 
+
+A VXI-11 Client typically implements a VXI-11 Core Channel ONC/RPC client, an Abort Channel ONC/RPC client and an Interrupt Channel ONC/RPC server.
+
+The [ISR's VXI-11 Client] project includes an implementation of a _VI_ that is used for unit and console application testing. 
+
+### _VXI-11 Instrument_ or _Instrument_
+
+The _VXI-11 Instrument_ or _Instrument_ is a physical piece of hardware that implements the VXI-11 Server protocol and, thus, can be controlled by a _VI_. 
+
+A VXI-11 Client typically implements a VXI-11 Core Channel ONC/RPC server, an Abort Channel ONC/RPC server and an Interrupt Channel ONC/RPC client.
+
+### _VXI-11 Interface_
+
+The _VXI-11 Interface_ is a physical piece of hardware that implements a VXI-11 client protocol for interface commands such as those that control a GPIB interface. 
+
+### _VXI-11 Device_
+
+A _VXI-11 Device_ is a software implementation of a _VXI-11 Instrument_ and _VXI-11 Interface_.
+
+The [ISR's VXI-11 Server] project includes an implementation of a _VXI-11 Device_ for testing purposes.
+
 ## How to Use
 
-For information on using [ISR's VXI-11] see the repository [ISR's VXI-11 Apps] projects.
+The [ISR's VXI-11] package implements the core [VXI Bus Specification].
 
-The [ISR's VXI-11 Client] and [ISR's VXI-11 Server]  VXI11 packages consists of a set of fully functional low level classes implementing VXI-11 clients, servers, devices and instruments. 
+The [ISR's VXI-11 Client] and [ISR's VXI-11 Server] VXI-11 packages include a set of fully functional low level classes that implement VXI-11 clients, servers, devices and instruments. These classes are then used by the [ISR's VXI-11 Apps] projects.
 
-Typically, the VXI-11 Instrument Client and Interface Client classed would be inherited for creating classes such as the Visa message-based session. 
+Typically, the VXI-11 Instrument Client and Interface Client classes would be inherited for creating classes such as the Visa message-based session. 
 
 On the server side the VXI-11 Instrument and, possibly, the VXI-11 Device classes would be inherited for creating the specific behavior desired from an instrument.
+
+## Testers
+
+### [ISR's VXI-11 LXI Discover]
+
+This application attempts to discover all the LXI devices on the local network.
+
+### [ISR's VXI-11 Client Tester]
+
+This application tests a most basic IEEE488.2 instrument.
+
+### [ISR's VXI-11 Instrument Client Tester]
+
+This application tests a physical IEEE488.2 instrument as implemented in the [ISR's VXI-11 Server].
+
+### [ISR's VXI-11 Single Client Server Tester]
+
+This application tests a mock IEEE488.2 instrument as implemented in the [ISR's VXI-11 Server].
+
+## Unit Tests
+
+### AsyncEventHandlersTests
+
+Test exception handling in async methods. 
+
+### CicrularListTests
+
+Tests the circular list, which is used for keeping a log of instrument and interface commands. 
+
+### DeviceNameParserTests
+
+Tests parsing the standard VXI-11 device name string. 
+
+### IdentityParserTests
+
+Tests parsing the standard VXI-11 instrument identity string.
+
+### Vxi11ClientTests
+
+Tests the VXI-11 client for generating a unique client ID on new instances of the client.
+
+### Vxi11DeviceTests
+
+Tests the implementation a VXI-11 device using methods for emulating socket communication thus bypassing the VXI-11 client server communication.
+
+### Vxi11DiscovererBoardcastTests
+
+Tests discovery of registered VXI-11 servers on the local network using broadcasting.
+
+### Vxi11DiscovererLoopbackTests
+
+Tests discovery of VXI-11 servers on the local network.
+
+### Vxi11DiscovererTests
+
+Tests discovery of registered servers from a list of known instrument addresses.
+
+### Vxi11DualClientServerTests
+
+Tests querying a VXI-11 server from two clients.
+
+### Vxi11SingleClientServerTests
+
+Tests querying a VXI-11 server from a single client.
+
+### Vxi11SupportTests
+
+#### Unique Client ID
+
+Tests generating a unique client identities by an instance of the VXI-11 server.
+
+#### IP Address Conversion
+
+Tests converting between representations of IPv4 IP addresses.
+
+#### Enums
+
+Tests parsing flag enumerations from whole numbers.
 
 ## Departures from [VXI11.CSharp]
 
@@ -61,7 +167,10 @@ Bug reports and contributions are welcome at the [ISR's VXI-11] repository.
 [ISR's VXI-11 Server]: https://github.com/ATECoder/dn.vxi11/src/vxi/vxi/server
 [ISR's ONC RPC]: https://github.com/ATECoder/dn.onc.rpc
 [ISR's XDR]: https://github.com/ATECoder/dn.xdr
-
+[ISR's VXI-11 LXI Discover]: https://github.com/ATECoder/dn.vxi11/src/vxi/apps/lxi.discover/
+[ISR's VXI-11 Client Tester]: https://github.com/ATECoder/dn.vxi11/src/vxi/apps/vxi11.client.tester/
+[ISR's VXI-11 Instrument Client Tester]: https://github.com/ATECoder/dn.vxi11/src/vxi/apps/vxi11.instrument.client.tester/
+[ISR's VXI-11 Single Client Server Tester]: https://github.com/ATECoder/dn.vxi11/src/vxi/apps/vxi11.single.client.server.tester/
 
 [XDR: External Data Representation Standard (May 2006)]: http://tools.ietf.org/html/rfc4506
 [RPC: Remote Procedure Call Protocol Specification Version 2 (May 2009)]: http://tools.ietf.org/html/rfc5531

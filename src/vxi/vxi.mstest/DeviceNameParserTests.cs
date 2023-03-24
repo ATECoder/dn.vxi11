@@ -5,7 +5,6 @@ namespace cc.isr.VXI11.MSTest
     public class DeviceNameParserTests
     {
 
-
         private readonly string[] _deviceNames = { "inst0",
                                                  "gpib,5",
                                                  "gpib,5,10",

@@ -9,7 +9,6 @@ namespace cc.isr.VXI11.MSTest
     public class IdentityParserTests
     {
 
-
         private readonly string[] _identities = { "INTEGRATED SCIENTIFIC RESOURCES,MODEL IEEE488Mock,001,1.0.8434",
                                                   "INTEGRATED SCIENTIFIC RESOURCES,MODEL IEEE488Mock,001,1.0.8434" };
 
@@ -38,9 +37,5 @@ namespace cc.isr.VXI11.MSTest
                 AssertIdentityParse( Identity );
             }
         }
-
-
-
-
     }
 }
