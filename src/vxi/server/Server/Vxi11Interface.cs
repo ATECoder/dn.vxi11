@@ -28,7 +28,7 @@ namespace cc.isr.VXI11.Server;
 /// </remarks>
 public partial class Vxi11Interface : IVxi11Interface
 {
-    #region " construction and cleanup "
+    #region " Construction and Cleanup "
 
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-14. </remarks>

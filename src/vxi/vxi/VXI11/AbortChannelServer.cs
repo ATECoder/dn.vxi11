@@ -19,7 +19,7 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     /// <summary>   The default value of the abort port number. </summary>
     public static int AbortPortDefault = 1025;
 
-    #region " construction and cleanup "
+    #region " Construction and Cleanup "
 
     /// <summary>   Default constructor. </summary>
     public AbortChannelServer() : this( 0 )

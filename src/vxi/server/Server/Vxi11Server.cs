@@ -15,7 +15,7 @@ namespace cc.isr.VXI11.Server;
 public class Vxi11Server : CoreChannelServerBase
 {
 
-    #region " construction and cleanup "
+    #region " Construction and Cleanup "
 
     /// <summary>   Default constructor. </summary>
     public Vxi11Server() : this( new Vxi11Device( new Vxi11InstrumentFactory(), new Vxi11InterfaceFactory() ), IPAddress.Any, 0 )

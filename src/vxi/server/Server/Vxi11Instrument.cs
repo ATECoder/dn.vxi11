@@ -34,7 +34,7 @@ namespace cc.isr.VXI11.Server;
 public partial class Vxi11Instrument : IVxi11Instrument
 {
 
-    #region " construction and cleanup "
+    #region " Construction and Cleanup "
 
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-14. </remarks>
@@ -869,7 +869,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     #endregion
 
-    #region  " instrument operation members "
+    #region "  " instrument operation members " "
 
     private string _identity;
     /// <summary>   Gets or sets the identity. </summary>

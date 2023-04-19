@@ -6,7 +6,7 @@ namespace cc.isr.VXI11.Client;
 public class Vxi11InterfaceClient : Vxi11Client
 {
 
-    #region " construction and cleanup "
+    #region " Construction and Cleanup "
 
     /// <summary>   Connects. </summary>
     /// <remarks>   2023-02-08. </remarks>

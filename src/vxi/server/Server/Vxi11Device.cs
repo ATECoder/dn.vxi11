@@ -30,7 +30,7 @@ namespace cc.isr.VXI11.Server;
 public partial class Vxi11Device : IVxi11Device
 {
 
-    #region " construction and cleanup "
+    #region " Construction and Cleanup "
 
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-09. </remarks>

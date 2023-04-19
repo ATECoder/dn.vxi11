@@ -12,7 +12,7 @@ namespace cc.isr.VXI11.MSTest;
 public class Vxi11DiscovererLoopbackTests
 {
 
-    #region " fixture construction and cleanup "
+    #region " fixture Construction and Cleanup "
 
     /// <summary>   Initializes the fixture. </summary>
     /// <param name="context">  The context. </param>

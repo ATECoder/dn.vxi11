@@ -44,7 +44,7 @@ namespace cc.isr.VXI11;
 public class InterruptChannelClient : OncRpcClientStubBase
 {
 
-    #region " construction and cleanup "
+    #region " Construction and Cleanup "
 
     /// <summary>
     /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptVersion"/>

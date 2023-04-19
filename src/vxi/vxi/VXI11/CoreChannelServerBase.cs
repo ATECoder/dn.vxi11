@@ -12,7 +12,7 @@ namespace cc.isr.VXI11;
 public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispatchable
 {
 
-    #region " construction and cleanup "
+    #region " Construction and Cleanup "
 
     /// <summary>   Default constructor. </summary>
     public CoreChannelServerBase() : this( 0 )

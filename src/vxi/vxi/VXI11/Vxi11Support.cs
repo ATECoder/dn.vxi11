@@ -59,7 +59,7 @@ public static class Vxi11Support
     /// Also, even for IPv4, an int can't hold addresses bigger than 127.255.255.255, e.g. the
     /// broadcast address (255.255.255.255), so use a uint. </para><para>
     /// 
-    /// <see href="https://stackoverflow.com/questions/461742/how-to-convert-an-ipv4-address-into-a-integer-in-c">
+    /// <see href="https://StackOverflow.com/questions/461742/how-to-convert-an-ipv4-address-into-a-integer-in-c">
     /// stack overflow</see> </para>
     /// </remarks>
     /// <param name="address">  The address to act on. </param>

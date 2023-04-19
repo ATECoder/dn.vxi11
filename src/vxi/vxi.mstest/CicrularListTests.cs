@@ -10,7 +10,7 @@ namespace cc.isr.VXI11.MSTest;
 public class CircularListTests
 {
 
-    #region " Fixture construction and cleanup "
+    #region " Fixture Construction and Cleanup "
 
     /// <summary>   Initializes the fixture. </summary>
     /// <param name="context">  The context. </param>
