@@ -69,7 +69,7 @@ client machine.
 
 The interface definition ( see Appendix I, "Network instrument RPCL") gives the function prototypes as well as the unique identifiers for the procedures. For ONC RPC, the unique identifier is a combination of a program number (also known as an interface id), a procedure number, and a version number.
 
-|VXI-11 Message    |C### Procedure    | Channel | Description  
+|VXI-11 Message    |C# Procedure    | Channel | Description  
 |------------------|:--------------:|:-------:|:------------  
 |create_link       |CreateLink      |core     |opens a link to a device  
 |device_write      |DeviceWrite     |core     |device receives a message
@@ -102,7 +102,7 @@ The network instrument protocol uses up to three channels between the controller
 
 These three channels correspond to three RPC client/server programs.
 
-|Channel   |Program      |C### Program        |ID
+|Channel   |Program      |C# Program        |ID
 |----------|:------------|:-----------------|:------
 |Core      |DEVICE_CORE  |CoreProgram       |0x0607AF
 |Abort     |DEVICE_ASYNC |AsyncProgram      |0x0607B0 
@@ -153,7 +153,7 @@ Note that the [VXI-11 Specifications] defines an Abort channel.
 <a name="Table-4"></a>
 ###### Table 4 Device Interrupt Program Implementation
 
-|VXI-11 Name           | C### Name 
+|VXI-11 Name           | C# Name 
 |----------------------|--------------
 |Create_LinkParms      | CreateLinkParms      
 |Device_DocmdParms     | DeviceDoCmdParms     
@@ -173,7 +173,7 @@ Note that the [VXI-11 Specifications] defines an Abort channel.
 |void                  |  
 
 <a name="Table-5"></a>
-###### Table 5 VXI-11 and C### Nomenclature
+###### Table 5 VXI-11 and C# Nomenclature
 
 #### Core and Abort Channel Establishment Sequence
 Implementation details may vary from one
