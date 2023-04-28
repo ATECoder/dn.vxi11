@@ -1,4 +1,4 @@
-# TCP/IP Instrument Protocol (VXI-11)
+### TCP/IP Instrument Protocol (VXI-11)
 
 A control and communication library for LXI-based instruments. 
 
@@ -7,7 +7,7 @@ A control and communication library for LXI-based instruments.
 - [References](#References)
 
 <a name="VXI11-Protocol"></a>
-## TCP/IP Instrument Protocol (VXI-11)
+#### TCP/IP Instrument Protocol (VXI-11)
 
 The VXI-11 protocol is an [RPC]-based communication protocol primarily designed for connecting instruments, defined as devices, (such as oscilloscopes, multimeters, spectrum analyzers etc.) to controllers.
 
@@ -19,7 +19,7 @@ VXI-11 uses TCP as its transport protocol.
 
 The [VXI-11 Specifications] was published in 1995 by the VXIbus Consortium, Inc.
 
-## [Making sense of T&M protocols] LAN - VXI-11
+##### [Making sense of T&M protocols] LAN - VXI-11
 VXI-11 dates all the way back to 1995. It is layered on top of the [ONC Remote Procedure Call (RPC)]protocol, which itself is layered on top of TCP/IP. You can find the [VXI-11 Specifications].
 
 RPC is synchronous by nature, which means that a request needs to be completed before the next one can be issued. (This can be a performance bottleneck when there’s a sequence of many small calls, which is why HiSLIP was developed as an alternative.)
@@ -57,7 +57,7 @@ Like all RPC programs, the VXI-11 RPC calls are specified in RPCL (Remote Proced
 Wireshark was really useful to dump all the traffic between my PC and the instrument, and it has built-in support for VXI-11 RPC calls!
 
 <a name="Network-Instrument-Protocol"></a>
-## Network Instrument Protocol
+#### Network Instrument Protocol
 The network instrument protocol uses the ONC remote procedure call (RPC) model.
 
 Conceptually, this model allows one application (typically called the client) to call procedures in a remote application (typically called the server) as if the remote procedures were local. This specification uses ONC/RPC for defining the network instrument messages which are passed over the network, but does not require that these RPCs be provided as the application interface. The ONC/RPC interface may, however, be used by a device designer as a matter of convenience.
@@ -69,7 +69,7 @@ client machine.
 
 The interface definition ( see Appendix I, "Network instrument RPCL") gives the function prototypes as well as the unique identifiers for the procedures. For ONC RPC, the unique identifier is a combination of a program number (also known as an interface id), a procedure number, and a version number.
 
-|VXI-11 Message    |C# Procedure    | Channel | Description  
+|VXI-11 Message    |C### Procedure    | Channel | Description  
 |------------------|:--------------:|:-------:|:------------  
 |create_link       |CreateLink      |core     |opens a link to a device  
 |device_write      |DeviceWrite     |core     |device receives a message
@@ -90,10 +90,10 @@ The interface definition ( see Appendix I, "Network instrument RPCL") gives the 
 |device_intr_srq   |DeviceIntrSrq   |interrupt|used by device to send a service request
 
 <a name="Table-1"></a>
-#### Table 1 Network instrument Protocol
+###### Table 1 Network instrument Protocol
 The 17 messages that define the network instrument protocol. These messages are expected to be supported by all devices that claim to be network instrument compliant. Most of these messages will be familiar to those who have worked with IEEE 488 devices.
 
-## CONNECTION MODEL
+#### CONNECTION MODEL
 
 The network instrument protocol uses up to three channels between the controller and the device for passing network instrument messages. A network instrument connection is this set of channels:
 * __Core Channel:__ a core synchronous command channel for transfer of all requests except the `device_abort` RPC and the `device_intr_srq` remote procedure calls.
@@ -102,18 +102,18 @@ The network instrument protocol uses up to three channels between the controller
 
 These three channels correspond to three RPC client/server programs.
 
-|Channel   |Program      |C# Program        |ID
+|Channel   |Program      |C### Program        |ID
 |----------|:------------|:-----------------|:------
 |Core      |DEVICE_CORE  |CoreProgram       |0x0607AF
 |Abort     |DEVICE_ASYNC |AsyncProgram      |0x0607B0 
 |Interrupt |DEVICE_INTR  |InterruptProgram  |0x0607B1
 
 <a name="Table-2"></a>
-#### Table 2 VXI-11 RPC Programs
+###### Table 2 VXI-11 RPC Programs
 Note that the [VXI-11 Specifications] defines an Abort channel. 
 
 
-## Device Core Program implementation
+#### Device Core Program implementation
 
 |Response           | Message          |Parameters            | #
 |-------------------|------------------|----------------------|---
@@ -134,26 +134,26 @@ Note that the [VXI-11 Specifications] defines an Abort channel.
 |Device_Error       |destroy_intr_chan |void                  | 26
 
 <a name="Table-3"></a>
-#### Table 3 Device Core Program Implementation
+###### Table 3 Device Core Program Implementation
 
-## Device Async Program implementation
+#### Device Async Program implementation
 
 |Response           | Message          |Parameters       | #
 |-------------------|------------------|-----------------|---
 |Device_Error       |create_link       |Device_Link      | 1
 
-#### Table 4 Device Core Program Implementation
+###### Table 4 Device Core Program Implementation
 
-## Device Interrupt Program implementation
+#### Device Interrupt Program implementation
 
 |Response           | Message          |Parameters       | #
 |-------------------|------------------|-----------------|---
 |void               |device_intr_srq   |Device_SrqParms  | 30
 
 <a name="Table-4"></a>
-#### Table 4 Device Interrupt Program Implementation
+###### Table 4 Device Interrupt Program Implementation
 
-|VXI-11 Name           | C# Name 
+|VXI-11 Name           | C### Name 
 |----------------------|--------------
 |Create_LinkParms      | CreateLinkParms      
 |Device_DocmdParms     | DeviceDoCmdParms     
@@ -173,9 +173,9 @@ Note that the [VXI-11 Specifications] defines an Abort channel.
 |void                  |  
 
 <a name="Table-5"></a>
-#### Table 5 VXI-11 and C# Nomenclature
+###### Table 5 VXI-11 and C### Nomenclature
 
-## Core and Abort Channel Establishment Sequence
+#### Core and Abort Channel Establishment Sequence
 Implementation details may vary from one
 operating system to another:
 
@@ -187,7 +187,7 @@ svctcp_create.
 
 After the first `create_link`, the network instrument client may create an RPC client for the abort channel, but no additional client creations are necessary after subsequent create_links. These connections may be torn down by the network instrument client once all links have been closed with destroy_link. The whole sequence could then start over.
 
-## Interrupt Channel Establishment Sequence
+#### Interrupt Channel Establishment Sequence
 The interrupt is established as follows:
 
 | Network instrument client (controller) | Network instrument server (device)
@@ -198,15 +198,15 @@ The interrupt is established as follows:
 |                                        | reply to create_intr_chan
 
 <a name="Table-6"></a>
-#### Table 6. Interrupt Channel Establishment Sequence
+###### Table 6. Interrupt Channel Establishment Sequence
 
-### Note
+##### Note
 * A `create_intr_chan` request received when an interrupt channel already exists is ignored; the
 existing interrupt channel is used such that there is only one interrupt channel used by all links on that network instrument connection.
 * If the network instrument client issues `destroy_intr_chan`, then the network instrument server destroys the RPC client to tear down the interrupt channel.
 * If the network instrument client never calls `destroy_intr_chan`, the interrupt channel is closed by the network instrument server when the core channel is closed by the network instrument client.
 
-### INTERRUPT LOGIC
+##### INTERRUPT LOGIC
 The interrupt mechanism allows the device to send a notification call to the controller (effectively switching the roles of RPC client and RPC server). One way a controller could implement the interrupt mechanism is to register a handler for the interrupt, inform the current device to enable the interrupt, and then service the interrupt when it occurs. 
 
 | client               | Network instrument server (device)
@@ -223,9 +223,9 @@ The interrupt mechanism allows the device to send a notification call to the con
 |                      | <= device_intr_srq
 
 <a name="Table-7"></a>
-#### Table 7 Possible sequences of interrupt channel creation and usage.
+###### Table 7 Possible sequences of interrupt channel creation and usage.
 
-### Note
+##### Note
 * Network instrument clients can implement interrupts by using either a separate interrupt process, threads, or by emulating threads using a signal handling routine that is invoked on incoming messages to the interrupt port.
 * The network instrument server MAY issue interrupts in the middle of an active call. In general, this implementation gives more timely responses, and can be easier than delaying the interrupt until an in-progress action has finished.
 * The <c>device_intr_srq</c> RPC is implemented as a one-way RPC. This means that the network instrument server does not expect a response from the network instrument client. This is necessary to avoid deadlock situations in a single-threaded environment where if a response were expected to an interrupt both the network instrument client and network instrument server could be waiting for a response from the other, with neither proceeding. 
@@ -233,12 +233,12 @@ The interrupt mechanism allows the device to send a notification call to the con
 * The `device_enable_srq` RPC contains a handle parameter. The same data contained in handle is passed back in the handle parameter of the `device_intr_srq` RPC. Since the same data is passed back, the network instrument client can identify the link associated with the `device_intr_srq`.
 * The network instrument protocol recognizes one type of interrupt, service request. Note that the return type to the interrupt RPC is void, denoting a one-way RPC.
 
-## Locking
+#### Locking
 A single device may be accessed by multiple controllers over separate links. For these situations the network instrument server supports locking access to a link, which guarantees exclusive access to the device associated with that link to that link only. If a controller expects to have exclusive access to a device, it must have the lock. When no link has the lock, multiple controllers may be sending data and generally manipulating the state of the device. Under such circumstances, the behavior of the device is unpredictable.
 
 The first call to `device_lock` for an unlocked device acquires the lock. Subsequent calls to `device_lock` for the same device return an error. `device_unlock` unlocks the device if this link has the lock, otherwise `device_unlock` returns an error.
 
-### Time-outs
+##### Time-outs
 Many of the remote procedures are passed timeout values. Values may be specified for I/O operations and locks. 
 
 The network instrument server allows at least `io_timeout` milliseconds for an I/O operation to
@@ -254,20 +254,20 @@ The RPC client side (local) timeout value should be set to a value greater than 
 
 A reply sent by the network instrument server after the network instrument client is no longer listening for it should be discarded by the network instrument client when it next sends or receives a network instrument message (and this is typically handled by the RPC subsystem, if such a subsystem is used by a particular implementation).
 
-## Dropped or Broken Connections
+#### Dropped or Broken Connections
 When the core channel is reset or closed (as defined by TCP), the network instrument server recognizes this condition and releases all resources associated with all links which were active on that network instrument connection (as if a `destroy_link` was executed for each open link on that connection). Resources to be released include locks, the abort channel, and the interrupt channel.
 
 The network instrument server is also configured to use an implementation defined mechanism to discover if the network is down or if a network instrument client has crashed, and perform the same cleanup actions.
 
-## Security Control
+#### Security Control
 The RPC interface defined by this specification provides no services to authenticate a user for security. A controller must merely know a network instrument host's IP address to access all of its functions. Security control is beyond the scope of this specification, though a network instrument host may support security control methods.
 
-## Concurrent Operations
+#### Concurrent Operations
 The protocol defined by this specification does not preclude the network instrument server or network instrument client from attempting to perform operations concurrently. However, due to the nature of most commercially available RPC software packages which may be used to implement the protocol defined by this specification, it is expected that a typical network instrument host's implementation will serialize the RPCs.
 
 If a network instrument client's implementation does allow multiple RPCs to be outstanding, then the network instrument server on the receiving end may have multiple RPC requests queued in its TCP input buffer. These RPCs are pending, but not in progress, and therefore are unaffected by `device_abort`.
 
-## TCP/IP-IEEE 488.1 Device String Format
+#### TCP/IP-IEEE 488.1 Device String Format
 The routing of messages from the LAN to the appropriate IEEE 488.1 device takes place via the `create_link` RPC. This RPC is used to create a network instrument link. The created link is associated with a particular IEEE 488.1 device or interface via the device parameter. This parameter is a character string which is parsed by the TCP/IP-IEEE 488.1 Interface Device to determine the IEEE 488.1 device or interface associated with the link.
 
 The TCP/IP-IEEE 488.1 Interface Device supports a device string of the following format:
@@ -293,7 +293,7 @@ A network instrument server could potentially support links using protocols desc
 
 A controller should use links to the interface with great care. They must be used with `device_docmd`. They should only be used with `device_write`, `device_read`, and `device_trigger`, when a device needs a special addressing sequence. Some older devices connected to an IEEE 488.1 bus do not properly implement the state machines for the `Talker` and `Listener` functions and require a specific order of `unlisten`, `my talk` or `listen` address, and controller's listen or talk address. Where this required order is different from the one specified in this standard, a `device_docmd` must be used to establish the addressing followed by an RPC that does no addressing. In other situations, links to the device should be used.
 
-## TCP/IP-IEEE 488.2 Device String Format
+#### TCP/IP-IEEE 488.2 Device String Format
 The contents of the device string determines which Message Exchange Interface is associated with a link. This structure allows multiple instruments to use the same IP address.
 
 A TCP/IP-IEEE 488.2 Instrument Interface supports a device string of the following format: `<inst_name>` where:
@@ -303,7 +303,7 @@ The TCP/IP-IEEE 488.2 Instrument Interface recognizes an `<inst_name>` of `"inst
 
 One and only one Message Exchange Interface and Status Reporting exists for each `instN` supported in a TCP/IP IEEE 488.2 Instrument Interface even when connections to multiple controllers are active.
 
-## Interface Communication 
+#### Interface Communication 
 
 The `device_docmd` RPC is a general purpose RPC which provides interface specific operations not covered by the other defined RPCs. Table 7 describes the allowed commands.
 
@@ -318,12 +318,12 @@ The `device_docmd` RPC is a general purpose RPC which provides interface specifi
 |IFC Control  | 0x020010 | 0     | X
 
 <a name="Table-8"></a>
-#### Table 8 Allowed generic commands.
+###### Table 8 Allowed generic commands.
 
-### Send Command
+##### Send Command
 In response to a device_docmd RPC whose `cmd` value is 0x20001, a TCP/IP-IEEE 488.1 Interface Device executes the SEND COMMAND control sequence described in IEEE 488.2, 16.2.1, where the commands sent are contained in `data_in`. The returned `data_out` is the be same as the received 'data_in'.
 
-### Bus Status
+##### Bus Status
 In response to a device_docmd RPC whose `cmd` value is 0x20001, a TCP/IP-IEEE 488.1 Interface Device returns a value in the response parameter 'data_out' which depends on the received value in 'data_in' as described in Table 8. The size of the returned `data_out`, `data_out.data_out_len`, is two.
 
 
@@ -339,30 +339,30 @@ In response to a device_docmd RPC whose `cmd` value is 0x20001, a TCP/IP-IEEE 48
 |BUS ADDRESS |8 |the TCP/IP-IEEE 488.1 Interface Device's address (0-30)
 
 <a name="Table-1"></a>
-#### Table 9 Received and returned values for Bus Status.
+###### Table 9 Received and returned values for Bus Status.
 
-### ATN Control
+##### ATN Control
 In response to a device_docmd RPC whose `cmd` value is 0x20002, a TCP/IP-IEEE 488.1 Interface Device sets the ATN line as follows:
 1. If the `data_in` parameter is non-zero, then set the ATN line true.
 2. If the `data_in` parameter is zero, then set the ATN line false. 
 The returned `data_out` is the same as the received `data_in`.
 
-### REN Control
+##### REN Control
 In response to a device_docmd RPC whose `cmd` value is 0x20003, a TCP/IP-IEEE 488.1 Interface Device sets the REN line as follows:
 1. If the `data_in` parameter is non-zero, then set the SRE (send remote enable) message true.
 2. If the `data_in` parameter is zero, then set the SRE (send remote enable) message false.  
 The returned `data_out` is be same as the received `data_in`.
 
-### Pass Control
+##### Pass Control
 In response to a device_docmd RPC whose `cmd` value is 0x20004, a TCP/IP-IEEE 488.1 Interface Device executes the `PASS CONTROL` control sequence described in IEEE 488.2, 16.2.14 where the talk address is constructed from the value in `data_in` bitwise OR-ed with 0x80. The returned `data_out` is the same as the received `data_in`.
 
-### Bus Address
+##### Bus Address
 In response to a device_docmd RPC whose `cmd` value is 0x2000A and `data_in` contains a value between 0 and 30 inclusive, a TCP/IP-IEEE 488.1 Interface Device sets its address to the contents of `data_in`. If `data_in` does not contain a legal value, device_docmd returns immediately with error set to `parameter error` (5). The returned `data_out` is the same as the received `data_in`.
 
-### IFC Control
+##### IFC Control
 In response to a device_docmd RPC whose `cmd` value is 0x20010, a TCP/IP-IEEE 488.1 Interface Device executes the `SEND IFC` control sequence described in IEEE 488.2, 16.2.8. The returned `data_out` has `data_out.data_out_len` set to zero.
 
-### References
+##### References
 
 * VMEbus Extensions for Instrumentation: TCP/IP Instrument Protocol Specification VXI-11, Revision 1.0, July 17, 1995, [VXI-11 Specifications].
 * Power Programming with RPC, John Bloomer, O’Reilly & Associates, Inc., 1999.
