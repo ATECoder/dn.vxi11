@@ -19,15 +19,11 @@ public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
 
     /// <summary>   Default constructor. </summary>
     public InterruptChannelServer() : this( 0 )
-    {
-    }
-
+    { }
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
     public InterruptChannelServer( int port ) : this( IPAddress.Any, port )
-    {
-    }
-
+    { }
     /// <summary>   Constructor. </summary>
     /// <param name="bindAddr"> The bind address. </param>
     /// <param name="port">     The port. </param>

@@ -23,7 +23,7 @@ public class Vxi11Discoverer
     /// <summary>   Executes the <see cref="ThreadExceptionOccurred"/> event. </summary>
     /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        Event information to send to registered event handlers. </param>
-    private static void OnThreadException( object sender, ThreadExceptionEventArgs e )
+    private static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
     {
         if ( sender is null || e is null ) return;
 

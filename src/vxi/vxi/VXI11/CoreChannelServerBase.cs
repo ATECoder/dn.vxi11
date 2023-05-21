@@ -16,15 +16,11 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
 
     /// <summary>   Default constructor. </summary>
     public CoreChannelServerBase() : this( 0 )
-    {
-    }
-
+    { }
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
     public CoreChannelServerBase( int port ) : this( IPAddress.Any, port )
-    {
-    }
-
+    { }
     /// <summary>   Constructor. </summary>
     /// <param name="bindAddr"> The bind address. </param>
     /// <param name="port">     The port. </param>

@@ -88,7 +88,7 @@ void SendCommand( string command )
         Console.WriteLine( $"{command} sent" );
 }
 
-static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
+static void OnThreadExcetion( object? sender, ThreadExceptionEventArgs e )
 {
     string name = "unknown";
     if ( sender is Vxi11InstrumentClient ) name = nameof( Vxi11InstrumentClient );
@@ -98,7 +98,7 @@ static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
 
 #region " Unhandled exception handling "
 
-static void OnUnhandledException( object sender, UnhandledExceptionEventArgs e )
+static void OnUnhandledException( object? sender, UnhandledExceptionEventArgs e )
 {
     Console.WriteLine( $"\n Unhandled exception occurred: {e.ExceptionObject}\n" );
 }

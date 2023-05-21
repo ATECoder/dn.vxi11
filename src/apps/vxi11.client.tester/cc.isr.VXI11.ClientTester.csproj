@@ -8,6 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+    <!-- Assembly Info -->
     <RootNamespace>cc.isr.VXI11.ClientTester</RootNamespace>
     <AssemblyName>cc.isr.VXI11.ClientTester</AssemblyName>
 

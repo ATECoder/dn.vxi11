@@ -53,9 +53,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
     /// <param name="client">   The ONC/RPC client connection object implementing the particular
     ///                         protocol and program. </param>
     public InterruptChannelClient( OncRpcClientBase client ) : base( client )
-    {
-    }
-
+    { }
     /// <summary>
     /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptVersion"/>
     /// remote program can be accessed.
@@ -68,9 +66,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
     public InterruptChannelClient( IPAddress host, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.InterruptProgram,
                                                                                                    Vxi11ProgramConstants.InterruptVersion,
                                                                                                    0, protocol, timeout )
-    {
-    }
-
+    { }
     /// <summary>
     /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptProgram"/> 
     /// remote program can be accessed. 
@@ -85,9 +81,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
     public InterruptChannelClient( IPAddress host, int port, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.InterruptProgram,
                                                                                                        Vxi11ProgramConstants.InterruptVersion, port,
                                                                                                        protocol, timeout )
-    {
-    }
-
+    { }
     /// <summary>
     /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptProgram"/>
     /// remote program can be accessed.
@@ -103,9 +97,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
     ///                         or the connection timeout for <see cref="OncRpcProtocol.OncRpcTcp"/>. </param>
     public InterruptChannelClient( IPAddress host, int program, int version, int port, OncRpcProtocol protocol,
                                                                        int timeout ) : base( host, program, version, port, protocol, timeout )
-    {
-    }
-
+    { }
     #endregion
 
     #region " RPC actions "

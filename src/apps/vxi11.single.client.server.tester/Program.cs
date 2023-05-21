@@ -36,7 +36,7 @@ catch ( System.Exception e )
 //server.stopRpcProcessing();// stop the service
 Console.WriteLine( "VXI-11 IEEE 488 Server stopped." );
 
-static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
+static void OnThreadExcetion( object? sender, ThreadExceptionEventArgs e )
 {
     string name = "unknown";
     if ( sender is cc.isr.VXI11.Server.Vxi11Server ) name = nameof( cc.isr.VXI11.Server.Vxi11Server );
@@ -47,7 +47,7 @@ static void OnThreadExcetion( object sender, ThreadExceptionEventArgs e )
 
 #region " Unhandled exception handling "
 
-static void OnUnhandledException( object sender, UnhandledExceptionEventArgs e )
+static void OnUnhandledException( object? sender, UnhandledExceptionEventArgs e )
 {
     Console.WriteLine( $"\n Unhandled exception occurred: {e.ExceptionObject}\n" );
 }

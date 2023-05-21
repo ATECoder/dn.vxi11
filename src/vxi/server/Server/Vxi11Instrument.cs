@@ -952,9 +952,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// override this method when sub-classing this class to initialize values such as the identity.
     /// </remarks>
     public virtual void Initialize()
-    {
-    }
-
+    { }
     private bool _lockEnabled;
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
     /// <value> True if lock enabled, false if not. </value>

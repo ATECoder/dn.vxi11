@@ -207,13 +207,11 @@ public class Vxi11InstrumentClient : Vxi11Client
     /// <summary>   Override this method to handler the VXI-11 event. </summary>
     /// <param name="e">    Event information to send to registered event handlers. </param>
     protected virtual void OnServiceRequested( Vxi11EventArgs e )
-    {
-    }
-
+    { }
     /// <summary>   Filters and passes on the service request. </summary>
     /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        VXI-11 event information. </param>
-    private void HandleServiceRequest( object sender, Vxi11EventArgs e )
+    private void HandleServiceRequest( object? sender, Vxi11EventArgs e )
     {
         if ( e.ServiceRequestCodec.ClientId == this.ClientId ) this.OnServiceRequested( e );
     }

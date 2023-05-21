@@ -30,9 +30,7 @@ public class AbortChannelClient : OncRpcClientStubBase
     /// <param name="client">   The ONC/RPC client connection object implementing the particular
     ///                         protocol and program. </param>
     public AbortChannelClient( OncRpcClientBase client ) : base( client )
-    {
-    }
-
+    { }
     /// <summary>
     /// Constructs a <see cref="AbortChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.AsyncProgram"/>
     /// remote program can be accessed.
@@ -45,9 +43,7 @@ public class AbortChannelClient : OncRpcClientStubBase
     public AbortChannelClient( IPAddress host, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.AsyncProgram,
                                                                                                    Vxi11ProgramConstants.AsyncVersion,
                                                                                                    0, protocol, timeout )
-    {
-    }
-
+    { }
     /// <summary>
     /// Constructs a <see cref="AbortChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.AsyncProgram"/> 
     /// remote program can be accessed. 
@@ -62,9 +58,7 @@ public class AbortChannelClient : OncRpcClientStubBase
     public AbortChannelClient( IPAddress host, int port, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.AsyncProgram,
                                                                                                        Vxi11ProgramConstants.AsyncVersion, port,
                                                                                                        protocol, timeout )
-    {
-    }
-
+    { }
     /// <summary>
     /// Constructs a <see cref="AbortChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.AsyncProgram"/>
     /// remote program can be accessed.
@@ -80,9 +74,7 @@ public class AbortChannelClient : OncRpcClientStubBase
     ///                         or the connection timeout for <see cref="OncRpcProtocol.OncRpcTcp"/>. </param>
     public AbortChannelClient( IPAddress host, int program, int version, int port, OncRpcProtocol protocol,
                                                                         int timeout ) : base( host, program, version, port, protocol, timeout )
-    {
-    }
-
+    { }
     /// <summary>   Calls remote procedure <see cref="Vxi11Message.DeviceAbortProcedure"/>. </summary>
     /// <remarks>
     /// <para>

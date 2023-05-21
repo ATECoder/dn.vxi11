@@ -23,15 +23,11 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
 
     /// <summary>   Default constructor. </summary>
     public AbortChannelServer() : this( 0 )
-    {
-    }
-
+    { }
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
     public AbortChannelServer( int port ) : this( IPAddress.Any, port )
-    {
-    }
-
+    { }
     /// <summary>   Constructor. </summary>
     /// <param name="bindAddr"> The bind address. </param>
     /// <param name="port">     The port. </param>

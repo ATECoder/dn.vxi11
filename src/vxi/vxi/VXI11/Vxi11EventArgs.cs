@@ -14,9 +14,7 @@ public class Vxi11EventArgs : EventArgs
     /// </summary>
     /// <param name="handle">   The handle. </param>
     public Vxi11EventArgs( byte[] handle ) : this( Vxi11EventCodec.DecodeInstance( handle ) )
-    {
-    }
-
+    { }
     /// <summary>
     /// Creates a new <see cref="Vxi11EventArgs"/> object and initializes its state.
     /// </summary>

@@ -27,9 +27,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <param name="client">   The ONC/RPC client connection object implementing the particular
     ///                         protocol and program. </param>
     public CoreChannelClient( OncRpcClientBase client ) : base( client )
-    {
-    }
-
+    { }
     /// <summary>
     /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
     /// remote program can be accessed.
@@ -42,9 +40,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     public CoreChannelClient( IPAddress host, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.CoreProgram,
                                                                                                    Vxi11ProgramConstants.CoreVersion,
                                                                                                    0, protocol, timeout )
-    {
-    }
-
+    { }
     /// <summary>
     /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/> 
     /// remote program can be accessed. 
@@ -59,9 +55,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     public CoreChannelClient( IPAddress host, int port, OncRpcProtocol protocol, int timeout ) : this( host, Vxi11ProgramConstants.CoreProgram,
                                                                                                        Vxi11ProgramConstants.CoreVersion, port,
                                                                                                        protocol, timeout )
-    {
-    }
-
+    { }
     /// <summary>
     /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
     /// remote program can be accessed.
@@ -77,9 +71,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     ///                         or the connection timeout for <see cref="OncRpcProtocol.OncRpcTcp"/>. </param>
     public CoreChannelClient( IPAddress host, int program, int version, int port, OncRpcProtocol protocol,
                                                                        int timeout ) : base( host, program, version, port, protocol, timeout )
-    {
-    }
-
+    { }
     #endregion
 
     #region " default values "

@@ -21,9 +21,7 @@ public class CircularList<T> : List<T>
     /// </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
     private CircularList()
-    {
-    }
-
+    { }
     /// <summary>
     /// Creates a circular list with room for capacity of items. Extra items are removed upon adding new items
     /// beyond the capacity.

@@ -61,7 +61,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     void EnableInterrupt( int linkId, bool enable, byte[] handle );
 
     /// <summary>   Event queue for all listeners interested in <see cref="RequestingService"/> events. </summary>
-    event EventHandler<Vxi11EventArgs> RequestingService;
+    event EventHandler<Vxi11EventArgs>? RequestingService;
 
     #endregion
 

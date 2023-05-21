@@ -171,7 +171,7 @@ to discover all the instruments listening on the local IPs of this machine.
     /// <summary>   Raises the thread exception event. </summary>
     /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        Event information to send to registered event handlers. </param>
-    internal static void OnThreadException( object sender, ThreadExceptionEventArgs e )
+    internal static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
     {
         string name = "unknown";
         if ( sender is cc.isr.VXI11.Client.Vxi11Client ) name = nameof( cc.isr.VXI11.Client.Vxi11Client );

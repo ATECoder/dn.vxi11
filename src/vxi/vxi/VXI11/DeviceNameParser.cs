@@ -6,9 +6,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
 
     /// <summary>   Default constructor. </summary>
     public DeviceNameParser() : this( string.Empty )
-    {
-    }
-
+    { }
     /// <summary>   Constructor. </summary>
     /// <param name="deviceName">  The device name, e.g., <c>gpib0,12,8</c>. </param>
     public DeviceNameParser( string deviceName )

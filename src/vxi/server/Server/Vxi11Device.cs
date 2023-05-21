@@ -136,7 +136,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <summary>   Filters and passes on the service request. </summary>
     /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        VXI-11 event information. </param>
-    private void OnRequestingService( object sender, Vxi11EventArgs e )
+    private void OnRequestingService( object? sender, Vxi11EventArgs e )
     {
         // the servicing goes to all clients where the client filtering goes.
         // if ( e.ServiceRequestCodec.ClientId == this.ClientId ) { this.OnRequestingService( e ); }
@@ -247,7 +247,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <remarks>   2023-02-09. </remarks>
     /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        Event information to send to registered event handlers. </param>
-    private void OnInstrumentPropertyChanged( object sender, PropertyChangedEventArgs e )
+    private void OnInstrumentPropertyChanged( object? sender, PropertyChangedEventArgs e )
     {
         if ( sender is not IVxi11Instrument ) return;
         this.OnInstrumentPropertyChanged( ( IVxi11Instrument ) sender, e.PropertyName );
@@ -399,7 +399,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <remarks>   2023-02-09. </remarks>
     /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        Event information to send to registered event handlers. </param>
-    private void OnInterfacePropertyChanged( object sender, PropertyChangedEventArgs e )
+    private void OnInterfacePropertyChanged( object? sender, PropertyChangedEventArgs e )
     {
         if ( sender is not IVxi11Interface ) return;
         this.OnInterfacePropertyChanged( ( IVxi11Interface ) sender, e.PropertyName );

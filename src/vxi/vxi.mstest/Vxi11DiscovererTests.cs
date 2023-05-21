@@ -15,9 +15,10 @@ public class Vxi11DiscovererTests
     #region " fixture Construction and Cleanup "
 
     /// <summary>   Initializes the fixture. </summary>
-    /// <param name="context">  The context. </param>
+    /// <param name="testContext"> Gets or sets the test context which provides information about
+    /// and functionality for the current test run. </param>
     [ClassInitialize]
-    public static void InitializeFixture( TestContext context )
+    public static void InitializeFixture( TestContext testContext )
     {
         try
         {
@@ -39,6 +40,11 @@ public class Vxi11DiscovererTests
         }
     }
 
+    /// <summary>
+    /// Gets or sets the test context which provides information about and functionality for the
+    /// current test run.
+    /// </summary>
+    /// <value> The test context. </value>
     public TestContext? TestContext { get; set; }
 
     private static TestContext? _classTestContext;
@@ -113,16 +119,16 @@ public class Vxi11DiscovererTests
     #region " port map tests "
 
     private static readonly string[] _visaResourceNames = new string[] {
-                                                "TCPIP0::192.168.0.50::inst0::INSTR",
-                                                "TCPIP0::192.168.0.132::inst0::INSTR",
-                                                "TCPIP0::192.168.0.134::inst0::INSTR",
-                                                "TCPIP0::192.168.0.136::inst0::INSTR",
-                                                "TCPIP0::192.168.0.144::inst0::INSTR",
-                                                "TCPIP0::192.168.0.146::inst0::INSTR",
-                                                "TCPIP0::192.168.0.148::inst0::INSTR",
-                                                "TCPIP0::192.168.0.150::inst0::INSTR",
-                                                "TCPIP0::192.168.0.152::inst0::INSTR",
-                                                "TCPIP0::192.168.0.154::inst0::INSTR",
+                                                "TCPIP0::192.168.0.50::INST0::INSTR",
+                                                "TCPIP0::192.168.0.132::INST0::INSTR",
+                                                "TCPIP0::192.168.0.134::INST0::INSTR",
+                                                "TCPIP0::192.168.0.136::INST0::INSTR",
+                                                "TCPIP0::192.168.0.144::INST0::INSTR",
+                                                "TCPIP0::192.168.0.146::INST0::INSTR",
+                                                "TCPIP0::192.168.0.148::INST0::INSTR",
+                                                "TCPIP0::192.168.0.150::INST0::INSTR",
+                                                "TCPIP0::192.168.0.152::INST0::INSTR",
+                                                "TCPIP0::192.168.0.154::INST0::INSTR",
                                                 "TCPIP0::192.168.0.254::gpib0,4::INSTR",
                                                 "TCPIP0::192.168.0.254::gpib0,7::INSTR",
                                                 "TCPIP0::192.168.0.254::gpib0,15::INSTR",

@@ -8,6 +8,7 @@
     <Nullable>enable</Nullable>
 
     <AssemblyName>cc.isr.VXI11.Server</AssemblyName>
+    <!-- Assembly Info -->
     <RootNamespace>cc.isr.VXI11</RootNamespace>
 
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -28,8 +29,6 @@
 
     <!-- Documentation -->
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
   </PropertyGroup>
 

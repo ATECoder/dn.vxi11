@@ -19,9 +19,7 @@ public class Vxi11Server : CoreChannelServerBase
 
     /// <summary>   Default constructor. </summary>
     public Vxi11Server() : this( new Vxi11Device( new Vxi11InstrumentFactory(), new Vxi11InterfaceFactory() ), IPAddress.Any, 0 )
-    {
-    }
-
+    { }
     /// <summary>   Constructor. </summary>
     /// <param name="device">   current device. </param>
     /// <param name="bindAddr"> The local Internet Address the server will bind to. </param>
@@ -139,7 +137,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// <remarks>   2023-01-26. </remarks>
     /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        Device error event information. </param>
-    private void HandleAbortRequest( object sender, DeviceErrorEventArgs e )
+    private void HandleAbortRequest( object? sender, DeviceErrorEventArgs e )
     {
         if ( this.Device is null ) return;
         this.Device.HandleAbortRequest( e );
@@ -332,7 +330,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// <remarks>   2023-02-09. </remarks>
     /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        Event information to send to registered event handlers. </param>
-    private void OnRequestingService( object sender, Vxi11EventArgs e )
+    private void OnRequestingService( object? sender, Vxi11EventArgs e )
     {
         this.OnRequestingService( e );
     }
@@ -366,7 +364,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// <value> A reference to the implemented <see cref="IVxi11Device"/> VXI-11 device. </value>
     public IVxi11Device? Device { get; private set; }
 
-    private void OnDevicePropertyChanged( object sender, PropertyChangedEventArgs e )
+    private void OnDevicePropertyChanged( object? sender, PropertyChangedEventArgs e )
     {
         if ( sender is not IVxi11Device ) return;
         this.OnDevicePropertyChanged( ( IVxi11Device ) sender, e.PropertyName );

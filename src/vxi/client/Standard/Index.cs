@@ -3,6 +3,8 @@
 
 using System.Runtime.CompilerServices;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+
 namespace System;
 
 /// <summary>
