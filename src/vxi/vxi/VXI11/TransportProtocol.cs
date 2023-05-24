@@ -6,11 +6,11 @@ namespace cc.isr.VXI11
     /// for <see cref="Vxi11Message.CreateInterruptChannelProcedure"/>RPC. </summary>
     /// <remarks> <para> 
     /// 
-    /// Renamed from <c>Device_AddrFamily</c>. </para><para>
+    /// Renamed from <c>Device_addrFamily</c>. </para><para>
     /// 
     /// LXI-11 Specification: </para>
     /// <code>
-    /// enum Device_AddrFamily { /* used by interrupts */
+    /// enum Device_addrFamily { /* used by interrupts */
     /// DEVICE_TCP,
     /// DEVICE_UDP
     /// };

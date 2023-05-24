@@ -12,7 +12,7 @@ namespace cc.isr.VXI11;
 public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispatchable
 {
 
-    #region " Construction and Cleanup "
+    #region " construction and cleanup "
 
     /// <summary>   Default constructor. </summary>
     public CoreChannelServerBase() : this( 0 )
@@ -219,7 +219,7 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
 
     #endregion
 
-    #region " VXI-11 procedure calls. "
+    #region " vxi-11 procedure calls. "
 
     /// <summary>  Opens a link to a device. </summary>
     /// <remarks> Renamed from <c>create_link_1</c> </remarks>

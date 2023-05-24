@@ -455,7 +455,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     #endregion
 
-    #region " Sending interrupts (service requests) to the clients "
+    #region " sending interrupts (service requests) to the clients "
 
     /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
     /// <value> True if interrupt enabled, false if not. </value>
@@ -497,7 +497,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     #endregion
 
-    #region " RPC implementations "
+    #region " rpc implementations "
 
     /// <summary>   Aborts and returns the <see cref="DeviceErrorCode"/>. </summary>
     /// <remarks>
@@ -529,7 +529,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     #endregion
 
-    #region " I/O operations "
+    #region " i/o operations "
 
     /// <summary>   Read a message. </summary>
     /// <remarks>
@@ -877,7 +877,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     #endregion
 
-    #region " RPC operation members "
+    #region " rpc operation members "
 
     /// <summary>   Gets or sets the last device error. </summary>
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>

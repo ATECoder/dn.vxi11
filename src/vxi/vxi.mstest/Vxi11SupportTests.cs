@@ -12,7 +12,7 @@ namespace cc.isr.VXI11.MSTest;
 public class Vxi11SupportTests
 {
 
-    #region " fixture Construction and Cleanup "
+    #region " fixture construction and cleanup "
 
     /// <summary>   Initializes the fixture. </summary>
     /// <param name="testContext"> Gets or sets the test context which provides information about
@@ -75,7 +75,7 @@ public class Vxi11SupportTests
 
     #endregion
 
-    #region " IP Address "
+    #region " ip address "
     private static void AssertIPAddressShouldRestoreFromUnsignedIntegerValue( IPAddress address )
     {
         uint unsignedIntAddress = address.ToUInt();

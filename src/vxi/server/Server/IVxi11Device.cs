@@ -30,7 +30,7 @@ namespace cc.isr.VXI11.Server;
 public interface IVxi11Device : INotifyPropertyChanged
 {
 
-    #region " Abort server "
+    #region " abort server "
 
     /// <summary>   Gets or sets the abort port number. </summary>
     /// <value> The abortPort number. </value>
@@ -42,7 +42,7 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     #endregion
 
-    #region " Interrupt port and client "
+    #region " interrupt port and client "
 
     /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
     /// <value> True if interrupt enabled, false if not. </value>
@@ -65,7 +65,7 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     #endregion
 
-    #region " I/O messages "
+    #region " i/o messages "
 
     /// <summary>   Gets or sets the last device error. </summary>
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
@@ -129,7 +129,7 @@ public interface IVxi11Device : INotifyPropertyChanged
 
     #endregion
 
-    #region " LXI-11 ONC/RPC Calls "
+    #region " lxi-11 onc/rpc calls "
 
     /// <summary>   Create a device connection; Opens a link to a device. </summary>
     /// <remarks>

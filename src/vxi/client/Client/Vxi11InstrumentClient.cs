@@ -12,7 +12,7 @@ namespace cc.isr.VXI11.Client;
 public class Vxi11InstrumentClient : Vxi11Client
 {
 
-    #region " Construction and Cleanup "
+    #region " construction and cleanup "
 
     /// <summary>
     /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
@@ -69,7 +69,7 @@ public class Vxi11InstrumentClient : Vxi11Client
 
     #endregion
 
-    #region " VXI-11 call implementations: Instrument "
+    #region " vxi-11 call implementations: instrument "
 
     /// <summary>
     /// Creates interrupt channel and starts the <see cref="InterruptChannelServer"/>.

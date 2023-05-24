@@ -34,7 +34,7 @@ namespace cc.isr.VXI11.Server;
 public partial class Vxi11Instrument : IVxi11Instrument
 {
 
-    #region " Construction and Cleanup "
+    #region " construction and cleanup "
 
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-14. </remarks>
@@ -892,7 +892,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     #endregion
 
-    #region " Sending interrupts (service requests) to the clients "
+    #region " sending interrupts (service requests) to the clients "
 
     private bool _interruptEnabled;
     /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
@@ -973,7 +973,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     #endregion
 
-    #region " RPC implementations "
+    #region " rpc implementations "
 
     /// <summary>   Aborts and returns the <see cref="DeviceError"/>. </summary>
     /// <remarks>
@@ -1022,7 +1022,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     #endregion
 
-    #region " I/O operations "
+    #region " i/o operations "
 
     /// <summary>   The current operation instruction type. </summary>
     /// <value> The type of the current operation. </value>
@@ -1586,7 +1586,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     #endregion
 
-    #region " RPC operation members "
+    #region " rpc operation members "
 
     /// <summary>   Gets or sets the i/o message capacity. </summary>
     /// <value> The i/o message capacity. </value>

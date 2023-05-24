@@ -129,7 +129,7 @@ public interface IVxi11Interface : INotifyPropertyChanged
 
     #endregion
 
-    #region " Interface methods "
+    #region " interface methods "
 
     /// <summary>   Sends a command; <see cref="InterfaceCommand.SendCommand"/> </summary>
     /// <param name="data"> The data. </param>
@@ -203,7 +203,7 @@ public interface IVxi11Interface : INotifyPropertyChanged
 
     #endregion
 
-    #region " RPC operation members "
+    #region " rpc operation members "
 
     /// <summary>   Query if 'command' is supported command. </summary>
     /// <remarks>   2023-02-10. </remarks>

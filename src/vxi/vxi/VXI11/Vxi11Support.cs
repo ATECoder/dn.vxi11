@@ -48,7 +48,7 @@ public static class Vxi11Support
         return ipAddress;
     }
 
-    #region " IP Address converters "
+    #region " ip address converters "
 
     /// <summary>   An <see cref="IPAddress"/> extension method that converts the address to an <see cref="uint"/>. </summary>
     /// <remarks>

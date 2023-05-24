@@ -6,7 +6,7 @@ namespace cc.isr.VXI11.Client;
 public class Vxi11InterfaceClient : Vxi11Client
 {
 
-    #region " Construction and Cleanup "
+    #region " construction and cleanup "
 
     /// <summary>   Connects. </summary>
     /// <remarks>   2023-02-08. </remarks>
@@ -26,7 +26,7 @@ public class Vxi11InterfaceClient : Vxi11Client
 
     #endregion
 
-    #region " VXI-11 commands "
+    #region " vxi-11 commands "
 
     /// <summary>   Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParms)"/>
     /// RPC Call. </summary>
@@ -110,7 +110,7 @@ public class Vxi11InterfaceClient : Vxi11Client
 
     #endregion
 
-    #region " Interface methods "
+    #region " interface methods "
 
     /// <summary>   Sends a command. </summary>
     /// <param name="data"> The data. </param>
@@ -202,7 +202,7 @@ public class Vxi11InterfaceClient : Vxi11Client
 
     #endregion
 
-    #region " Set bus commands "
+    #region " set bus commands "
 
     /// <summary>   Set ATN line. </summary>
     /// <remarks>

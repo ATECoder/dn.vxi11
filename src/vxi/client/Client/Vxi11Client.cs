@@ -334,7 +334,7 @@ public partial class Vxi11Client : ICloseable
 
     #endregion
 
-    #region " VXI-11 members "
+    #region " vxi-11 members "
 
     /// <summary>   Gets or sets the Core client. </summary>
     protected CoreChannelClient? CoreClient { get; set; }
@@ -829,7 +829,7 @@ public partial class Vxi11Client : ICloseable
 
     #endregion
 
-    #region " Write "
+    #region " write "
 
     /// <summary>   Sends a message to the VXI-11 server using <see cref="WriteRaw(string, bool)"/>. </summary>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
@@ -895,7 +895,7 @@ public partial class Vxi11Client : ICloseable
 
     #endregion
 
-    #region " Read "
+    #region " read "
 
     /// <summary>   Receives a message from the VXI-11 server using <see cref="ReadRaw(int)"/>. </summary>
     /// <exception cref="DeviceException">  Thrown when an OncRpc error condition occurs. </exception>
@@ -978,7 +978,7 @@ public partial class Vxi11Client : ICloseable
 
     #endregion
 
-    #region " Query "
+    #region " query "
 
     /// <summary>   Sends a query message to and receives a message from the VXI-11 server. </summary>
     /// <remarks>   2023-02-01. </remarks>
@@ -1115,7 +1115,7 @@ public partial class Vxi11Client : ICloseable
 
     #endregion
 
-    #region " VXI-11 call implementations: Client "
+    #region " vxi-11 call implementations: client "
 
     /// <summary>   Creates a link. </summary>
     /// <remarks>   2023-02-07. </remarks>

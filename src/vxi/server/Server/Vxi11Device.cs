@@ -30,7 +30,7 @@ namespace cc.isr.VXI11.Server;
 public partial class Vxi11Device : IVxi11Device
 {
 
-    #region " Construction and Cleanup "
+    #region " construction and cleanup "
 
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-09. </remarks>
@@ -366,7 +366,7 @@ public partial class Vxi11Device : IVxi11Device
 
     #endregion
 
-    #region " Interface management "
+    #region " interface management "
 
     private Vxi11InterfaceFactory InterfaceFactory { get; }
 
@@ -445,7 +445,7 @@ public partial class Vxi11Device : IVxi11Device
 
     #endregion
 
-    #region " LXI-11 ONC/RPC Calls "
+    #region " lxi-11 onc/rpc calls "
 
     private DeviceErrorCode _lastDeviceError;
     /// <summary>   Gets or sets the last device error. </summary>

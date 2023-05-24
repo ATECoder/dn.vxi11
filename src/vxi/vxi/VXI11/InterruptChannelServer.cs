@@ -15,7 +15,7 @@ public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     /// <summary>   The interrupt port default. </summary>
     public static int InterruptPortDefault = 1099;
 
-    #region " Construction and Cleanup "
+    #region " construction and cleanup "
 
     /// <summary>   Default constructor. </summary>
     public InterruptChannelServer() : this( 0 )

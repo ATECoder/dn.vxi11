@@ -93,7 +93,7 @@ static void OnThreadExcetion( object? sender, ThreadExceptionEventArgs e )
 }
 
 
-#region " Unhandled exception handling "
+#region " unhandled exception handling "
 
 static void OnUnhandledException( object? sender, UnhandledExceptionEventArgs e )
 {

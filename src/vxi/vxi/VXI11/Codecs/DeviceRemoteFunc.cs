@@ -19,13 +19,13 @@ namespace cc.isr.VXI11.Codecs;
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
-/// enum Device_AddrFamily {DEVICE_TCP, DEVICE_UDP};/* used by interrupts*
+/// enum Device_addrFamily {DEVICE_TCP, DEVICE_UDP};/* used by interrupts*
 /// struct Device_RemoteFunc {
 ///    unsigned long hostAddr;       /* Host servicing Interrupt */
 ///    unsigned short hostPort;      /* valid port # on client */
 ///    unsigned long progNum;        /* DEVICE_INTR */
 ///    unsigned long progVers;       /* DEVICE_INTR_VERSION */
-///    Device_AddrFamily progFamily; /* DEVICE_UDP | DEVICE_TCP */
+///    Device_addrFamily progFamily; /* DEVICE_UDP | DEVICE_TCP */
 /// };
 /// </code>
 /// </remarks>
@@ -99,7 +99,7 @@ public class DeviceRemoteFunc : IXdrCodec
     /// that some <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPCs might not arrive at all
     /// or that they might arrive out of order. <para>
     /// 
-    /// The VXI specifications defines this value as an Enum called `Device_AddrFamily`.
+    /// The VXI specifications defines this value as an Enum called `Device_addrFamily`.
     /// </para>
     /// </remarks>
     /// <value> The <see cref="VXI11.TransportProtocol"/>. </value>

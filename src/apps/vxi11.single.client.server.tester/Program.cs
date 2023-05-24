@@ -45,7 +45,7 @@ static void OnThreadExcetion( object? sender, ThreadExceptionEventArgs e )
     Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
 }
 
-#region " Unhandled exception handling "
+#region " unhandled exception handling "
 
 static void OnUnhandledException( object? sender, UnhandledExceptionEventArgs e )
 {

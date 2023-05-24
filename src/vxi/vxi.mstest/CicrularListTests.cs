@@ -10,7 +10,7 @@ namespace cc.isr.VXI11.MSTest;
 public class CircularListTests
 {
 
-    #region " Fixture Construction and Cleanup "
+    #region " fixture construction and cleanup "
 
     /// <summary>   Initializes the fixture. </summary>
     /// <param name="testContext"> Gets or sets the test context which provides information about
@@ -65,7 +65,7 @@ public class CircularListTests
 
     #endregion
 
-    #region " TEST METHODS "
+    #region " test methods "
 
     /// <summary>   (Unit Test Method) circular list should fill. </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
