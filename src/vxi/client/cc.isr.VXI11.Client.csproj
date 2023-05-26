@@ -7,9 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <AssemblyName>cc.isr.VXI11.Client</AssemblyName>
     <!-- Assembly Info -->
     <RootNamespace>cc.isr.VXI11</RootNamespace>
+    <AssemblyName>cc.isr.VXI11.Client</AssemblyName>
 
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <OutputType>Library</OutputType>
