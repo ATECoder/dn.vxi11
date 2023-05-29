@@ -11,11 +11,7 @@
     <!-- Assembly Info -->
     <RootNamespace>cc.isr.VXI11.Discover</RootNamespace>
     <AssemblyName>cc.isr.VXI11.Discover</AssemblyName>
-
-    <!-- Display name -->
     <ApplicationTitle>cc.isr.VXI11.Discover</ApplicationTitle>
-
-    <!-- App Identifier -->
     <ApplicationId>cc.isr.vxi11.Discover</ApplicationId>
 
   </PropertyGroup>

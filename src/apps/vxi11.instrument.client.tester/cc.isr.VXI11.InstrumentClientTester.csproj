@@ -11,11 +11,7 @@
     <!-- Assembly Info -->
     <RootNamespace>cc.isr.VXI11.Vxi11InstrumentClientTester</RootNamespace>
     <AssemblyName>cc.isr.VXI11.Vxi11InstrumentClientTester</AssemblyName>
-
-    <!-- Display name -->
     <ApplicationTitle>cc.isr.VXI11.Vxi11InstrumentClientTester</ApplicationTitle>
-
-    <!-- App Identifier -->
     <ApplicationId>cc.isr.vxi11.Vxi11InstrumentClientTester</ApplicationId>
 
   </PropertyGroup>

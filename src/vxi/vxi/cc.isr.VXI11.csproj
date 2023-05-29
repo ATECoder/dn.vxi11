@@ -2,39 +2,64 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Library</OutputType>
     <LangVersion>latest</LangVersion>
 
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+
     <!-- Assembly Info -->
     <RootNamespace>cc.isr</RootNamespace>
     <AssemblyName>cc.isr.VXI11</AssemblyName>
+    <ApplicationTitle>cc.isr.VXI11</ApplicationTitle>
+    <ApplicationId>cc.isr.vxi11</ApplicationId>
 
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <OutputType>Library</OutputType>
-    <NoWarn>1591</NoWarn>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 
-    <!-- Display name -->
-    <ApplicationTitle>cc.isr.VXI11</ApplicationTitle>
+    <!-- Coding -->
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>On</OptionStrict>
+    <OptionInfer>Off</OptionInfer>
 
-    <!-- App Identifier -->
-    <ApplicationId>cc.isr.vxi11</ApplicationId>
+    <!-- Signature -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\items\keyPair.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
 
     <!-- NuGet -->
     <IsPackable>true</IsPackable>
     <PackageId>cc.isr.VXI11</PackageId>
     <Description>A pure C# implementation of the VXI-11 protocol.</Description>
     <PackageTags>VXI-11</PackageTags>
+    <PackageOutputPath>C:\my\nuget</PackageOutputPath>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
     <!-- Documentation -->
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\oncrpc\src\rpc\oncrpc\cc.isr.ONC.RPC.csproj" />
-  </ItemGroup>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);MYPROJREF;</DefineConstants>
+  </PropertyGroup>
+
+  <Choose>
+    <When Condition="$(DefineConstants.Contains(';PROJREF;')) OR $(DefineConstants.Contains(';MYPROJREF;'))">
+	  <ItemGroup>
+		<ProjectReference Include="..\..\..\..\oncrpc\src\rpc\oncrpc\cc.isr.ONC.RPC.csproj" />
+	  </ItemGroup>
+    </When>
+    <Otherwise>
+	    <ItemGroup>
+        <PackageReference Include="cc.isr.ONC.RPC" Version="1.0.0" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
 
   <ItemGroup>
     <None Include="..\..\items\readme.md" Pack="true" PackagePath="" />

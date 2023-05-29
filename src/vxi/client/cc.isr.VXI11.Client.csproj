@@ -2,38 +2,59 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Library</OutputType>
     <LangVersion>latest</LangVersion>
 
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+
     <!-- Assembly Info -->
     <RootNamespace>cc.isr.VXI11</RootNamespace>
     <AssemblyName>cc.isr.VXI11.Client</AssemblyName>
-
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <OutputType>Library</OutputType>
-    <NoWarn>1591</NoWarn>
-
-    <!-- Display name -->
     <ApplicationTitle>cc.isr.VXI11.Client</ApplicationTitle>
-
-    <!-- App Identifier -->
     <ApplicationId>cc.isr.vxi11.client</ApplicationId>
+
+    <!-- Coding -->
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>On</OptionStrict>
+    <OptionInfer>Off</OptionInfer>
+
+    <!-- Signature -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\items\keyPair.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
 
     <!-- NuGet -->
     <IsPackable>true</IsPackable>
     <PackageId>cc.isr.VXI11.Client</PackageId>
     <Description>A pure C# implementation of VXI-11 clients.</Description>
     <PackageTags>VXI-11 Client</PackageTags>
+    <PackageOutputPath>C:\my\nuget</PackageOutputPath>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
     <!-- Documentation -->
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\vxi\cc.isr.VXI11.csproj" />
-  </ItemGroup>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);MYPROJREF;</DefineConstants>
+  </PropertyGroup>
+
+  <Choose>
+    <When Condition="$(DefineConstants.Contains(';PROJREF;')) OR $(DefineConstants.Contains(';MYPROJREF;'))">
+	  <ItemGroup>
+		<ProjectReference Include="..\vxi\cc.isr.VXI11.csproj" />
+	  </ItemGroup>
+    </When>
+    <Otherwise>
+	    <ItemGroup>
+        <PackageReference Include="cc.isr.VXI11" Version="1.0.0" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
 
 </Project>

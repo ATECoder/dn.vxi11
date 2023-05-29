@@ -2,30 +2,41 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
+     <OutputType>Library</OutputType>
+   <LangVersion>latest</LangVersion>
 
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
     <!-- Assembly Info -->
     <RootNamespace>cc.isr.VXI11</RootNamespace>
-   <AssemblyName>cc.isr.VXI11.Server</AssemblyName>
- 
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <OutputType>Library</OutputType>
-    <NoWarn>1591</NoWarn>
-
-    <!-- Display name -->
+    <AssemblyName>cc.isr.VXI11.Server</AssemblyName>
     <ApplicationTitle>cc.isr.VXI11.Server</ApplicationTitle>
-
-    <!-- App Identifier -->
     <ApplicationId>cc.isr.vxi11.server</ApplicationId>
+
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+
+    <!-- Coding -->
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>On</OptionStrict>
+    <OptionInfer>Off</OptionInfer>
+
+    <!-- Signature -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\items\keyPair.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
 
     <!-- NuGet -->
     <IsPackable>true</IsPackable>
     <PackageId>cc.isr.VXI11.Client</PackageId>
     <Description>A pure C# implementation of VXI-11 servers, instruments and interfaces.</Description>
     <PackageTags>VXI-11 Client</PackageTags>
+    <PackageOutputPath>C:\my\nuget</PackageOutputPath>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
     <!-- Documentation -->
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
