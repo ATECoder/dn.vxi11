@@ -3,14 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "~items", "~items", "{D245DFF2-72CA-4541-A96E-895D97687E65}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "`docs", "`docs", "{D245DFF2-72CA-4541-A96E-895D97687E65}"
 	ProjectSection(SolutionItems) = preProject
 		cc.isr.Vxi11.sln.vsspell = cc.isr.Vxi11.sln.vsspell
 		..\CHANGELOG.md = ..\CHANGELOG.md
 		..\LICENSE-CODE = ..\LICENSE-CODE
 		..\README.md = ..\README.md
 		items\readme.md = items\readme.md
+		..\TODO.md = ..\TODO.md
 		..\VXI-11.md = ..\VXI-11.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "`build", "`build", "{F92F2C4E-9126-45AD-89F4-6104551ADEDA}"
+	ProjectSection(SolutionItems) = preProject
+		directory.build.props = directory.build.props
+		items\version.build.bat = items\version.build.bat
+		items\version.build.props = items\version.build.props
+		items\version.build.tt = items\version.build.tt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vxi", "vxi", "{B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}"
@@ -41,14 +50,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xdr", "xdr", "{3BC97BEF-E1E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.ONC.RPC.MSTest", "..\..\oncrpc\src\rpc\oncrpc.mstest\cc.isr.ONC.RPC.MSTest.csproj", "{5868BF4C-64EF-4334-BA1A-764F33FCF4D2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "~build", "~build", "{F92F2C4E-9126-45AD-89F4-6104551ADEDA}"
-	ProjectSection(SolutionItems) = preProject
-		directory.build.props = directory.build.props
-		items\version.build.bat = items\version.build.bat
-		items\version.build.props = items\version.build.props
-		items\version.build.tt = items\version.build.tt
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.MSTest", "vxi\vxi.mstest\cc.isr.VXI11.MSTest.csproj", "{589B8B25-BFD9-4A6A-B0CD-7797B16C31D8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.Discover", "apps\lxi.discover\cc.isr.VXI11.Discover.csproj", "{26B0B22B-025B-4EFD-AD29-30CC62862E5D}"
@@ -62,8 +63,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.Client", "vxi\client\cc.isr.VXI11.Client.csproj", "{B682BAB9-179C-414C-9E85-56AA050CC2BD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.Server", "vxi\server\cc.isr.VXI11.Server.csproj", "{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cc.isr.VXI11.AsyncEventHandlersTester", "apps\vxi11.AsyncEventHandlersTester\cc.isr.VXI11.AsyncEventHandlersTester.csproj", "{12D6CC35-2D57-406C-B5B2-3985BB3FA76B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,10 +118,6 @@ Global
 		{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{12D6CC35-2D57-406C-B5B2-3985BB3FA76B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12D6CC35-2D57-406C-B5B2-3985BB3FA76B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12D6CC35-2D57-406C-B5B2-3985BB3FA76B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12D6CC35-2D57-406C-B5B2-3985BB3FA76B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -140,7 +135,6 @@ Global
 		{74045BB9-86DC-4BD4-9074-4CA124C91E42} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
 		{B682BAB9-179C-414C-9E85-56AA050CC2BD} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
 		{3A88CDBB-184D-47A8-9864-DE6C8BD97BFB} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
-		{12D6CC35-2D57-406C-B5B2-3985BB3FA76B} = {B43E7D88-74B0-40CA-B997-F8CF2CD24DCC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A0429F81-8254-4C93-A727-249FEAC06071}

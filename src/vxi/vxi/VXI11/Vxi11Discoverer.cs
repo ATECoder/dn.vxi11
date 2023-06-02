@@ -5,7 +5,6 @@ using System.Net.Sockets;
 using cc.isr.ONC.RPC.Client;
 using cc.isr.ONC.RPC.Codecs;
 using cc.isr.ONC.RPC.Portmap;
-using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11;
 
@@ -29,7 +28,7 @@ public class Vxi11Discoverer
 
         var handler = ThreadExceptionOccurred;
         if ( handler is null )
-            Logger.Writer.LogError( $"Thread exception", e.Exception );
+            Logger?.LogError( $"Thread exception", e.Exception );
 
         handler?.Invoke( sender, e );
     }
@@ -163,7 +162,7 @@ public class Vxi11Discoverer
             foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
             {
                 IPAddress[] addresses = EnumerateAddresses( broadcastIP );
-                Logger.Writer.LogVerbose( $"{nameof( ListCoreDevicesEndpoints )} scanning {addresses.Length} addresses at {broadcastIP}" );
+                Logger?.LogVerbose( $"{nameof( ListCoreDevicesEndpoints )} scanning {addresses.Length} addresses at {broadcastIP}" );
                 endpoints.AddRange( ListCoreDevicesEndpoints( addresses, ioTimeout, startEmbeddedPortmapService, true ) );
                 startEmbeddedPortmapService = false;
             }
@@ -172,7 +171,7 @@ public class Vxi11Discoverer
         else
         {
             IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
-            Logger.Writer.LogVerbose( $"{nameof( ListCoreDevicesEndpoints )} scanning {addresses.Length} addresses at {broadcastAddress}" );
+            Logger?.LogVerbose( $"{nameof( ListCoreDevicesEndpoints )} scanning {addresses.Length} addresses at {broadcastAddress}" );
             return ListCoreDevicesEndpoints( addresses, ioTimeout, startEmbeddedPortmapService, true );
         }
     }
@@ -198,7 +197,7 @@ public class Vxi11Discoverer
             foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
             {
                 IPAddress[] addresses = EnumerateAddresses( broadcastIP );
-                Logger.Writer.LogVerbose( $"{nameof( ListCoreDevicesAddresses )} scanning {addresses.Length} addresses at {broadcastIP}" );
+                Logger?.LogVerbose( $"{nameof( ListCoreDevicesAddresses )} scanning {addresses.Length} addresses at {broadcastIP}" );
                 ips.AddRange( ListCoreDevicesAddresses( addresses, ioTimeout, startEmbeddedPortmapService ) );
                 startEmbeddedPortmapService = false;
             }
@@ -207,7 +206,7 @@ public class Vxi11Discoverer
         else
         {
             IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
-            Logger.Writer.LogVerbose( $"{nameof( ListCoreDevicesAddresses )} scanning {addresses.Length} addresses at {broadcastAddress}" );
+            Logger?.LogVerbose( $"{nameof( ListCoreDevicesAddresses )} scanning {addresses.Length} addresses at {broadcastAddress}" );
             return ListCoreDevicesAddresses( addresses, ioTimeout, startEmbeddedPortmapService );
         }
     }
@@ -320,7 +319,7 @@ public class Vxi11Discoverer
             foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
             {
                 IPAddress[] addresses = EnumerateAddresses( broadcastIP );
-                Logger.Writer.LogVerbose( $"{nameof( EnumerateRegisteredServers )} scanning {addresses.Length} addresses at {broadcastIP}" );
+                Logger?.LogVerbose( $"{nameof( EnumerateRegisteredServers )} scanning {addresses.Length} addresses at {broadcastIP}" );
                 endpoints.AddRange( EnumerateRegisteredServers( addresses, timeout, startEmbeddedPortmapService ) );
                 startEmbeddedPortmapService = false;
             }
@@ -329,7 +328,7 @@ public class Vxi11Discoverer
         else
         {
             IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
-            Logger.Writer.LogVerbose( $"{nameof( EnumerateRegisteredServers )} scanning {addresses.Length} addresses at {broadcastAddress}" );
+            Logger?.LogVerbose( $"{nameof( EnumerateRegisteredServers )} scanning {addresses.Length} addresses at {broadcastAddress}" );
             return EnumerateRegisteredServers( addresses, timeout, startEmbeddedPortmapService );
         }
     }

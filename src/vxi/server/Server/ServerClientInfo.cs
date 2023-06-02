@@ -1,5 +1,3 @@
-using System.Collections;
-
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;
@@ -15,7 +13,7 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
     public ServerClientInfo( CreateLinkParms createLinkParameters, int linkId )
     {
         // ensure that we have a valid link parameters.
-        if ( string.IsNullOrWhiteSpace( createLinkParameters.DeviceName  ))
+        if ( string.IsNullOrWhiteSpace( createLinkParameters.DeviceName ) )
             throw new ArgumentException( $"{nameof( createLinkParameters.DeviceName )} must be specified", nameof( createLinkParameters ) );
         this.ClientId = createLinkParameters.ClientId;
         this.DeviceName = createLinkParameters.DeviceName;

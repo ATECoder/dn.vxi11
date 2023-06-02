@@ -72,6 +72,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     public CoreChannelClient( IPAddress host, int program, int version, int port, OncRpcProtocol protocol,
                                                                        int timeout ) : base( host, program, version, port, protocol, timeout )
     { }
+
     #endregion
 
     #region " default values "

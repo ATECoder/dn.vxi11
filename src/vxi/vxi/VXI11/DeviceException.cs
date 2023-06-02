@@ -50,7 +50,7 @@ public class DeviceException : Exception
     /// <param name="reason">           The detail reason. </param>
     /// <param name="innerException">   The inner exception. </param>
     public DeviceException( string suffixMessage, DeviceErrorCode reason,
-                            Exception innerException ) : base( DeviceException.BuildErrorMessage( suffixMessage, reason), innerException )
+                            Exception innerException ) : base( DeviceException.BuildErrorMessage( suffixMessage, reason ), innerException )
     {
         this.Reason = reason;
     }
@@ -88,7 +88,7 @@ public class DeviceException : Exception
     /// <param name="suffixMessage">    Message describing the suffix. </param>
     /// <param name="reason">           The detail reason. </param>
     /// <returns>   A string. </returns>
-    public static string BuildErrorMessage(string suffixMessage, DeviceErrorCode reason )
+    public static string BuildErrorMessage( string suffixMessage, DeviceErrorCode reason )
     {
         return $"{Vxi11Support.GetDescription( reason )}{suffixMessage}";
     }

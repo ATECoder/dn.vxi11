@@ -1,6 +1,5 @@
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.EnumExtensions;
-using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.Server;
 
@@ -443,25 +442,25 @@ public partial class Vxi11Interface : IVxi11Interface
 
         if ( !this.IsSupportedCommand( request.Cmd ) )
         {
-            Logger.Writer.LogVerbose( $"{request.Cmd} is not a supported interface command." );
+            Logger?.LogVerbose( $"{request.Cmd} is not a supported interface command." );
             return new DeviceDoCmdResp();
         }
         else if ( request.Cmd < ( int ) InterfaceCommand.SendCommand )
         {
             InterfaceCommandOption cmd = (( int ) request.Cmd).ToInterfaceCommandOption();
-            Logger.Writer.LogVerbose( $"Implementing： {cmd}({request.Cmd})" );
+            Logger?.LogVerbose( $"Implementing： {cmd}({request.Cmd})" );
             return this.DeviceDoCmd( cmd );
         }
         else if ( request.Cmd <= ( int ) InterfaceCommand.InterfaceClearControl )
         {
             InterfaceCommand cmd = (( int ) request.Cmd).ToInterfaceCommand();
-            Logger.Writer.LogVerbose( $"Implementing： {cmd}({request.Cmd})" );
+            Logger?.LogVerbose( $"Implementing： {cmd}({request.Cmd})" );
             return this.DeviceDoCmd( request, cmd );
         }
         else
         {
             string message = $"{request.Cmd} is unexpected yet unsupported interface command.";
-            Logger.Writer.LogVerbose( message );
+            Logger?.LogVerbose( message );
             this.LogMessage( 'c', message );
         }
 
@@ -573,7 +572,7 @@ public partial class Vxi11Interface : IVxi11Interface
     private void LogMessage( char operationType, string value )
     {
         if ( this.ActiveServerClient is null ) return;
-        this.MessageLog.Add( ( this.ActiveServerClient.ClientId, operationType, DateTimeOffset.Now, value) );
+        this.MessageLog.Add( (this.ActiveServerClient.ClientId, operationType, DateTimeOffset.Now, value) );
         this.MessageLogCount++;
     }
 

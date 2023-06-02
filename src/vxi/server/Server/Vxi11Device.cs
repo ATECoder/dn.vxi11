@@ -1,9 +1,7 @@
 using cc.isr.VXI11.Codecs;
-using cc.isr.VXI11.Logging;
 
 using System.Collections.Concurrent;
 using System.ComponentModel;
-using System.Net;
 
 namespace cc.isr.VXI11.Server;
 
@@ -153,8 +151,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <value> The number of linked clients. </value>
     public int LinkedClientsCount
     {
-        get
-        {
+        get {
             int count = 0;
             foreach ( IVxi11Instrument instrument in this.Instruments.Values )
             {
@@ -163,13 +160,13 @@ public partial class Vxi11Device : IVxi11Device
             return count;
         }
     }
-        
+
 
     /// <summary>   Query if 'clientId' is client linked. </summary>
     /// <remarks>   2023-02-21. </remarks>
     /// <param name="clientId"> Identifier for the client. </param>
     /// <returns>   True if client linked, false if not. </returns>
-    public bool IsClientLinked ( int clientId )
+    public bool IsClientLinked( int clientId )
     {
         foreach ( IVxi11Instrument instrument in this.Instruments.Values )
         {
@@ -323,7 +320,7 @@ public partial class Vxi11Device : IVxi11Device
     {
         // select an instrument from the link id.
 
-        if ( this.TryGetInstrument ( linkId, out IVxi11Instrument? instrument ) )
+        if ( this.TryGetInstrument( linkId, out IVxi11Instrument? instrument ) )
         {
 
             // is this the active instrument?
@@ -346,7 +343,7 @@ public partial class Vxi11Device : IVxi11Device
 
             }
 
-            return this.ActiveInstrument!.TrySelectActiveClient( linkId , lockTimeout);
+            return this.ActiveInstrument!.TrySelectActiveClient( linkId, lockTimeout );
 
         }
         return false;
@@ -552,7 +549,7 @@ public partial class Vxi11Device : IVxi11Device
             this.ActiveInstrument = this.Instruments[request.DeviceName];
             this.ActiveInstrument.ActiveServerClient?.ActivateLockTimeout( request.LockTimeout );
 
-            Logger.Writer.LogVerbose( $"creating link to {request.DeviceName} for client {request.ClientId}" );
+            Logger?.LogVerbose( $"creating link to {request.DeviceName} for client {request.ClientId}" );
 
             _lastLinkId = linkId;
             reply.DeviceLink = new DeviceLink( linkId );
@@ -615,7 +612,7 @@ public partial class Vxi11Device : IVxi11Device
                     }
                 }
                 else
-                    reply.ErrorCode = DeviceErrorCode.InvalidLinkIdentifier; 
+                    reply.ErrorCode = DeviceErrorCode.InvalidLinkIdentifier;
             }
             else
                 reply.ErrorCode = DeviceErrorCode.InvalidLinkIdentifier;

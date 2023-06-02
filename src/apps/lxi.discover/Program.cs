@@ -1,6 +1,5 @@
 // See https://aka.ms/new-console-template for more information
 
-using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.Discover;
 
 Console.WriteLine( $"VXI-11 {nameof( LxiDiscover )} " );
@@ -19,7 +18,7 @@ else
     }
     catch ( Exception ex )
     {
-        Logger.Writer.LogError( "There has been an exception, find the details below..", ex );
+        Logger?.LogError( "There has been an exception, find the details below..", ex );
     }
 }
 

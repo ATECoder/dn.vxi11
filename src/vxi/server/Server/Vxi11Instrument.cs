@@ -1,11 +1,7 @@
-using System.ComponentModel.Design;
-using System.Net;
 using System.Reflection;
-using System.Threading;
 
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.EnumExtensions;
-using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.Server;
 
@@ -337,11 +333,11 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool TrySelectClient( int linkId, bool waitLock, int? lockTimeout = null )
     {
-        if ( this.IsActiveLinkId ( linkId ) )
+        if ( this.IsActiveLinkId( linkId ) )
             // if the client was already selected, we are done.
             return true;
 
-        if ( !this.AwaitLockRelease( waitLock) )
+        if ( !this.AwaitLockRelease( waitLock ) )
             return false;
 
         if ( this.ServerClientsRegistry.TrySelectActiveClient( linkId, lockTimeout ) )
@@ -1188,7 +1184,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
         DeviceErrorCode result = DeviceErrorCode.NoError;
         foreach ( string scpiCommand in scpiCommands )
         {
-            Logging.Logger.Writer.LogVerbose( $"Processing '{scpiCommand}'" );
+            Logging.Logger?.LogVerbose( $"Processing '{scpiCommand}'" );
             try
             {
                 _ = this._asyncLocker.Reset(); // Block threads
@@ -1197,7 +1193,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
             }
             catch ( Exception ex )
             {
-                Logging.Logger.Writer.LogError( $"failed processing '{scpiCommand}'", ex );
+                Logging.Logger?.LogError( $"failed processing '{scpiCommand}'", ex );
                 result = DeviceErrorCode.IOError;
             }
             finally
@@ -1288,7 +1284,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public virtual DeviceErrorCode DeviceWrite( byte[] data )
     {
         string cmd = this.CharacterEncoding.GetString( data );
-        Logger.Writer.LogVerbose( $"{this.ActiveServerClient} -> Received：{cmd}" );
+        Logger?.LogVerbose( $"{this.ActiveServerClient} -> Received：{cmd}" );
         return this.DeviceWrite( cmd );
     }
 
@@ -1361,7 +1357,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
                     {
                         case Vxi11InstrumentOperationType.None:
                             string message = $"The attribute of method {method} is marked incorrectly as {scpiAtt.OperationType}";
-                            Logger.Writer.LogMemberWarning( message );
+                            Logger?.LogMemberWarning( message );
                             this.LogMessage( scpiAtt.OperationType, message );
                             break;
                         case Vxi11InstrumentOperationType.Write:
@@ -1377,12 +1373,12 @@ public partial class Vxi11Instrument : IVxi11Instrument
                             {
                                 this.LogMessage( scpiAtt.OperationType, res.ToString() );
                                 this._readBuffer = this.CharacterEncoding.GetBytes( res.ToString()! );
-                                Logger.Writer.LogVerbose( $"Query results： {res}。" );
+                                Logger?.LogVerbose( $"Query results： {res}。" );
                             }
                             else
                             {
                                 this.LogMessage( scpiAtt.OperationType, "null" );
-                                Logger.Writer.LogVerbose( "Query results：NULL。" );
+                                Logger?.LogVerbose( "Query results：NULL。" );
                                 result = DeviceErrorCode.NoError;
                             }
                             break;
@@ -1391,7 +1387,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
                 catch ( Exception ex )
                 {
                     string message = $"An error occurred when the method was called：{method}; {ex.Message}";
-                    Logger.Writer.LogMemberError( $"An error occurred when the method was called：{method}", ex );
+                    Logger?.LogMemberError( $"An error occurred when the method was called：{method}", ex );
                     this.LogMessage( 'e', message );
                     // Parameter error
                     result = DeviceErrorCode.ParameterError;
@@ -1400,7 +1396,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
             else
             {
                 string message = $"Attribute not found for method '{method}' parsed from the command '{fullScpiCommand}'";
-                Logger.Writer.LogMemberWarning( message );
+                Logger?.LogMemberWarning( message );
                 this.LogMessage( 'e', message );
                 result = DeviceErrorCode.SyntaxError; // The instruction is incorrect or undefined
                 this.CurrentOperationType = Vxi11InstrumentOperationType.None;
@@ -1409,7 +1405,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
         else
         {
             string message = $"No method found to match the command '{fullScpiCommand}'";
-            Logger.Writer.LogMemberWarning( message );
+            Logger?.LogMemberWarning( message );
             this.LogMessage( 'e', message );
             result = DeviceErrorCode.SyntaxError; // The instruction is incorrect or undefined
             this.CurrentOperationType = Vxi11InstrumentOperationType.None;

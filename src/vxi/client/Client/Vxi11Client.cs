@@ -965,7 +965,7 @@ public partial class Vxi11Client : ICloseable
         int receivedLen = data.Length;
         int outputLen = Math.Min( count, values.Length ) * 4;
         if ( receivedLen < outputLen )
-            return ( receivedLen, DeviceErrorCode.IOError, $"{nameof( Read )}(int, int, ref float[]) received {receivedLen} of the requested byte output {outputLen}" );
+            return (receivedLen, DeviceErrorCode.IOError, $"{nameof( Read )}(int, int, ref float[]) received {receivedLen} of the requested byte output {outputLen}");
         Buffer.BlockCopy( data, offset, values, 0, outputLen );
         return (outputLen, DeviceErrorCode.NoError, string.Empty);
 #if false
@@ -990,12 +990,12 @@ public partial class Vxi11Client : ICloseable
     /// </returns>
     public (string Reply, DeviceErrorCode ErrorCode, string Details) Query( string message, int millisecondsReadDelay = 3, bool trimEnd = false )
     {
-        (int sentCount, DeviceErrorCode errorCode, string details) = this.WriteRaw(message, false);
+        (int sentCount, DeviceErrorCode errorCode, string details) = this.WriteRaw( message, false );
         if ( errorCode != DeviceErrorCode.NoError )
-            return ( string.Empty, errorCode, details);
+            return (string.Empty, errorCode, details);
         if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
         return this.Read( trimEnd );
-        
+
 #if false
         if ( string.IsNullOrEmpty( message ) ) return (false, $"{nameof( message )} is empty");
 
@@ -1083,7 +1083,7 @@ public partial class Vxi11Client : ICloseable
     /// <returns>  A tuple: the number of bytes sent, The number of output bytes, which will be the minimum of <paramref name="count"/>
     /// and length of <paramref name="values"/>, error code, error details).
     /// </returns>
-    public (int BytesSent,int BytesReceived, DeviceErrorCode ErrorCode, string Details) Query( string message, int offset, int count, ref float[] values )
+    public (int BytesSent, int BytesReceived, DeviceErrorCode ErrorCode, string Details) Query( string message, int offset, int count, ref float[] values )
     {
         if ( count == 0 )
             return (0, 0, DeviceErrorCode.IOError, $"requested count is zero");

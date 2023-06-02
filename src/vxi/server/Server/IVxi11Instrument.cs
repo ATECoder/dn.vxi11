@@ -1,6 +1,5 @@
 using System.ComponentModel;
 
-using cc.isr.VXI11;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;

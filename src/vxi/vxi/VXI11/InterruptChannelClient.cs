@@ -98,6 +98,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
     public InterruptChannelClient( IPAddress host, int program, int version, int port, OncRpcProtocol protocol,
                                                                        int timeout ) : base( host, program, version, port, protocol, timeout )
     { }
+
     #endregion
 
     #region " rpc actions "

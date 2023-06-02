@@ -1,57 +1,64 @@
-using System.Diagnostics;
 using System.Net;
 
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.ONC.RPC.Server;
-using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.MSTest;
 
-/// <summary>   (Unit Test Class) a device discover tests. </summary>
+/// <summary>   (Unit Test Class) a vxi 11 discoverer broadcast tests. </summary>
+/// <remarks>   2023-06-01. </remarks>
 [TestClass]
-public class Vxi11DiscovererBoardcastTests
+public class Vxi11DiscovererBroadcastTests
 {
 
-    #region " fixture construction and cleanup "
+    #region " construction and cleanup "
 
-    /// <summary>   Initializes the fixture. </summary>
+    /// <summary> Initializes the test class before running the first test. </summary>
     /// <param name="testContext"> Gets or sets the test context which provides information about
     /// and functionality for the current test run. </param>
-    [ClassInitialize]
-    public static void InitializeFixture( TestContext testContext )
+    /// <remarks>Use ClassInitialize to run code before running the first test in the class</remarks>
+    [ClassInitialize()]
+    public static void InitializeTestClass( TestContext testContext )
     {
         try
         {
-            _classTestContext = context;
-            Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
+            string methodFullName = $"{testContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}";
+            if ( Logger is null )
+                Console.WriteLine( methodFullName );
+            else
+                Logger?.LogMemberInfo( methodFullName );
             Vxi11DiscovererTests.EnumerateHosts();
 
-            Logger.Writer.LogInformation( $"Starting the embedded Portmap service" );
+            Logger?.LogInformation( $"Starting the embedded Portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = VXI11.Vxi11Discoverer.StartEmbeddedPortmapService();
             _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
 
-            Logger.Writer.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
+            Logger?.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
         }
         catch ( Exception ex )
         {
-            Logger.Writer.LogMemberError( $"Failed initializing fixture:", ex );
-            CleanupFixture();
+            if ( Logger is null )
+                Console.WriteLine( $"Failed initializing the test class: {ex}" );
+            else
+                Logger.LogMemberError( "Failed initializing the test class:", ex );
+
+            // cleanup to meet strong guarantees
+
+            try
+            {
+                CleanupTestClass();
+            }
+            finally
+            {
+            }
         }
     }
 
-    /// <summary>
-    /// Gets or sets the test context which provides information about and functionality for the
-    /// current test run.
-    /// </summary>
-    /// <value> The test context. </value>
-    public TestContext? TestContext { get; set; }
-
-    private static TestContext? _classTestContext;
-
-    /// <summary>   Cleanup fixture. </summary>
-    [ClassCleanup]
-    public static void CleanupFixture()
+    /// <summary> Cleans up the test class after all tests in the class have run. </summary>
+    /// <remarks> Use <see cref="CleanupTestClass"/> to run code after all tests in the class have run. </remarks>
+    [ClassCleanup()]
+    public static void CleanupTestClass()
     {
         OncRpcEmbeddedPortmapServiceStub? service = _embeddedPortMapService;
         if ( service is not null )
@@ -63,16 +70,56 @@ public class Vxi11DiscovererBoardcastTests
             }
             catch ( Exception ex )
             {
-                Logger.Writer.LogError( "Exception cleaning up fixture", ex );
+                Logger?.LogError( "Exception cleaning up fixture", ex );
             }
             finally
             {
                 _embeddedPortMapService = null;
-                _classTestContext = null;
             }
         }
     }
 
+    private IDisposable? _loggerScope;
+
+    private LoggerTraceListener<Vxi11DiscovererBroadcastTests>? _traceListener;
+
+    /// <summary> Initializes the test class instance before each test runs. </summary>
+    [TestInitialize()]
+    public void InitializeBeforeEachTest()
+    {
+        if ( Logger is not null )
+        {
+            this._loggerScope = Logger.BeginScope( this.TestContext?.TestName ?? string.Empty );
+            this._traceListener = new LoggerTraceListener<Vxi11DiscovererBroadcastTests>( Logger );
+            _ = Trace.Listeners.Add( this._traceListener );
+        }
+    }
+
+    /// <summary> Cleans up the test class instance after each test has run. </summary>
+    [TestCleanup()]
+    public void CleanupAfterEachTest()
+    {
+        Assert.IsFalse( this._traceListener?.Any( TraceEventType.Error ),
+            $"{nameof( this._traceListener )} should have no {TraceEventType.Error} messages" );
+        this._loggerScope?.Dispose();
+        this._traceListener?.Dispose();
+        Trace.Listeners.Clear();
+    }
+
+    /// <summary>
+    /// Gets or sets the test context which provides information about and functionality for the
+    /// current test run.
+    /// </summary>
+    /// <value> The test context. </value>
+    public TestContext? TestContext { get; set; }
+
+    /// <summary>   Gets a logger instance for this category. </summary>
+    /// <value> The logger. </value>
+    public static ILogger<Vxi11DiscovererBroadcastTests>? Logger { get; } = LoggerProvider.InitLogger<Vxi11DiscovererBroadcastTests>();
+
+    #endregion
+
+    #region " ONC RPC Embedded port map and server stub base event handlers "
 
     /// <summary>   Gets or sets the discover timeout. Overrides the default longer (100) timeout. </summary>
     /// <value> The discover timeout. </value>
@@ -80,12 +127,45 @@ public class Vxi11DiscovererBoardcastTests
 
     private static OncRpcEmbeddedPortmapServiceStub? _embeddedPortMapService;
 
+    /// <summary>   Handles the thread exception event. </summary>
+    /// <remarks>   2023-06-01. </remarks>
+    /// <param name="sender">   Source of the event. </param>
+    /// <param name="e">        Event information to send to registered event handlers. </param>
     internal static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
     {
         string name = "unknown";
         if ( sender is OncRpcServerStubBase ) name = nameof( OncRpcServerStubBase );
 
-        Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
+        Logger?.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
+    }
+
+    #endregion
+
+    #region " initialization tests "
+
+    /// <summary>   (Unit Test Method) 00 logger should be enabled. </summary>
+    /// <remarks>   2023-05-31. </remarks>
+    [TestMethod]
+    public void A00LoggerShouldBeEnabled()
+    {
+        Assert.IsNotNull( Logger, $"{nameof( Logger )} should initialize" );
+        Assert.IsTrue( Logger.IsEnabled( LogLevel.Information ),
+            $"{nameof( Logger )} should be enabled for the {LogLevel.Information} {nameof( LogLevel )}" );
+    }
+
+    /// <summary>   (Unit Test Method) 01 logger trace listener should have messages. </summary>
+    /// <remarks>   2023-06-01. </remarks>
+    [TestMethod]
+    public void A01LoggerTraceListenerShouldHaveMessages()
+    {
+        Assert.IsNotNull( this._traceListener, $"{nameof( this._traceListener )} should initialize" );
+        Assert.IsTrue( Trace.Listeners.Count > 0, $"{nameof( Trace )} should have non-zero {nameof( Trace.Listeners )}" );
+        Trace.TraceError( "Testing tracing an error" ); Trace.Flush();
+        Assert.IsTrue( this._traceListener?.Any( TraceEventType.Error ), $"{nameof( this._traceListener )} should have {TraceEventType.Error} messages" );
+
+        // no need to report errors for this test.
+
+        this._traceListener?.Clear();
     }
 
     #endregion
@@ -121,13 +201,13 @@ public class Vxi11DiscovererBoardcastTests
     [TestCategory( "discover" )]
     public void DeviceExplorerShouldListDevicesEndpoints()
     {
-        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorerShouldListDevicesEndpoints )} using timeout of {Vxi11DiscovererBoardcastTests.DiscoverTimeout} ms." );
+        Logger?.LogInformation( @$"{nameof( DeviceExplorerShouldListDevicesEndpoints )} using timeout of {Vxi11DiscovererBroadcastTests.DiscoverTimeout} ms." );
         DateTime startTime = DateTime.Now;
         Stopwatch sw = Stopwatch.StartNew();
-        List<IPEndPoint>? endpoints = VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints( IPAddress.Any, Vxi11DiscovererBoardcastTests.DiscoverTimeout, false );
+        List<IPEndPoint>? endpoints = VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints( IPAddress.Any, Vxi11DiscovererBroadcastTests.DiscoverTimeout, false );
         Assert.IsNotNull( endpoints );
 
-        Logger.Writer.LogInformation(
+        Logger?.LogInformation(
             $"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints )} found {endpoints.Count} Core VXI-11 device(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:\n" );
 
         //var s = string.Join( Environment.NewLine, endpoints.Select( x => $"{x}" ).ToArray() );
@@ -135,7 +215,7 @@ public class Vxi11DiscovererBoardcastTests
 
         foreach ( IPEndPoint endpoint in endpoints )
         {
-            Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
+            Logger?.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
         }
 
         Assert.AreEqual( Vxi11DiscovererTests.PingedHosts.Count, endpoints.Count, "Device count is expected to equal pinged hosts count." );
@@ -171,20 +251,20 @@ public class Vxi11DiscovererBoardcastTests
     [TestCategory( "discover" )]
     public void DeviceExplorerShouldListDevicesAddresses()
     {
-        Logger.Writer.LogInformation( @$"{nameof( DeviceExplorerShouldListDevicesAddresses )} using timeout of {Vxi11DiscovererBoardcastTests.DiscoverTimeout} ms." );
+        Logger?.LogInformation( @$"{nameof( DeviceExplorerShouldListDevicesAddresses )} using timeout of {Vxi11DiscovererBroadcastTests.DiscoverTimeout} ms." );
         DateTime startTime = DateTime.Now;
         Stopwatch sw = Stopwatch.StartNew();
-        List<IPAddress>? addresses = VXI11.Vxi11Discoverer.ListCoreDevicesAddresses( IPAddress.Any, Vxi11DiscovererBoardcastTests.DiscoverTimeout, false );
+        List<IPAddress>? addresses = VXI11.Vxi11Discoverer.ListCoreDevicesAddresses( IPAddress.Any, Vxi11DiscovererBroadcastTests.DiscoverTimeout, false );
         Assert.IsNotNull( addresses );
 
-        Logger.Writer.LogInformation( $"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints )} found {addresses.Count} Core VXI-11 device(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:\n" );
+        Logger?.LogInformation( $"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints )} found {addresses.Count} Core VXI-11 device(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:\n" );
 
         //var s = string.Join( Environment.NewLine, addresses.Select( x => $"{x}" ).ToArray() );
         //Console.WriteLine( s );
 
         foreach ( IPAddress ip in addresses )
         {
-            Logger.Writer.LogInformation( $"{ip}: {Vxi11DiscovererTests.TryQueryIdentity( ip.ToString() )}" );
+            Logger?.LogInformation( $"{ip}: {Vxi11DiscovererTests.TryQueryIdentity( ip.ToString() )}" );
         }
 
 
@@ -204,15 +284,15 @@ public class Vxi11DiscovererBoardcastTests
         int actualCount = 0;
         foreach ( IPEndPoint endpoint in endpoints )
         {
-            Logger.Writer.LogInformation( $"Pinging {endpoint}" );
+            Logger?.LogInformation( $"Pinging {endpoint}" );
             Stopwatch sw = Stopwatch.StartNew();
             Assert.IsTrue( VXI11.Vxi11Discoverer.Paping( endpoint ) );
-            Logger.Writer.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
+            Logger?.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
 
             if ( endpoint.Port == OncRpcPortmapConstants.OncRpcPortmapPortNumber ) { actualCount++; }
 
             if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
-                Logger.Writer.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
+                Logger?.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
         }
 
         int expectedCount = 0;
@@ -270,13 +350,13 @@ public class Vxi11DiscovererBoardcastTests
     [TestCategory( "discover" )]
     public void DeviceExplorerShouldListLocalRegisteredServers()
     {
-        Logger.Writer.LogInformation(
-            $"{nameof( DeviceExplorerShouldListLocalRegisteredServers )} using timeout of {Vxi11DiscovererBoardcastTests.DiscoverTimeout} ms." );
+        Logger?.LogInformation(
+            $"{nameof( DeviceExplorerShouldListLocalRegisteredServers )} using timeout of {Vxi11DiscovererBroadcastTests.DiscoverTimeout} ms." );
         Stopwatch sw = Stopwatch.StartNew();
-        var endpoints = VXI11.Vxi11Discoverer.EnumerateRegisteredServers( IPAddress.Any, Vxi11DiscovererBoardcastTests.DiscoverTimeout, false );
+        var endpoints = VXI11.Vxi11Discoverer.EnumerateRegisteredServers( IPAddress.Any, Vxi11DiscovererBroadcastTests.DiscoverTimeout, false );
         Assert.IsNotNull( endpoints );
 
-        Logger.Writer.LogInformation(
+        Logger?.LogInformation(
             $"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.EnumerateRegisteredServers )}( IPAddress.Any ) found {endpoints.Count} VXI-11 registered servers(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:\n" );
         var s = string.Join( Environment.NewLine, endpoints.Select( x => $"{x}" ).ToArray() );
         Console.WriteLine( s );

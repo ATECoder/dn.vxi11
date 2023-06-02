@@ -1,8 +1,6 @@
 using System.Net;
 using System.Text;
 
-using cc.isr.VXI11.Logging;
-
 namespace cc.isr.VXI11.Discover;
 
 /// <summary>   An LXI discover. </summary>
@@ -175,7 +173,7 @@ to discover all the instruments listening on the local IPs of this machine.
     {
         string name = "unknown";
         if ( sender is cc.isr.VXI11.Client.Vxi11Client ) name = nameof( cc.isr.VXI11.Client.Vxi11Client );
-        Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
+        Logger?.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
     }
 
     /// <summary>   Gets local broadcast addresses. </summary>
@@ -211,7 +209,7 @@ to discover all the instruments listening on the local IPs of this machine.
         (string reply, DeviceErrorCode errorCode, string errorDetails) = instrument.TryQueryLine( "*IDN?" );
         return errorCode == DeviceErrorCode.NoError
             ? reply
-            : $"unable to query identity from TCPIP::{address}::{deviceName}::INSTR because: {DeviceException.BuildErrorMessage( $"; {errorDetails}", errorCode)}";
+            : $"unable to query identity from TCPIP::{address}::{deviceName}::INSTR because: {DeviceException.BuildErrorMessage( $"; {errorDetails}", errorCode )}";
     }
 
     #endregion

@@ -3,7 +3,6 @@ using System.Net.Sockets;
 
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.EnumExtensions;
-using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.MSTest;
 
@@ -12,24 +11,73 @@ namespace cc.isr.VXI11.MSTest;
 public class Vxi11SupportTests
 {
 
-    #region " fixture construction and cleanup "
+    #region " construction and cleanup "
 
-    /// <summary>   Initializes the fixture. </summary>
+    /// <summary> Initializes the test class before running the first test. </summary>
     /// <param name="testContext"> Gets or sets the test context which provides information about
     /// and functionality for the current test run. </param>
-    [ClassInitialize]
-    public static void InitializeFixture( TestContext testContext )
+    /// <remarks>Use ClassInitialize to run code before running the first test in the class</remarks>
+    [ClassInitialize()]
+    public static void InitializeTestClass( TestContext testContext )
     {
         try
         {
-            _classTestContext = context;
-            Logger.Writer.LogInformation( $"{_classTestContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}" );
+            string methodFullName = $"{testContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}";
+            if ( Logger is null )
+                Console.WriteLine( methodFullName );
+            else
+                Logger?.LogMemberInfo( methodFullName );
         }
         catch ( Exception ex )
         {
-            Logger.Writer.LogMemberError( $"Failed initializing fixture:", ex );
-            CleanupFixture();
+            if ( Logger is null )
+                Console.WriteLine( $"Failed initializing the test class: {ex}" );
+            else
+                Logger.LogMemberError( "Failed initializing the test class:", ex );
+
+            // cleanup to meet strong guarantees
+
+            try
+            {
+                CleanupTestClass();
+            }
+            finally
+            {
+            }
         }
+    }
+
+    /// <summary> Cleans up the test class after all tests in the class have run. </summary>
+    /// <remarks> Use <see cref="CleanupTestClass"/> to run code after all tests in the class have run. </remarks>
+    [ClassCleanup()]
+    public static void CleanupTestClass()
+    { }
+
+    private IDisposable? _loggerScope;
+
+    private LoggerTraceListener<Vxi11SupportTests>? _traceListener;
+
+    /// <summary> Initializes the test class instance before each test runs. </summary>
+    [TestInitialize()]
+    public void InitializeBeforeEachTest()
+    {
+        if ( Logger is not null )
+        {
+            this._loggerScope = Logger.BeginScope( this.TestContext?.TestName ?? string.Empty );
+            this._traceListener = new LoggerTraceListener<Vxi11SupportTests>( Logger );
+            _ = Trace.Listeners.Add( this._traceListener );
+        }
+    }
+
+    /// <summary> Cleans up the test class instance after each test has run. </summary>
+    [TestCleanup()]
+    public void CleanupAfterEachTest()
+    {
+        Assert.IsFalse( this._traceListener?.Any( TraceEventType.Error ),
+            $"{nameof( this._traceListener )} should have no {TraceEventType.Error} messages" );
+        this._loggerScope?.Dispose();
+        this._traceListener?.Dispose();
+        Trace.Listeners.Clear();
     }
 
     /// <summary>
@@ -39,12 +87,39 @@ public class Vxi11SupportTests
     /// <value> The test context. </value>
     public TestContext? TestContext { get; set; }
 
-    private static TestContext? _classTestContext;
+    /// <summary>   Gets a logger instance for this category. </summary>
+    /// <value> The logger. </value>
+    public static ILogger<Vxi11SupportTests>? Logger { get; } = LoggerProvider.InitLogger<Vxi11SupportTests>();
 
-    /// <summary>   Cleanup fixture. </summary>
-    [ClassCleanup]
-    public static void CleanupFixture()
-    { }
+    #endregion
+
+    #region " initialization tests "
+
+    /// <summary>   (Unit Test Method) 00 logger should be enabled. </summary>
+    /// <remarks>   2023-05-31. </remarks>
+    [TestMethod]
+    public void A00LoggerShouldBeEnabled()
+    {
+        Assert.IsNotNull( Logger, $"{nameof( Logger )} should initialize" );
+        Assert.IsTrue( Logger.IsEnabled( LogLevel.Information ),
+            $"{nameof( Logger )} should be enabled for the {LogLevel.Information} {nameof( LogLevel )}" );
+    }
+
+    /// <summary>   (Unit Test Method) 01 logger trace listener should have messages. </summary>
+    /// <remarks>   2023-06-01. </remarks>
+    [TestMethod]
+    public void A01LoggerTraceListenerShouldHaveMessages()
+    {
+        Assert.IsNotNull( this._traceListener, $"{nameof( this._traceListener )} should initialize" );
+        Assert.IsTrue( Trace.Listeners.Count > 0, $"{nameof( Trace )} should have non-zero {nameof( Trace.Listeners )}" );
+        Trace.TraceError( "Testing tracing an error" ); Trace.Flush();
+        Assert.IsTrue( this._traceListener?.Any( TraceEventType.Error ), $"{nameof( this._traceListener )} should have {TraceEventType.Error} messages" );
+
+        // no need to report errors for this test.
+
+        this._traceListener?.Clear();
+    }
+
     #endregion
 
     #region " unique client id "
@@ -123,7 +198,7 @@ public class Vxi11SupportTests
     /// <remarks> 
     /// <code>
     /// Standard Output: 
-    ///    2023-02-02 17:38:03.191,cc.isr.VXI11.MSTest.SupportTests.SupportTests
+    ///    2023-02-02 17:38:03.191,cc.isr.VXI11.MSTest.Vxi11SupportTests.Vxi11SupportTests
     ///    192.168.4.255
     ///    192.168.0.255
     /// </code>
@@ -140,7 +215,7 @@ public class Vxi11SupportTests
     /// <remarks>   
     /// <code>
     /// Standard Output: 
-    ///    2023-02-02 17:40:42.287,cc.isr.VXI11.MSTest.SupportTests.SupportTests
+    ///    2023-02-02 17:40:42.287,cc.isr.VXI11.MSTest.Vxi11SupportTests.Vxi11SupportTests
     ///    192.168.4.28
     ///    192.168.0.40
     /// </code>
@@ -157,7 +232,7 @@ public class Vxi11SupportTests
     /// <remarks>   
     /// <code>
     /// Standard Output: 
-    ///    2023-02-02 17:41:13.178,cc.isr.VXI11.MSTest.SupportTests.SupportTests
+    ///    2023-02-02 17:41:13.178,cc.isr.VXI11.MSTest.Vxi11SupportTests.Vxi11SupportTests
     ///    fe80::a91e:10bb:6315:822c%7
     ///    fe80::fcf9:d92f:1f6c:7cf%8
     ///    192.168.4.28
@@ -219,7 +294,7 @@ public class Vxi11SupportTests
 
     /// <summary>   Assert <see cref="int"/> should cast to <see cref="TransportProtocol"/>. </summary>
     /// <param name="expected"> The expected value. </param>
-    private static void AssertIntShouldCastToDeviceAddrFamily( int expected )
+    private static void AssertIntShouldCastToDeviceAddressFamily( int expected )
     {
         TransportProtocol actual = expected.ToTransportProtocol();
         Assert.AreEqual( expected, ( int ) actual );
@@ -227,7 +302,7 @@ public class Vxi11SupportTests
 
     /// <summary>   (Unit Test Method) <see cref="int"/> should cast to <see cref="TransportProtocol"/>. </summary>
     [TestMethod]
-    public void IntShouldCastToDeviceAddrFamily()
+    public void IntShouldCastToDeviceAddressFamily()
     {
         int value = 0;
         int maxValue = 0;
@@ -235,9 +310,9 @@ public class Vxi11SupportTests
         {
             value = ( int ) enumValue;
             maxValue = value > maxValue ? value : maxValue;
-            AssertIntShouldCastToDeviceAddrFamily( value );
+            AssertIntShouldCastToDeviceAddressFamily( value );
         }
-        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceAddrFamily( maxValue + 1 ); } );
+        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceAddressFamily( maxValue + 1 ); } );
     }
 
     /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceOperationFlags"/>. </summary>
@@ -253,15 +328,15 @@ public class Vxi11SupportTests
     public void IntShouldCastToDeviceOperationFlags()
     {
         int value = 0;
-        int oredValue = 0;
+        int orValue = 0;
         foreach ( var enumValue in Enum.GetValues( typeof( DeviceOperationFlags ) ) )
         {
             value = ( int ) enumValue;
             AssertIntShouldCastToDeviceOperationFlags( value );
-            oredValue |= value;
-            AssertIntShouldCastToDeviceOperationFlags( oredValue );
+            orValue |= value;
+            AssertIntShouldCastToDeviceOperationFlags( orValue );
         }
-        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceOperationFlags( oredValue + 1 ); } );
+        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceOperationFlags( orValue + 1 ); } );
     }
 
     /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceReadReasons"/>. </summary>
@@ -277,15 +352,15 @@ public class Vxi11SupportTests
     public void IntShouldCastToDeviceReadReasons()
     {
         int value = 0;
-        int oredValue = 0;
+        int orValue = 0;
         foreach ( var enumValue in Enum.GetValues( typeof( DeviceReadReasons ) ) )
         {
             value = ( int ) enumValue;
             AssertIntShouldCastToDeviceReadReasons( value );
-            oredValue |= value;
-            AssertIntShouldCastToDeviceReadReasons( oredValue );
+            orValue |= value;
+            AssertIntShouldCastToDeviceReadReasons( orValue );
         }
-        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceReadReasons( oredValue + 1 ); } );
+        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceReadReasons( orValue + 1 ); } );
     }
 
     #endregion

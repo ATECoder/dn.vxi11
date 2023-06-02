@@ -3,7 +3,6 @@ using System.Net;
 
 using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
-using cc.isr.VXI11.Logging;
 
 namespace cc.isr.VXI11.Server;
 
@@ -452,7 +451,7 @@ public class Vxi11Server : CoreChannelServerBase
     {
         lock ( this._lock )
         {
-            Logger.Writer.LogVerbose( $"@{nameof( Vxi11Server.CreateLink )} client {request.ClientId} lock {request.LockDevice} timeout {request.LockTimeout}" );
+            Logger?.LogVerbose( $"@{nameof( Vxi11Server.CreateLink )} client {request.ClientId} lock {request.LockDevice} timeout {request.LockTimeout}" );
             return this.Device?.AwaitLockReleaseAsync( request.LockTimeout ) ?? true
                 ? this.CreateLinkUnlocked( request )
                 : new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink };
@@ -527,12 +526,12 @@ public class Vxi11Server : CoreChannelServerBase
                 InterruptChannelClient? interruptClient = this.InterruptClient;
                 interruptClient?.Close();
                 if ( !interruptClient?.IsDisposed ?? false )
-                    Logger.Writer.LogWarning( $"{nameof( DestroyLink )} failed closing the interrupt client." );
+                    Logger?.LogWarning( $"{nameof( DestroyLink )} failed closing the interrupt client." );
 
                 this.InterruptClient = null;
 
                 if ( !abortServerTask?.Wait( AbortServerDisableTimeoutDefault ) ?? false )
-                    Logger.Writer.LogWarning( $"{nameof( DestroyLink )} failed stopping the abort server." );
+                    Logger?.LogWarning( $"{nameof( DestroyLink )} failed stopping the abort server." );
 
             }
         }
@@ -586,7 +585,7 @@ public class Vxi11Server : CoreChannelServerBase
             }
             catch ( Exception ex )
             {
-                Logger.Writer.LogError( "Failed creating interrupt channel", ex );
+                Logger?.LogError( "Failed creating interrupt channel", ex );
                 result = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
             }
         }

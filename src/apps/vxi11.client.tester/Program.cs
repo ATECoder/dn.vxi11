@@ -1,5 +1,4 @@
 using cc.isr.VXI11;
-using cc.isr.VXI11.Logging;
 
 AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobsserverException;
@@ -76,7 +75,7 @@ void SendCommand( string command )
     else if ( vxi11Client.IsQuery( command ) )
     {
         (string response, errorCode, errorDetails) = vxi11Client.TryRead();
-        if (errorCode != DeviceErrorCode.NoError )
+        if ( errorCode != DeviceErrorCode.NoError )
             Console.WriteLine( $"{command} read failed;  {DeviceException.BuildErrorMessage( $"; {errorDetails}", errorCode )}" );
         Console.WriteLine( $"{command} sent{(string.IsNullOrEmpty( response ) ? string.Empty : $"; received: {response}")}" );
     }
@@ -89,7 +88,7 @@ static void OnThreadExcetion( object? sender, ThreadExceptionEventArgs e )
     string name = "unknown";
     if ( sender is cc.isr.VXI11.Client.Vxi11Client ) name = nameof( cc.isr.VXI11.Client.Vxi11Client );
 
-    Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
+    Logger?.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
 }
 
 

@@ -21,9 +21,9 @@ public static class StringExtensions
     public static bool Contains( this String str, String substring, StringComparison comp )
     {
         if ( substring is null )
-            throw new ArgumentNullException( nameof(substring), $"{nameof(substring)} cannot be null." );
+            throw new ArgumentNullException( nameof( substring ), $"{nameof( substring )} cannot be null." );
         else if ( !Enum.IsDefined( typeof( StringComparison ), comp ) )
-            throw new ArgumentException( $"{nameof( comp )} is not a member of {nameof( StringComparison )}", nameof(comp) );
+            throw new ArgumentException( $"{nameof( comp )} is not a member of {nameof( StringComparison )}", nameof( comp ) );
         return str.IndexOf( substring, comp ) >= 0;
     }
 }

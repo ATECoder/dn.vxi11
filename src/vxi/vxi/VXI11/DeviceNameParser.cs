@@ -277,7 +277,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <param name="modelCode">        The model code. </param>
     /// <param name="serialNumber">     The serial number. </param>
     /// <returns>   A string. </returns>
-    public static string BuildUsbDeviceName(int boardNumber, int interfaceNumber, int manufacturerId, int modelCode, string serialNumber )
+    public static string BuildUsbDeviceName( int boardNumber, int interfaceNumber, int manufacturerId, int modelCode, string serialNumber )
     {
         return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
                 ? throw new ArgumentOutOfRangeException( nameof( interfaceNumber ),
@@ -413,7 +413,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
                 ? this.EqualsGenericDeviceName( other )
                 : this.IsGpibInstrumentDevice()
                     ? this.EqualsGpibDeviceName( other )
-                    : this.EqualsUsbDeviceName( other )); 
+                    : this.EqualsUsbDeviceName( other ));
     }
 
 }

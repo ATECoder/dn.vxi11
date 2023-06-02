@@ -6,4 +6,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage( "Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "namespace", Target = "~N:cc.isr.VXI11.MSTest" )]
-[assembly: SuppressMessage( "Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "namespace", Target = "~N:cc.isr.VXI11.MSTest.IEEE488" )]
+[assembly: SuppressMessage( "Usage", "CA2254:Template should be a static expression", Justification = "<Pending>", Scope = "module" )]

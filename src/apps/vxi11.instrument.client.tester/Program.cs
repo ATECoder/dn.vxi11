@@ -1,7 +1,6 @@
 // See https://aka.ms/new-console-template for more information
 
 using cc.isr.VXI11;
-using cc.isr.VXI11.Logging;
 using cc.isr.VXI11.Client;
 using cc.isr.VXI11.Server;
 
@@ -93,7 +92,7 @@ static void OnThreadExcetion( object? sender, ThreadExceptionEventArgs e )
     string name = "unknown";
     if ( sender is Vxi11InstrumentClient ) name = nameof( Vxi11InstrumentClient );
 
-    Logger.Writer.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
+    Logger?.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
 }
 
 #region " unhandled exception handling "
