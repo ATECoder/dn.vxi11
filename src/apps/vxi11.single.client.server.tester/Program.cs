@@ -3,23 +3,23 @@
 using cc.isr.ONC.RPC.Portmap;
 
 AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
-TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobsserverException;
+TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobservedException;
 
 try
 {
     using cc.isr.VXI11.Server.Vxi11Server server = new();
-    server.ThreadExceptionOccurred += OnThreadExcetion;
+    server.ThreadExceptionOccurred += OnThreadException;
 
-    Logger?.LogInformation( "Starting the embedded port map service" );
+    Console.WriteLine( "Starting the embedded port map service" );
     using OncRpcEmbeddedPortmapServiceStub epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
-    epm.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadExcetion;
+    epm.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
 
-    Logger?.LogInformation( "Starting VXI-11 IEEE 488 Server" );
+    Console.WriteLine( "Starting VXI-11 IEEE 488 Server" );
     _ = server.RunAsync();
 
     _ = server.ServerStarted( 2 * Constants.ServerStartTimeTypical, Constants.ServerStartLoopDelay );
 
-    Logger?.LogInformation( $"{nameof( cc.isr.VXI11.Server.Vxi11Server )} is {(server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
+    Console.WriteLine( $"{nameof( cc.isr.VXI11.Server.Vxi11Server )} is {(server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
 
     char DoneKey = 'S';
     Console.Write( $"Press {DoneKey} to stop: " );
@@ -35,23 +35,27 @@ catch ( System.Exception e )
 //server.stopRpcProcessing();// stop the service
 Console.WriteLine( "VXI-11 IEEE 488 Server stopped." );
 
-static void OnThreadExcetion( object? sender, ThreadExceptionEventArgs e )
+static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
 {
     string name = "unknown";
     if ( sender is cc.isr.VXI11.Server.Vxi11Server ) name = nameof( cc.isr.VXI11.Server.Vxi11Server );
     if ( sender is cc.isr.ONC.RPC.Server.OncRpcServerStubBase ) name = nameof( cc.isr.ONC.RPC.Server.OncRpcServerStubBase );
-
-    Logger?.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
+    if ( e.Exception is Exception )
+        Console.WriteLine( $"{name} encountered an exception during an asynchronous operation: {e.Exception}" );
 }
 
 #region " unhandled exception handling "
 
+/// <summary>   Raises the unhandled exception event. </summary>
+/// <remarks>   2023-06-02. </remarks>
+/// <param name="sender">   Source of the event. </param>
+/// <param name="e">        Event information to send to registered event handlers. </param>
 static void OnUnhandledException( object? sender, UnhandledExceptionEventArgs e )
 {
     Console.WriteLine( $"\n Unhandled exception occurred: {e.ExceptionObject}\n" );
 }
 
-static void OnTaskSchedulerUnobsserverException( object? sender, UnobservedTaskExceptionEventArgs e )
+static void OnTaskSchedulerUnobservedException( object? sender, UnobservedTaskExceptionEventArgs e )
 {
     Console.WriteLine( $"{(e.Observed ? "" : "un")}observed exception occurred: {e.Exception}\n" );
 }

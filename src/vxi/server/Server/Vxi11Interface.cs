@@ -47,7 +47,7 @@ public partial class Vxi11Interface : IVxi11Interface
 
     private string _deviceName;
     /// <summary>
-    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
+    /// Gets or sets the device name, .e.g, INST0, gpib0,5, or usb0[...].
     /// </summary>
     /// <value> The device name. </value>
     public string DeviceName
@@ -107,7 +107,7 @@ public partial class Vxi11Interface : IVxi11Interface
     /// <remarks>
     /// 2023-02-09. <para>
     /// 
-    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.Waitlock"/>
+    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.WaitLock"/>
     /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
     /// terminate that calling call and set error to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>
@@ -120,7 +120,7 @@ public partial class Vxi11Interface : IVxi11Interface
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool TrySelectClient( int linkId, DeviceOperationFlags operationFlags, int? lockTimeout = null )
     {
-        return this.TrySelectClient( linkId, DeviceOperationFlags.None != (operationFlags & DeviceOperationFlags.Waitlock), lockTimeout );
+        return this.TrySelectClient( linkId, DeviceOperationFlags.None != (operationFlags & DeviceOperationFlags.WaitLock), lockTimeout );
     }
 
     /// <summary>   Attempts to select client. </summary>
@@ -263,7 +263,7 @@ public partial class Vxi11Interface : IVxi11Interface
     /// <summary>   Reads <see cref="InterfaceCommandOption.NotDataAcceptedLineStatus"/> NDAC line. </summary>
     /// <remarks>   2023-01-24. </remarks>
     /// <returns>   1 if the NDAC message is true, 0 otherwise. </returns>
-    public virtual int ReadNdacLine()
+    public virtual int ReadNDacLine()
     {
         throw new NotImplementedException();
     }
@@ -355,29 +355,34 @@ public partial class Vxi11Interface : IVxi11Interface
         throw new NotImplementedException();
     }
 
-    /// <summary>   Pass control to another controller; <see cref="InterfaceCommand.PassControl"/>. </summary>
+    /// <summary>
+    /// Pass control to another controller; <see cref="InterfaceCommand.PassControl"/>.
+    /// </summary>
     /// <remarks>
     /// The TCP/IP-IEEE 488.1 Interface Device executes the `PASS CONTROL` control sequence described
     /// in IEEE 488.2, 16.2.14 where the talk address is constructed from the value in `data_in`
     /// bitwise OR-ed with 0x80. The returned `data_out` is the same as the received `data_in`.
     /// </remarks>
-    /// <param name="addr"> The address. </param>
+    /// <param name="address">  The address. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    public virtual bool PassControl( int addr )
+    public virtual bool PassControl( int address )
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>   Set interface device bus address; <see cref="InterfaceCommand.BusAddress"/>. </summary>
+    /// <summary>
+    /// Set interface device bus address; <see cref="InterfaceCommand.BusAddress"/>.
+    /// </summary>
     /// <remarks>
     /// the TCP/IP-IEEE 488.1 Interface Device sets its address to the contents of `data_in`. If
-    /// `data_in` does not contain a legal value, device_docmd returns immediately with error set to
-    /// `parameter error` (5). The returned `data_out` is the same as the received `data_in`.
+    /// `data_in` does not contain a legal value, <c>device_do</c>cmd returns immediately with error
+    /// set to `parameter error` (5). The returned `data_out` is the same as the received `data_in`.
     /// </remarks>
-    /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
-    /// <param name="addr"> The address. </param>
+    /// <param name="address">  The address. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    public virtual bool SetBusAddress( int addr )
+    ///
+    /// ### <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
+    public virtual bool SetBusAddress( int address )
     {
         throw new NotImplementedException();
     }
@@ -433,34 +438,34 @@ public partial class Vxi11Interface : IVxi11Interface
 
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-01-26. </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to use
+    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParams"/> to use
     ///                         with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>. </returns>
-    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
+    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParams request )
     {
         // TODO: Implement interface operations here based on the parsing of the request.
 
         if ( !this.IsSupportedCommand( request.Cmd ) )
         {
-            Logger?.LogVerbose( $"{request.Cmd} is not a supported interface command." );
+            TraceExtensions.TraceMemberInfo(  $"{request.Cmd} is not a supported interface command." );
             return new DeviceDoCmdResp();
         }
         else if ( request.Cmd < ( int ) InterfaceCommand.SendCommand )
         {
             InterfaceCommandOption cmd = (( int ) request.Cmd).ToInterfaceCommandOption();
-            Logger?.LogVerbose( $"Implementing： {cmd}({request.Cmd})" );
+            TraceExtensions.TraceMemberInfo(  $"Implementing： {cmd}({request.Cmd})" );
             return this.DeviceDoCmd( cmd );
         }
         else if ( request.Cmd <= ( int ) InterfaceCommand.InterfaceClearControl )
         {
             InterfaceCommand cmd = (( int ) request.Cmd).ToInterfaceCommand();
-            Logger?.LogVerbose( $"Implementing： {cmd}({request.Cmd})" );
+            TraceExtensions.TraceMemberInfo(  $"Implementing： {cmd}({request.Cmd})" );
             return this.DeviceDoCmd( request, cmd );
         }
         else
         {
             string message = $"{request.Cmd} is unexpected yet unsupported interface command.";
-            Logger?.LogVerbose( message );
+            TraceExtensions.TraceMemberInfo(  message );
             this.LogMessage( 'c', message );
         }
 
@@ -469,11 +474,11 @@ public partial class Vxi11Interface : IVxi11Interface
 
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-02-10. </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to use
+    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParams"/> to use
     ///                         with the remote procedure call. </param>
     /// <param name="command">  The <see cref="InterfaceCommand"/> command. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>. </returns>
-    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request, InterfaceCommand command )
+    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParams request, InterfaceCommand command )
     {
         // TODO: Finish implementing the commands.
 

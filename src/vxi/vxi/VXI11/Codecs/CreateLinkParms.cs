@@ -74,7 +74,7 @@ public class CreateLinkParms : IXdrCodec
     public int LockTimeout { get; set; }
 
     /// <summary>
-    /// Gets or sets the device name also called device name, e.g., inst0, gpib,5 or
+    /// Gets or sets the device name also called device name, e.g., INST0, gpib,5 or
     /// usb0[...].
     /// </summary>
     /// <value> The device name. </value>

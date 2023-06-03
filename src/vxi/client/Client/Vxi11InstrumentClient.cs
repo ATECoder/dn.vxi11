@@ -89,7 +89,7 @@ public class Vxi11InstrumentClient : Vxi11Client
     {
         if ( !this.Connected ) this.Reconnect();
 
-        var reply = this.CoreClient!.CreateIntrChan( hostAddress, hostPort );
+        var reply = this.CoreClient!.CreateInterruptChan( hostAddress, hostPort );
 
         if ( reply is null )
             throw new DeviceException( DeviceErrorCode.IOError );
@@ -112,7 +112,7 @@ public class Vxi11InstrumentClient : Vxi11Client
 
         // send a message to the server to end the interrupt service.
 
-        var reply = this.CoreClient!.DestroyIntrChan();
+        var reply = this.CoreClient!.DestroyInterruptChan();
 
         if ( reply is null )
             throw new DeviceException( DeviceErrorCode.IOError );
@@ -208,7 +208,8 @@ public class Vxi11InstrumentClient : Vxi11Client
     /// <param name="e">    Event information to send to registered event handlers. </param>
     protected virtual void OnServiceRequested( Vxi11EventArgs e )
     { }
-    /// <summary>   Filters and passes on the service request. </summary>
+
+    ///<summary>   Filters and passes on the service request. </summary>
     /// <param name="sender">   Source of the event. </param>
     /// <param name="e">        VXI-11 event information. </param>
     private void HandleServiceRequest( object? sender, Vxi11EventArgs e )
@@ -216,6 +217,8 @@ public class Vxi11InstrumentClient : Vxi11Client
         if ( e.ServiceRequestCodec.ClientId == this.ClientId ) this.OnServiceRequested( e );
     }
 
+    /// <summary>   Gets or sets the interrupt server. </summary>
+    /// <value> The interrupt server. </value>
     protected InterruptChannelServer? InterruptServer { get; set; }
 
     /// <summary>   Device Interrupt. </summary>

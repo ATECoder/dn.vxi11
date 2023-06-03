@@ -1,5 +1,3 @@
-using cc.isr.VXI11.EnumExtensions;
-
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
@@ -13,11 +11,11 @@ namespace cc.isr.VXI11.Codecs;
 /// All integers defined by the VXI-11 specification are passed over the
 /// network as 32-bit integers, either signed or unsigned as defined. </para><para>
 /// 
-/// Renamed from <c>Device_DocmdResp</c>. </para><para>
+/// Renamed from <c>Device_DoCmdResp</c>. </para><para>
 ///  
 /// VXI-11 Specifications: </para>
 /// <code>
-/// struct Device_DocmdResp {
+/// struct Device_DoCmdResp {
 /// Device_ErrorCode error; /* returned status */
 /// opaque data_out{}; /* returned data parameter */
 /// };

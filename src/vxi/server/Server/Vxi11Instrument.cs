@@ -1,7 +1,8 @@
+using System.Diagnostics;
 using System.Reflection;
 
+using cc.isr.VXI11;
 using cc.isr.VXI11.Codecs;
-using cc.isr.VXI11.EnumExtensions;
 
 namespace cc.isr.VXI11.Server;
 
@@ -67,7 +68,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     private string _deviceName;
     /// <summary>
-    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
+    /// Gets or sets the device name, .e.g, INST0, gpib0,5, or usb0[...].
     /// </summary>
     /// <value> The device name. </value>
     public string DeviceName
@@ -225,7 +226,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
         return this.ServerClientsRegistry.ReleaseLock( linkId );
     }
 
-    /// <summary>   Query if 'clinetId' is client linked. </summary>
+    /// <summary>   Query if <paramref name="clientId"/> is client linked. </summary>
     /// <remarks>   2023-02-21. </remarks>
     /// <param name="clientId"> Identifier for the client. </param>
     /// <returns>   True if client linked, false if not. </returns>
@@ -307,7 +308,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <remarks>
     /// 2023-02-09. <para>
     /// 
-    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.Waitlock"/>
+    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.WaitLock"/>
     /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
     /// terminate that calling call and set error to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>
@@ -320,7 +321,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     public bool TrySelectClient( int linkId, DeviceOperationFlags operationFlags, int? lockTimeout = null )
     {
-        return this.TrySelectClient( linkId, DeviceOperationFlags.None != (operationFlags & DeviceOperationFlags.Waitlock), lockTimeout );
+        return this.TrySelectClient( linkId, DeviceOperationFlags.None != (operationFlags & DeviceOperationFlags.WaitLock), lockTimeout );
     }
 
     /// <summary>   Attempts to select client. </summary>
@@ -555,7 +556,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// current operation. The purpose of this command is to synchronize your application with the
     /// instrument. Used in triggered sweep, triggered burst, list, or arbitrary waveform sequence
     /// modes to provide a way to poll or interrupt the computer when the *TRG or
-    /// INITiate[:IMMediate] is complete. Other commands may be executed before Operation Complete
+    /// INIT[:IMMediate] is complete. Other commands may be executed before Operation Complete
     /// bit is set. The difference between *OPC and *OPC? is that *OPC? returns "1" to the output
     /// buffer when the current operation completes. This means that no further commands can be sent
     /// after an *OPC? until it has responded. In this way an explicit polling loop can be avoided.
@@ -588,7 +589,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     /// <summary>   Resets the device: <see cref="Vxi11InstrumentCommands.RST"/>. </summary>
     /// <remarks>
-    /// Resets instrument to factory default state, independent of MEMory:STATe:RECall:AUTO setting.
+    /// Resets instrument to factory default state, independent of MEM:STATe:RECall:AUTO setting.
     /// Does not affect stored instrument states, stored arbitrary waveforms, or I/O settings; these
     /// are stored in non-volatile memory. Aborts a sweep or burst in progress.
     /// </remarks>
@@ -695,8 +696,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <summary>   Trigger command: *TRG. </summary>
     /// <remarks>
     /// Triggers a sweep, burst, arbitrary waveform advance, or LIST advance from the remote
-    /// interface if the bus (software) trigger source is currently selected (TRIGger[1|2]:SOURce
-    /// BUS).
+    /// interface if the bus (software) trigger source is currently selected (TRIG[1|2]:SOURce BUS).
     /// </remarks>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.TRG, Vxi11InstrumentOperationType.Write )]
@@ -1030,13 +1030,14 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// 1. Transfer bytes into the data parameter until one of the following termination conditions
     /// are met: a.An END indicator is read.The END bit in reason SHALL be set. </para><para>
     /// 
-    /// b.requestSize bytes are transferred.The REQCNT bit in reason SHALL be set. This termination
+    /// b. Request Size bytes are transferred.The REQCNT bit in reason SHALL be set. This termination
     /// condition SHALL be used if requestSize is zero.  </para><para>
     /// 
-    /// c.termchrset is set in flags and a character which matches termChar is transferred.The CHR
+    /// c. Term Char Set is set in flags and a character which matches termChar is transferred.The CHR
     /// bit in reason SHALL be set. </para><para>
     /// 
-    /// d.The buffer used to return the response is full.No bits in reason SHALL BE set.
+    /// d. The buffer used to return the response is full.No bits in reason SHALL BE set.  
+    /// 
     /// 2. Return with error set to 0, no error, to indicate successful completion.  </para><para>
     /// 
     /// If more than one termination condition is valid, reason contains the bitwise inclusive OR of
@@ -1116,7 +1117,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// If the end flag in <c>flags</c>  is set, then an END indicator SHALL be associated with the
     /// last byte in data. </para><para>
     /// 
-    /// If a controller needs to send greater than maxRecvSize bytes to the device at one time, then
+    /// If a controller needs to send greater than <see cref="MaxReceiveLength"/> bytes to the device at one time, then
     /// the network instrument client makes multiple calls to <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  to accomplish the
     /// complete transaction.A network instrument server accepts at least 1,024 bytes in a single
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/> call due to RULE B.6.3.  </para><para>
@@ -1127,11 +1128,11 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// The <c>link id</c> parameter is compared to the active link identifiers. If none match, <c>
     /// device_write</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
-    /// If data.data_len is greater than the value of maxRecvSize returned in create_link,
+    /// If data.data_len is greater than the value of <see cref="MaxReceiveLength"/> returned in create_link,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring any bytes to the device and SHALL
     /// set error to 5. </para><para>
     /// 
-    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the lock is
     /// free. If the flag is not set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11, 
     /// device already locked by another link. </para><para>
@@ -1184,7 +1185,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
         DeviceErrorCode result = DeviceErrorCode.NoError;
         foreach ( string scpiCommand in scpiCommands )
         {
-            Logging.Logger?.LogVerbose( $"Processing '{scpiCommand}'" );
+            TraceExtensions.TraceMemberInfo( $"Processing '{scpiCommand}'" );
             try
             {
                 _ = this._asyncLocker.Reset(); // Block threads
@@ -1193,7 +1194,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
             }
             catch ( Exception ex )
             {
-                Logging.Logger?.LogError( $"failed processing '{scpiCommand}'", ex );
+                TraceExtensions.TraceMemberError(  $"failed processing '{scpiCommand}'", ex );
                 result = DeviceErrorCode.IOError;
             }
             finally
@@ -1220,7 +1221,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// If the end flag in <c>flags</c>  is set, then an END indicator SHALL be associated with the
     /// last byte in data. </para><para>
     /// 
-    /// If a controller needs to send greater than maxRecvSize bytes to the device at one time, then
+    /// If a controller needs to send greater than <see cref="MaxReceiveLength"/> bytes to the device at one time, then
     /// the network instrument client makes multiple calls to <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// to accomplish the complete transaction.A network instrument server accepts at least 1,024
     /// bytes in a single <c>
@@ -1233,12 +1234,12 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// device_write</c>
     /// SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
-    /// If data.data_len is greater than the value of maxRecvSize returned in create_link,
+    /// If data.data_len is greater than the value of <see cref="MaxReceiveLength"/> returned in create_link,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring
     /// any bytes to the device and SHALL set error to 5. </para><para>
     /// 
     /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
-    /// SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the
+    /// SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in <c>flags</c> . If the
     /// flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the
     /// lock is free. If the flag is not set,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11,
@@ -1284,7 +1285,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public virtual DeviceErrorCode DeviceWrite( byte[] data )
     {
         string cmd = this.CharacterEncoding.GetString( data );
-        Logger?.LogVerbose( $"{this.ActiveServerClient} -> Received：{cmd}" );
+        TraceExtensions.TraceMemberInfo( $"{this.ActiveServerClient} -> Received：{cmd}" );
         return this.DeviceWrite( cmd );
     }
 
@@ -1357,7 +1358,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
                     {
                         case Vxi11InstrumentOperationType.None:
                             string message = $"The attribute of method {method} is marked incorrectly as {scpiAtt.OperationType}";
-                            Logger?.LogMemberWarning( message );
+                            TraceExtensions.TraceMemberWarning( message );
                             this.LogMessage( scpiAtt.OperationType, message );
                             break;
                         case Vxi11InstrumentOperationType.Write:
@@ -1373,12 +1374,12 @@ public partial class Vxi11Instrument : IVxi11Instrument
                             {
                                 this.LogMessage( scpiAtt.OperationType, res.ToString() );
                                 this._readBuffer = this.CharacterEncoding.GetBytes( res.ToString()! );
-                                Logger?.LogVerbose( $"Query results： {res}。" );
+                                TraceExtensions.TraceMemberInfo(  $"Query results： {res}。" );
                             }
                             else
                             {
                                 this.LogMessage( scpiAtt.OperationType, "null" );
-                                Logger?.LogVerbose( "Query results：NULL。" );
+                                TraceExtensions.TraceMemberInfo(  "Query results：NULL。" );
                                 result = DeviceErrorCode.NoError;
                             }
                             break;
@@ -1387,7 +1388,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
                 catch ( Exception ex )
                 {
                     string message = $"An error occurred when the method was called：{method}; {ex.Message}";
-                    Logger?.LogMemberError( $"An error occurred when the method was called：{method}", ex );
+                    TraceExtensions.TraceMemberError($"An error occurred when the method was called：{method}", ex );
                     this.LogMessage( 'e', message );
                     // Parameter error
                     result = DeviceErrorCode.ParameterError;
@@ -1396,7 +1397,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
             else
             {
                 string message = $"Attribute not found for method '{method}' parsed from the command '{fullScpiCommand}'";
-                Logger?.LogMemberWarning( message );
+                TraceExtensions.TraceMemberWarning( message );
                 this.LogMessage( 'e', message );
                 result = DeviceErrorCode.SyntaxError; // The instruction is incorrect or undefined
                 this.CurrentOperationType = Vxi11InstrumentOperationType.None;
@@ -1405,7 +1406,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
         else
         {
             string message = $"No method found to match the command '{fullScpiCommand}'";
-            Logger?.LogMemberWarning( message );
+            TraceExtensions.TraceMemberWarning( message );
             this.LogMessage( 'e', message );
             result = DeviceErrorCode.SyntaxError; // The instruction is incorrect or undefined
             this.CurrentOperationType = Vxi11InstrumentOperationType.None;
@@ -1424,7 +1425,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// The <c>link id</c> parameter is compared against the link identifiers. If none match,
     /// <c>device_trigger</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> .If the flag is set, <c>device_trigger</c> SHALL block until the lock is free
     /// before sending the trigger. If the flag is not set, <c>device_trigger</c> SHALL terminate and
     /// set error to 11, device locked by another link. </para><para>
@@ -1463,7 +1464,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <para>
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// device_clear SHALL terminate with error set to 4, invalid link identifier. </para><para>
-    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>
+    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in <c>
     /// flags</c> . If the flag is set, device_clear SHALL block until the lock is free. If the flag
     /// is not set, device_clear SHALL terminate with error set to 11, device locked by another link.
     /// </para><para>
@@ -1503,7 +1504,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match, <c>
     /// device_remote</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> . If the flag is set, <c>device_remote</c> SHALL block until the lock is
     /// free. If the flag is not set, <c>device_remote</c> SHALL terminate with error set to 11,
     /// device locked by another link.  </para><para>
@@ -1551,7 +1552,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_local</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in
+    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in
     /// <c>flags</c>. If the flag is set, <c>device_local</c> SHALL block until the lock is free. If
     /// the flag is not set, <c>device_local</c> SHALL terminate with error set to 11, device locked
     /// by another link. </para><para>

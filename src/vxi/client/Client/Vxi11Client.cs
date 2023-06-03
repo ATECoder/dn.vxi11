@@ -39,7 +39,7 @@ public partial class Vxi11Client : ICloseable
     /// RPC and returning the <see cref="DeviceErrorCode"/> codec.
     /// </summary>
     /// <param name="hostAddress">      The host device IPv4 address. </param>
-    /// <param name="deviceName">       The device name, e.g., inst0 or gpib0,8. </param>
+    /// <param name="deviceName">       The device name, e.g., INST0 or gpib0,8. </param>
     /// <param name="connectTimeout">   The connect timeout. This timeout overrides the
     ///                                 <see cref="ONC.RPC.Client.OncRpcClientBase.TransmitTimeout"/> </param>
     /// <returns>   A DeviceErrorCode. </returns>
@@ -76,7 +76,7 @@ public partial class Vxi11Client : ICloseable
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
     /// <param name="hostAddress">      The host device IPv4 address. </param>
-    /// <param name="deviceName">       The device name, e.g., inst0 or gpib0,8. </param>
+    /// <param name="deviceName">       The device name, e.g., INST0 or gpib0,8. </param>
     /// <param name="connectTimeout">   (Optional) The connect timeout [3000]. This timeouts
     ///                                 overrides the
     ///                                 <see cref="ONC.RPC.Client.OncRpcClientBase.TransmitTimeout"/> </param>
@@ -154,7 +154,7 @@ public partial class Vxi11Client : ICloseable
     /// </summary>
     /// <remarks>
     /// Takes account of and updates <see cref="IsDisposed"/>. Encloses <see cref="Dispose(bool)"/>
-    /// within a try...finaly block. <para>
+    /// within a try...finally block. <para>
     ///
     /// Because this class is implementing <see cref="IDisposable"/> and is not sealed, then it
     /// should include the call to <see cref="GC.SuppressFinalize(object)"/> even if it does not
@@ -201,9 +201,8 @@ public partial class Vxi11Client : ICloseable
             // dispose managed state (managed objects)
             try
             {
-                DeviceError? deviceError = this.DestroyLink();
-                if ( deviceError is null )
-                    throw new DeviceException( $"; failed destroying the link to the {this.DeviceName} device at {this.IPAddress}.",
+                DeviceError? deviceError = this.DestroyLink()
+                    ?? throw new DeviceException( $"; failed destroying the link to the {this.DeviceName} device at {this.IPAddress}.",
                         DeviceErrorCode.IOError );
                 if ( deviceError.ErrorCode != DeviceErrorCode.NoError )
                     throw new DeviceException( $"; failed destroying the link to the {this.DeviceName} device at {this.IPAddress}.",
@@ -397,7 +396,7 @@ public partial class Vxi11Client : ICloseable
 
     private string _deviceName;
     /// <summary>
-    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
+    /// Gets or sets the device name, .e.g, INST0, gpib0,5, or usb0[...].
     /// </summary>
     /// <value> The device name. </value>
     public string DeviceName
@@ -756,6 +755,8 @@ public partial class Vxi11Client : ICloseable
         return (total, DeviceErrorCode.NoError, string.Empty);
     }
 
+    /// <summary>   Gets or sets the maximum length of the read raw. </summary>
+    /// <value> The maximum length of the read raw. </value>
     public int MaxReadRawLength { get; private set; }
 
     /// <summary>
@@ -1120,7 +1121,7 @@ public partial class Vxi11Client : ICloseable
     /// <summary>   Creates a link. </summary>
     /// <remarks>   2023-02-07. </remarks>
     /// <param name="coreChannelClient">    The core channel client. </param>
-    /// <param name="deviceName">           The device name, e.g., inst0 or gpib0,8. </param>
+    /// <param name="deviceName">           The device name, e.g., INST0 or gpib0,8. </param>
     /// <returns>   The new link. </returns>
     private CreateLinkResp CreateLink( CoreChannelClient coreChannelClient, string deviceName )
     {

@@ -62,7 +62,7 @@ from the broadcast address. For example, 192.168.0.255 entails 254 such
 IP addresses. Thus, it is expected to take at least 2.54 seconds to scan
 this broadcast address with the default timeout of 10ms.
 
-A device name, such as 'inst0' is required for reporting the instruments identity
+A device name, such as 'INST0' is required for reporting the instruments identity
 (*IDN) strings. Otherwise, only the instrument addresses are reported. If USB or
 GPIB instruments, which have a different device name, reside on the network,
 {nameof( LxiDiscover )} will catch the exceptions from the identity query
@@ -83,7 +83,7 @@ to discover all the instruments listening on the local IPs of this machine.
     /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="System.Net.IPAddress.Any"/>
     ///                                 (0.0.0.0). </param>
     /// <param name="timeout">          The timeout. </param>
-    /// <param name="deviceName">       The device name, e.g., inst0 or gpib0,4. </param>
+    /// <param name="deviceName">       The device name, e.g., INST0 or gpib0,4. </param>
     private static void DiscoverEndpoints( string broadcastAddress, int timeout, string deviceName )
     {
         Console.WriteLine( $"Discovering {deviceName} instruments on {broadcastAddress}...." );
@@ -105,7 +105,7 @@ to discover all the instruments listening on the local IPs of this machine.
     /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="System.Net.IPAddress.Any"/>
     ///                                 (0.0.0.0). </param>
     /// <param name="timeout">          The timeout. </param>
-    /// <param name="deviceName">       The device name, e.g., inst0 or gpib0,4. </param>
+    /// <param name="deviceName">       The device name, e.g., INST0 or gpib0,4. </param>
     private static void DiscoverAddresses( string broadcastAddress, int timeout, string deviceName )
     {
         Console.WriteLine( $"Discovering {deviceName} instruments on {broadcastAddress}...." );
@@ -127,7 +127,7 @@ to discover all the instruments listening on the local IPs of this machine.
     /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="System.Net.IPAddress.Any"/>
     ///                                 (0.0.0.0). </param>
     /// <param name="timeout">          The timeout. </param>
-    /// <param name="deviceName">       The device name, e.g., inst0 or gpib0,4. </param>
+    /// <param name="deviceName">       The device name, e.g., INST0 or gpib0,4. </param>
     public static void Discover( string broadcastAddress, int timeout, string deviceName )
     {
 
@@ -173,7 +173,8 @@ to discover all the instruments listening on the local IPs of this machine.
     {
         string name = "unknown";
         if ( sender is cc.isr.VXI11.Client.Vxi11Client ) name = nameof( cc.isr.VXI11.Client.Vxi11Client );
-        Logger?.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
+        if ( e.Exception is Exception )
+            Console.WriteLine( $"{name} encountered an exception during an asynchronous operation: {e.Exception}" );
     }
 
     /// <summary>   Gets local broadcast addresses. </summary>
@@ -199,7 +200,7 @@ to discover all the instruments listening on the local IPs of this machine.
     /// <summary>   Tries to query the instrument identity. </summary>
     /// <remarks>   2023-02-06. </remarks>
     /// <param name="address">      The instrument network IPv4 address. </param>
-    /// <param name="deviceName">   The device name, e.g., inst0 or gpib0,4. </param>
+    /// <param name="deviceName">   The device name, e.g., INST0 or gpib0,4. </param>
     /// <returns>   The instrument identity. </returns>
     public static string TryQueryIdentity( string address, string deviceName )
     {

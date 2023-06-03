@@ -24,12 +24,11 @@ public class Vxi11Discoverer
     /// <param name="e">        Event information to send to registered event handlers. </param>
     private static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
     {
-        if ( sender is null || e is null ) return;
+        if ( sender is null || e.Exception is not Exception ) return;
+
+        System.Diagnostics.Trace.TraceError( $"{nameof(Vxi11Discoverer) } thread exception: {e.Exception}" );
 
         var handler = ThreadExceptionOccurred;
-        if ( handler is null )
-            Logger?.LogError( $"Thread exception", e.Exception );
-
         handler?.Invoke( sender, e );
     }
 
@@ -162,7 +161,7 @@ public class Vxi11Discoverer
             foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
             {
                 IPAddress[] addresses = EnumerateAddresses( broadcastIP );
-                Logger?.LogVerbose( $"{nameof( ListCoreDevicesEndpoints )} scanning {addresses.Length} addresses at {broadcastIP}" );
+                System.Diagnostics.Trace.TraceInformation( $"{nameof( ListCoreDevicesEndpoints )} scanning {addresses.Length} addresses at {broadcastIP}" );
                 endpoints.AddRange( ListCoreDevicesEndpoints( addresses, ioTimeout, startEmbeddedPortmapService, true ) );
                 startEmbeddedPortmapService = false;
             }
@@ -171,7 +170,7 @@ public class Vxi11Discoverer
         else
         {
             IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
-            Logger?.LogVerbose( $"{nameof( ListCoreDevicesEndpoints )} scanning {addresses.Length} addresses at {broadcastAddress}" );
+            System.Diagnostics.Trace.TraceInformation( $"{nameof( ListCoreDevicesEndpoints )} scanning {addresses.Length} addresses at {broadcastAddress}" );
             return ListCoreDevicesEndpoints( addresses, ioTimeout, startEmbeddedPortmapService, true );
         }
     }
@@ -197,7 +196,7 @@ public class Vxi11Discoverer
             foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
             {
                 IPAddress[] addresses = EnumerateAddresses( broadcastIP );
-                Logger?.LogVerbose( $"{nameof( ListCoreDevicesAddresses )} scanning {addresses.Length} addresses at {broadcastIP}" );
+                System.Diagnostics.Trace.TraceInformation( $"{nameof( ListCoreDevicesAddresses )} scanning {addresses.Length} addresses at {broadcastIP}" );
                 ips.AddRange( ListCoreDevicesAddresses( addresses, ioTimeout, startEmbeddedPortmapService ) );
                 startEmbeddedPortmapService = false;
             }
@@ -206,7 +205,7 @@ public class Vxi11Discoverer
         else
         {
             IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
-            Logger?.LogVerbose( $"{nameof( ListCoreDevicesAddresses )} scanning {addresses.Length} addresses at {broadcastAddress}" );
+            System.Diagnostics.Trace.TraceInformation( $"{nameof( ListCoreDevicesAddresses )} scanning {addresses.Length} addresses at {broadcastAddress}" );
             return ListCoreDevicesAddresses( addresses, ioTimeout, startEmbeddedPortmapService );
         }
     }
@@ -249,12 +248,12 @@ public class Vxi11Discoverer
     /// <param name="addresses">                    The hosts. </param>
     /// <param name="ioTimeout">               The timeout in milliseconds. </param>
     /// <param name="startEmbeddedPortmapService">  True to start embedded Portmap service. </param>
-    /// <param name="pmapPing">                     True to use the Portmap service to ping each
+    /// <param name="pingHost">                     True to use the Portmap service to ping each
     ///                                             address before getting its port number thus
     ///                                             validating the address as a VXI-11 code
     ///                                             device."/> . </param>
     /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
-    public static List<IPEndPoint> ListCoreDevicesEndpoints( IEnumerable<IPAddress> addresses, int ioTimeout, bool startEmbeddedPortmapService, bool pmapPing )
+    public static List<IPEndPoint> ListCoreDevicesEndpoints( IEnumerable<IPAddress> addresses, int ioTimeout, bool startEmbeddedPortmapService, bool pingHost )
     {
         // start the embedded service.
         if ( startEmbeddedPortmapService )
@@ -265,7 +264,7 @@ public class Vxi11Discoverer
         List<IPEndPoint> endpoints = new();
         foreach ( IPAddress address in addresses )
         {
-            if ( pmapPing && Vxi11Discoverer.PortmapPingHost( address, ioTimeout ) )
+            if ( pingHost && Vxi11Discoverer.PortmapPingHost( address, ioTimeout ) )
             {
                 int port = GetCoreDevicePortNumber( address, ioTimeout );
                 if ( port > 0 ) { endpoints.Add( new IPEndPoint( address, port ) ); }
@@ -288,11 +287,11 @@ public class Vxi11Discoverer
 
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
-        using OncRpcPortmapClient pmapClient = new( host, OncRpcProtocol.OncRpcTcp, ioTimeout );
-        pmapClient.OncRpcClient!.IOTimeout = OncRpcTcpClient.IOTimeoutDefault;
+        using OncRpcPortmapClient portMapClient = new( host, OncRpcProtocol.OncRpcTcp, ioTimeout );
+        portMapClient.OncRpcClient!.IOTimeout = OncRpcTcpClient.IOTimeoutDefault;
 
         // get a port from this host, if any.
-        return pmapClient.GetPort( Vxi11ProgramConstants.CoreProgram, Vxi11ProgramConstants.CoreVersion, OncRpcProtocol.OncRpcTcp );
+        return portMapClient.GetPort( Vxi11ProgramConstants.CoreProgram, Vxi11ProgramConstants.CoreVersion, OncRpcProtocol.OncRpcTcp );
     }
 
     #endregion 
@@ -319,7 +318,7 @@ public class Vxi11Discoverer
             foreach ( IPAddress broadcastIP in GetLocalBroadcastAddresses() )
             {
                 IPAddress[] addresses = EnumerateAddresses( broadcastIP );
-                Logger?.LogVerbose( $"{nameof( EnumerateRegisteredServers )} scanning {addresses.Length} addresses at {broadcastIP}" );
+                System.Diagnostics.Trace.TraceInformation( $"{nameof( EnumerateRegisteredServers )} scanning {addresses.Length} addresses at {broadcastIP}" );
                 endpoints.AddRange( EnumerateRegisteredServers( addresses, timeout, startEmbeddedPortmapService ) );
                 startEmbeddedPortmapService = false;
             }
@@ -328,7 +327,7 @@ public class Vxi11Discoverer
         else
         {
             IPAddress[] addresses = EnumerateAddresses( broadcastAddress );
-            Logger?.LogVerbose( $"{nameof( EnumerateRegisteredServers )} scanning {addresses.Length} addresses at {broadcastAddress}" );
+            System.Diagnostics.Trace.TraceInformation( $"{nameof( EnumerateRegisteredServers )} scanning {addresses.Length} addresses at {broadcastAddress}" );
             return EnumerateRegisteredServers( addresses, timeout, startEmbeddedPortmapService );
         }
     }
@@ -374,18 +373,18 @@ public class Vxi11Discoverer
 
         // skip if the Portmap service is not registered on the host
 
-        if ( !Paping( new IPEndPoint( host, OncRpcPortmapConstants.OncRpcPortmapPortNumber ) ) )
+        if ( !PingPort( new IPEndPoint( host, OncRpcPortmapConstants.OncRpcPortmapPortNumber ) ) )
             return endpoints;
 
         // Create a portmap client object, which can then be used to contact
         // a local or remote ONC/RPC portmap process. 
 
-        using OncRpcPortmapClient tcpPmapClient = new( host, OncRpcProtocol.OncRpcTcp, ioTimeout );
-        tcpPmapClient.OncRpcClient!.IOTimeout = OncRpcTcpClient.IOTimeoutDefault;
+        using OncRpcPortmapClient tcpPortMapClient = new( host, OncRpcProtocol.OncRpcTcp, ioTimeout );
+        tcpPortMapClient.OncRpcClient!.IOTimeout = OncRpcTcpClient.IOTimeoutDefault;
 
         // Now dump the current list of registered servers.
 
-        OncRpcServerIdentifierCodec[] registeredServers = tcpPmapClient.ListRegisteredServers(); ;
+        OncRpcServerIdentifierCodec[] registeredServers = tcpPortMapClient.ListRegisteredServers(); ;
         foreach ( OncRpcServerIdentifierCodec registeredServer in registeredServers )
         {
             if ( registeredServer.Port > 0 ) { endpoints.Add( new IPEndPoint( host, registeredServer.Port ) ); }
@@ -402,9 +401,9 @@ public class Vxi11Discoverer
     /// <param name="portNumber">           (Optional) The port number [5025]. </param>
     /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds [10]. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    public static bool Paping( IPAddress ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
+    public static bool PingPort( IPAddress ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
     {
-        return Paping( ipv4Address.ToString(), portNumber, timeoutMilliseconds );
+        return PingPort( ipv4Address.ToString(), portNumber, timeoutMilliseconds );
     }
 
     /// <summary>   Pings port. </summary>
@@ -412,9 +411,9 @@ public class Vxi11Discoverer
     /// <param name="portNumber">           (Optional) The port number [5025]. </param>
     /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds [10]. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    public static bool Paping( string ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
+    public static bool PingPort( string ipv4Address, int portNumber = 5025, int timeoutMilliseconds = 10 )
     {
-        return Paping( new IPEndPoint( IPAddress.Parse( ipv4Address ), portNumber ), timeoutMilliseconds );
+        return PingPort( new IPEndPoint( IPAddress.Parse( ipv4Address ), portNumber ), timeoutMilliseconds );
     }
 
 
@@ -422,7 +421,7 @@ public class Vxi11Discoverer
     /// <param name="endpoint">             The endpoint. </param>
     /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    public static bool Paping( IPEndPoint endpoint, int timeoutMilliseconds = 10 )
+    public static bool PingPort( IPEndPoint endpoint, int timeoutMilliseconds = 10 )
     {
         bool pinged = false;
         try
@@ -455,8 +454,8 @@ public class Vxi11Discoverer
         bool pingable = false;
         try
         {
-            using Ping pinger = new();
-            PingReply reply = pinger.Send( nameOrAddress, timeoutMilliseconds );
+            using Ping ping = new();
+            PingReply reply = ping.Send( nameOrAddress, timeoutMilliseconds );
             pingable = reply.Status == IPStatus.Success;
         }
         catch ( PingException )
@@ -475,8 +474,8 @@ public class Vxi11Discoverer
         bool pingable = false;
         try
         {
-            using Ping pinger = new();
-            PingReply reply = pinger.Send( address, timeoutMilliseconds );
+            using Ping ping = new();
+            PingReply reply = ping.Send( address, timeoutMilliseconds );
             pingable = reply.Status == IPStatus.Success;
         }
         catch ( PingException )

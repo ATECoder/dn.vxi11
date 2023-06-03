@@ -28,7 +28,7 @@ public class Vxi11InterfaceClient : Vxi11Client
 
     #region " vxi-11 commands "
 
-    /// <summary>   Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParms)"/>
+    /// <summary>   Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParams)"/>
     /// RPC Call. </summary>
     /// <exception cref="InvalidOperationException">    Thrown when the requested operation is
     ///                                                 invalid. </exception>
@@ -52,7 +52,7 @@ public class Vxi11InterfaceClient : Vxi11Client
         return reply.GetDataOut();
     }
 
-    /// <summary>   Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParms)"/>
+    /// <summary>   Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParams)"/>
     /// RPC Call. </summary>
     /// <param name="commandCode">  The command code. </param>
     /// <param name="dataSize">     Size of individual data elements. </param>
@@ -63,7 +63,7 @@ public class Vxi11InterfaceClient : Vxi11Client
         return this.SendCommand( ( int ) commandCode, dataSize, data );
     }
 
-    /// <summary>   Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParms)"/>
+    /// <summary>   Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParams)"/>
     /// RPC Call. </summary>
     /// <exception cref="InvalidOperationException">    Thrown when the requested operation is
     ///                                                 invalid. </exception>
@@ -82,7 +82,7 @@ public class Vxi11InterfaceClient : Vxi11Client
     }
 
     /// <summary>
-    /// Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParms)"/>
+    /// Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParams)"/>
     /// RPC Call.
     /// </summary>
     /// <param name="commandCode">  The command code. </param>
@@ -95,7 +95,7 @@ public class Vxi11InterfaceClient : Vxi11Client
         return this.SendCommand( ( int ) commandCode, dataSize, value );
     }
 
-    /// <summary>   Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParms)"/>
+    /// <summary>   Sends a command using the <see cref="CoreChannelClient.DeviceDoCmd(DeviceDoCmdParams)"/>
     /// RPC Call. </summary>
     /// <remarks>   2023-02-07. </remarks>
     /// <param name="commandCode">  The command code. </param>

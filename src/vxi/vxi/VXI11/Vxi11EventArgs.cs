@@ -3,7 +3,7 @@ namespace cc.isr.VXI11;
 /// <summary>
 /// The class <see cref="Vxi11EventArgs"/> defines the event arguments for the 
 /// an event fired by the <see cref="InterruptChannelServer">Interrupt server</see> whenever replies to a
-/// <see cref="InterruptChannelClient.DeviceIntrSrq(cc.isr.VXI11.Codecs.DeviceSrqParms)"/> message
+/// <see cref="InterruptChannelClient.DeviceIntrSrq(cc.isr.VXI11.Codecs.DeviceSrqParams)"/> message
 /// is received.
 /// </summary>
 public class Vxi11EventArgs : EventArgs
@@ -15,6 +15,7 @@ public class Vxi11EventArgs : EventArgs
     /// <param name="handle">   The handle. </param>
     public Vxi11EventArgs( byte[] handle ) : this( Vxi11EventCodec.DecodeInstance( handle ) )
     { }
+
     /// <summary>
     /// Creates a new <see cref="Vxi11EventArgs"/> object and initializes its state.
     /// </summary>

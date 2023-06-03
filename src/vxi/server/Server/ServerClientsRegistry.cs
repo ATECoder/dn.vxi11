@@ -115,8 +115,8 @@ public class ServerClientsRegistry
         {
             int loopDelay = 5;
             Task<bool> awaitingTask = this.AwaitLockReleaseAsync( timeout, 5 );
-            // Logger?.LogVerbose( $"@{nameof( ServerClientsRegistry.AwaitLockReleaseAsync )} await task await is {(awaitingTask.Wait( timeout + 2 ) ? "true" : "false")}" );
-            // Logger?.LogVerbose( $"@{nameof( ServerClientsRegistry.AwaitLockReleaseAsync )} await task result {(awaitingTask.Result ? "true" : "false")}" );
+            // TraceExtensions.TraceMemberInfo(  $"@{nameof( ServerClientsRegistry.AwaitLockReleaseAsync )} await task await is {(awaitingTask.Wait( timeout + 2 ) ? "true" : "false")}" );
+            // TraceExtensions.TraceMemberInfo(  $"@{nameof( ServerClientsRegistry.AwaitLockReleaseAsync )} await task result {(awaitingTask.Result ? "true" : "false")}" );
             return awaitingTask.Wait( timeout + 2 * loopDelay ) && awaitingTask.Result;
         }
         return true;
@@ -131,7 +131,7 @@ public class ServerClientsRegistry
     {
         bool result = false;
         await Task.Factory.StartNew( () => { result = this.AwaitLockRelease( this.ActiveServerClient!.LockTimeout, loopDelay ); } );
-        // Logger?.LogVerbose( $"exit {nameof( ServerClientsRegistry.AwaitLockReleaseAsync )} result is {(result ? "true" : "false")}" );
+        // TraceExtensions.TraceMemberInfo(  $"exit {nameof( ServerClientsRegistry.AwaitLockReleaseAsync )} result is {(result ? "true" : "false")}" );
         return result;
     }
 
@@ -142,7 +142,7 @@ public class ServerClientsRegistry
     /// <returns>   <see langword="true"/> if it the lock was released; otherwise, <see langword="false"/>  if it fails. </returns>
     public bool AwaitLockRelease( int timeout, int loopDelay )
     {
-        Logger?.LogVerbose( $"enter {nameof( ServerClientsRegistry.AwaitLockRelease )} {this.ActiveServerClient?.DeviceName} client {this.ActiveServerClient?.ClientId} is {((this.ActiveServerClient?.IsLocked() ?? false) ? "locked" : "not locked")}" );
+        TraceExtensions.TraceMemberInfo(  $"enter {nameof( ServerClientsRegistry.AwaitLockRelease )} {this.ActiveServerClient?.DeviceName} client {this.ActiveServerClient?.ClientId} is {((this.ActiveServerClient?.IsLocked() ?? false) ? "locked" : "not locked")}" );
 
         // await for the server to stop running
         DateTime endTime = DateTime.Now.AddMilliseconds( timeout );
@@ -150,7 +150,7 @@ public class ServerClientsRegistry
         {
             Task.Delay( loopDelay ).Wait();
         }
-        Logger?.LogVerbose( $"exit {nameof( ServerClientsRegistry.AwaitLockRelease )} {this.ActiveServerClient?.DeviceName} client {this.ActiveServerClient?.ClientId} is {((this.ActiveServerClient?.IsLocked() ?? false) ? "locked" : "not locked")}" );
+        TraceExtensions.TraceMemberInfo(  $"exit {nameof( ServerClientsRegistry.AwaitLockRelease )} {this.ActiveServerClient?.DeviceName} client {this.ActiveServerClient?.ClientId} is {((this.ActiveServerClient?.IsLocked() ?? false) ? "locked" : "not locked")}" );
 
         return !(this.ActiveServerClient?.IsLocked() ?? false);
     }

@@ -1,12 +1,12 @@
 using cc.isr.VXI11;
 
 AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
-TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobsserverException;
+TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobservedException;
 
 Console.WriteLine( $"VXI-11 {nameof( cc.isr.VXI11.Client.Vxi11Client )} Tester" );
 
 string ipv4Address = "192.168.0.144"; // "127.0.0.1";
-string deviceName = "inst0";
+string deviceName = "INST0";
 
 bool ready = false;
 while ( !ready )
@@ -16,13 +16,13 @@ while ( !ready )
     ipv4Address = string.IsNullOrWhiteSpace( enteredIp ) ? ipv4Address : enteredIp;
     Console.WriteLine();
     Console.Write( $"Connect to {ipv4Address}? " );
-    var yesno = Console.ReadKey();
-    ready = yesno.KeyChar == 'y' || yesno.KeyChar == 'Y';
+    var yesNo = Console.ReadKey();
+    ready = yesNo.KeyChar == 'y' || yesNo.KeyChar == 'Y';
 }
 
 using cc.isr.VXI11.Client.Vxi11Client vxi11Client = new();
 
-vxi11Client.ThreadExceptionOccurred += OnThreadExcetion;
+vxi11Client.ThreadExceptionOccurred += OnThreadException;
 
 Console.WriteLine();
 Console.Write( $"Press key to Connect to {ipv4Address}: " );
@@ -83,23 +83,35 @@ void SendCommand( string command )
         Console.WriteLine( $"{command} sent" );
 }
 
-static void OnThreadExcetion( object? sender, ThreadExceptionEventArgs e )
+/// <summary>   Raises the thread exception event. </summary>
+/// <remarks>   2023-06-02. </remarks>
+/// <param name="sender">   Source of the event. </param>
+/// <param name="e">        Event information to send to registered event handlers. </param>
+static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
 {
     string name = "unknown";
     if ( sender is cc.isr.VXI11.Client.Vxi11Client ) name = nameof( cc.isr.VXI11.Client.Vxi11Client );
-
-    Logger?.LogError( $"{name} encountered an exception during an asynchronous operation", e.Exception );
+    if ( e.Exception is Exception )
+        Console.WriteLine( $"{name} encountered an exception during an asynchronous operation: {e.Exception}" );
 }
 
 
 #region " unhandled exception handling "
 
+/// <summary>   Raises the unhandled exception event. </summary>
+/// <remarks>   2023-06-02. </remarks>
+/// <param name="sender">   Source of the event. </param>
+/// <param name="e">        Event information to send to registered event handlers. </param>
 static void OnUnhandledException( object? sender, UnhandledExceptionEventArgs e )
 {
     Console.WriteLine( $"\n Unhandled exception occurred: {e.ExceptionObject}\n" );
 }
 
-static void OnTaskSchedulerUnobsserverException( object? sender, UnobservedTaskExceptionEventArgs e )
+/// <summary>   Raises the unobserved task exception event. </summary>
+/// <remarks>   2023-06-02. </remarks>
+/// <param name="sender">   Source of the event. </param>
+/// <param name="e">        Event information to send to registered event handlers. </param>
+static void OnTaskSchedulerUnobservedException( object? sender, UnobservedTaskExceptionEventArgs e )
 {
     Console.WriteLine( $"{(e.Observed ? "" : "un")}observed exception occurred: {e.Exception}\n" );
 }

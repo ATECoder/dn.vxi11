@@ -1,9 +1,7 @@
-using cc.isr.VXI11.EnumExtensions;
-
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
-/// The <see cref="DeviceDoCmdParms"/> class defines the request XDR
+/// The <see cref="DeviceDoCmdParams"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.DeviceDoCommandProcedure"/> RPC message.
 /// </summary>
 /// <remarks> 
@@ -13,27 +11,27 @@ namespace cc.isr.VXI11.Codecs;
 /// All integers defined by the VXI-11 specification are passed over the
 /// network as 32-bit integers, either signed or unsigned as defined. </para><para>
 /// 
-/// Renamed from <c>Device_DocmdParms</c>. </para><para>
+/// Renamed from <c>Device_DoCmdParams</c>. </para><para>
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
-/// struct Device_DocmdParms {
+/// struct Device_DoCmdParams {
 ///    Device_Link lid;             /* link id from create_link */
 ///    Device_Flags flags;          /* flags specifying various options */
 ///    unsigned long io_timeout;    /* time to wait for I/O to complete */
 ///    unsigned long lock_timeout;  /* time to wait on a lock */
 ///    long cmd;                    /* which command to execute */
 ///    bool network_order;          /* client's byte order */
-///    long datasize;               /* size of individual data elements */
+///    long dataSize;               /* size of individual data elements */
 ///    opaque data_in{};            /* do cmd data parameters */
 /// };
 /// </code>
 /// </remarks>
-public class DeviceDoCmdParms : IXdrCodec
+public class DeviceDoCmdParams : IXdrCodec
 {
 
     /// <summary>   Default constructor. </summary>
-    public DeviceDoCmdParms()
+    public DeviceDoCmdParams()
     {
         this._link = new();
         this._dataIn = Array.Empty<byte>();
@@ -42,17 +40,17 @@ public class DeviceDoCmdParms : IXdrCodec
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceDoCmdParms( XdrDecodingStreamBase decoder ) : this()
+    public DeviceDoCmdParams( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
     }
 
-    /// <summary>   Decodes an instance of a <see cref="DeviceDoCmdParms"/>. </summary>
+    /// <summary>   Decodes an instance of a <see cref="DeviceDoCmdParams"/>. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    /// <returns>   The <see cref="DeviceDoCmdParms"/>. </returns>
-    public static DeviceDoCmdParms DecodeInstance( XdrDecodingStreamBase decoder )
+    /// <returns>   The <see cref="DeviceDoCmdParams"/>. </returns>
+    public static DeviceDoCmdParams DecodeInstance( XdrDecodingStreamBase decoder )
     {
-        return new DeviceDoCmdParms( decoder );
+        return new DeviceDoCmdParams( decoder );
     }
 
     private DeviceLink _link;

@@ -36,6 +36,7 @@ public class DeviceWriteResp : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public DeviceWriteResp()
     { }
+
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
     public DeviceWriteResp( XdrDecodingStreamBase decoder ) : this()

@@ -299,7 +299,7 @@ The contents of the device string determines which Message Exchange Interface is
 A TCP/IP-IEEE 488.2 Instrument Interface supports a device string of the following format: `<inst_name>` where:
 * `<inst_name>` A name corresponding to a single instrument.
 
-The TCP/IP-IEEE 488.2 Instrument Interface recognizes an `<inst_name>` of `"inst0"` as the first or only instrument within the TCP/IP-IEEE 488.2 Instrument Interface. Additional instruments are identified by `"instN"` where N is a non-negative integer assigned sequentially beginning at one.
+The TCP/IP-IEEE 488.2 Instrument Interface recognizes an `<inst_name>` of `"INST0"` as the first or only instrument within the TCP/IP-IEEE 488.2 Instrument Interface. Additional instruments are identified by `"instN"` where N is a non-negative integer assigned sequentially beginning at one.
 
 One and only one Message Exchange Interface and Status Reporting exists for each `instN` supported in a TCP/IP IEEE 488.2 Instrument Interface even when connections to multiple controllers are active.
 

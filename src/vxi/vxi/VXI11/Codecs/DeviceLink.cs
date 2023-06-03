@@ -37,6 +37,7 @@ public class DeviceLink : IXdrCodec
     /// <summary>   Default constructor. </summary>
     public DeviceLink()
     { }
+
     /// <summary>   Constructor. </summary>
     /// <param name="linkId">    The device link id. </param>
     public DeviceLink( int linkId )

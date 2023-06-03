@@ -18,7 +18,7 @@ else
     }
     catch ( Exception ex )
     {
-        Logger?.LogError( "There has been an exception, find the details below..", ex );
+        Console.WriteLine( $"There has been an exception, find the details below.. {ex}" );
     }
 }
 

@@ -286,7 +286,7 @@ public class Vxi11DiscovererBroadcastTests
         {
             Logger?.LogInformation( $"Pinging {endpoint}" );
             Stopwatch sw = Stopwatch.StartNew();
-            Assert.IsTrue( VXI11.Vxi11Discoverer.Paping( endpoint ) );
+            Assert.IsTrue( VXI11.Vxi11Discoverer.PingPort( endpoint ) );
             Logger?.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
 
             if ( endpoint.Port == OncRpcPortmapConstants.OncRpcPortmapPortNumber ) { actualCount++; }

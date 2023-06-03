@@ -35,7 +35,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     #region " device name "
 
     /// <summary>
-    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
+    /// Gets or sets the device name, .e.g, INST0, gpib0,5, or usb0[...].
     /// </summary>
     /// <value> The device name. </value>
     string DeviceName { get; set; }
@@ -157,7 +157,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <remarks>
     /// 2023-02-09. <para>
     /// 
-    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.Waitlock"/>
+    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.WaitLock"/>
     /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
     /// terminate that calling call and set error to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>
@@ -607,7 +607,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring any bytes to the device and SHALL
     /// set error to 5. </para><para>
     /// 
-    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> . If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the lock is
     /// free. If the flag is not set,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11, device already locked by another
@@ -679,7 +679,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// set error to 5. </para><para>
     /// 
     /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
-    /// SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the
+    /// SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in <c>flags</c> . If the
     /// flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the
     /// lock is free. If the flag is not set,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11,
@@ -735,7 +735,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// The <c>link id</c> parameter is compared against the link identifiers. If none match,
     /// <c>device_trigger</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> .If the flag is set, <c>device_trigger</c> SHALL block until the lock is free
     /// before sending the trigger. If the flag is not set, <c>device_trigger</c> SHALL terminate and
     /// set error to 11, device locked by another link. </para><para>
@@ -770,7 +770,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <para>
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// device_clear SHALL terminate with error set to 4, invalid link identifier. </para><para>
-    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>
+    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in <c>
     /// flags</c> . If the flag is set, device_clear SHALL block until the lock is free. If the flag
     /// is not set, device_clear SHALL terminate with error set to 11, device locked by another link.
     /// </para><para>
@@ -805,7 +805,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match, <c>
     /// device_remote</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> . If the flag is set, <c>device_remote</c> SHALL block until the lock is
     /// free. If the flag is not set, <c>device_remote</c> SHALL terminate with error set to 11,
     /// device locked by another link.  </para><para>
@@ -849,7 +849,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_local</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in
+    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in
     /// <c>flags</c>. If the flag is set, <c>device_local</c> SHALL block until the lock is free. If
     /// the flag is not set, <c>device_local</c> SHALL terminate with error set to 11, device locked
     /// by another link. </para><para>

@@ -17,10 +17,12 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
     /// <summary>   Default constructor. </summary>
     public CoreChannelServerBase() : this( 0 )
     { }
+
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
     public CoreChannelServerBase( int port ) : this( IPAddress.Any, port )
     { }
+
     /// <summary>   Constructor. </summary>
     /// <param name="bindAddr"> The bind address. </param>
     /// <param name="port">     The port. </param>
@@ -116,7 +118,7 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
                     }
                 case Vxi11Message.DeviceReadStbProcedure:
                     {
-                        DeviceGenericParms request = new();
+                        DeviceGenericParams request = new();
                         call.RetrieveCall( request );
                         DeviceReadStbResp result = this.DeviceReadStb( request );
                         call.Reply( result );
@@ -124,7 +126,7 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
                     }
                 case Vxi11Message.DeviceTriggerProcedure:
                     {
-                        DeviceGenericParms request = new();
+                        DeviceGenericParams request = new();
                         call.RetrieveCall( request );
                         DeviceError result = this.DeviceTrigger( request );
                         call.Reply( result );
@@ -132,7 +134,7 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
                     }
                 case Vxi11Message.DeviceClearProcedure:
                     {
-                        DeviceGenericParms request = new();
+                        DeviceGenericParams request = new();
                         call.RetrieveCall( request );
                         DeviceError result = this.DeviceClear( request );
                         call.Reply( result );
@@ -140,7 +142,7 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
                     }
                 case Vxi11Message.DeviceRemoteProcedure:
                     {
-                        DeviceGenericParms request = new();
+                        DeviceGenericParams request = new();
                         call.RetrieveCall( request );
                         DeviceError result = this.DeviceRemote( request );
                         call.Reply( result );
@@ -148,7 +150,7 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
                     }
                 case Vxi11Message.DeviceLocalProcedure:
                     {
-                        DeviceGenericParms request = new();
+                        DeviceGenericParams request = new();
                         call.RetrieveCall( request );
                         DeviceError result = this.DeviceLocal( request );
                         call.Reply( result );
@@ -180,7 +182,7 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
                     }
                 case Vxi11Message.DeviceDoCommandProcedure:
                     {
-                        DeviceDoCmdParms request = new();
+                        DeviceDoCmdParams request = new();
                         call.RetrieveCall( request );
                         DeviceDoCmdResp result = this.DeviceDoCmd( request );
                         call.Reply( result );
@@ -198,14 +200,14 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
                     {
                         DeviceRemoteFunc request = new();
                         call.RetrieveCall( request );
-                        DeviceError result = this.CreateIntrChan( request );
+                        DeviceError result = this.CreateInterruptChan( request );
                         call.Reply( result );
                         break;
                     }
                 case Vxi11Message.DestroyInterruptChannelProcedure:
                     {
                         call.RetrieveCall( VoidXdrCodec.VoidXdrCodecInstance );
-                        DeviceError result = this.DestroyIntrChan();
+                        DeviceError result = this.DestroyInterruptChan();
                         call.Reply( result );
                         break;
                     }
@@ -241,33 +243,33 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
 
     /// <summary>  Device returns its status byte. </summary>
     /// <remarks> Renamed from <c>device_readstb_1</c> </remarks>
-    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParms"/> to use with the remote procedure call. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParams"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceReadStbResp"/>. </returns>
-    public abstract DeviceReadStbResp DeviceReadStb( DeviceGenericParms request );
+    public abstract DeviceReadStbResp DeviceReadStb( DeviceGenericParams request );
 
     /// <summary>  Device executes a trigger. </summary>
     /// <remarks> Renamed from <c>device_trigger_1</c> </remarks>
-    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParms"/> to use with the remote procedure call. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParams"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceTrigger( DeviceGenericParms request );
+    public abstract DeviceError DeviceTrigger( DeviceGenericParams request );
 
     /// <summary>  Device clears itself. </summary>
     /// <remarks> Renamed from <c>device_clear_1</c> </remarks>
-    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParms"/> to use with the remote procedure call. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParams"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceClear( DeviceGenericParms request );
+    public abstract DeviceError DeviceClear( DeviceGenericParams request );
 
     /// <summary>  Device disables its front panel. </summary>
     /// <remarks> Renamed from <c>device_remote_1</c> </remarks>
-    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParms"/> to use with the remote procedure call. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParams"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceRemote( DeviceGenericParms request );
+    public abstract DeviceError DeviceRemote( DeviceGenericParams request );
 
     /// <summary>  Device enables its front panel. </summary>
     /// <remarks> Renamed from <c>device_local_1</c> </remarks>
-    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParms"/> to use with the remote procedure call. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceGenericParams"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DeviceLocal( DeviceGenericParms request );
+    public abstract DeviceError DeviceLocal( DeviceGenericParams request );
 
     /// <summary>  Device is locked. </summary>
     /// <remarks> Renamed from <c>device_lock_1</c> </remarks>
@@ -289,9 +291,9 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
 
     /// <summary>  Device executes a command. </summary>
     /// <remarks> Renamed from <c>device_docmd_1</c> </remarks>
-    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceDoCmdParms"/> to use with the remote procedure call. </param>
+    /// <param name="request"> The request of type of type <see cref="Codecs.DeviceDoCmdParams"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>. </returns>
-    public abstract DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request );
+    public abstract DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParams request );
 
     /// <summary>  Closes a link to a device. </summary>
     /// <remarks> Renamed from <c>destroy_link_1</c> </remarks>
@@ -303,12 +305,12 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
     /// <remarks> Renamed from <c>create_intr_chan_1</c> </remarks>
     /// <param name="request"> The request of type of type <see cref="Codecs.DeviceRemoteFunc"/> to use with the remote procedure call. </param>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError CreateIntrChan( DeviceRemoteFunc request );
+    public abstract DeviceError CreateInterruptChan( DeviceRemoteFunc request );
 
     /// <summary>  Device destroys interrupt channel. </summary>
     /// <remarks> Renamed from <c>destroy_intr_chan_1</c> </remarks>
     /// <returns>   A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>. </returns>
-    public abstract DeviceError DestroyIntrChan();
+    public abstract DeviceError DestroyInterruptChan();
 
     #endregion
 

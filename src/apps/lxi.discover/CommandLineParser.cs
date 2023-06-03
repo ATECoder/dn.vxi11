@@ -26,7 +26,7 @@ internal class CommandLineParser
         _ = sb.Append( $"Usage: ./{nameof( LxiDiscover )} " );
         _ = sb.Append( $"{CommandLineParser.TimeoutKey}{CommandLineParser.EqualsSign}<timeout_milliseconds>" );
         _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.IPKey}{CommandLineParser.EqualsSign}<address>" );
-        _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.DeviceNameKey}{CommandLineParser.EqualsSign}inst0" );
+        _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.DeviceNameKey}{CommandLineParser.EqualsSign}INST0" );
         _ = sb.Append( $"{CommandLineParser.Delimiter}{CommandLineParser.HelpKey}" );
         CommandLineParser.Usage = sb.ToString();
         _ = sb.Clear();
@@ -74,7 +74,7 @@ internal class CommandLineParser
 
     /// <summary>   Gets or sets the device instrument string default. </summary>
     /// <value> The device instrument string default. </value>
-    public static string DeviceInstrumentStringDefault { get; set; } = "inst0";
+    public static string DeviceInstrumentStringDefault { get; set; } = "INST0";
 
     /// <summary>   Gets or sets the default arguments. </summary>
     /// <value> The default arguments. </value>

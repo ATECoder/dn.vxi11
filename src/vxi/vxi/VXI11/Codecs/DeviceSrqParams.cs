@@ -1,7 +1,7 @@
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>
-/// The <see cref="DeviceSrqParms"/> class defines the request XDR
+/// The <see cref="DeviceSrqParams"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPC message.
 /// </summary>
 /// <remarks> 
@@ -11,42 +11,45 @@ namespace cc.isr.VXI11.Codecs;
 /// All integers defined by the VXI-11 specification are passed over the
 /// network as 32-bit integers, either signed or unsigned as defined. </para><para>
 /// 
-/// Renamed from <c>Device_SrqParms</c>. </para><para>
+/// Renamed from <c>Device_SrqParams</c>. </para><para>
 /// 
 /// VXI-11 Specifications: </para>
 /// <code>
-/// struct Device_SrqParms {
+/// struct Device_SrqParams {
 ///    opaque handle{};
 /// };
 /// </code>
 /// </remarks>
-public class DeviceSrqParms : IXdrCodec
+public class DeviceSrqParams : IXdrCodec
 {
 
     /// <summary>   Default constructor. </summary>
-    public DeviceSrqParms() : this( new byte[40] )
+    public DeviceSrqParams() : this( new byte[40] )
     {
         this._handle = Array.Empty<byte>();
     }
 
-    public DeviceSrqParms( byte[] handle )
+    /// <summary>   Constructor. </summary>
+    /// <remarks>   2023-06-02. </remarks>
+    /// <param name="handle">   The handle. </param>
+    public DeviceSrqParams( byte[] handle )
     {
         this._handle = handle ?? new byte[40];
     }
 
     /// <summary>   Constructor. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    public DeviceSrqParms( XdrDecodingStreamBase decoder ) : this()
+    public DeviceSrqParams( XdrDecodingStreamBase decoder ) : this()
     {
         this.Decode( decoder );
     }
 
-    /// <summary>   Decodes an instance of a <see cref="DeviceSrqParms"/>. </summary>
+    /// <summary>   Decodes an instance of a <see cref="DeviceSrqParams"/>. </summary>
     /// <param name="decoder">  XDR stream from which decoded information is retrieved. </param>
-    /// <returns>   The <see cref="DeviceSrqParms"/>. </returns>
-    public static DeviceSrqParms DecodeInstance( XdrDecodingStreamBase decoder )
+    /// <returns>   The <see cref="DeviceSrqParams"/>. </returns>
+    public static DeviceSrqParams DecodeInstance( XdrDecodingStreamBase decoder )
     {
-        return new DeviceSrqParms( decoder );
+        return new DeviceSrqParams( decoder );
     }
 
     private byte[] _handle;

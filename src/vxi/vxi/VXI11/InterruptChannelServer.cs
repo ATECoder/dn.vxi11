@@ -20,16 +20,19 @@ public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     /// <summary>   Default constructor. </summary>
     public InterruptChannelServer() : this( 0 )
     { }
-    /// <summary>   Constructor. </summary>
+
+    ///<summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
     public InterruptChannelServer( int port ) : this( IPAddress.Any, port )
     { }
-    /// <summary>   Constructor. </summary>
-    /// <param name="bindAddr"> The bind address. </param>
-    /// <param name="port">     The port. </param>
-    public InterruptChannelServer( IPAddress bindAddr, int port )
+
+    ///<summary>   Constructor. </summary>
+    /// <remarks>   2023-06-02. </remarks>
+    /// <param name="bindAddress">  The bind address. </param>
+    /// <param name="port">         The port. </param>
+    public InterruptChannelServer( IPAddress bindAddress, int port )
     {
-        this._ipv4Address = bindAddr;
+        this._ipv4Address = bindAddress;
         this.PortNumber = port;
 
         OncRpcProgramInfo[] registeredPrograms = new OncRpcProgramInfo[] {
@@ -38,8 +41,8 @@ public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
         this.SetRegisteredPrograms( registeredPrograms );
 
         OncRpcTransportBase[] transports = new OncRpcTransportBase[] {
-            new OncRpcUdpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault),
-            new OncRpcTcpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault)
+            new OncRpcUdpTransport(this, bindAddress, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault),
+            new OncRpcTcpTransport(this, bindAddress, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault)
         };
         this.SetTransports( transports );
     }
@@ -74,7 +77,7 @@ public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     /// <remarks>
     /// This interface has some fairly deep semantics, so please read the description above for how
     /// to use it properly. For background information about fairly deep semantics, please also refer
-    /// to <i>Gigzales</i>, <i>J</i>.: Semantics considered harmful. Addison-Reilly, 1992, ISBN 0-542-
+    /// to <i>Gigzales</i>, <i>J</i>., Semantics considered harmful. Addison-Reilly, 1992, ISBN 0-542-
     /// 10815-X. <para>
     /// 
     /// See the introduction to this class for examples of how to use this interface properly.</para>
@@ -92,7 +95,7 @@ public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
             {
                 case Vxi11Message.DeviceInterruptSrqProcedure:
                     {
-                        DeviceSrqParms request = new();
+                        DeviceSrqParams request = new();
                         call.RetrieveCall( request );
                         this.HandleServiceRequest( request );
                         call.Reply( VoidXdrCodec.VoidXdrCodecInstance );
@@ -110,6 +113,7 @@ public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
 
     #region " event handlers "
 
+    /// <summary>   Event queue for all listeners interested in ServiceRequested events. </summary>
     public event EventHandler<Vxi11EventArgs>? ServiceRequested;
 
     /// <summary>   Executes the <see cref="ServiceRequested"/> event. </summary>
@@ -128,11 +132,11 @@ public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     /// Handles the remote <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> request.
     /// </summary>
     /// <remarks>   2023-01-26. </remarks>
-    /// <param name="request">  The parameter of type <see cref="Codecs.DeviceSrqParms"/> received
+    /// <param name="request">  The parameter of type <see cref="Codecs.DeviceSrqParams"/> received
     ///                         from the network instrument, which acts as a client for the network
     ///                         instrument client, which acts as a server, when handling service
     ///                         requests. </param>
-    public virtual void HandleServiceRequest( DeviceSrqParms request )
+    public virtual void HandleServiceRequest( DeviceSrqParams request )
     {
         if ( request == null ) return;
         this.OnServiceRequested( new Vxi11EventArgs( request.GetHandle() ) );

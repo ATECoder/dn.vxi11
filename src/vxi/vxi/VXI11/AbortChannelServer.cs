@@ -24,16 +24,19 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     /// <summary>   Default constructor. </summary>
     public AbortChannelServer() : this( 0 )
     { }
+
     /// <summary>   Constructor. </summary>
     /// <param name="port"> The port. </param>
     public AbortChannelServer( int port ) : this( IPAddress.Any, port )
     { }
+
     /// <summary>   Constructor. </summary>
-    /// <param name="bindAddr"> The bind address. </param>
-    /// <param name="port">     The port. </param>
-    public AbortChannelServer( IPAddress bindAddr, int port )
+    /// <remarks>   2023-06-02. </remarks>
+    /// <param name="bindAddress">  The bind address. </param>
+    /// <param name="port">         The port. </param>
+    public AbortChannelServer( IPAddress bindAddress, int port )
     {
-        this._ipv4Address = bindAddr;
+        this._ipv4Address = bindAddress;
         this.PortNumber = port;
 
         OncRpcProgramInfo[] registeredPrograms = new OncRpcProgramInfo[] {
@@ -42,8 +45,8 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
         this.SetRegisteredPrograms( registeredPrograms );
 
         OncRpcTransportBase[] transports = new OncRpcTransportBase[] {
-        new OncRpcUdpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault),
-        new OncRpcTcpTransport(this, bindAddr, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault)
+        new OncRpcUdpTransport(this, bindAddress, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault),
+        new OncRpcTcpTransport(this, bindAddress, port, registeredPrograms, OncRpcTransportBase.BufferSizeDefault)
         };
         this.SetTransports( transports );
     }
@@ -114,6 +117,7 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
 
     #region " event handlers "
 
+    /// <summary>   Event queue for all listeners interested in AbortRequested events. </summary>
     public event EventHandler<DeviceErrorEventArgs>? AbortRequested;
 
     /// <summary>   Executes the <see cref="AbortRequested"/> event. </summary>

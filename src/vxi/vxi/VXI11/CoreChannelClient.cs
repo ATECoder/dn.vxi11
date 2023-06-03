@@ -28,6 +28,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     ///                         protocol and program. </param>
     public CoreChannelClient( OncRpcClientBase client ) : base( client )
     { }
+
     /// <summary>
     /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
     /// remote program can be accessed.
@@ -41,6 +42,7 @@ public class CoreChannelClient : OncRpcClientStubBase
                                                                                                    Vxi11ProgramConstants.CoreVersion,
                                                                                                    0, protocol, timeout )
     { }
+
     /// <summary>
     /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/> 
     /// remote program can be accessed. 
@@ -56,6 +58,7 @@ public class CoreChannelClient : OncRpcClientStubBase
                                                                                                        Vxi11ProgramConstants.CoreVersion, port,
                                                                                                        protocol, timeout )
     { }
+
     /// <summary>
     /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
     /// remote program can be accessed.
@@ -110,7 +113,7 @@ public class CoreChannelClient : OncRpcClientStubBase
 
     /// <summary>   Gets or sets the write termination default. </summary>
     /// <value> The write termination default. </value>
-    public static byte[] WriteTerminationDefault { get; set; } = new byte[] { ( byte ) '\n' };
+    public static byte[] WriteTerminationDefault { get; set; } = { ( byte ) '\n' };
 
     /// <summary>
     /// Gets or sets a value indicating whether the end-or-identify (EOI) terminator is enabled by
@@ -280,7 +283,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks> <para>
     ///
-    /// Renamed from <c>device_readstb_1</c> </para></remarks>
+    /// Renamed from <c>device_ReadStb_1</c> </para></remarks>
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
@@ -294,7 +297,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </returns>
     public DeviceReadStbResp DeviceReadStb( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout )
     {
-        DeviceGenericParms request = new() {
+        DeviceGenericParams request = new() {
             Link = link,
             Flags = flags,
             LockTimeout = lockTimeout,
@@ -309,14 +312,14 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks> <para>
     ///
-    /// Renamed from <c>device_readstb_1</c> </para></remarks>
+    /// Renamed from <c>device_ReadStb_1</c> </para></remarks>
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
-    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParams"/> to send
     ///                         with the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceReadStbResp"/>.
     /// </returns>
-    public DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
+    public DeviceReadStbResp DeviceReadStb( DeviceGenericParams request )
     {
         DeviceReadStbResp result = new();
         this.Client?.Call( ( int ) Vxi11Message.DeviceReadStbProcedure, Vxi11ProgramConstants.CoreVersion, request, result );
@@ -343,7 +346,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </returns>
     public DeviceError DeviceTrigger( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout )
     {
-        DeviceGenericParms request = new() {
+        DeviceGenericParams request = new() {
             Link = link,
             Flags = flags,
             LockTimeout = lockTimeout,
@@ -360,12 +363,12 @@ public class CoreChannelClient : OncRpcClientStubBase
     ///
     /// Renamed from <c>device_trigger_1</c> </para></remarks>
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
-    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParams"/> to send
     ///                         to  the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceTrigger( DeviceGenericParms request )
+    public DeviceError DeviceTrigger( DeviceGenericParams request )
     {
         DeviceError result = new();
         this.Client?.Call( ( int ) Vxi11Message.DeviceTriggerProcedure, Vxi11ProgramConstants.CoreVersion, request, result );
@@ -392,7 +395,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </returns>
     public DeviceError DeviceClear( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout )
     {
-        DeviceGenericParms request = new() {
+        DeviceGenericParams request = new() {
             Link = link,
             Flags = flags,
             LockTimeout = lockTimeout,
@@ -409,12 +412,12 @@ public class CoreChannelClient : OncRpcClientStubBase
     ///
     /// Renamed from <c>device_clear_1</c> </para></remarks>
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
-    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParams"/> to send
     ///                         to the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceClear( DeviceGenericParms request )
+    public DeviceError DeviceClear( DeviceGenericParams request )
     {
         DeviceError result = new();
         this.Client?.Call( ( int ) Vxi11Message.DeviceClearProcedure, Vxi11ProgramConstants.CoreVersion, request, result );
@@ -441,7 +444,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </returns>
     public DeviceError DeviceRemote( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout )
     {
-        DeviceGenericParms request = new() {
+        DeviceGenericParams request = new() {
             Link = link,
             Flags = flags,
             LockTimeout = lockTimeout,
@@ -458,12 +461,12 @@ public class CoreChannelClient : OncRpcClientStubBase
     ///
     /// Renamed from <c>device_remote_1</c> </para></remarks>
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
-    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParams"/> to send
     ///                         to the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DeviceRemote( DeviceGenericParms request )
+    public DeviceError DeviceRemote( DeviceGenericParams request )
     {
         DeviceError result = new();
         this.Client?.Call( ( int ) Vxi11Message.DeviceRemoteProcedure, Vxi11ProgramConstants.CoreVersion, request, result );
@@ -490,7 +493,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </returns>
     public DeviceError DeviceLocal( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout )
     {
-        DeviceGenericParms request = new() {
+        DeviceGenericParams request = new() {
             Link = link,
             Flags = flags,
             LockTimeout = lockTimeout,
@@ -503,17 +506,19 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceLocalProcedure"/>;
     /// Device enables its front panel.
     /// </summary>
-    /// <remarks> <para>
-    ///
-    /// Renamed from <c>device_local_1</c> </para></remarks>
-    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
-    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParms"/> to send
+    /// <remarks>
+    /// <para>
+    /// 
+    /// Renamed from <c>device_local_1</c> </para>
+    /// </remarks>
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParams"/> to send
     ///                         to the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
     ///
-    public DeviceError DeviceLocal( DeviceGenericParms request )
+    /// ### <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    public DeviceError DeviceLocal( DeviceGenericParams request )
     {
         DeviceError result = new();
         this.Client?.Call( ( int ) Vxi11Message.DeviceLocalProcedure, Vxi11ProgramConstants.CoreVersion, request, result );
@@ -524,9 +529,10 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceLockProcedure"/>;
     /// Device is locked.
     /// </summary>
-    /// <remarks> <para>
-    ///
-    /// Renamed from <c>device_lock_1</c> </para></remarks>
+    /// <remarks>
+    /// <para>
+    /// Renamed from <c>device_lock_1</c> </para>
+    /// </remarks>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
     /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
@@ -549,15 +555,18 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceLockProcedure"/>;
     /// Device is locked.
     /// </summary>
-    /// <remarks> <para>
-    ///
-    /// Renamed from <c>device_lock_1</c> </para></remarks>
-    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <remarks>
+    /// <para>
+    /// 
+    /// Renamed from <c>device_lock_1</c> </para>
+    /// </remarks>
     /// <param name="request">  The request of type <see cref="Codecs.DeviceLockParms"/> to send to
     ///                         the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
+    ///
+    /// ### <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     public DeviceError DeviceLock( DeviceLockParms request )
     {
         DeviceError result = new();
@@ -569,15 +578,18 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceUnlockProcedure"/>;
     /// Device is unlocked.
     /// </summary>
-    /// <remarks> <para>
-    ///
-    /// Renamed from <c>device_unlock_1</c> </para></remarks>
-    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <remarks>
+    /// <para>
+    /// 
+    /// Renamed from <c>device_unlock_1</c> </para>
+    /// </remarks>
     /// <param name="link"> The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                     call, which forms the request of this RPC call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
+    ///
+    /// ### <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     public DeviceError DeviceUnlock( DeviceLink link )
     {
         DeviceError result = new();
@@ -589,34 +601,37 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceEnableSrqProcedure"/>;
     /// Device enables/disables sending of service requests.
     /// </summary>
-    /// <remarks>   <para> 
+    /// <remarks>
+    /// <para>
     /// 
-    /// The <c>create_intr_chan</c> RPC is used to identify the host or port that can service the interrupt. The
-    /// <c>device_enable_srq</c> RPC is used to enable or disable an interrupt. The <c>destroy_intr_chan</c> RPC is used to
-    /// close the interrupt channel. </para><para>
-    ///
-    /// The <c>device_enable_srq</c> RPC contains a handle parameter. The same data contained in handle is passed
-    /// back in the handle parameter of the <c>device_intr_srq</c> RPC. Since the same data is passed back, the
-    /// network instrument client can identify the link associated with the <c>device_intr_srq</c>. </para><para>
-    ///
-    /// The network instrument protocol recognizes one type of interrupt, service request. Note that the return
-    /// type to the interrupt RPC is void, denoting a one-way RPC. </para><para>
-    ///
+    /// The <c>CREATE_INTR_CHAN</c> RPC is used to identify the host or port that can service the
+    /// interrupt. The
+    /// <c>device_enable_srq</c> RPC is used to enable or disable an interrupt. The <c>
+    /// DESTROY_INTR_CHAN</c> RPC is used to close the interrupt channel. </para><para>
+    /// 
+    /// The <c>device_enable_srq</c> RPC contains a handle parameter. The same data contained in
+    /// handle is passed back in the handle parameter of the <c>DEVICE_INTR_SRQ</c> RPC. Since the
+    /// same data is passed back, the network instrument client can identify the link associated with
+    /// the <c>DEVICE_INTR_SRQ</c>. </para><para>
+    /// 
+    /// The network instrument protocol recognizes one type of interrupt, service request. Note that
+    /// the return type to the interrupt RPC is void, denoting a one-way RPC. </para><para>
+    /// 
     /// A network instrument host uses the following RPCL definition for interrupt messages.
     /// <code>
-    /// struct Device_SrqParms
+    /// struct Device_SrqParams
     /// {
     ///    opaque handle;
     /// };
     /// program DEVICE_INTR
     /// {
     ///    version DEVICE_INTR_VERSION {
-    ///        void device_intr_srq( Device_SrqParms) = 30;
+    ///        void DEVICE_INTR_SRQ( Device_SrqParams) = 30;
     ///    }=1;
     /// } = 0x0607B1;
     /// </code>
-    /// The program number <c>0x0607B1</c> is the registered program number for the network instrument protocol's
-    /// interrupt channel. </para> <para>
+    /// The program number <c>0x0607B1</c> is the registered program number for the network
+    /// instrument protocol's interrupt channel. </para> <para>
     /// 
     /// Renamed from <c>device_enable_srq_1</c> </para>
     /// </remarks>
@@ -661,9 +676,11 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
     /// Device executes a command.
     /// </summary>
-    /// <remarks> <para>
-    ///
-    /// Renamed from <c>device_docmd_1</c> </para></remarks>
+    /// <remarks>
+    /// <para>
+    /// 
+    /// Renamed from <c>DEVICE_DOCMD_1</c> </para>
+    /// </remarks>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
@@ -698,9 +715,11 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
     /// Device executes a command.
     /// </summary>
-    /// <remarks> <para>
-    ///
-    /// Renamed from <c>device_docmd_1</c> </para></remarks>
+    /// <remarks>
+    /// <para>
+    /// 
+    /// Renamed from <c>DEVICE_DOCMD_1</c> </para>
+    /// </remarks>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
@@ -735,10 +754,11 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
     /// Device executes a command.
     /// </summary>
-    /// <remarks> <para>
-    ///
-    /// Renamed from <c>device_docmd_1</c> </para></remarks>
-    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    /// <remarks>
+    /// <para>
+    /// 
+    /// Renamed from <c>DEVICE_DOCMD_1</c> </para>
+    /// </remarks>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
     /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
@@ -751,6 +771,8 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
     /// </returns>
+    ///
+    /// ### <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     public DeviceDoCmdResp DeviceDoCmd( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout,
                                         int cmd, int dataSize, byte[] dataIn )
     {
@@ -762,9 +784,11 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
     /// Device executes a command.
     /// </summary>
-    /// <remarks> <para>
-    ///
-    /// Renamed from <c>device_docmd_1</c> </para></remarks>
+    /// <remarks>
+    /// <para>
+    /// 
+    /// Renamed from <c>DEVICE_DOCMD_1</c> </para>
+    /// </remarks>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     ///                             call. </param>
     /// <param name="flags">        The <see cref="DeviceOperationFlags"/> options. </param>
@@ -783,7 +807,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     public DeviceDoCmdResp DeviceDoCmd( DeviceLink link, DeviceOperationFlags flags, int lockTimeout, int ioTimeout,
                                         int cmd, bool netWorkOrder, int dataSize, byte[] dataIn )
     {
-        DeviceDoCmdParms request = new() {
+        DeviceDoCmdParams request = new() {
             Link = link,
             Flags = flags,
             IOTimeout = ioTimeout,
@@ -801,16 +825,19 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
     /// Device executes a command.
     /// </summary>
-    /// <remarks> <para>
-    ///
-    /// Renamed from <c>device_docmd_1</c> </para></remarks>
-    /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
-    /// <param name="request"> The request of type <see cref="Codecs.DeviceDoCmdParms"/> to send to the
-    ///                     remote procedure call. </param>
+    /// <remarks>
+    /// <para>
+    /// 
+    /// Renamed from <c>DEVICE_DOCMD_1</c> </para>
+    /// </remarks>
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceDoCmdParams"/> to send to
+    ///                         the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceDoCmdResp"/>.
     /// </returns>
-    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
+    ///
+    /// ### <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
+    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParams request )
     {
         DeviceDoCmdResp result = new();
         this.Client?.Call( ( int ) Vxi11Message.DeviceDoCommandProcedure, Vxi11ProgramConstants.CoreVersion, request, result );
@@ -843,11 +870,11 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <remarks>
     /// <para>
     /// 
-    /// The <c>create_intr_chan</c> RPC is used to identify the host or port that can service the
+    /// The <c>CREATE_INTR_CHAN</c> RPC is used to identify the host or port that can service the
     /// interrupt. The <c>device_enable_srq</c> RPC is used to enable or disable an interrupt. The <c>
-    /// destroy_intr_chan</c> RPC is used to close the interrupt channel. </para><para>
+    /// DESTROY_INTR_CHAN</c> RPC is used to close the interrupt channel. </para><para>
     /// 
-    /// Renamed from <c>create_intr_chan_1</c>  </para>
+    /// Renamed from <c>CREATE_INTR_CHAN_1</c>  </para>
     /// </remarks>
     /// <param name="hostAddress">          The host address. </param>
     /// <param name="hostPort">             The host port. </param>
@@ -855,9 +882,9 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError CreateIntrChan( IPAddress hostAddress, int hostPort, TransportProtocol transportProtocol = TransportProtocol.Tcp )
+    public DeviceError CreateInterruptChan( IPAddress hostAddress, int hostPort, TransportProtocol transportProtocol = TransportProtocol.Tcp )
     {
-        return this.CreateIntrChan( hostAddress, hostPort, Vxi11ProgramConstants.InterruptProgram, Vxi11ProgramConstants.InterruptVersion, transportProtocol );
+        return this.CreateInterruptChan( hostAddress, hostPort, Vxi11ProgramConstants.InterruptProgram, Vxi11ProgramConstants.InterruptVersion, transportProtocol );
     }
 
     /// <summary>
@@ -866,11 +893,11 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// If a protocol other than UDP or TCP is specified, <c>create_intr_chan</c> terminates and set
+    /// If a protocol other than UDP or TCP is specified, <c>CREATE_INTR_CHAN</c> terminates and set
     /// error to <see cref="DeviceErrorCode.OperationNotSupported"/> (8), operation not
     /// supported. </para><para>
     /// 
-    /// Renamed from <c>create_intr_chan_1</c> </para>
+    /// Renamed from <c>CREATE_INTR_CHAN_1</c> </para>
     /// </remarks>
     /// <param name="hostAddress">          The host address. </param>
     /// <param name="hostPort">             The host port. </param>
@@ -881,7 +908,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError CreateIntrChan( IPAddress hostAddress, int hostPort, int programNumber, int programVersion, TransportProtocol transportProtocol )
+    public DeviceError CreateInterruptChan( IPAddress hostAddress, int hostPort, int programNumber, int programVersion, TransportProtocol transportProtocol )
     {
         DeviceRemoteFunc request = new() {
             HostAddr = hostAddress,
@@ -890,7 +917,7 @@ public class CoreChannelClient : OncRpcClientStubBase
             ProgVers = programVersion,
             TransportProtocol = transportProtocol
         };
-        return this.CreateIntrChan( request );
+        return this.CreateInterruptChan( request );
     }
 
     /// <summary>
@@ -900,14 +927,14 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// <remarks> <para>
     /// 
     ///
-    /// Renamed from <c>create_intr_chan_1</c> </para></remarks>
+    /// Renamed from <c>CREATE_INTR_CHAN_1</c> </para></remarks>
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <param name="request">  The request of type <see cref="Codecs.DeviceRemoteFunc"/> to send to
     ///                         the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError CreateIntrChan( DeviceRemoteFunc request )
+    public DeviceError CreateInterruptChan( DeviceRemoteFunc request )
     {
         DeviceError result = new();
         this.Client?.Call( ( int ) Vxi11Message.CreateInterruptChannelProcedure, Vxi11ProgramConstants.CoreVersion, request, result );
@@ -920,12 +947,12 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks> <para>
     ///
-    /// Renamed from <c>destroy_intr_chan_1</c> </para></remarks>
+    /// Renamed from <c>DESTROY_INTR_CHAN_1</c> </para></remarks>
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="Codecs.DeviceError"/>.
     /// </returns>
-    public DeviceError DestroyIntrChan()
+    public DeviceError DestroyInterruptChan()
     {
         VoidXdrCodec request = VoidXdrCodec.VoidXdrCodecInstance;
         DeviceError result = new();

@@ -1,5 +1,3 @@
-using cc.isr.VXI11.EnumExtensions;
-
 namespace cc.isr.VXI11.Codecs;
 
 /// <summary>

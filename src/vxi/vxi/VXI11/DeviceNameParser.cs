@@ -7,6 +7,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <summary>   Default constructor. </summary>
     public DeviceNameParser() : this( string.Empty )
     { }
+
     /// <summary>   Constructor. </summary>
     /// <param name="deviceName">  The device name, e.g., <c>gpib0,12,8</c>. </param>
     public DeviceNameParser( string deviceName )
@@ -23,7 +24,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     }
 
     /// <summary>   (Immutable) the generic interface family. </summary>
-    public const string GenericInterfaceFamily = "inst";
+    public const string GenericInterfaceFamily = "INST";
 
     /// <summary>   (Immutable) the gpib interface family. </summary>
     public const string GpibInterfaceFamily = "gpib";
@@ -67,7 +68,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <value> The device name. </value>
     public string DeviceName { get; set; }
 
-    /// <summary>   Gets or sets the interface family , e.g., <c>gpib</c> or <c>inst</c> </summary>
+    /// <summary>   Gets or sets the interface family , e.g., <c>gpib</c> or <c>INST</c> </summary>
     /// <value> The interface family. </value>
     public string InterfaceFamily { get; set; }
 
@@ -111,9 +112,9 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <returns>   A string. </returns>
     public string BuildDeviceName()
     {
-        return this.InterfaceFamily.Equals( GenericInterfaceFamily )
+        return string.Equals( this.InterfaceFamily, GenericInterfaceFamily, StringComparison.OrdinalIgnoreCase )
             ? this.BoardNumber is null ? this.InterfaceFamily : BuildGenericDeviceName( this.BoardNumber ?? 0 )
-            : this.InterfaceFamily.Equals( GpibInterfaceFamily )
+            : string.Equals( this.InterfaceFamily, GpibInterfaceFamily, StringComparison.OrdinalIgnoreCase )
                 ? this.BoardNumber is null
                     ? this.InterfaceFamily
                     : this.PrimaryAddress is null
@@ -121,7 +122,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
                         : this.SecondaryAddress is null
                             ? BuildGpibDeviceName( this.BoardNumber ?? 0, this.PrimaryAddress ?? 0 )
                             : BuildGpibDeviceName( this.BoardNumber ?? 0, this.PrimaryAddress ?? 0, this.SecondaryAddress ?? 0 )
-                : this.InterfaceFamily.Equals( UsbInterfaceFamily )
+                : string.Equals( this.InterfaceFamily, UsbInterfaceFamily, StringComparison.OrdinalIgnoreCase )
                     ? this.BoardNumber is null
                         ? this.InterfaceFamily
                         : this.ManufacturerId is null
@@ -233,14 +234,14 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     public bool Parse( string deviceName )
     {
         this.Clear();
-        return string.IsNullOrWhiteSpace( deviceName )
-            ? false
-            : deviceName.StartsWith( UsbInterfaceFamily )
-                ? this.ParseUsbDeviceName( deviceName )
-                : this.ParseDeviceName( deviceName );
+
+        return !string.IsNullOrWhiteSpace( deviceName )
+                && ( deviceName.StartsWith( UsbInterfaceFamily )
+                     ? this.ParseUsbDeviceName( deviceName )
+                     : this.ParseDeviceName( deviceName ) );
     }
 
-    /// <summary>   Parses a genetic (inst) or GPIB device name into its components. </summary>
+    /// <summary>   Parses a genetic (INST) or GPIB device name into its components. </summary>
     /// <param name="deviceName">   The device name, e.g., <c>gpib0,12,8</c>. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
     private bool ParseDeviceName( string deviceName )
@@ -337,6 +338,9 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
         return this.InterfaceFamily.Equals( GpibInterfaceFamily, StringComparison.OrdinalIgnoreCase );
     }
 
+    /// <summary>   Query if this object is USB instrument device. </summary>
+    /// <remarks>   2023-06-02. </remarks>
+    /// <returns>   True if USB instrument device, false if not. </returns>
     public bool IsUsbInstrumentDevice()
     {
         return this.InterfaceFamily.Equals( UsbInterfaceFamily, StringComparison.OrdinalIgnoreCase );

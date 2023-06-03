@@ -19,6 +19,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// <summary>   Default constructor. </summary>
     public Vxi11Server() : this( new Vxi11Device( new Vxi11InstrumentFactory(), new Vxi11InterfaceFactory() ), IPAddress.Any, 0 )
     { }
+
     /// <summary>   Constructor. </summary>
     /// <param name="device">   current device. </param>
     /// <param name="bindAddr"> The local Internet Address the server will bind to. </param>
@@ -142,6 +143,8 @@ public class Vxi11Server : CoreChannelServerBase
         this.Device.HandleAbortRequest( e );
     }
 
+    /// <summary>   Gets or sets the abort server. </summary>
+    /// <value> The abort server. </value>
     protected AbortChannelServer? AbortServer { get; set; }
 
     /// <summary>   Starts the abort server. </summary>
@@ -272,7 +275,7 @@ public class Vxi11Server : CoreChannelServerBase
                  && this.InterruptPort > 0);
     }
 
-    /// <summary>   The interrupt address as set when getting the <see cref="CreateIntrChan(DeviceRemoteFunc)"/> RPC. </summary>
+    /// <summary>   The interrupt address as set when getting the <see cref="CreateInterruptChan(DeviceRemoteFunc)"/> RPC. </summary>
     private IPAddress InterruptAddress { get; set; }
 
     private int InterruptTransmitTimeout { get; set; }
@@ -451,7 +454,7 @@ public class Vxi11Server : CoreChannelServerBase
     {
         lock ( this._lock )
         {
-            Logger?.LogVerbose( $"@{nameof( Vxi11Server.CreateLink )} client {request.ClientId} lock {request.LockDevice} timeout {request.LockTimeout}" );
+            TraceExtensions.TraceMemberInfo(  $"@{nameof( Vxi11Server.CreateLink )} client {request.ClientId} lock {request.LockDevice} timeout {request.LockTimeout}" );
             return this.Device?.AwaitLockReleaseAsync( request.LockTimeout ) ?? true
                 ? this.CreateLinkUnlocked( request )
                 : new CreateLinkResp() { ErrorCode = DeviceErrorCode.DeviceLockedByAnotherLink };
@@ -526,12 +529,12 @@ public class Vxi11Server : CoreChannelServerBase
                 InterruptChannelClient? interruptClient = this.InterruptClient;
                 interruptClient?.Close();
                 if ( !interruptClient?.IsDisposed ?? false )
-                    Logger?.LogWarning( $"{nameof( DestroyLink )} failed closing the interrupt client." );
+                    TraceExtensions.TraceMemberWarning( $"{nameof( DestroyLink )} failed closing the interrupt client." );
 
                 this.InterruptClient = null;
 
                 if ( !abortServerTask?.Wait( AbortServerDisableTimeoutDefault ) ?? false )
-                    Logger?.LogWarning( $"{nameof( DestroyLink )} failed stopping the abort server." );
+                    TraceExtensions.TraceMemberWarning( $"{nameof( DestroyLink )} failed stopping the abort server." );
 
             }
         }
@@ -553,7 +556,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// <returns>
     /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
-    public override DeviceError CreateIntrChan( DeviceRemoteFunc request )
+    public override DeviceError CreateInterruptChan( DeviceRemoteFunc request )
     {
         // These constructs only exists in the server class. 
         // no calls are required on the device and instrument classes.
@@ -585,7 +588,7 @@ public class Vxi11Server : CoreChannelServerBase
             }
             catch ( Exception ex )
             {
-                Logger?.LogError( "Failed creating interrupt channel", ex );
+                TraceExtensions.TraceMemberError( $"Exception occurred creating interrupt channel", ex );
                 result = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
             }
         }
@@ -596,7 +599,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// <returns>
     /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
-    public override DeviceError DestroyIntrChan()
+    public override DeviceError DestroyInterruptChan()
     {
         DeviceError reply = new();
         try
@@ -631,7 +634,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// <para>
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// device_clear SHALL terminate with error set to 4, invalid link identifier. </para><para>
-    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the
+    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in <c>flags</c> . If the
     /// flag is set, device_clear SHALL block until the lock is free. If the flag is not set,
     /// device_clear SHALL terminate with error set to 11, device locked by another link. </para><para>
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, device_clear SHALL
@@ -643,22 +646,22 @@ public class Vxi11Server : CoreChannelServerBase
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, device_clear SHALL terminate
     /// with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParams"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
-    public override DeviceError DeviceClear( DeviceGenericParms request )
+    public override DeviceError DeviceClear( DeviceGenericParams request )
     {
         lock ( this ) { return this.DeviceClearUnlocked( request ); }
     }
 
     /// <summary>   Device clear unlocked. </summary>
     /// <remarks>   2023-02-14. </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParams"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>   A DeviceError. </returns>
-    private DeviceError DeviceClearUnlocked( DeviceGenericParms request )
+    private DeviceError DeviceClearUnlocked( DeviceGenericParams request )
     {
         return this.Device is null
             ? new DeviceError() { ErrorCode = DeviceErrorCode.DeviceNotAccessible }
@@ -667,12 +670,12 @@ public class Vxi11Server : CoreChannelServerBase
 
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-01-26. </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to
+    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParams"/> to
     ///                         use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceDoCmdResp"/> to send to the remote procedure call.
     /// </returns>
-    public override DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
+    public override DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParams request )
     {
         lock ( this._lock )
         {
@@ -720,7 +723,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_local</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in 
+    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in 
     /// <c>flags</c>. If the flag is set, <c>device_local</c> SHALL block until the lock is free. If the flag is not set,
     /// <c>device_local</c> SHALL terminate with error set to 11, device locked by another link. </para><para>
     /// 
@@ -737,12 +740,12 @@ public class Vxi11Server : CoreChannelServerBase
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_local</c> SHALL terminate
     /// with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParams"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
-    public override DeviceError DeviceLocal( DeviceGenericParms request )
+    public override DeviceError DeviceLocal( DeviceGenericParams request )
     {
         lock ( this._lock )
         {
@@ -764,7 +767,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match, <c>
     /// device_remote</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> . If the flag is set, <c>device_remote</c> SHALL block until the lock is
     /// free. If the flag is not set, <c>device_remote</c> SHALL terminate with error set to 11,
     /// device locked by another link.  </para><para>
@@ -781,12 +784,12 @@ public class Vxi11Server : CoreChannelServerBase
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_remote</c>
     /// SHALL terminate with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParams"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
-    public override DeviceError DeviceRemote( DeviceGenericParms request )
+    public override DeviceError DeviceRemote( DeviceGenericParams request )
     {
         lock ( this._lock )
         {
@@ -812,7 +815,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_readstb</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, the procedure examines the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c>
+    /// If some other link has the lock, the procedure examines the <see cref="DeviceOperationFlags.WaitLock"/> flag in <c>flags</c>
     /// . If the flag is set, <c>device_readstb</c> blocks until the lock is free before retrieving
     /// the status byte. If the flag is not set, <c>device_readstb</c> SHALL terminate and set error
     /// to 11, device locked by another link.</para><para>
@@ -829,12 +832,12 @@ public class Vxi11Server : CoreChannelServerBase
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_readstb</c>
     /// SHALL terminate with error set to 23.</para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParams"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceReadStbResp"/> to send to the remote procedure call.
     /// </returns>
-    public override DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
+    public override DeviceReadStbResp DeviceReadStb( DeviceGenericParams request )
     {
         lock ( this._lock )
         {
@@ -854,7 +857,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// The <c>link id</c> parameter is compared against the link identifiers. If none match,
     /// <c>device_trigger</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> .If the flag is set, <c>device_trigger</c> SHALL block until the lock is free
     /// before sending the trigger. If the flag is not set, <c>device_trigger</c> SHALL terminate and
     /// set error to 11, device locked by another link. </para><para>
@@ -871,12 +874,12 @@ public class Vxi11Server : CoreChannelServerBase
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_trigger</c>
     /// SHALL terminate with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParams"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
-    public override DeviceError DeviceTrigger( DeviceGenericParms request )
+    public override DeviceError DeviceTrigger( DeviceGenericParams request )
     {
         lock ( this._lock )
         {
@@ -901,7 +904,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// The <c>link id</c> parameter is compared against the active link identifiers . If none match, <c>device_lock</c> SHALL
     /// terminate, before trying to acquire the device's lock, with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_lock</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the flag is set,
+    /// If some other link has the lock, <c>device_lock</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in <c>flags</c> . If the flag is set,
     /// <c>device_lock</c> SHALL block until the lock is free. If the flag is not set, <c>device_lock</c> SHALL terminate with
     /// error set to 11, device locked by another link. </para><para>
     /// 
@@ -1053,7 +1056,7 @@ public class Vxi11Server : CoreChannelServerBase
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring any bytes to the device and SHALL
     /// set error to 5. </para><para>
     /// 
-    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> . If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the lock is
     /// free. If the flag is not set,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11, device already locked by another

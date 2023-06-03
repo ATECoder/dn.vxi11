@@ -383,7 +383,7 @@ public class Vxi11DiscovererTests
         {
             Logger?.LogInformation( $"Pinging {endpoint}" );
             sw.Restart();
-            Assert.IsTrue( VXI11.Vxi11Discoverer.Paping( endpoint ) );
+            Assert.IsTrue( VXI11.Vxi11Discoverer.PingPort( endpoint ) );
             Logger?.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
             if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
                 Logger?.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
@@ -405,7 +405,7 @@ public class Vxi11DiscovererTests
         {
             Logger?.LogInformation( $"Pinging {endpoint}" );
             Stopwatch sw = Stopwatch.StartNew();
-            Assert.IsTrue( VXI11.Vxi11Discoverer.Paping( endpoint ) );
+            Assert.IsTrue( VXI11.Vxi11Discoverer.PingPort( endpoint ) );
             Logger?.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms\n" );
 
             if ( endpoint.Port == OncRpcPortmapConstants.OncRpcPortmapPortNumber ) { actualCount++; }

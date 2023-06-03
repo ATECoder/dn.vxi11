@@ -35,7 +35,7 @@ public interface IVxi11Interface : INotifyPropertyChanged
     #region " device name "
 
     /// <summary>
-    /// Gets or sets the device name, .e.g, inst0, gpib0,5, or usb0[...].
+    /// Gets or sets the device name, .e.g, INST0, gpib0,5, or usb0[...].
     /// </summary>
     /// <value> The device name. </value>
     string DeviceName { get; set; }
@@ -68,7 +68,7 @@ public interface IVxi11Interface : INotifyPropertyChanged
     /// <remarks>
     /// 2023-02-09. <para>
     /// 
-    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.Waitlock"/>
+    /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.WaitLock"/>
     /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
     /// terminate that calling call and set error to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>
@@ -153,7 +153,7 @@ public interface IVxi11Interface : INotifyPropertyChanged
     /// <summary>   Reads <see cref="InterfaceCommandOption.NotDataAcceptedLineStatus"/> NDAC line. </summary>
     /// <remarks>   2023-01-24. </remarks>
     /// <returns>   1 if the NDAC message is true, 0 otherwise. </returns>
-    int ReadNdacLine();
+    int ReadNDacLine();
 
     /// <summary>   Check if interface device is a system controller; <see cref="InterfaceCommandOption.SystemControllerStatus"/>. </summary>
     /// <remarks>   2023-01-24. </remarks>
@@ -213,12 +213,12 @@ public interface IVxi11Interface : INotifyPropertyChanged
 
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-01-26. </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to
+    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParams"/> to
     ///                         use with the remote procedure call. </param>
     /// <returns>
     /// A Result from remote procedure call of type <see cref="DeviceDoCmdResp"/>.
     /// </returns>
-    DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request );
+    DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParams request );
 
     /// <summary>   Gets or sets the last device error. </summary>
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>

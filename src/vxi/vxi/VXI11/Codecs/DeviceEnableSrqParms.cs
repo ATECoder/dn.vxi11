@@ -60,7 +60,7 @@ public class DeviceEnableSrqParms : IXdrCodec
     public bool Enable { get; set; }
 
     /// <summary>   Gets or sets the handle. Host specific data for handling the service request. </summary>
-    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParms.GetHandle()"/> 
+    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParams.GetHandle()"/> 
     /// when a service request occurs. <para>
     /// 
     /// The network instrument client should send in the handle parameter a unique link identifier. This will
@@ -71,7 +71,7 @@ public class DeviceEnableSrqParms : IXdrCodec
     private byte[] _handle;
 
     /// <summary>   Gets the handle. </summary>
-    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParms.GetHandle()"/> 
+    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParams.GetHandle()"/> 
     /// when a service request occurs. </remarks>
     /// <returns>   An array of byte. </returns>
     public byte[] GetHandle()
@@ -80,7 +80,7 @@ public class DeviceEnableSrqParms : IXdrCodec
     }
 
     /// <summary>   Sets a handle. </summary>
-    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParms.GetHandle()"/> 
+    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParams.GetHandle()"/> 
     /// when a service request occurs. </remarks>
     /// <param name="handle">   The handle. </param>
     public void SetHandle( byte[] handle )

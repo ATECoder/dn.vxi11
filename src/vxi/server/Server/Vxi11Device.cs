@@ -307,7 +307,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <returns>   True if it succeeds, false if it fails. </returns>
     private bool TrySelectActiveClientInstrument( int linkId, DeviceOperationFlags flags, int? lockTimeout = null )
     {
-        return this.TrySelectActiveClientInstrument( linkId, DeviceOperationFlags.Waitlock == (flags & DeviceOperationFlags.Waitlock), lockTimeout );
+        return this.TrySelectActiveClientInstrument( linkId, DeviceOperationFlags.WaitLock == (flags & DeviceOperationFlags.WaitLock), lockTimeout );
     }
 
     /// <summary>   Attempts to select active client instrument. </summary>
@@ -435,6 +435,10 @@ public partial class Vxi11Device : IVxi11Device
         return _lastLinkId;
     }
 
+    /// <summary>   Gets candidate link identifier. </summary>
+    /// <remarks>   2023-06-02. </remarks>
+    /// <param name="currentId">    Identifier for the current. </param>
+    /// <returns>   The candidate link identifier. </returns>
     public static int GetCandidateLinkId( int currentId )
     {
         return ++currentId == int.MaxValue ? 0 : currentId;
@@ -549,7 +553,7 @@ public partial class Vxi11Device : IVxi11Device
             this.ActiveInstrument = this.Instruments[request.DeviceName];
             this.ActiveInstrument.ActiveServerClient?.ActivateLockTimeout( request.LockTimeout );
 
-            Logger?.LogVerbose( $"creating link to {request.DeviceName} for client {request.ClientId}" );
+            TraceExtensions.TraceMemberInfo(  $"creating link to {request.DeviceName} for client {request.ClientId}" );
 
             _lastLinkId = linkId;
             reply.DeviceLink = new DeviceLink( linkId );
@@ -635,7 +639,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <para>
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// device_clear SHALL terminate with error set to 4, invalid link identifier. </para><para>
-    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c> . If the
+    /// If some other link has the lock, device_clear SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in <c>flags</c> . If the
     /// flag is set, device_clear SHALL block until the lock is free. If the flag is not set,
     /// device_clear SHALL terminate with error set to 11, device locked by another link. </para><para>
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, device_clear SHALL
@@ -647,12 +651,12 @@ public partial class Vxi11Device : IVxi11Device
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, device_clear SHALL terminate
     /// with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParams"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
-    public DeviceError DeviceClear( DeviceGenericParms request )
+    public DeviceError DeviceClear( DeviceGenericParams request )
     {
         DeviceError reply = new();
         if ( !this.ContainsLink( request.Link.LinkId ) )
@@ -684,12 +688,12 @@ public partial class Vxi11Device : IVxi11Device
 
     /// <summary>   The device executes a command. </summary>
     /// <remarks>   2023-01-26. </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParms"/> to
+    /// <param name="request">  The request of type of type <see cref="DeviceDoCmdParams"/> to
     ///                         use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceDoCmdResp"/> to send to the remote procedure call.
     /// </returns>
-    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParms request )
+    public DeviceDoCmdResp DeviceDoCmd( DeviceDoCmdParams request )
     {
         DeviceDoCmdResp reply = new();
 
@@ -782,7 +786,7 @@ public partial class Vxi11Device : IVxi11Device
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_local</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in
+    /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in
     /// <c>flags</c>. If the flag is set, <c>device_local</c> SHALL block until the lock is free. If
     /// the flag is not set, <c>device_local</c> SHALL terminate with error set to 11, device locked
     /// by another link. </para><para>
@@ -800,12 +804,12 @@ public partial class Vxi11Device : IVxi11Device
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_local</c>
     /// SHALL terminate with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type <see cref="DeviceGenericParms"/> to use with the
+    /// <param name="request">  The request of type <see cref="DeviceGenericParams"/> to use with the
     ///                         remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
-    public DeviceError DeviceLocal( DeviceGenericParms request )
+    public DeviceError DeviceLocal( DeviceGenericParams request )
     {
         DeviceError reply = new();
         if ( !this.ContainsLink( request.Link.LinkId ) )
@@ -849,7 +853,7 @@ public partial class Vxi11Device : IVxi11Device
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match, <c>
     /// device_remote</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> . If the flag is set, <c>device_remote</c> SHALL block until the lock is
     /// free. If the flag is not set, <c>device_remote</c> SHALL terminate with error set to 11,
     /// device locked by another link.  </para><para>
@@ -867,12 +871,12 @@ public partial class Vxi11Device : IVxi11Device
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_remote</c>
     /// SHALL terminate with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParams"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
-    public DeviceError DeviceRemote( DeviceGenericParms request )
+    public DeviceError DeviceRemote( DeviceGenericParams request )
     {
         DeviceError reply = new();
         if ( !this.ContainsLink( request.Link.LinkId ) )
@@ -918,7 +922,7 @@ public partial class Vxi11Device : IVxi11Device
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_readstb</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, the procedure examines the <see cref="DeviceOperationFlags.Waitlock"/> flag in <c>flags</c>
+    /// If some other link has the lock, the procedure examines the <see cref="DeviceOperationFlags.WaitLock"/> flag in <c>flags</c>
     /// . If the flag is set, <c>device_readstb</c> blocks until the lock is free before retrieving
     /// the status byte. If the flag is not set, <c>device_readstb</c> SHALL terminate and set error
     /// to 11, device locked by another link.</para><para>
@@ -935,12 +939,12 @@ public partial class Vxi11Device : IVxi11Device
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_readstb</c>
     /// SHALL terminate with error set to 23.</para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParams"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceReadStbResp"/> to send to the remote procedure call.
     /// </returns>
-    public DeviceReadStbResp DeviceReadStb( DeviceGenericParms request )
+    public DeviceReadStbResp DeviceReadStb( DeviceGenericParams request )
     {
         DeviceReadStbResp reply = new();
         if ( !this.ContainsLink( request.Link.LinkId ) )
@@ -977,7 +981,7 @@ public partial class Vxi11Device : IVxi11Device
     /// The <c>link id</c> parameter is compared against the link identifiers. If none match,
     /// <c>device_trigger</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> .If the flag is set, <c>device_trigger</c> SHALL block until the lock is free
     /// before sending the trigger. If the flag is not set, <c>device_trigger</c> SHALL terminate and
     /// set error to 11, device locked by another link. </para><para>
@@ -994,12 +998,12 @@ public partial class Vxi11Device : IVxi11Device
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_trigger</c>
     /// SHALL terminate with error set to 23, abort. </para>
     /// </remarks>
-    /// <param name="request">  The request of type of type <see cref="DeviceGenericParms"/>
+    /// <param name="request">  The request of type of type <see cref="DeviceGenericParams"/>
     ///                         to use with the remote procedure call. </param>
     /// <returns>
     /// A response of type <see cref="DeviceError"/> to send to the remote procedure call.
     /// </returns>
-    public DeviceError DeviceTrigger( DeviceGenericParms request )
+    public DeviceError DeviceTrigger( DeviceGenericParams request )
     {
         DeviceError reply = new();
         if ( !this.ContainsLink( request.Link.LinkId ) )
@@ -1043,7 +1047,7 @@ public partial class Vxi11Device : IVxi11Device
     /// The <c>link id</c> parameter is compared against the active link identifiers . If none match, <c>device_lock</c> SHALL
     /// terminate, before trying to acquire the device's lock, with error set to 4, invalid link identifier. </para><para>
     /// 
-    /// If some other link has the lock, <c>device_lock</c> SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag in 
+    /// If some other link has the lock, <c>device_lock</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in 
     /// <see cref="DeviceLockParms.Flags"/>. If the flag is set, <c>device_lock</c> SHALL block until the lock is free.
     /// If the flag is not set, <c>device_lock</c> SHALL terminate with error set to 11, device locked by another link. </para><para>
     /// 
@@ -1244,7 +1248,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring any bytes to the device and SHALL
     /// set error to 5 </para><para>
     /// 
-    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> . If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/> SHALL block until the lock is
     /// free. If the flag is not set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/> SHALL terminate and set error to 11, 
     /// device already locked by another link. </para><para>
@@ -1338,7 +1342,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring any bytes to the device and SHALL
     /// set error to 5. </para><para>
     /// 
-    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.Waitlock"/> flag
+    /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> . If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the lock is
     /// free. If the flag is not set,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11, device already locked by another

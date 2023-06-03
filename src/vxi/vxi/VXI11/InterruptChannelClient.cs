@@ -54,6 +54,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
     ///                         protocol and program. </param>
     public InterruptChannelClient( OncRpcClientBase client ) : base( client )
     { }
+
     /// <summary>
     /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptVersion"/>
     /// remote program can be accessed.
@@ -67,6 +68,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
                                                                                                    Vxi11ProgramConstants.InterruptVersion,
                                                                                                    0, protocol, timeout )
     { }
+
     /// <summary>
     /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptProgram"/> 
     /// remote program can be accessed. 
@@ -82,6 +84,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
                                                                                                        Vxi11ProgramConstants.InterruptVersion, port,
                                                                                                        protocol, timeout )
     { }
+
     /// <summary>
     /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptProgram"/>
     /// remote program can be accessed.
@@ -114,7 +117,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
     /// <param name="handle">   The handle as it was received from the Core device. </param>
     public void DeviceIntrSrq( byte[] handle )
     {
-        DeviceSrqParms request = new( handle ) {
+        DeviceSrqParams request = new( handle ) {
         };
         this.DeviceIntrSrq( request );
     }
@@ -141,11 +144,11 @@ public class InterruptChannelClient : OncRpcClientStubBase
     /// 
     /// Renamed from <c>device_intr_srq_1</c> </para>.
     /// </remarks>
-    /// <param name="request">  The request of type <see cref="Codecs.DeviceSrqParms"/> to send to
+    /// <param name="request">  The request of type <see cref="Codecs.DeviceSrqParams"/> to send to
     ///                         the remote procedure call. </param>
     ///
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
-    public void DeviceIntrSrq( DeviceSrqParms request )
+    public void DeviceIntrSrq( DeviceSrqParams request )
     {
         VoidXdrCodec result = VoidXdrCodec.VoidXdrCodecInstance;
         this.Client?.Call( ( int ) Vxi11Message.DeviceInterruptSrqProcedure, Vxi11ProgramConstants.InterruptVersion, request, result );

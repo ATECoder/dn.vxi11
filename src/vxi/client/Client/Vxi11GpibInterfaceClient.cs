@@ -1,5 +1,7 @@
 namespace cc.isr.VXI11.Client;
 
+/// <summary>   A VXI 11 gpib interface client. </summary>
+/// <remarks>   2023-06-02. </remarks>
 public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
 {
 
@@ -14,13 +16,13 @@ public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
     {
         List<byte> data = new( new byte[] { ( byte ) (this.BusAddress | ( byte ) GpibCommandArgument.TalkAddress), ( byte ) GpibCommandArgument.Unlisten } );
 
-        foreach ( byte[] addr in addressList )
-            if ( addr?.Length > 0 )
-                for ( int i = 0; i < addr.Length; i++ )
+        foreach ( byte[] address in addressList )
+            if ( address?.Length > 0 )
+                for ( int i = 0; i < address.Length; i++ )
                 {
-                    if ( addr[i] < 0 || addr[i] > 30 )
-                        throw new DeviceException( $"; {nameof( CreateSetup )} failed because {i}-th address {addr[i]} is an invalid bus address.", DeviceErrorCode.InvalidAddress );
-                    data.Add( ( byte ) (addr[i] | ( byte ) (i == 0 ? GpibCommandArgument.ListenAddress : GpibCommandArgument.SecondaryAddress)) );
+                    if ( address[i] < 0 || address[i] > 30 )
+                        throw new DeviceException( $"; {nameof( CreateSetup )} failed because {i}-th address {address[i]} is an invalid bus address.", DeviceErrorCode.InvalidAddress );
+                    data.Add( ( byte ) (address[i] | ( byte ) (i == 0 ? GpibCommandArgument.ListenAddress : GpibCommandArgument.SecondaryAddress)) );
                 }
         return data.ToArray();
     }
@@ -54,7 +56,7 @@ public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
         try
         {
             this.Lock();
-            foreach ( var addr in address_list )
+            foreach ( var address in address_list )
             {
                 // check for listener at primary address
                 var cmd = new List<byte> {
@@ -63,9 +65,9 @@ public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
                 ( byte ) (this.BusAddress | ( byte ) GpibCommandArgument.TalkAddress)
             };
 
-                if ( addr < 0 || addr > 30 )
-                    throw new DeviceException( $"; {nameof( FindListeners )} failed because {addr} is an invalid bus address.", DeviceErrorCode.InvalidAddress );
-                cmd.Add( ( byte ) (addr | ( byte ) GpibCommandArgument.ListenAddress) );
+                if ( address < 0 || address > 30 )
+                    throw new DeviceException( $"; {nameof( FindListeners )} failed because {address} is an invalid bus address.", DeviceErrorCode.InvalidAddress );
+                cmd.Add( ( byte ) (address | ( byte ) GpibCommandArgument.ListenAddress) );
 
                 _ = this.SendCommand( cmd.ToArray() );
 
@@ -74,7 +76,7 @@ public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
                 Task.Delay( readAfterWriteDelay ).Wait();
 
                 if ( 0 != this.ReadNdacLine() )
-                    found.Add( (addr, 0) );
+                    found.Add( (address, 0) );
                 else
                 {
                     // check for listener at any sub-address
@@ -82,7 +84,7 @@ public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
                     ( byte ) GpibCommandArgument.Unlisten,
                     ( byte ) GpibCommandArgument.Untalk,
                     ( byte ) (this.BusAddress | ( byte ) GpibCommandArgument.TalkAddress),
-                    ( byte ) (addr | ( byte ) GpibCommandArgument.ListenAddress)
+                    ( byte ) (address | ( byte ) GpibCommandArgument.ListenAddress)
                 };
 
                     foreach ( var sa in Enumerable.Range( 0, 31 ) )
@@ -99,7 +101,7 @@ public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
                             ( byte ) GpibCommandArgument.Unlisten,
                             ( byte ) GpibCommandArgument.Untalk,
                             ( byte ) (this.BusAddress | ( byte ) GpibCommandArgument.TalkAddress),
-                            ( byte ) (addr | ( byte ) GpibCommandArgument.ListenAddress),
+                            ( byte ) (address | ( byte ) GpibCommandArgument.ListenAddress),
                             ( byte ) (sa | ( byte ) GpibCommandArgument.SecondaryAddress)
                         };
 
@@ -108,7 +110,7 @@ public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
                             Task.Delay( readAfterWriteDelay ).Wait();
 
                             if ( 0 != this.ReadNdacLine() )
-                                found.Add( (addr, sa) );
+                                found.Add( (address, sa) );
                         }
                 }
             }

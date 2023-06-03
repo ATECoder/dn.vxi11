@@ -31,6 +31,7 @@ public class AbortChannelClient : OncRpcClientStubBase
     ///                         protocol and program. </param>
     public AbortChannelClient( OncRpcClientBase client ) : base( client )
     { }
+
     /// <summary>
     /// Constructs a <see cref="AbortChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.AsyncProgram"/>
     /// remote program can be accessed.
@@ -44,6 +45,7 @@ public class AbortChannelClient : OncRpcClientStubBase
                                                                                                    Vxi11ProgramConstants.AsyncVersion,
                                                                                                    0, protocol, timeout )
     { }
+
     /// <summary>
     /// Constructs a <see cref="AbortChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.AsyncProgram"/> 
     /// remote program can be accessed. 
@@ -59,6 +61,7 @@ public class AbortChannelClient : OncRpcClientStubBase
                                                                                                        Vxi11ProgramConstants.AsyncVersion, port,
                                                                                                        protocol, timeout )
     { }
+
     /// <summary>
     /// Constructs a <see cref="AbortChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.AsyncProgram"/>
     /// remote program can be accessed.
@@ -75,6 +78,7 @@ public class AbortChannelClient : OncRpcClientStubBase
     public AbortChannelClient( IPAddress host, int program, int version, int port, OncRpcProtocol protocol,
                                                                         int timeout ) : base( host, program, version, port, protocol, timeout )
     { }
+
     /// <summary>   Calls remote procedure <see cref="Vxi11Message.DeviceAbortProcedure"/>. </summary>
     /// <remarks>
     /// <para>

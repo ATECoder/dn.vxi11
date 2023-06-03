@@ -52,7 +52,7 @@ public class DeviceError : IXdrCodec
     public DeviceError() : this( DeviceErrorCode.NoError )
     { }
 
-    /// <summary>   Constructor. </summary>
+    ///<summary>   Constructor. </summary>
     /// <param name="deviceErrorCode">    The <see cref="DeviceErrorCode"/>. </param>
     public DeviceError( DeviceErrorCode deviceErrorCode )
     {
