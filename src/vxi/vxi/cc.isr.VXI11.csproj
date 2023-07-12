@@ -50,12 +50,12 @@
 
   <Choose>
     <When Condition="$(DefineConstants.Contains(';PROJREF;')) OR $(DefineConstants.Contains(';MYPROJREF;'))">
-	  <ItemGroup>
-		<ProjectReference Include="..\..\..\..\oncrpc\src\rpc\oncrpc\cc.isr.ONC.RPC.csproj" />
-	  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\..\oncrpc\src\rpc\oncrpc\cc.isr.ONC.RPC.csproj" />
+    </ItemGroup>
     </When>
     <Otherwise>
-	    <ItemGroup>
+        <ItemGroup>
         <PackageReference Include="cc.isr.ONC.RPC" Version="1.0.0" />
       </ItemGroup>
     </Otherwise>
