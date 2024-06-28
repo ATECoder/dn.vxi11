@@ -9,27 +9,31 @@ public static class TraceExtensions
 {
 
     /// <summary>   (Immutable) the multi line member message format. </summary>
-    public const string MultiLineMemberMessageFormat = "{message}\n  at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
+    [System.Diagnostics.CodeAnalysis.SuppressMessage( "Naming", "CA1707:Identifiers should not contain underscores", Justification = "<Pending>" )]
+    public const string MULTI_LINE_MEMBER_MESSAGE_FORMAT = "{message}\n  at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
 
     /// <summary>   (Immutable) the single line member message format. </summary>
-    public const string SingleLineMemberMessageFormat = "{message} at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
+    [System.Diagnostics.CodeAnalysis.SuppressMessage( "Naming", "CA1707:Identifiers should not contain underscores", Justification = "<Pending>" )]
+    public const string SINGLE_LINE_MEMBER_MESSAGE_FORMAT = "{message} at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
 
     /// <summary>   Gets or sets the member message format. </summary>
     /// <value> The member message format. </value>
-    public static string MemberMessageFormat { get; set; } = MultiLineMemberMessageFormat;
+    public static string MemberMessageFormat { get; set; } = MULTI_LINE_MEMBER_MESSAGE_FORMAT;
 
     /// <summary>   (Immutable) the multi line member exception message format. </summary>
-    public const string MultiLineMemberExceptionMessageFormat = "{message}\n  {ex}\n  at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
+    [System.Diagnostics.CodeAnalysis.SuppressMessage( "Naming", "CA1707:Identifiers should not contain underscores", Justification = "<Pending>" )]
+    public const string MULTI_LINE_MEMBER_EXCEPTION_MESSAGE_FORMAT = "{message}\n  {ex}\n  at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
 
     /// <summary>   (Immutable) the single line member exception message format. </summary>
-    public const string SingleLineMemberExceptionMessageFormat = "{message} {ex} at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
+    [System.Diagnostics.CodeAnalysis.SuppressMessage( "Naming", "CA1707:Identifiers should not contain underscores", Justification = "<Pending>" )]
+    public const string SINGLE_LINE_MEMBER_EXCEPTION_MESSAGE_FORMAT = "{message} {ex} at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
 
     /// <summary>   Gets or sets the member exception message format. </summary>
     /// <value> The member exception message format. </value>
-    public static string MemberExceptionMessageFormat { get; set; } = MultiLineMemberExceptionMessageFormat;
+    public static string MemberExceptionMessageFormat { get; set; } = MULTI_LINE_MEMBER_EXCEPTION_MESSAGE_FORMAT;
 
     /// <summary>
-    /// An <see cref="System.Diagnostics.Trace"/> extension method that traces member information.
+    /// An <see cref="Diagnostics.Trace"/> extension method that traces member information.
     /// </summary>
     /// <remarks>   2023-03-23. </remarks>
     /// <param name="message">          The message. </param>
@@ -45,7 +49,7 @@ public static class TraceExtensions
     }
 
     /// <summary>
-    /// An <see cref="System.Diagnostics.Trace"/> extension method that traces member warning.
+    /// An <see cref="Diagnostics.Trace"/> extension method that traces member warning.
     /// </summary>
     /// <remarks>   2023-03-23. </remarks>
     /// <param name="message">          The message. </param>

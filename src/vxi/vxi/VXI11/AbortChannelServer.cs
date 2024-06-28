@@ -86,7 +86,7 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     ///  
     /// See the introduction to this class for examples of how to use this interface properly.</para>
     /// </remarks>
-    /// <param name="call">         <see cref="T:cc.isr.ONC.RPC.Server.OncRpcCallInformation" />
+    /// <param name="call">         <see cref="cc.isr.ONC.RPC.Server.OncRpcCallInformation" />
     ///                             about the call to handle, like the caller's Internet address, the ONC/RPC
     ///                             call header, etc. </param>
     /// <param name="program">      Program number requested by client. </param>

@@ -11,10 +11,13 @@ public class Vxi11DiscovererTests
 
     #region " construction and cleanup "
 
-    /// <summary> Initializes the test class before running the first test. </summary>
-    /// <param name="testContext"> Gets or sets the test context which provides information about
-    /// and functionality for the current test run. </param>
-    /// <remarks>Use ClassInitialize to run code before running the first test in the class</remarks>
+    /// <summary>   Initializes the test class before running the first test. </summary>
+    /// <remarks>
+    /// Use <see cref="InitializeTestClass(TestContext)"/> to run code before running the first test
+    /// in the class.
+    /// </remarks>
+    /// <param name="testContext">  Gets or sets the test context which provides information about
+    ///                             and functionality for the current test run. </param>
     [ClassInitialize()]
     public static void InitializeTestClass( TestContext testContext )
     {
@@ -168,7 +171,7 @@ public class Vxi11DiscovererTests
 
     /// <summary>   Queries the instrument identity. </summary>
     /// <remarks>   2023-02-04. </remarks>
-    /// <param name="address">  The instrument <see cref="System.Net.Sockets.AddressFamily.InterNetwork"/>
+    /// <param name="address">  The instrument <see cref="Net.Sockets.AddressFamily.InterNetwork"/>
     ///                         (IPv4) address. </param>
     /// <returns>   The identity. </returns>
     public static string TryQueryIdentity( string address )
@@ -231,7 +234,7 @@ public class Vxi11DiscovererTests
                                     "" };
 
     /// <summary>   Non responding hosts. </summary>
-    /// <returns>   A string[]. </returns>
+    /// <returns>   A <see cref="string" />[]. </returns>
     public static string[] NonRespondingHosts()
     {
         return new string[] { "192.168.0.152",

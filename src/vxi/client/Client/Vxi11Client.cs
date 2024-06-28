@@ -124,7 +124,7 @@ public partial class Vxi11Client : ICloseable
     /// Closes the connection to an VXI-11 server and free all network-related resources.
     /// </summary>
     /// <remarks> This implementation of close and dispose follows the implementation of
-    /// the <see cref="System.Net.Sockets.TcpClient"/> at
+    /// the <see cref="Net.Sockets.TcpClient"/> at
     /// <see href="https://GitHub.com/microsoft/referencesource/blob/master/System/net/System/Net/Sockets/TCPClient.cs"/>
     /// with the following modifications:
     /// <list type="bullet"> <item>
@@ -357,7 +357,7 @@ public partial class Vxi11Client : ICloseable
     /// RPC. This value is at least 1024. <para>
     /// 
     /// The value is returned from the network instrument is used by the <see cref="CoreChannelClient"/>
-    /// for implementing the <see cref="Vxi11Message.DeviceWriteProcedure">Device Write</see>/&gt;
+    /// for implementing the <see cref="Vxi11Message.DeviceWriteProcedure">Device Write</see>
     /// RPC. </para><para>
     /// 
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for

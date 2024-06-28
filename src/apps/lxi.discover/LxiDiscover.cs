@@ -80,7 +80,7 @@ to discover all the instruments listening on the local IPs of this machine.
 
     /// <summary>   Discover endpoints. </summary>
     /// <remarks>   2023-02-06. </remarks>
-    /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="System.Net.IPAddress.Any"/>
+    /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="Net.IPAddress.Any"/>
     ///                                 (0.0.0.0). </param>
     /// <param name="timeout">          The timeout. </param>
     /// <param name="deviceName">       The device name, e.g., INST0 or gpib0,4. </param>
@@ -102,7 +102,7 @@ to discover all the instruments listening on the local IPs of this machine.
 
     /// <summary>   Discover addresses. </summary>
     /// <remarks>   2023-02-06. </remarks>
-    /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="System.Net.IPAddress.Any"/>
+    /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="Net.IPAddress.Any"/>
     ///                                 (0.0.0.0). </param>
     /// <param name="timeout">          The timeout. </param>
     /// <param name="deviceName">       The device name, e.g., INST0 or gpib0,4. </param>
@@ -124,7 +124,7 @@ to discover all the instruments listening on the local IPs of this machine.
 
     /// <summary>   Discovers th devices on the specified broadcast address. </summary>
     /// <remarks>   2023-02-06. </remarks>
-    /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="System.Net.IPAddress.Any"/>
+    /// <param name="broadcastAddress"> The broadcast address such as "192.169.0.255" or null (<see cref="Net.IPAddress.Any"/>
     ///                                 (0.0.0.0). </param>
     /// <param name="timeout">          The timeout. </param>
     /// <param name="deviceName">       The device name, e.g., INST0 or gpib0,4. </param>

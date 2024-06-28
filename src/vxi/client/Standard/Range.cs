@@ -17,25 +17,19 @@ namespace System;
 /// </code>
 /// <see href="https://GitHub.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Range.cs"/>
 /// </remarks>
-internal readonly struct Range : IEquatable<Range>
+/// <remarks>   Construct a Range object using the start and end indexes. </remarks>
+/// <remarks>   David, 2021-04-27. </remarks>
+/// <param name="start">    Represent the inclusive start index of the range. </param>
+/// <param name="end">      Represent the exclusive end index of the range. </param>
+internal readonly struct Range( Index start, Index end ) : IEquatable<Range>
 {
     /// <summary>   Represent the inclusive start index of the Range. </summary>
     /// <value> The start. </value>
-    public Index Start { get; }
+    public Index Start { get; } = start;
 
     /// <summary>   Represent the exclusive end index of the Range. </summary>
     /// <value> The end. </value>
-    public Index End { get; }
-
-    /// <summary>   Construct a Range object using the start and end indexes. </summary>
-    /// <remarks>   David, 2021-04-27. </remarks>
-    /// <param name="start">    Represent the inclusive start index of the range. </param>
-    /// <param name="end">      Represent the exclusive end index of the range. </param>
-    public Range( Index start, Index end )
-    {
-        this.Start = start;
-        this.End = end;
-    }
+    public Index End { get; } = end;
 
     /// <summary>
     /// Indicates whether the current Range object is equal to another object of the same type.
@@ -46,10 +40,12 @@ internal readonly struct Range : IEquatable<Range>
     /// true if <paramref name="value">object?</paramref> and this instance are the same type and represent
     /// the same value; otherwise, false.
     /// </returns>
-    public override bool Equals( object? value ) =>
-        value is Range r &&
+    public override bool Equals( object? value )
+    {
+        return value is Range r &&
         r.Start.Equals( this.Start ) &&
         r.End.Equals( this.End );
+    }
 
     /// <summary>
     /// Indicates whether the current Range object is equal to another Range object.
@@ -60,15 +56,21 @@ internal readonly struct Range : IEquatable<Range>
     /// true if the current object is equal to the <paramref name="other">other</paramref> parameter;
     /// otherwise, false.
     /// </returns>
-    public bool Equals( Range other ) => other.Start.Equals( this.Start ) && other.End.Equals( this.End );
+    public bool Equals( Range other )
+    {
+        return other.Start.Equals( this.Start ) && other.End.Equals( this.End );
+    }
 
     /// <summary>   Returns the hash code for this instance. </summary>
     /// <remarks>   David, 2021-04-27. </remarks>
     /// <returns>   A 32-bit signed integer that is the hash code for this instance. </returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage( "Style", "IDE0070:Use 'System.HashCode'", Justification = "<Pending>" )]
     public override int GetHashCode()
     {
+#if NETSTANDARD2_1_OR_GREATER
+        return HashCode.Combine( this.Start, this.End );
+#else
         return (this.Start, this.End).GetHashCode();  // this.Start.GetHashCode() * 31 + this.End.GetHashCode();
+#endif
     }
 
     /// <summary>
@@ -87,7 +89,10 @@ internal readonly struct Range : IEquatable<Range>
     /// <remarks>   David, 2021-04-27. </remarks>
     /// <param name="start">    Represent the inclusive start index of the range. </param>
     /// <returns>   A Range. </returns>
-    public static Range StartAt( Index start ) => new( start, Index.End );
+    public static Range StartAt( Index start )
+    {
+        return new( start, Index.End );
+    }
 
     /// <summary>
     /// Create a Range object starting from first element in the collection to the end Index.
@@ -95,7 +100,10 @@ internal readonly struct Range : IEquatable<Range>
     /// <remarks>   David, 2021-04-27. </remarks>
     /// <param name="end">  Represent the exclusive end index of the range. </param>
     /// <returns>   A Range. </returns>
-    public static Range EndAt( Index end ) => new( Index.Start, end );
+    public static Range EndAt( Index end )
+    {
+        return new( Index.Start, end );
+    }
 
     /// <summary>   Create a Range object starting from first element to the end. </summary>
     /// <value> all. </value>
@@ -118,11 +126,11 @@ internal readonly struct Range : IEquatable<Range>
     public (int Offset, int Length) GetOffsetAndLength( int length )
     {
         int start;
-        var startIndex = this.Start;
+        Index startIndex = this.Start;
         start = startIndex.IsFromEnd ? length - startIndex.Value : startIndex.Value;
 
         int end;
-        var endIndex = this.End;
+        Index endIndex = this.End;
         end = endIndex.IsFromEnd ? length - endIndex.Value : endIndex.Value;
 
         return ( uint ) end > ( uint ) length || ( uint ) start > ( uint ) end

@@ -78,7 +78,7 @@ public class CreateLinkResp : IXdrCodec
     /// <remarks>
     /// The <see cref="AbortPort"/> is returned from the network instrument is used by the
     /// <see cref="AbortChannelClient"/> for implementing the <see cref="Vxi11Message.DeviceAbortProcedure">
-    /// Device Abort</see>/&gt; RPC.
+    /// Device Abort</see> RPC.
     /// <para>
     /// 
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
@@ -93,7 +93,7 @@ public class CreateLinkResp : IXdrCodec
     /// RPC. This value is at least 1024. <para>
     /// 
     /// The value is returned from the network instrument is used by the <see cref="CoreChannelClient"/>
-    /// for implementing the <see cref="Vxi11Message.DeviceWriteProcedure">Device Write</see>/&gt;
+    /// for implementing the <see cref="Vxi11Message.DeviceWriteProcedure">Device Write</see>
     /// RPC. </para><para>
     /// 
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for

@@ -51,10 +51,7 @@ internal readonly struct Index : IEquatable<Index>
     /// </summary>
     /// <remarks>   David, 2021-04-27. </remarks>
     /// <param name="value">    The index value. it has to be zero or positive number. </param>
-    private Index( int value )
-    {
-        this._value = value;
-    }
+    private Index( int value ) => this._value = value;
 
     /// <summary>   Create an Index pointing at first element. </summary>
     /// <value> The start. </value>
@@ -110,7 +107,7 @@ internal readonly struct Index : IEquatable<Index>
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public int GetOffset( int length )
     {
-        var offset = this._value;
+        int offset = this._value;
         if ( this.IsFromEnd )
         {
             // offset = length - (~value)
@@ -132,7 +129,10 @@ internal readonly struct Index : IEquatable<Index>
     /// the same value; otherwise, false.
     /// </returns>
     [Diagnostics.CodeAnalysis.SuppressMessage( "Style", "IDE0038:Use pattern matching", Justification = "<Pending>" )]
-    public override bool Equals( object? value ) => value is Index && this._value == (( Index ) value)._value;
+    public override bool Equals( object? value )
+    {
+        return value is Index && this._value == (( Index ) value)._value;
+    }
 
     /// <summary>
     /// Indicates whether the current Index object is equal to another Index object.
@@ -143,12 +143,18 @@ internal readonly struct Index : IEquatable<Index>
     /// true if the current object is equal to the <paramref name="other">other</paramref> parameter;
     /// otherwise, false.
     /// </returns>
-    public bool Equals( Index other ) => this._value == other._value;
+    public bool Equals( Index other )
+    {
+        return this._value == other._value;
+    }
 
     /// <summary>   Returns the hash code for this instance. </summary>
     /// <remarks>   David, 2021-04-27. </remarks>
     /// <returns>   A 32-bit signed integer that is the hash code for this instance. </returns>
-    public override int GetHashCode() => this._value;
+    public override int GetHashCode()
+    {
+        return this._value;
+    }
 
     /// <summary>   Converts integer number to an Index. </summary>
     /// <remarks>   David, 2021-04-27. </remarks>
@@ -163,6 +169,6 @@ internal readonly struct Index : IEquatable<Index>
     /// <returns>   The fully qualified type name. </returns>
     public override string ToString()
     {
-        return this.IsFromEnd ? "^" + (( uint ) this.Value).ToString() : (( uint ) this.Value).ToString();
+        return this.IsFromEnd ? "^" + (( uint ) this.Value).ToString( System.Globalization.CultureInfo.CurrentCulture ) : (( uint ) this.Value).ToString( System.Globalization.CultureInfo.CurrentCulture );
     }
 }

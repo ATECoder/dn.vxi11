@@ -65,7 +65,7 @@ static void OnTaskSchedulerUnobservedException( object? sender, UnobservedTaskEx
 
 static bool KeyDone( char doneKey )
 {
-    return Console.KeyAvailable && string.Equals( Console.ReadKey().KeyChar, doneKey );
+    return Console.KeyAvailable && string.Equals( Console.ReadKey().KeyChar, doneKey, StringComparison.Ordinal );
 }
 
 internal static class Constants

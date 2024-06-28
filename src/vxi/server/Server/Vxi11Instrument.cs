@@ -531,7 +531,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// bit through the enable register.To set the enable register mask, write a decimal value to the
     /// register using *ESE. Once a bit is set, it remains set until cleared by this query or *CLS.
     /// </remarks>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESRRead, Vxi11InstrumentOperationType.Read )]
     public virtual string ESRRead()
     {
@@ -542,7 +542,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     /// <summary>   Reads the device identity string: <see cref="Vxi11InstrumentCommands.IDNRead"/></summary>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.IDNRead, Vxi11InstrumentOperationType.Read )]
     public virtual string IDNRead()
     {
@@ -631,7 +631,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     /// <summary>   Reads the service request enabled status: <see cref="Vxi11InstrumentCommands.SRERead"/> </summary>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.SRERead, Vxi11InstrumentOperationType.Read )]
     public virtual string SRERead()
     {
@@ -1317,7 +1317,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
             Vxi11InstrumentOperationAttribute scpiAtt = ( Vxi11InstrumentOperationAttribute ) att;
 
             // return success if the command matches the method attribute
-            return String.Equals( scpiAtt.Content, operationName, StringComparison.OrdinalIgnoreCase );
+            return string.Equals( scpiAtt.Content, operationName, StringComparison.OrdinalIgnoreCase );
         } );
     }
 
@@ -1589,7 +1589,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <value> The i/o message capacity. </value>
     public static int IOMessageCapacity { get; set; } = 127;
 
-    /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="String"/> Value)
+    /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="string"/> Value)
     /// of the last messages that were sent to and received from the instrument. </summary>
     /// <value> The list of message tuples consisting of the Client Id, IO (R for read and W for write), 
     /// a timestamp and a value that were sent to or received from the instrument. </value>

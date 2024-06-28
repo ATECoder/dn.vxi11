@@ -224,7 +224,7 @@ public interface IVxi11Interface : INotifyPropertyChanged
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
     DeviceErrorCode LastDeviceError { get; set; }
 
-    /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="String"/> Value)
+    /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="string"/> Value)
     /// of the last messages that were sent to and received from the instrument. </summary>
     /// <value> The list of message tuples consisting of the client id, IO (R for read and W for write), 
     /// a timestamp and a value that were sent to or received from the instrument. </value>

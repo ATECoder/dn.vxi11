@@ -89,7 +89,7 @@ public class IdentityParser : IEquatable<IdentityParser>
 
     /// <summary>   Builds the identity. </summary>
     /// <remarks>   2023-02-11. </remarks>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public string BuildIdentity()
     {
         return $"{this.Manufacturer},{this.Model},{this.Serial},{this.Firmware}";
@@ -97,7 +97,7 @@ public class IdentityParser : IEquatable<IdentityParser>
 
     /// <summary>   Builds the firmware. </summary>
     /// <remarks>   2023-02-11. </remarks>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public string BuildFirmware()
     {
         StringBuilder builder = new();
@@ -122,11 +122,11 @@ public class IdentityParser : IEquatable<IdentityParser>
     public bool Equals( IdentityParser other )
     {
         return (other is not null)
-            && String.Equals( this.Manufacturer, other.Manufacturer )
-            && String.Equals( this.Model, other.Model )
-            && String.Equals( this.Serial, other.Model )
-            && String.Equals( this.Firmware, other.Firmware )
-            && String.Equals( this.Model, other.Model );
+            && string.Equals( this.Manufacturer, other.Manufacturer, StringComparison.Ordinal )
+            && string.Equals( this.Model, other.Model, StringComparison.Ordinal )
+            && string.Equals( this.Serial, other.Model, StringComparison.Ordinal )
+            && string.Equals( this.Firmware, other.Firmware, StringComparison.Ordinal )
+            && string.Equals( this.Model, other.Model, StringComparison.Ordinal );
     }
 
 }

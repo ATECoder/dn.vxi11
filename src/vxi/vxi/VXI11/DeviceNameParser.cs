@@ -53,7 +53,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     private readonly string[] _interfaceFamilies;
 
     /// <summary>   Interface families. </summary>
-    /// <returns>   A string[]. </returns>
+    /// <returns>   A <see cref="string" />[]. </returns>
     public string[] InterfaceFamilies()
     {
         return this._interfaceFamilies;
@@ -109,7 +109,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
 
     /// <summary>   Builds a device name. </summary>
     /// <remarks>   2023-02-11. </remarks>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public string BuildDeviceName()
     {
         return string.Equals( this.InterfaceFamily, GenericInterfaceFamily, StringComparison.OrdinalIgnoreCase )
@@ -140,7 +140,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     ///                                                 the required range. </exception>
     /// <param name="interfaceFamily">  The interface family. </param>
     /// <param name="boardNumber">      The board number. </param>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public static string BuildDeviceName( string interfaceFamily, int boardNumber )
     {
         return string.IsNullOrEmpty( interfaceFamily )
@@ -155,7 +155,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
     ///                                                 the required range. </exception>
     /// <param name="boardNumber">  The board number. </param>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public static string BuildGenericDeviceName( int boardNumber )
     {
         return MinimumInterfaceNumber > boardNumber || MaximumInterfaceNumber < boardNumber
@@ -168,7 +168,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <exception cref="ArgumentOutOfRangeException">  Thrown when one or more arguments are outside
     ///                                                 the required range. </exception>
     /// <param name="boardNumber">  The board number. </param>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public static string BuildGpibDeviceName( int boardNumber )
     {
         return MinimumInterfaceNumber > boardNumber || MaximumInterfaceNumber < boardNumber
@@ -183,7 +183,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     ///                                                 the required range. </exception>
     /// <param name="boardNumber">      The board number. </param>
     /// <param name="primaryAddress">   The primary address. </param>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public static string BuildGpibDeviceName( int boardNumber, int primaryAddress )
     {
         return MinimumInterfaceNumber > boardNumber || MaximumInterfaceNumber < boardNumber
@@ -201,7 +201,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <param name="boardNumber">  The board number. </param>
     /// <param name="primaryAddress">   The primary address. </param>
     /// <param name="secondaryAddress"> The secondary address. </param>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public static string BuildGpibDeviceName( int boardNumber, int primaryAddress, int secondaryAddress )
     {
         return MinimumInterfaceNumber > boardNumber || MaximumInterfaceNumber < boardNumber
@@ -277,7 +277,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <param name="manufacturerId">   The identifier of the manufacturer. </param>
     /// <param name="modelCode">        The model code. </param>
     /// <param name="serialNumber">     The serial number. </param>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public static string BuildUsbDeviceName( int boardNumber, int interfaceNumber, int manufacturerId, int modelCode, string serialNumber )
     {
         return MinimumInterfaceNumber > interfaceNumber || MaximumInterfaceNumber < interfaceNumber
@@ -397,7 +397,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
         return string.Equals( this.InterfaceFamily, other.InterfaceFamily, StringComparison.OrdinalIgnoreCase )
             && this.BoardNumber == other.BoardNumber
             && this.ManufacturerId == other.ManufacturerId
-            && string.Equals( this.SerialNumber, other.SerialNumber )
+            && string.Equals( this.SerialNumber, other.SerialNumber, StringComparison.Ordinal )
             && this.ModelCode == other.ModelCode
             && this.UsbTmcInterfaceNumber == other.UsbTmcInterfaceNumber;
     }

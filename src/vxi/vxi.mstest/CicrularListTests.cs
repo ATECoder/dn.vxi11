@@ -10,10 +10,13 @@ public class CircularListTests
 
     #region " construction and cleanup "
 
-    /// <summary> Initializes the test class before running the first test. </summary>
-    /// <param name="testContext"> Gets or sets the test context which provides information about
-    /// and functionality for the current test run. </param>
-    /// <remarks>Use ClassInitialize to run code before running the first test in the class</remarks>
+    /// <summary>   Initializes the test class before running the first test. </summary>
+    /// <remarks>
+    /// Use <see cref="InitializeTestClass(TestContext)"/> to run code before running the first test
+    /// in the class.
+    /// </remarks>
+    /// <param name="testContext">  Gets or sets the test context which provides information about
+    ///                             and functionality for the current test run. </param>
     [ClassInitialize()]
     public static void InitializeTestClass( TestContext testContext )
     {
@@ -191,7 +194,7 @@ public class CircularListTests
     }
 
     /// <summary>
-    /// Assert circular list should enumerate as <see cref="IReadOnlyCollection&lt;byte&gt;"/>.
+    /// Assert circular list should enumerate as <see cref="IReadOnlyCollection{byte}"/>.
     /// </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
     /// <param name="list">     The list. </param>
@@ -246,7 +249,7 @@ public class CircularListTests
     }
 
     /// <summary>
-    /// Assert circular list should enumerate as <see cref="IEnumerable&lt;byte&gt;"/>.
+    /// Assert circular list should enumerate as <see cref="IEnumerable{byte}"/>.
     /// </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
     /// <param name="bytes">    The bytes. </param>
@@ -276,7 +279,7 @@ public class CircularListTests
 
 
     /// <summary>
-    /// Assert circular list should enumerate as <see cref="IEnumerable&lt;byte&gt;"/>.
+    /// Assert circular list should enumerate as <see cref="IEnumerable{byte}"/>.
     /// </summary>
     /// <remarks>   2023-02-16. </remarks>
     /// <param name="bytes">    The bytes. </param>

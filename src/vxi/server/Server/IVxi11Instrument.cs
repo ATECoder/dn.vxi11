@@ -259,7 +259,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     bool ESE( byte standardEventStatusMask );
 
     /// <summary>   Reads Standard Event Status: *ESE? </summary>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     string ESERead();
 
     /// <summary>   Standard Event Status Register Query: *ESR. </summary>
@@ -269,11 +269,11 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// bit through the enable register.To set the enable register mask, write a decimal value to the
     /// register using *ESE. Once a bit is set, it remains set until cleared by this query or *CLS.
     /// </remarks>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     string ESRRead();
 
     /// <summary>   Reads the instrument identity string: *IDN? </summary>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     string IDNRead();
 
     /// <summary>   Operation completion instruction: *OPC. </summary>
@@ -332,7 +332,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     bool SRE( int serviceRequestEventMask );
 
     /// <summary>   Reads the service request enabled status: *SER? </summary>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     string SRERead();
 
     /// <summary>
@@ -882,7 +882,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
     DeviceErrorCode LastDeviceError { get; set; }
 
-    /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="String"/> Value)
+    /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="string"/> Value)
     /// of the last messages that were sent to and received from the instrument. </summary>
     /// <value> The list of message tuples consisting of the client id, IO (R for read and W for write), 
     /// a timestamp and a value that were sent to or received from the instrument. </value>

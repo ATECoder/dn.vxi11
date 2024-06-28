@@ -77,7 +77,7 @@ public class DeviceException : Exception
     /// <summary>   Builds error message. </summary>
     /// <remarks>   2023-02-20. </remarks>
     /// <param name="reason">   The detail reason. </param>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public static string BuildErrorMessage( DeviceErrorCode reason )
     {
         return Vxi11Support.GetDescription( reason );
@@ -87,7 +87,7 @@ public class DeviceException : Exception
     /// <remarks>   2023-02-20. </remarks>
     /// <param name="suffixMessage">    Message describing the suffix. </param>
     /// <param name="reason">           The detail reason. </param>
-    /// <returns>   A string. </returns>
+    /// <returns>   A <see cref="string" />. </returns>
     public static string BuildErrorMessage( string suffixMessage, DeviceErrorCode reason )
     {
         return $"{Vxi11Support.GetDescription( reason )}{suffixMessage}";

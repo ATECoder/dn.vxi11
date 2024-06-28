@@ -25,7 +25,7 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
 
     /// <summary>   Returns a string that represents the current object. </summary>
     /// <remarks>   2023-02-14. </remarks>
-    /// <returns>   A string that represents the current object. </returns>
+    /// <returns>   A <see cref="string" /> that represents the current object. </returns>
     public override string ToString()
     {
         return $"{this.DeviceName} client {this.ClientId} link {this.LinkId}";

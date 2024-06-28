@@ -36,22 +36,22 @@ public class CircularList<T> : List<T>
 
     /// <summary>   The synchronize root. </summary>
     [NonSerialized]
-    private Object? _syncRoot;
+    private object? _syncRoot;
 
     /// <summary>
     /// Gets an object that can be used to synchronize access to the
-    /// <see cref="T:System.Collections.ICollection" />.
+    /// <see cref="ICollection" />.
     /// </summary>
     /// <value>
     /// An object that can be used to synchronize access to the
-    /// <see cref="T:System.Collections.ICollection" />.
+    /// <see cref="ICollection" />.
     /// </value>
-    public virtual Object SyncRoot
+    public virtual object SyncRoot
     {
         get {
             if ( this._syncRoot == null )
             {
-                _ = System.Threading.Interlocked.CompareExchange( ref this._syncRoot, new Object(), null );
+                _ = System.Threading.Interlocked.CompareExchange( ref this._syncRoot, new object(), null );
             }
             return this._syncRoot;
         }
@@ -67,12 +67,12 @@ public class CircularList<T> : List<T>
 
     /// <summary>
     /// Adds an item to the end of the
-    /// <see cref="T:System.Collections.Generic.List`1" />. Extra items are removed 
+    /// <see cref="Collections.Generic.List`1" />. Extra items are removed 
     /// upon adding items beyond the fixed <see cref="List{T}.Capacity"/>.
     /// </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
     /// <param name="item">  The item to add to the end of the
-    ///                     <see cref="T:System.Collections.Generic.List`1" />. The
+    ///                     <see cref="Collections.Generic.List`1" />. The
     ///                     value can be a null reference (Nothing in Visual Basic) for reference
     ///                     types. </param>
     public new void Add( T item )
@@ -87,7 +87,7 @@ public class CircularList<T> : List<T>
 
     /// <summary>
     /// Adds items to the end of the
-    /// <see cref="T:System.Collections.Generic.List`1" />. Extra items are removed 
+    /// <see cref="Collections.Generic.List`1" />. Extra items are removed 
     /// upon adding items beyond the fixed <see cref="List{T}.Capacity"/>.
     /// </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
@@ -104,7 +104,7 @@ public class CircularList<T> : List<T>
 
     /// <summary>
     /// Adds items to the end of the
-    /// <see cref="T:System.Collections.Generic.List`1" />. Extra items are removed
+    /// <see cref="Collections.Generic.List`1" />. Extra items are removed
     /// upon adding items beyond the fixed <see cref="List{T}.Capacity"/>.
     /// </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
@@ -121,11 +121,11 @@ public class CircularList<T> : List<T>
 
     /// <summary>
     /// Adds the elements of the specified collection to the end of the
-    /// <see cref="T:System.Collections.Generic.List`1" />.
+    /// <see cref="Collections.Generic.List`1" />.
     /// </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
     /// <param name="collection">   The collection whose elements should be added to the end of the
-    ///                             <see cref="T:System.Collections.Generic.List`1" />. The
+    ///                             <see cref="Collections.Generic.List`1" />. The
     ///                             collection itself cannot be <see langword="null" />, but it can
     ///                             contain elements that are <see langword="null" />, if type
     ///                             <typeparamref name="T"/> is a reference type. </param>
@@ -143,10 +143,10 @@ public class CircularList<T> : List<T>
     /// <param name="index">    The zero-based index at which <paramref name="item" /> should be
     ///                         inserted. </param>
     /// <param name="item">     The object to insert into the
-    ///                         <see cref="T:System.Collections.IList" />. </param>
+    ///                         <see cref="IList{T}" />. </param>
     public void Insert( int index, object item )
     {
-        throw new InvalidOperationException( $"Insert({index}, ({typeof( Object )}){nameof( item )}) into a {nameof( CircularList<T> )} is not permitted" );
+        throw new InvalidOperationException( $"Insert({index}, ({typeof( object )}){nameof( item )}) into a {nameof( CircularList<T> )} is not permitted" );
     }
 
     /// <summary>
@@ -158,7 +158,7 @@ public class CircularList<T> : List<T>
     /// <param name="index">        The zero-based index at which the new elements should be
     ///                             inserted. </param>
     /// <param name="collection">   The collection whose elements should be inserted into the
-    ///                             <see cref="T:System.Collections.Generic.List`1" />. The
+    ///                             <see cref="Collections.Generic.List`1" />. The
     ///                             collection itself cannot be <see langword="null" />, but it can
     ///                             contain elements that are <see langword="null" />, if 
     ///                             <typeparamref name="T"/> is a reference type. </param>
