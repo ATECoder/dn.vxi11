@@ -16,8 +16,8 @@
     <ApplicationId>cc.isr.vxi11</ApplicationId>
 
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- Coding -->
     <OptionExplicit>On</OptionExplicit>
