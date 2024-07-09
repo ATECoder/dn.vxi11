@@ -17,9 +17,6 @@ namespace cc.isr.VXI11;
 /// </remarks>
 public class CoreChannelClient : OncRpcClientStubBase
 {
-
-    #region " construction and cleanup "
-
     /// <summary>
     /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
     /// remote program can be accessed.

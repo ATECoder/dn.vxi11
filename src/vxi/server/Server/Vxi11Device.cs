@@ -27,9 +27,6 @@ namespace cc.isr.VXI11.Server;
 /// </remarks>
 public partial class Vxi11Device : IVxi11Device
 {
-
-    #region " construction and cleanup "
-
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-09. </remarks>
     /// <param name="instrumentFactory">    The instrument factory. </param>

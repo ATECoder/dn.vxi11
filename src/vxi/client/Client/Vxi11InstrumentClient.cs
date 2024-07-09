@@ -11,9 +11,6 @@ namespace cc.isr.VXI11.Client;
 /// </remarks>
 public class Vxi11InstrumentClient : Vxi11Client
 {
-
-    #region " construction and cleanup "
-
     /// <summary>
     /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
     /// resources.

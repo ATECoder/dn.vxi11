@@ -5,7 +5,6 @@ namespace cc.isr.VXI11.MSTest;
 [TestClass]
 public class DeviceNameParserTests
 {
-
     #region " construction and cleanup "
 
     /// <summary>   Initializes the test class before running the first test. </summary>

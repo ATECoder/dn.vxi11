@@ -11,7 +11,6 @@ namespace cc.isr.VXI11.MSTest;
 [TestClass]
 public class Vxi11DualClientServerTests
 {
-
     #region " construction and cleanup "
 
     /// <summary>   Gets or sets the server start time typical. </summary>

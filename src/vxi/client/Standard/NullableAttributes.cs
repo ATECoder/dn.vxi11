@@ -40,7 +40,6 @@ internal sealed class NotNullAttribute : Attribute { }
 [AttributeUsage( AttributeTargets.Parameter, Inherited = false )]
 internal sealed class MaybeNullWhenAttribute( bool returnValue ) : Attribute
 {
-
     /// <summary>   Gets the return value condition. </summary>
     /// <value> True if return value, false if not. </value>
     public bool ReturnValue { get; } = returnValue;
@@ -56,7 +55,6 @@ internal sealed class MaybeNullWhenAttribute( bool returnValue ) : Attribute
 [AttributeUsage( AttributeTargets.Parameter, Inherited = false )]
 internal sealed class NotNullWhenAttribute( bool returnValue ) : Attribute
 {
-
     /// <summary>   Gets the return value condition. </summary>
     /// <value> True if return value, false if not. </value>
     public bool ReturnValue { get; } = returnValue;
@@ -71,7 +69,6 @@ internal sealed class NotNullWhenAttribute( bool returnValue ) : Attribute
 [AttributeUsage( AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, AllowMultiple = true, Inherited = false )]
 internal sealed class NotNullIfNotNullAttribute( string parameterName ) : Attribute
 {
-
     /// <summary>   Gets the associated parameter name. </summary>
     /// <value> The name of the parameter. </value>
     public string ParameterName { get; } = parameterName;
@@ -88,7 +85,6 @@ internal sealed class NotNullIfNotNullAttribute( string parameterName ) : Attrib
 [AttributeUsage( AttributeTargets.Parameter, Inherited = false )]
 internal sealed class DoesNotReturnIfAttribute( bool parameterValue ) : Attribute
 {
-
     /// <summary>   Gets the condition parameter value. </summary>
     /// <value> True if parameter value, false if not. </value>
     public bool ParameterValue { get; } = parameterValue;

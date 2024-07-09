@@ -7,7 +7,6 @@ namespace cc.isr.VXI11.MSTest;
 [TestClass]
 public class Vxi11DeviceTests
 {
-
     #region " construction and cleanup "
 
     /// <summary>   Initializes the test class before running the first test. </summary>

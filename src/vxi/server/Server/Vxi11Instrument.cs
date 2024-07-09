@@ -30,9 +30,6 @@ namespace cc.isr.VXI11.Server;
 /// </remarks>
 public partial class Vxi11Instrument : IVxi11Instrument
 {
-
-    #region " construction and cleanup "
-
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="deviceName">   The device name. </param>

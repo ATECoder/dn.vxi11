@@ -5,9 +5,6 @@ namespace cc.isr.VXI11.Client;
 /// <summary>   A VXI-11 interface client. </summary>
 public class Vxi11InterfaceClient : Vxi11Client
 {
-
-    #region " construction and cleanup "
-
     /// <summary>   Connects. </summary>
     /// <remarks>   2023-02-08. </remarks>
     /// <param name="hostAddress">      The host address. </param>
