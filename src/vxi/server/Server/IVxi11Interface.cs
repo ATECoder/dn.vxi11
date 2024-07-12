@@ -1,5 +1,4 @@
 using System.ComponentModel;
-
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;
@@ -31,7 +30,6 @@ namespace cc.isr.VXI11.Server;
 /// </remarks>
 public interface IVxi11Interface : INotifyPropertyChanged
 {
-
     #region " device name "
 
     /// <summary>

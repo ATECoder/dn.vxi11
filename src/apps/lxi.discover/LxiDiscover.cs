@@ -214,8 +214,5 @@ to discover all the instruments listening on the local IPs of this machine.
     }
 
     #endregion
-
-
 }
-
 

@@ -1,6 +1,5 @@
 using cc.isr.ONC.RPC.Server;
 using cc.isr.VXI11.Codecs;
-
 using System.Net;
 
 namespace cc.isr.VXI11;
@@ -310,5 +309,4 @@ public abstract class CoreChannelServerBase : OncRpcServerStubBase, IOncRpcDispa
     public abstract DeviceError DestroyInterruptChan();
 
     #endregion
-
 }

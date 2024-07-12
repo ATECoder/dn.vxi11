@@ -4,7 +4,6 @@ namespace cc.isr.VXI11.Client;
 /// <remarks>   2023-06-02. </remarks>
 public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
 {
-
     #region " gpib interface commands "
 
     /// <summary>   Creates a setup. </summary>
@@ -125,5 +124,4 @@ public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
     }
 
     #endregion
-
 }

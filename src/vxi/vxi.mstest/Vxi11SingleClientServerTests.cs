@@ -328,5 +328,4 @@ public class Vxi11SingleClientServerTests
     }
 
     #endregion
-
 }

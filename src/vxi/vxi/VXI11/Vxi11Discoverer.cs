@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-
 using cc.isr.ONC.RPC.Client;
 using cc.isr.ONC.RPC.Codecs;
 using cc.isr.ONC.RPC.Portmap;
@@ -11,7 +10,6 @@ namespace cc.isr.VXI11;
 /// <summary>   A VXI-11 discoverer. </summary>
 public class Vxi11Discoverer
 {
-
     #region " thread exception handlers "
 
     /// <summary>
@@ -486,6 +484,5 @@ public class Vxi11Discoverer
     }
 
     #endregion
-
 }
 

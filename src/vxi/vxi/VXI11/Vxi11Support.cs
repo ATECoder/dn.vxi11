@@ -122,5 +122,4 @@ public static class Vxi11Support
     }
 
     #endregion
-
 }

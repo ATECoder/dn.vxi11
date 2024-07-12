@@ -1,10 +1,8 @@
 
 using System.Collections.Concurrent;
-
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;
-
 
 /// <summary>   Manager for server clients. </summary>
 /// <remarks>   2023-02-09. </remarks>

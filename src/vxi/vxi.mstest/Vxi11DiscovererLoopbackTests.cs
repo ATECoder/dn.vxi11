@@ -208,5 +208,4 @@ public class Vxi11DiscovererLoopbackTests
     }
 
     #endregion
-
 }

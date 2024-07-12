@@ -121,7 +121,6 @@ public class CircularListTests
 
     #endregion
 
-
     #region " random numbers generator "
 
     private static readonly Random? _rnd = new();

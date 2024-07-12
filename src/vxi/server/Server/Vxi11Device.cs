@@ -1,5 +1,4 @@
 using cc.isr.VXI11.Codecs;
-
 using System.Collections.Concurrent;
 using System.ComponentModel;
 
@@ -251,7 +250,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <remarks>   2023-02-09. </remarks>
     /// <param name="sender">       Source of the event. </param>
     /// <param name="propertyName"> Name of the property. </param>
-    private void OnInstrumentPropertyChanged( IVxi11Instrument sender, string propertyName )
+    private void OnInstrumentPropertyChanged( IVxi11Instrument sender, string? propertyName )
     {
         if ( sender is not IVxi11Instrument || string.IsNullOrWhiteSpace( propertyName ) ) return;
         {
@@ -403,7 +402,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <remarks>   2023-02-09. </remarks>
     /// <param name="sender">       Source of the event. </param>
     /// <param name="propertyName"> Name of the property. </param>
-    private void OnInterfacePropertyChanged( IVxi11Interface sender, string propertyName )
+    private void OnInterfacePropertyChanged( IVxi11Interface sender, string? propertyName )
     {
         if ( sender is not IVxi11Interface || string.IsNullOrWhiteSpace( propertyName ) ) return;
         {
@@ -1400,5 +1399,4 @@ public partial class Vxi11Device : IVxi11Device
     }
 
     #endregion
-
 }

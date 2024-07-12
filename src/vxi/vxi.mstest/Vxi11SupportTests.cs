@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Sockets;
-
 using cc.isr.VXI11.Codecs;
 using cc.isr.VXI11.EnumExtensions;
 
@@ -366,5 +365,4 @@ public class Vxi11SupportTests
     }
 
     #endregion
-
 }

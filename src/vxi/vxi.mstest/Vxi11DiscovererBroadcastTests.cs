@@ -1,5 +1,4 @@
 using System.Net;
-
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.ONC.RPC.Server;
 
@@ -367,5 +366,4 @@ public class Vxi11DiscovererBroadcastTests
     }
 
     #endregion
-
 }

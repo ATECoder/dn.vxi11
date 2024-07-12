@@ -1,6 +1,5 @@
 namespace cc.isr.VXI11;
 
-
 /// <summary>   A collection of VXI-11 program and program version constants. </summary>
 /// <remarks>
 /// A network instrument server is expected to implement all three of the channels described in

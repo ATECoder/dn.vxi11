@@ -593,5 +593,4 @@ public partial class Vxi11Interface : IVxi11Interface
     }
 
     #endregion
-
 }

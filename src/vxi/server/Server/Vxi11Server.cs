@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Net;
-
 using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
 
@@ -371,7 +370,7 @@ public class Vxi11Server : CoreChannelServerBase
         this.OnDevicePropertyChanged( ( IVxi11Device ) sender, e?.PropertyName );
     }
 
-    private void OnDevicePropertyChanged( IVxi11Device sender, string propertyName )
+    private void OnDevicePropertyChanged( IVxi11Device sender, string? propertyName )
     {
         if ( sender is not IVxi11Device || string.IsNullOrWhiteSpace( propertyName ) ) return;
         {
@@ -1112,5 +1111,4 @@ public class Vxi11Server : CoreChannelServerBase
     }
 
     #endregion
-
 }

@@ -1,5 +1,4 @@
 using System.ComponentModel;
-
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;
@@ -28,7 +27,6 @@ namespace cc.isr.VXI11.Server;
 /// </remarks>
 public interface IVxi11Device : INotifyPropertyChanged
 {
-
     #region " abort server "
 
     /// <summary>   Gets or sets the abort port number. </summary>
@@ -581,5 +579,4 @@ public interface IVxi11Device : INotifyPropertyChanged
     void OnThreadException( ThreadExceptionEventArgs e );
 
     #endregion
-
 }

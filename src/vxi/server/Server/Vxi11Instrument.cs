@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Reflection;
-
 using cc.isr.VXI11;
 using cc.isr.VXI11.Codecs;
 
@@ -1635,5 +1634,4 @@ public partial class Vxi11Instrument : IVxi11Instrument
     private byte[] _readBuffer = Array.Empty<byte>();
 
     #endregion
-
 }

@@ -149,7 +149,6 @@ public class Vxi11DeviceTests
         Assert.AreNotEqual( nextLinkId, LinkId, $"The next Link id {nextLinkId} should not be the same as the previous id {LinkId}" );
     }
 
-
     #endregion
 
     #region " client emulations "

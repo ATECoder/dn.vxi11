@@ -287,5 +287,4 @@ public class Vxi11InterfaceClient : Vxi11Client
     }
 
     #endregion
-
 }

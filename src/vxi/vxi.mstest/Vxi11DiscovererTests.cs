@@ -471,5 +471,4 @@ public class Vxi11DiscovererTests
     }
 
     #endregion
-
 }
