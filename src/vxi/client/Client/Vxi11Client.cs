@@ -444,8 +444,9 @@ public partial class Vxi11Client : ICloseable
     public int IOTimeout
     {
         get => this._ioTimeout;
-        set {
-            if ( this.SetProperty( ref this._ioTimeout, value ) )
+        set
+        {
+             if ( this.SetProperty( ref this._ioTimeout, value ) )
             {
                 if ( this.CoreClient?.Client is not null )
                     this.CoreClient.Client.IOTimeout = value;
@@ -466,8 +467,9 @@ public partial class Vxi11Client : ICloseable
     public int TransmitTimeout
     {
         get => this._transmitTimeout;
-        set {
-            if ( this.SetProperty( ref this._transmitTimeout, value ) )
+        set
+        {
+             if ( this.SetProperty( ref this._transmitTimeout, value ) )
             {
                 if ( this.CoreClient?.Client is not null )
                     this.CoreClient.Client.TransmitTimeout = value;

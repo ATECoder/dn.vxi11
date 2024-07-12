@@ -358,8 +358,9 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public ServerClientInfo? ActiveServerClient
     {
         get => this._activeServerClient;
-        set {
-            if ( this.OnPropertyChanged( ref this._activeServerClient, value ) )
+        set
+        {
+             if ( this.OnPropertyChanged( ref this._activeServerClient, value ) )
             {
             }
         }
@@ -454,8 +455,9 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public ServiceRequests ServiceRequestStatus
     {
         get => this._serviceRequestStatus;
-        set {
-            if ( this.OnPropertyChanged( ref this._serviceRequestStatus, value ) )
+        set
+        {
+             if ( this.OnPropertyChanged( ref this._serviceRequestStatus, value ) )
             {
                 if ( this.InterruptEnabled
                     && (( byte ) this._serviceRequestStatus & this.ServiceRequestEventMask) != 0 )
@@ -870,8 +872,9 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public string Identity
     {
         get => this._identity;
-        set {
-            if ( this.OnPropertyChanged( ref this._identity, value ) )
+        set
+        {
+             if ( this.OnPropertyChanged( ref this._identity, value ) )
             {
                 this.IdentityParser.Parse( value );
                 this.OnPropertyChanged( nameof( Vxi11Instrument.IdentityParser ) );
@@ -1346,7 +1349,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
         if ( method is not null )
         {
             Vxi11InstrumentOperationAttribute scpiAtt = ( Vxi11InstrumentOperationAttribute ) method.GetCustomAttribute( typeof( Vxi11InstrumentOperationAttribute ) )!;
-            if ( scpiAtt != null )
+            if ( scpiAtt is not null )
             {
                 try
                 {

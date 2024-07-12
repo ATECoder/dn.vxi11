@@ -124,8 +124,9 @@ public class Vxi11Server : CoreChannelServerBase
     public int AbortPortNumber
     {
         get => this._abortPortNumber;
-        set {
-            if ( this.SetProperty( ref this._abortPortNumber, value ) && this.Device is not null )
+        set
+        {
+             if ( this.SetProperty( ref this._abortPortNumber, value ) && this.Device is not null )
                 this.Device.AbortPortNumber = value;
         }
     }
@@ -346,8 +347,9 @@ public class Vxi11Server : CoreChannelServerBase
     public override Encoding CharacterEncoding
     {
         get => base.CharacterEncoding;
-        set {
-            if ( this.SetProperty( base.CharacterEncoding!, value, () => base.CharacterEncoding = value ) )
+        set
+        {
+             if ( this.SetProperty( base.CharacterEncoding!, value, () => base.CharacterEncoding = value ) )
                 if ( this.Device is not null ) { this.Device.CharacterEncoding = value; }
         }
     }
@@ -366,7 +368,7 @@ public class Vxi11Server : CoreChannelServerBase
     private void OnDevicePropertyChanged( object? sender, PropertyChangedEventArgs e )
     {
         if ( sender is not IVxi11Device ) return;
-        this.OnDevicePropertyChanged( ( IVxi11Device ) sender, e.PropertyName );
+        this.OnDevicePropertyChanged( ( IVxi11Device ) sender, e?.PropertyName );
     }
 
     private void OnDevicePropertyChanged( IVxi11Device sender, string propertyName )

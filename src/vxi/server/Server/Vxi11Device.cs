@@ -244,7 +244,7 @@ public partial class Vxi11Device : IVxi11Device
     private void OnInstrumentPropertyChanged( object? sender, PropertyChangedEventArgs e )
     {
         if ( sender is not IVxi11Instrument ) return;
-        this.OnInstrumentPropertyChanged( ( IVxi11Instrument ) sender, e.PropertyName );
+        this.OnInstrumentPropertyChanged( ( IVxi11Instrument ) sender, e?.PropertyName );
     }
 
     /// <summary>   Raises the instrument property changed event. </summary>
@@ -396,7 +396,7 @@ public partial class Vxi11Device : IVxi11Device
     private void OnInterfacePropertyChanged( object? sender, PropertyChangedEventArgs e )
     {
         if ( sender is not IVxi11Interface ) return;
-        this.OnInterfacePropertyChanged( ( IVxi11Interface ) sender, e.PropertyName );
+        this.OnInterfacePropertyChanged( ( IVxi11Interface ) sender, e?.PropertyName );
     }
 
     /// <summary>   Executes the interface property changed action. </summary>

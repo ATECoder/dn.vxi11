@@ -53,8 +53,9 @@ public partial class Vxi11Interface : IVxi11Interface
     public string DeviceName
     {
         get => this._deviceName;
-        set {
-            if ( this.SetProperty( ref this._deviceName, value ) )
+        set
+        {
+             if ( this.SetProperty( ref this._deviceName, value ) )
                 _ = this.DeviceNameParser.Parse( value );
         }
     }
@@ -169,8 +170,9 @@ public partial class Vxi11Interface : IVxi11Interface
     public ServerClientInfo? ActiveServerClient
     {
         get => this._activeServerClient;
-        set {
-            if ( this.OnPropertyChanged( ref this._activeServerClient, value ) )
+        set
+        {
+             if ( this.OnPropertyChanged( ref this._activeServerClient, value ) )
             {
             }
         }
