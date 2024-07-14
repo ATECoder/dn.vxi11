@@ -23,7 +23,7 @@ public partial class Vxi11Device
     /// <param name="value">        The value. </param>
     /// <param name="propertyName"> (Optional) Name of the property. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    protected virtual bool OnPropertyChanged<T>( ref T backingField, T value, [CallerMemberName] string? propertyName = "" )
+    protected virtual bool OnPropertyChanged<T>( ref T backingField, T value, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = "" )
     {
         if ( EqualityComparer<T>.Default.Equals( backingField, value ) )
             return false;
@@ -39,7 +39,7 @@ public partial class Vxi11Device
     /// <param name="value">        The value. </param>
     /// <param name="propertyName"> (Optional) Name of the property. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    protected bool SetProperty<T>( ref T prop, T value, [CallerMemberName] string? propertyName = null )
+    protected bool SetProperty<T>( ref T prop, T value, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null )
     {
         if ( EqualityComparer<T>.Default.Equals( prop, value ) ) return false;
         prop = value;
@@ -99,7 +99,7 @@ public partial class Vxi11Device
     /// The <see cref="PropertyChanged"/> event is not raised if the current and new value for the target property are the same.
     /// </remarks>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="model"/> or <paramref name="callback"/> are (<see langword="null"/>).</exception>
-    protected bool SetProperty<TModel, T>( T oldValue, T newValue, TModel model, Action<TModel, T> callback, [CallerMemberName] string? propertyName = null )
+    protected bool SetProperty<TModel, T>( T oldValue, T newValue, TModel model, Action<TModel, T> callback, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null )
         where TModel : class
     {
         if ( model is null ) throw new ArgumentNullException( nameof( model ) );
@@ -132,7 +132,7 @@ public partial class Vxi11Device
     ///                             change has occurred. </param>
     /// <param name="propertyName"> (Optional) Name of the property. </param>
     /// <returns>   <see langword="true"/> if it succeeds; otherwise, <see langword="false"/>. </returns>
-    protected bool SetProperty<T>( T oldValue, T newValue, Action callback, [CallerMemberName] string? propertyName = null )
+    protected bool SetProperty<T>( T oldValue, T newValue, Action callback, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null )
     {
 #if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull( callback, nameof( callback ) );

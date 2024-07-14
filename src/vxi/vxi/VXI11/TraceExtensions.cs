@@ -41,9 +41,9 @@ public static class TraceExtensions
     /// <param name="sourceFilePath">   (Optional) Full pathname of the source file. </param>
     /// <param name="sourceLineNumber"> (Optional) Source line number. </param>
     public static void TraceMemberInfo( string message,
-                                        [CallerMemberName] string memberName = "",
-                                        [CallerFilePath] string sourceFilePath = "",
-                                        [CallerLineNumber] int sourceLineNumber = 0 )
+                                        [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+                                        [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+                                        [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0 )
     {
         Trace.TraceInformation( MemberMessageFormat, message, sourceFilePath, memberName, sourceLineNumber );
     }
@@ -57,9 +57,9 @@ public static class TraceExtensions
     /// <param name="sourceFilePath">   (Optional) Full pathname of the source file. </param>
     /// <param name="sourceLineNumber"> (Optional) Source line number. </param>
     public static void TraceMemberWarning( string message,
-                                           [CallerMemberName] string memberName = "",
-                                           [CallerFilePath] string sourceFilePath = "",
-                                           [CallerLineNumber] int sourceLineNumber = 0 )
+                                           [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+                                           [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+                                           [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0 )
     {
         Trace.TraceWarning( MemberMessageFormat, message, sourceFilePath, memberName, sourceLineNumber );
     }
@@ -72,9 +72,9 @@ public static class TraceExtensions
     /// <param name="sourceFilePath">   (Optional) Full pathname of the source file. </param>
     /// <param name="sourceLineNumber"> (Optional) Source line number. </param>
     public static void TraceMemberError( string message, System.Exception ex,
-                                         [CallerMemberName] string memberName = "",
-                                         [CallerFilePath] string sourceFilePath = "",
-                                         [CallerLineNumber] int sourceLineNumber = 0 )
+                                         [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+                                         [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+                                         [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0 )
     {
             Trace.TraceError( MemberExceptionMessageFormat, message, ex, sourceFilePath, memberName, sourceLineNumber );
     }
