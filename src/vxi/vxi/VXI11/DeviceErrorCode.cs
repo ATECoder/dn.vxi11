@@ -73,12 +73,10 @@ public enum DeviceErrorCode
     NoImplemented = -1,
 
 }
-
 /// <summary>   A vxi 11 enum extensions. </summary>
 /// <remarks>   2023-06-02. </remarks>
 public static partial class Vxi11EnumExtensions
 {
-
     /// <summary>   An int extension method that converts a value to a <see cref="DeviceErrorCode"/>. </summary>
     /// <exception cref="ArgumentException">    Thrown when one or more arguments have unsupported or
     ///                                         illegal values. </exception>

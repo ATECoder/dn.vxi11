@@ -2,7 +2,6 @@ using System.ComponentModel;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;
-
 /// <summary>
 /// Interface for a base LXI interface, which implements standard IEEE 488.1 interface
 /// commands.

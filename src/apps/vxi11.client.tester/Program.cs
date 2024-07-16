@@ -82,7 +82,6 @@ void SendCommand( string command )
     else
         Console.WriteLine( $"{command} sent" );
 }
-
 /// <summary>   Raises the thread exception event. </summary>
 /// <remarks>   2023-06-02. </remarks>
 /// <param name="sender">   Source of the event. </param>
@@ -97,7 +96,6 @@ static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
 
 
 #region " unhandled exception handling "
-
 /// <summary>   Raises the unhandled exception event. </summary>
 /// <remarks>   2023-06-02. </remarks>
 /// <param name="sender">   Source of the event. </param>
@@ -106,7 +104,6 @@ static void OnUnhandledException( object? sender, UnhandledExceptionEventArgs e 
 {
     Console.WriteLine( $"\n Unhandled exception occurred: {e.ExceptionObject}\n" );
 }
-
 /// <summary>   Raises the unobserved task exception event. </summary>
 /// <remarks>   2023-06-02. </remarks>
 /// <param name="sender">   Source of the event. </param>

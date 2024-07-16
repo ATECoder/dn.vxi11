@@ -45,7 +45,6 @@ static void OnThreadException( object? sender, ThreadExceptionEventArgs e )
 }
 
 #region " unhandled exception handling "
-
 /// <summary>   Raises the unhandled exception event. </summary>
 /// <remarks>   2023-06-02. </remarks>
 /// <param name="sender">   Source of the event. </param>

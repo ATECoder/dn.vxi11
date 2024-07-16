@@ -1,7 +1,6 @@
 using cc.isr.VXI11.EnumExtensions;
 
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceGenericParams"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.DeviceReadStbProcedure"/>,
@@ -34,7 +33,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceGenericParams : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceGenericParams()
     {

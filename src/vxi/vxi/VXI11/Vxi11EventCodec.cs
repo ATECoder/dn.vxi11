@@ -6,7 +6,6 @@ namespace cc.isr.VXI11;
 /// <remarks>   2023-01-25. </remarks>
 public class Vxi11EventCodec : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public Vxi11EventCodec() : this( new byte[40] )
     { }

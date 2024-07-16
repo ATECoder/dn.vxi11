@@ -3,14 +3,12 @@ using cc.isr.VXI11.Codecs;
 using System.Net;
 
 namespace cc.isr.VXI11;
-
 /// <summary>
 /// The VXI-11 <see cref="Vxi11ProgramConstants.InterruptProgram"/> <see cref="InterruptChannelServer"/> class is the base class upon which
 /// to build VXI-11 <see cref="Vxi11ProgramConstants.InterruptProgram"/> TCP and UDP servers.
 /// </summary>
 public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
 {
-
     /// <summary>   The interrupt port default. </summary>
     public static int InterruptPortDefault = 1099;
 

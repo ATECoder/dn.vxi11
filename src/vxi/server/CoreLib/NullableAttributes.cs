@@ -4,7 +4,6 @@
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 
 namespace System.Diagnostics.CodeAnalysis;
-
 /// <summary>
 /// Specifies that the method or property will ensure that the listed field and property members
 /// have not-null values.
@@ -28,7 +27,6 @@ internal sealed class MemberNotNullAttribute : Attribute
     /// <value> The members. </value>
     public string[] Members { get; }
 }
-
 /// <summary>
 /// Specifies that the method or property will ensure that the listed field and property members
 /// have not-null values when returning with the specified return value condition.

@@ -5,7 +5,6 @@ namespace cc.isr.VXI11.Server;
 
 public partial class Vxi11Instrument
 {
-
     /// <summary>   Occurs when a property value changes. </summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 

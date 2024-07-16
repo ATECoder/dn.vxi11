@@ -23,7 +23,6 @@ namespace cc.isr.VXI11;
 /// </remarks>
 internal enum Vxi11Message
 {
-
     /// <summary>  Abort Channel: device aborts an in-progress call. <para>
     /// 
     /// Renamed from <c>device_abort_1 = 1</c>. </para> </summary>

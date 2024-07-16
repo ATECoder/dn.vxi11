@@ -1,5 +1,4 @@
 namespace cc.isr.VXI11;
-
 /// <summary>
 /// The class <see cref="DeviceErrorEventArgs"/> defines the event arguments for the 
 /// an event fired by the <see cref="AbortChannelServer">Abort server</see> whenever replies to a
@@ -7,7 +6,6 @@ namespace cc.isr.VXI11;
 /// </summary>
 public class DeviceErrorEventArgs : EventArgs
 {
-
     /// <summary>   Default constructor. </summary>
     /// <remarks>   2023-01-26. </remarks>
     public DeviceErrorEventArgs() : this( 0 )

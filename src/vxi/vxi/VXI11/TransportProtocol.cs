@@ -27,7 +27,6 @@ public enum TransportProtocol
     /// Renamed from <c>DEVICE_UDP = 1</c>. </para>. </summary>
     [Description( "The device UDP transport protocol." )] Udp = 1,
 }
-
 /// <summary>   A vxi 11 enum extensions. </summary>
 /// <remarks>   2023-06-02. </remarks>
 public static partial class Vxi11EnumExtensions

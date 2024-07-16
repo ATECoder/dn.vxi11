@@ -3,7 +3,6 @@ using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11;
-
 /// <summary>
 /// The class <see cref="AbortChannelClient"/> implements the client stub proxy for the
 /// <see cref="Vxi11ProgramConstants.AsyncProgram"/> remote program. It provides method
@@ -21,7 +20,6 @@ namespace cc.isr.VXI11;
 /// </remarks>
 public class AbortChannelClient : OncRpcClientStubBase
 {
-
     /// <summary>
     /// Constructs a <see cref="AbortChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.AsyncProgram"/>
     /// remote program can be accessed.

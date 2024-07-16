@@ -1,5 +1,4 @@
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceEnableSrqParms "/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.DeviceEnableSrqProcedure"/> RPC message.
@@ -24,7 +23,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceEnableSrqParms : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceEnableSrqParms()
     {

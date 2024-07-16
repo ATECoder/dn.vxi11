@@ -1,7 +1,6 @@
 using cc.isr.VXI11.EnumExtensions;
 
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceError"/> class defines the response XDR
 /// codec for the <see cref="Vxi11Message.DeviceTriggerProcedure"/>,
@@ -47,7 +46,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceError : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceError() : this( DeviceErrorCode.NoError )
     { }

@@ -246,7 +246,6 @@ public class Vxi11DiscovererTests
     /// <value> The pinged hosts. </value>
     public static List<IPAddress> PingedHosts { get; } = new();
 
-
     /// <summary>   Adds a host if ping Portmap service to 'timeout'. </summary>
     /// <remarks> This causes an issue with subsequent port map operations. </remarks>
     /// <param name="host">     The host. </param>

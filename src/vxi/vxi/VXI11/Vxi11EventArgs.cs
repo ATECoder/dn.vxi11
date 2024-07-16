@@ -1,5 +1,4 @@
 namespace cc.isr.VXI11;
-
 /// <summary>
 /// The class <see cref="Vxi11EventArgs"/> defines the event arguments for the 
 /// an event fired by the <see cref="InterruptChannelServer">Interrupt server</see> whenever replies to a
@@ -8,7 +7,6 @@ namespace cc.isr.VXI11;
 /// </summary>
 public class Vxi11EventArgs : EventArgs
 {
-
     /// <summary>
     /// Creates a new <see cref="Vxi11EventArgs"/> object and initializes its state.
     /// </summary>

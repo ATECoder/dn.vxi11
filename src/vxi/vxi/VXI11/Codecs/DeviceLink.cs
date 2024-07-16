@@ -1,5 +1,4 @@
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceLink"/> class defines the request XDR
 /// codec used with all device core XDR codecs such as <see cref="CreateLinkResp"/>.
@@ -33,7 +32,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceLink : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceLink()
     { }

@@ -8,7 +8,6 @@ namespace cc.isr.VXI11.Server;
 /// <remarks>   2023-02-09. </remarks>
 public class ServerClientsRegistry
 {
-
     /// <summary>   Default constructor. </summary>
     public ServerClientsRegistry()
     {

@@ -1,7 +1,6 @@
 using cc.isr.VXI11.EnumExtensions;
 
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceWriteParms"/> class defines the request XDR codec for the <see cref="Vxi11Message.DeviceWriteProcedure"/>
 /// RPC message.

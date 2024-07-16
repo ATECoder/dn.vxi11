@@ -1,7 +1,6 @@
 using cc.isr.VXI11.EnumExtensions;
 
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceReadStbResp"/> class defines the response XDR
 /// codec for the <see cref="Vxi11Message.DeviceReadStbProcedure"/> RPC message.
@@ -26,7 +25,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceReadStbResp : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceReadStbResp()
     {

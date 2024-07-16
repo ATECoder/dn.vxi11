@@ -1,7 +1,6 @@
 using cc.isr.VXI11.EnumExtensions;
 
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceWriteResp"/> class defines the response XDR codec for the <see cref="Vxi11Message.DeviceWriteProcedure"/>
 /// RPC message.
@@ -32,7 +31,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceWriteResp : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceWriteResp()
     { }

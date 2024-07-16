@@ -2,7 +2,6 @@ using System.Net;
 using cc.isr.VXI11.EnumExtensions;
 
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceRemoteFunc"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.CreateInterruptChannelProcedure"/> RPC message.
@@ -30,7 +29,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceRemoteFunc : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceRemoteFunc()
     {

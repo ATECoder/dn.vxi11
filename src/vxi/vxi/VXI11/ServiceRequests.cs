@@ -13,7 +13,6 @@ namespace cc.isr.VXI11;
 [Flags()]
 public enum ServiceRequests
 {
-
     /// <summary> The None option. </summary>
     [Description( "None" )]
     None = 0,

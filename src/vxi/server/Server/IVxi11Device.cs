@@ -2,7 +2,6 @@ using System.ComponentModel;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;
-
 /// <summary>
 /// An interface that is required for the implementation of a VXI-11 Device on a <see cref="Vxi11Server"/>.
 /// </summary>

@@ -2,7 +2,6 @@ using System.ComponentModel;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11.Server;
-
 /// <summary>
 /// Interface for a base LXI instrument, which implements standard IEEE 488.2 commands.
 /// </summary>
@@ -757,7 +756,6 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// A response of type <see cref="DeviceErrorCode"/> to send to the remote procedure call.
     /// </returns>
     DeviceErrorCode DeviceTrigger( DeviceOperationFlags flags, int ioTimeout );
-
 
     /// <summary>   Device clear. </summary>
     /// <remarks>

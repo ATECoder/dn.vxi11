@@ -1,5 +1,4 @@
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceDoCmdParams"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.DeviceDoCommandProcedure"/> RPC message.
@@ -29,7 +28,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceDoCmdParams : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceDoCmdParams()
     {

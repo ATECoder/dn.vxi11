@@ -15,7 +15,6 @@ namespace cc.isr.VXI11;
 /// <typeparamref name="T"> Generic type parameter. </typeparamref>
 public class CircularList<T> : List<T>
 {
-
     /// <summary>
     /// Constructor that prevents a default instance of this class from being created.
     /// </summary>

@@ -8,7 +8,6 @@ namespace cc.isr.VXI11;
 /// <summary>   A VXI-11 support. </summary>
 public static class Vxi11Support
 {
-
     /// <summary>   Gets a description from an Enum. </summary>
     /// <param name="value">    An enum constant representing the value option. </param>
     /// <returns>   The description. </returns>

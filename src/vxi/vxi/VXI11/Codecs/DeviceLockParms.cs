@@ -1,7 +1,6 @@
 using cc.isr.VXI11.EnumExtensions;
 
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceLockParms"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.DeviceLockProcedure"/> RPC message.
@@ -33,7 +32,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceLockParms : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceLockParms()
     {

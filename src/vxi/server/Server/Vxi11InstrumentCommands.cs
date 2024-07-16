@@ -3,7 +3,6 @@ namespace cc.isr.VXI11.Server;
 /// <summary>   Provides the standard VXI-11 (IEEE 488.2) instrument operation commands. </summary>
 public class Vxi11InstrumentCommands
 {
-
     /// <summary>   Clears status: *CLS. </summary>
     public const string CLS = "*CLS";
 

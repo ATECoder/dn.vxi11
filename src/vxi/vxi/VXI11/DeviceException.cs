@@ -1,5 +1,4 @@
 namespace cc.isr.VXI11;
-
 /// <summary>
 /// The class <see cref="DeviceException"/> indicates VXI-11 conditions that a reasonable
 /// application might want to catch.
@@ -11,7 +10,6 @@ namespace cc.isr.VXI11;
 [Serializable]
 public class DeviceException : Exception
 {
-
     /// <summary>
     /// Constructs an <see cref="DeviceException"/> with the specified detail reason and message.
     /// </summary>

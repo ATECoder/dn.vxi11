@@ -17,14 +17,12 @@ public enum Vxi11InstrumentOperationType
     [Description( "Read reply from the device." )]
     Read
 }
-
 /// <summary>
 /// VXI-11 instrument operation tag attributes.
 /// </summary>
 [AttributeUsage( AttributeTargets.Method )]
 public partial class Vxi11InstrumentOperationAttribute : Attribute
 {
-
     /// <summary>
     /// VXI-11 Device command content can be marked with full name
     /// </summary>
@@ -46,7 +44,6 @@ public partial class Vxi11InstrumentOperationAttribute : Attribute
         this.OperationType = operationType;
     }
 }
-
 /// <summary>   A vxi 11 enum extensions. </summary>
 /// <remarks>   2023-06-02. </remarks>
 public static partial class Vxi11ServerEnumExtensions

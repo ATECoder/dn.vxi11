@@ -5,7 +5,6 @@ namespace cc.isr.VXI11.Client;
 
 public partial class Vxi11Client : INotifyPropertyChanged
 {
-
     /// <summary>   Occurs when a property value changes. </summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 

@@ -3,7 +3,6 @@ using cc.isr.ONC.RPC.Client;
 using cc.isr.VXI11.Codecs;
 
 namespace cc.isr.VXI11;
-
 /// <summary>
 /// The class <see cref="InterruptChannelClient"/> implements the client stub proxy for the
 /// <see cref="Vxi11ProgramConstants.InterruptProgram"/> remote program. It provides method

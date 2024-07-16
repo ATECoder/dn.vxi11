@@ -3,7 +3,6 @@ using cc.isr.VXI11.Codecs;
 using System.Net;
 
 namespace cc.isr.VXI11;
-
 /// <summary>
 /// The VXI-11 <see cref="AbortChannelServer"/> class serves the <see cref="Vxi11ProgramConstants.AsyncProgram"/> 
 /// for the <see cref="Vxi11Message.DeviceAbortProcedure"/>.
@@ -14,7 +13,6 @@ namespace cc.isr.VXI11;
 /// </remarks>
 public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
 {
-
     /// <summary>   The default value of the abort port number. </summary>
     public static int AbortPortDefault = 1025;
 

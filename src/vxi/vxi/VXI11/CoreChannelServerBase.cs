@@ -3,7 +3,6 @@ using cc.isr.VXI11.Codecs;
 using System.Net;
 
 namespace cc.isr.VXI11;
-
 /// <summary>
 /// The abstract VXI-11 <see cref="Vxi11ProgramConstants.CoreProgram"/> <see cref="CoreChannelServerBase"/> class is the base class upon which
 /// to build VXI-11 <see cref="Vxi11ProgramConstants.CoreProgram"/> TCP servers.

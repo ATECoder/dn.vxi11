@@ -5,7 +5,6 @@ namespace cc.isr.VXI11.Server;
 /// <summary>   Information about the server client. </summary>
 public class ServerClientInfo : IEquatable<ServerClientInfo>
 {
-
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-13. </remarks>
     /// <param name="createLinkParameters"> The parameters defining the created link. </param>

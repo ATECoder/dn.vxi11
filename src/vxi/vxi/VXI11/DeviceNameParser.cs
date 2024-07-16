@@ -3,7 +3,6 @@ namespace cc.isr.VXI11;
 /// <summary>   An VXI-11 device name parser. </summary>
 public class DeviceNameParser : IEquatable<DeviceNameParser>
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceNameParser() : this( string.Empty )
     { }

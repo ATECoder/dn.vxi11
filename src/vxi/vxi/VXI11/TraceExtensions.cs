@@ -7,7 +7,6 @@ namespace cc.isr.VXI11;
 /// <remarks>   2023-06-02. </remarks>
 public static class TraceExtensions
 {
-
     /// <summary>   (Immutable) the multi line member message format. </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage( "Naming", "CA1707:Identifiers should not contain underscores", Justification = "<Pending>" )]
     public const string MULTI_LINE_MEMBER_MESSAGE_FORMAT = "{message}\n  at '{sourceFilePath}' {memberName} line {sourceLineNumber})";

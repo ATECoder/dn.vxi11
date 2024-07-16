@@ -4,7 +4,6 @@ namespace cc.isr.VXI11;
 /// <remarks>   2023-02-11. </remarks>
 public class IdentityParser : IEquatable<IdentityParser>
 {
-
     /// <summary>   Constructor. </summary>
     /// <remarks>   2023-02-11. </remarks>
     /// <param name="identity"> The identity. </param>

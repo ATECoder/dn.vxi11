@@ -11,7 +11,6 @@ public enum Vxi11EventType
     ServiceRequest = 1,
 
 }
-
 /// <summary>   A vxi 11 enum extensions. </summary>
 /// <remarks>   2023-06-02. </remarks>
 public static partial class Vxi11EnumExtensions

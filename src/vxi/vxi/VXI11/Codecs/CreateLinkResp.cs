@@ -1,5 +1,4 @@
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="CreateLinkResp"/> class defines the response XDR
 /// codec for the <see cref="Vxi11Message.CreateLinkProcedure"/> RPC message.
@@ -32,7 +31,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class CreateLinkResp : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public CreateLinkResp()
     {

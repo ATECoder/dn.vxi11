@@ -6,7 +6,6 @@ namespace cc.isr.VXI11.Server;
 /// <remarks>   2023-02-14. </remarks>
 public class Vxi11InterfaceFactory
 {
-
     /// <summary>   Default constructor. </summary>
     /// <remarks>   2023-02-14. </remarks>
     public Vxi11InterfaceFactory()

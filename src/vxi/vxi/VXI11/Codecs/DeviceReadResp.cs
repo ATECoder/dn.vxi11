@@ -1,5 +1,4 @@
 namespace cc.isr.VXI11.Codecs;
-
 /// <summary>
 /// The <see cref="DeviceReadResp"/> class defines the response XDR
 /// codec for the <see cref="Vxi11Message.DeviceReadProcedure"/> RPC message.
@@ -24,7 +23,6 @@ namespace cc.isr.VXI11.Codecs;
 /// </remarks>
 public class DeviceReadResp : IXdrCodec
 {
-
     /// <summary>   Default constructor. </summary>
     public DeviceReadResp()
     {
@@ -117,7 +115,6 @@ public class DeviceReadResp : IXdrCodec
     }
 
 }
-
 /// <summary>   Values that represent device read reasons. </summary>
 /// <remarks>   
 /// Upon successfully completing a <see cref="Vxi11Message.DeviceReadProcedure"/> RPC, a network instrument server:
@@ -167,7 +164,6 @@ public enum DeviceReadReasons
     /// </remarks>
     EndIndicator = 4,
 }
-
 /// <summary>   A vxi 11 enum extensions. </summary>
 /// <remarks>   2023-06-02. </remarks>
 public static partial class Vxi11EnumExtensions

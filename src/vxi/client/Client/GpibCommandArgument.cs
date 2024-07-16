@@ -125,7 +125,6 @@ public enum GpibCommandArgument
     /// </para></summary>
     ParallelPollDisable = 0x70,
 }
-
 /// <summary>   A vxi 11 enum extensions. </summary>
 /// <remarks>   2023-06-02. </remarks>
 public static partial class Vxi11ClientEnumExtensions

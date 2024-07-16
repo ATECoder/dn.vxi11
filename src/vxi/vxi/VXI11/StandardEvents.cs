@@ -17,7 +17,6 @@ namespace cc.isr.VXI11;
 [Flags()]
 public enum StandardEvents
 {
-
     /// <summary> The None option. </summary>
     [Description( "None" )]
     None = 0,
@@ -88,7 +87,6 @@ public enum StandardEvents
     [Description( "Power Toggled (PON)" )]
     PowerToggled = 0x80,
 }
-
 /// <summary>   A vxi 11 enum extensions. </summary>
 /// <remarks>   2023-06-02. </remarks>
 public static partial class Vxi11EnumExtensions

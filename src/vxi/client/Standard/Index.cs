@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 
 namespace System;
-
 /// <summary>
 /// Represent a type can be used to index a collection either from the start or the end.
 /// </summary>
