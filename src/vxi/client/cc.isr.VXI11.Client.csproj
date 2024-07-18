@@ -15,6 +15,9 @@
     <ApplicationTitle>cc.isr.VXI11.Client</ApplicationTitle>
     <ApplicationId>cc.isr.vxi11.client</ApplicationId>
 
+    <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
     <!-- Coding -->
     <OptionExplicit>On</OptionExplicit>
     <OptionCompare>Binary</OptionCompare>

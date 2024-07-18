@@ -14,7 +14,6 @@
     <ApplicationTitle>cc.isr.VXI11.Server</ApplicationTitle>
     <ApplicationId>cc.isr.vxi11.server</ApplicationId>
 
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
