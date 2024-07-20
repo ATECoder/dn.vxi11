@@ -221,7 +221,7 @@ public partial class Vxi11Interface : IVxi11Interface
     /// <summary>   Await lock release asynchronously. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     public bool AwaitLockReleaseAsync( int timeout )
     {
         return this.ServerClientRegistry.AwaitLockReleaseAsync( timeout );

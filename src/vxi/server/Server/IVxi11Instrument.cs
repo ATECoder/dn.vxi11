@@ -121,7 +121,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <summary>   Releases the lock for the client with the specified <paramref name="linkId"/>. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="linkId">   The link identifier. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     bool ReleaseLock( int linkId );
 
     /// <summary>   Adds a client to the client collection and makes it the active client. </summary>
@@ -133,7 +133,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
 
     /// <summary>   Removes the client described by linkId. </summary>
     /// <param name="linkId">   Identifier for the link. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     bool RemoveClient( int linkId );
 
     /// <summary>   Attempts to get an existing a client using the <paramref name="linkId"/>. </summary>
@@ -147,7 +147,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <remarks>   2023-02-21. </remarks>
     /// <param name="linkId">       Identifier for the link. </param>
     /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     bool TrySelectActiveClient( int linkId, int? lockTimeout = null );
 
     /// <summary>   Attempts to select client. </summary>
@@ -216,7 +216,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <summary>   Await lock release asynchronously. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     bool AwaitLockReleaseAsync( int timeout );
 
     /// <summary>   Await lock release. </summary>
@@ -224,7 +224,7 @@ public interface IVxi11Instrument : INotifyPropertyChanged
     /// <param name="waitLock"> Set <see langword="true"/> to wait for an existing lock;
     ///                         otherwise, return <see langword="false"/> if the active client is
     ///                         locked. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     bool AwaitLockRelease( bool waitLock );
 
     #endregion

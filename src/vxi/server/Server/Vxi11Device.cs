@@ -202,7 +202,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <summary>   Releases the lock for the client with the specified <paramref name="linkId"/>. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="linkId">   The link identifier. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     public bool ReleaseLock( int linkId )
     {
         foreach ( IVxi11Instrument instrument in this.Instruments.Values )
@@ -230,7 +230,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <summary>   Await lock release asynchronously. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     public bool AwaitLockReleaseAsync( int timeout )
     {
         return this.ActiveInstrument?.AwaitLockReleaseAsync( timeout ) ?? true;
@@ -283,7 +283,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <remarks>   2023-02-21. </remarks>
     /// <param name="linkId">       Identifier for the link. </param>
     /// <param name="instrument">   [out] The instrument. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     private bool TryGetInstrument( int linkId, out IVxi11Instrument? instrument )
     {
         if ( this.TryGetClient( linkId, out ServerClientInfo? client ) )
@@ -300,7 +300,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <param name="linkId">       Identifier for the link. </param>
     /// <param name="flags">        The flags. </param>
     /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     private bool TrySelectActiveClientInstrument( int linkId, DeviceOperationFlags flags, int? lockTimeout = null )
     {
         return this.TrySelectActiveClientInstrument( linkId, DeviceOperationFlags.WaitLock == (flags & DeviceOperationFlags.WaitLock), lockTimeout );
@@ -311,7 +311,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <param name="linkId">       Identifier for the link. </param>
     /// <param name="waitLock">     True to lock, false to unlock the wait. </param>
     /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     private bool TrySelectActiveClientInstrument( int linkId, bool waitLock, int? lockTimeout = null )
     {
         // select an instrument from the link id.
@@ -368,7 +368,7 @@ public partial class Vxi11Device : IVxi11Device
     /// <summary>   Select active interface. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="linkId">   Identifier for the link. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     private bool TrySelectActiveInterface( int linkId )
     {
         if ( this.ActiveInterface is not null ) this.ActiveInterface.PropertyChanged -= this.OnInterfacePropertyChanged;

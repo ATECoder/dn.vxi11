@@ -216,7 +216,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <summary>   Releases the lock for the client with the specified <paramref name="linkId"/>. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="linkId">   The link identifier. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     public bool ReleaseLock( int linkId )
     {
         return this.ServerClientsRegistry.ReleaseLock( linkId );
@@ -259,7 +259,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <summary>   Removes the client described by linkId. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="linkId">   Identifier for the link. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     public bool RemoveClient( int linkId )
     {
         return this.ServerClientsRegistry.RemoveClient( linkId );
@@ -279,7 +279,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <remarks>   2023-02-21. </remarks>
     /// <param name="linkId">       Identifier for the link. </param>
     /// <param name="lockTimeout">  (Optional) The lock timeout. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     public bool TrySelectActiveClient( int linkId, int? lockTimeout = null )
     {
         if ( this.IsActiveLinkId( linkId ) )
@@ -407,7 +407,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <summary>   Await lock release asynchronously. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     public bool AwaitLockReleaseAsync( int timeout )
     {
         return this.ServerClientsRegistry.AwaitLockReleaseAsync( timeout );
@@ -418,7 +418,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <param name="waitLock"> Set <see langword="true"/> to wait for an existing lock;
     ///                         otherwise, return <see langword="false"/> if the active client is
     ///                         locked. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     public bool AwaitLockRelease( bool waitLock )
     {
         bool released = true;

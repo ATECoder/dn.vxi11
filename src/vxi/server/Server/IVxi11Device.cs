@@ -74,7 +74,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <summary>   Await lock release asynchronously. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="timeout">  The timeout to wait for the release of the lock. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     bool AwaitLockReleaseAsync( int timeout );
 
     /// <summary>   Query if 'clientId' is client linked. </summary>
@@ -109,7 +109,7 @@ public interface IVxi11Device : INotifyPropertyChanged
     /// <summary>   Releases the lock for the client with the specified <paramref name="linkId"/>. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="linkId">   The link identifier. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     bool ReleaseLock( int linkId );
 
     /// <summary>   Gets or sets the active instrument. </summary>

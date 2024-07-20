@@ -91,7 +91,7 @@ public class ServerClientsRegistry
     /// <summary>   Releases the lock for the client with the specified <paramref name="linkId"/>. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="linkId">   The link identifier. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     public bool ReleaseLock( int linkId )
     {
         if ( this.LinkedClients.ContainsKey( linkId ) && this.LinkedClients[linkId].IsLocked() )
@@ -187,7 +187,7 @@ public class ServerClientsRegistry
     /// <summary>   Query if <see cref="ServerClientsRegistry"/> contains an instrument <paramref name="deviceName"/>. </summary>
     /// <remarks>   2023-02-14. </remarks>
     /// <param name="deviceName">   Name of the device. </param>
-    /// <returns>   True if it succeeds, false if it fails. </returns>
+    /// <returns>   True if it succeeds; otherwise, false. </returns>
     public bool ContainsInstrument( string deviceName )
     {
         return this.InstrumentClients.ContainsKey( deviceName );
