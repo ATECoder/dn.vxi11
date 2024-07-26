@@ -5,12 +5,12 @@ VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "`docs", "`docs", "{D245DFF2-72CA-4541-A96E-895D97687E65}"
 	ProjectSection(SolutionItems) = preProject
-		cc.isr.Vxi11.sln.vsspell = cc.isr.Vxi11.sln.vsspell
 		..\CHANGELOG.md = ..\CHANGELOG.md
 		..\LICENSE-CODE = ..\LICENSE-CODE
 		..\README.md = ..\README.md
 		items\readme.md = items\readme.md
 		..\TODO.md = ..\TODO.md
+
 		..\VXI-11.md = ..\VXI-11.md
 	EndProjectSection
 EndProject
