@@ -1,3 +1,5 @@
+using cc.isr.MSTest.Exceptions;
+
 namespace cc.isr.VXI11.MSTest;
 
 /// <summary>   (Unit Test Class) a device name parser tests. </summary>
@@ -23,7 +25,7 @@ public class DeviceNameParserTests
             if ( Logger is null )
                 Console.WriteLine( methodFullName );
             else
-                Logger?.LogMemberInfo( methodFullName );
+                Logger?.LogInformationMultiLineMessage( methodFullName );
         }
         catch ( Exception ex )
         {
@@ -86,7 +88,7 @@ public class DeviceNameParserTests
 
     /// <summary>   Gets a logger instance for this category. </summary>
     /// <value> The logger. </value>
-    public static ILogger<DeviceNameParserTests>? Logger { get; } = LoggerProvider.InitLogger<DeviceNameParserTests>();
+    public static ILogger<DeviceNameParserTests>? Logger { get; } = LoggerProvider.CreateLogger<DeviceNameParserTests>();
 
     #endregion
 
@@ -137,7 +139,7 @@ public class DeviceNameParserTests
         string builtDeviceName = expectedParser.BuildDeviceName();
         cc.isr.VXI11.DeviceNameParser actualParser = new( builtDeviceName );
         Assert.IsTrue( expectedParser.Equals( actualParser ), $"device name {builtDeviceName} built from parsed {deviceName} not matching" );
-        Logger?.LogInformation( $"device is {(string.IsNullOrEmpty( expectedParser.DeviceName ) ? "empty" : expectedParser.DeviceName)} for {deviceName} " );
+        Logger?.LogInformationMessage( $"device is {(string.IsNullOrEmpty( expectedParser.DeviceName ) ? "empty" : expectedParser.DeviceName)} for {deviceName} " );
     }
 
     /// <summary>   (Unit Test Method) device name parse. </summary>

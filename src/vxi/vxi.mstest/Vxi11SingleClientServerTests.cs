@@ -2,6 +2,7 @@ using System.ComponentModel;
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.ONC.RPC.Server;
 using cc.isr.VXI11.Server;
+using cc.isr.MSTest.Exceptions;
 
 namespace cc.isr.VXI11.MSTest;
 
@@ -34,7 +35,7 @@ public class Vxi11SingleClientServerTests
             if ( Logger is null )
                 Console.WriteLine( methodFullName );
             else
-                Logger?.LogMemberInfo( methodFullName );
+                Logger?.LogInformationMultiLineMessage( methodFullName );
 
             _server = new();
 
@@ -43,23 +44,23 @@ public class Vxi11SingleClientServerTests
 
             _ = Task.Factory.StartNew( () => {
 
-                Logger?.LogInformation( "starting the embedded port map service; this takes ~3.5 seconds." );
+                Logger?.LogInformationMessage( "starting the embedded port map service; this takes ~3.5 seconds." );
                 using OncRpcEmbeddedPortmapServiceStub epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
                 epm.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
 
-                Logger?.LogInformation( "starting the server task; this takes ~2.5 seconds." );
+                Logger?.LogInformationMessage( "starting the server task; this takes ~2.5 seconds." );
                 _server.Run();
             } ).ContinueWith( failedTask => Vxi11SingleClientServerTests.OnThreadException( new ThreadExceptionEventArgs( failedTask.Exception! ) ),
                                                                                  TaskContinuationOptions.OnlyOnFaulted );
 
-            Logger?.LogInformation( $"{nameof( Vxi11Server )} waiting running {DateTime.Now:ss.fff}" );
+            Logger?.LogInformationMessage( $"{nameof( Vxi11Server )} waiting running {DateTime.Now:ss.fff}" );
 
             // because the initializing task is not awaited, we need to wait for the server to start here.
 
             if ( !_server.ServerStarted( 2 * Vxi11SingleClientServerTests.ServerStartTimeTypical, Vxi11SingleClientServerTests.ServerStartLoopDelay ) )
                 throw new InvalidOperationException( "failed starting the ONC/RPC server." );
 
-            Logger?.LogInformation( $"{nameof( Vxi11Server )} is {(_server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
+            Logger?.LogInformationMessage( $"{nameof( Vxi11Server )} is {(_server.Running ? "running" : "idle")}  {DateTime.Now:ss.fff}" );
         }
         catch ( Exception ex )
         {
@@ -141,7 +142,7 @@ public class Vxi11SingleClientServerTests
 
     /// <summary>   Gets a logger instance for this category. </summary>
     /// <value> The logger. </value>
-    public static ILogger<Vxi11SingleClientServerTests>? Logger { get; } = LoggerProvider.InitLogger<Vxi11SingleClientServerTests>();
+    public static ILogger<Vxi11SingleClientServerTests>? Logger { get; } = LoggerProvider.CreateLogger<Vxi11SingleClientServerTests>();
 
     #endregion
 
@@ -182,13 +183,13 @@ public class Vxi11SingleClientServerTests
         switch ( e.PropertyName )
         {
             case nameof( Vxi11Server.PortNumber ):
-                Logger?.LogInformation( $"{e.PropertyName} set to {(( Vxi11Server ) sender).PortNumber}" );
+                Logger?.LogInformationMessage( $"{e.PropertyName} set to {(( Vxi11Server ) sender).PortNumber}" );
                 break;
             case nameof( Vxi11Server.IPv4Address ):
-                Logger?.LogInformation( $"{e.PropertyName} set to {(( Vxi11Server ) sender).IPv4Address}" );
+                Logger?.LogInformationMessage( $"{e.PropertyName} set to {(( Vxi11Server ) sender).IPv4Address}" );
                 break;
             case nameof( Vxi11Server.Running ):
-                Logger?.LogInformation( $"{e.PropertyName} set to {(( Vxi11Server ) sender).Running}" );
+                Logger?.LogInformationMessage( $"{e.PropertyName} set to {(( Vxi11Server ) sender).Running}" );
                 break;
         }
     }

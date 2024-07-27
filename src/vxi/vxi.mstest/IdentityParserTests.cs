@@ -1,3 +1,5 @@
+using cc.isr.MSTest.Exceptions;
+
 namespace cc.isr.VXI11.MSTest;
 
 [TestClass]
@@ -21,7 +23,7 @@ public class IdentityParserTests
             if ( Logger is null )
                 Console.WriteLine( methodFullName );
             else
-                Logger?.LogMemberInfo( methodFullName );
+                Logger?.LogInformationMultiLineMessage( methodFullName );
         }
         catch ( Exception ex )
         {
@@ -84,7 +86,7 @@ public class IdentityParserTests
 
     /// <summary>   Gets a logger instance for this category. </summary>
     /// <value> The logger. </value>
-    public static ILogger<IdentityParserTests>? Logger { get; } = LoggerProvider.InitLogger<IdentityParserTests>();
+    public static ILogger<IdentityParserTests>? Logger { get; } = LoggerProvider.CreateLogger<IdentityParserTests>();
 
     #endregion
 
@@ -130,7 +132,7 @@ public class IdentityParserTests
         cc.isr.VXI11.IdentityParser parser = new( identity );
         string builtIdentity = parser.BuildIdentity();
         Assert.AreEqual( identity, builtIdentity, $"Identity {builtIdentity} built from parsed {identity} not matching" );
-        Logger?.LogInformation( $"Identity is {(string.IsNullOrEmpty( parser.Identity ) ? "empty" : parser.Identity)} for {identity} " );
+        Logger?.LogInformationMessage( $"Identity is {(string.IsNullOrEmpty( parser.Identity ) ? "empty" : parser.Identity)} for {identity} " );
     }
 
     /// <summary>   (Unit Test Method) identity parse. </summary>

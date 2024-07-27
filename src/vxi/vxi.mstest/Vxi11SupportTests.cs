@@ -27,7 +27,7 @@ public class Vxi11SupportTests
             if ( Logger is null )
                 Console.WriteLine( methodFullName );
             else
-                Logger?.LogMemberInfo( methodFullName );
+                Logger?.LogInformationMultiLineMessage( methodFullName );
         }
         catch ( Exception ex )
         {
@@ -90,7 +90,7 @@ public class Vxi11SupportTests
 
     /// <summary>   Gets a logger instance for this category. </summary>
     /// <value> The logger. </value>
-    public static ILogger<Vxi11SupportTests>? Logger { get; } = LoggerProvider.InitLogger<Vxi11SupportTests>();
+    public static ILogger<Vxi11SupportTests>? Logger { get; } = LoggerProvider.CreateLogger<Vxi11SupportTests>();
 
     #endregion
 

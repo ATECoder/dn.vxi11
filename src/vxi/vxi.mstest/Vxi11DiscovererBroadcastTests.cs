@@ -1,6 +1,7 @@
 using System.Net;
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.ONC.RPC.Server;
+using cc.isr.MSTest.Exceptions;
 
 namespace cc.isr.VXI11.MSTest;
 
@@ -27,15 +28,15 @@ public class Vxi11DiscovererBroadcastTests
             if ( Logger is null )
                 Console.WriteLine( methodFullName );
             else
-                Logger?.LogMemberInfo( methodFullName );
+                Logger?.LogInformationMultiLineMessage( methodFullName );
             Vxi11DiscovererTests.EnumerateHosts();
 
-            Logger?.LogInformation( $"Starting the embedded Portmap service" );
+            Logger?.LogInformationMessage( $"Starting the embedded Portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = VXI11.Vxi11Discoverer.StartEmbeddedPortmapService();
             _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
 
-            Logger?.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
+            Logger?.LogInformationMessage( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
         }
         catch ( Exception ex )
         {
@@ -116,7 +117,7 @@ public class Vxi11DiscovererBroadcastTests
 
     /// <summary>   Gets a logger instance for this category. </summary>
     /// <value> The logger. </value>
-    public static ILogger<Vxi11DiscovererBroadcastTests>? Logger { get; } = LoggerProvider.InitLogger<Vxi11DiscovererBroadcastTests>();
+    public static ILogger<Vxi11DiscovererBroadcastTests>? Logger { get; } = LoggerProvider.CreateLogger<Vxi11DiscovererBroadcastTests>();
 
     #endregion
 
@@ -202,13 +203,13 @@ public class Vxi11DiscovererBroadcastTests
     [TestCategory( "discover" )]
     public void DeviceExplorerShouldListDevicesEndpoints()
     {
-        Logger?.LogInformation( @$"{nameof( DeviceExplorerShouldListDevicesEndpoints )} using timeout of {Vxi11DiscovererBroadcastTests.DiscoverTimeout} ms." );
+        Logger?.LogInformationMessage( @$"{nameof( DeviceExplorerShouldListDevicesEndpoints )} using timeout of {Vxi11DiscovererBroadcastTests.DiscoverTimeout} ms." );
         DateTime startTime = DateTime.Now;
         Stopwatch sw = Stopwatch.StartNew();
         List<IPEndPoint>? endpoints = VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints( IPAddress.Any, Vxi11DiscovererBroadcastTests.DiscoverTimeout, false );
         Assert.IsNotNull( endpoints );
 
-        Logger?.LogInformation(
+        Logger?.LogInformationMessage(
             $"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints )} found {endpoints.Count} Core VXI-11 device(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:\n" );
 
         //var s = string.Join( Environment.NewLine, endpoints.Select( x => $"{x}" ).ToArray() );
@@ -216,7 +217,7 @@ public class Vxi11DiscovererBroadcastTests
 
         foreach ( IPEndPoint endpoint in endpoints )
         {
-            Logger?.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
+            Logger?.LogInformationMessage( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
         }
 
         Assert.AreEqual( Vxi11DiscovererTests.PingedHosts.Count, endpoints.Count, "Device count is expected to equal pinged hosts count." );
@@ -252,20 +253,20 @@ public class Vxi11DiscovererBroadcastTests
     [TestCategory( "discover" )]
     public void DeviceExplorerShouldListDevicesAddresses()
     {
-        Logger?.LogInformation( @$"{nameof( DeviceExplorerShouldListDevicesAddresses )} using timeout of {Vxi11DiscovererBroadcastTests.DiscoverTimeout} ms." );
+        Logger?.LogInformationMessage( @$"{nameof( DeviceExplorerShouldListDevicesAddresses )} using timeout of {Vxi11DiscovererBroadcastTests.DiscoverTimeout} ms." );
         DateTime startTime = DateTime.Now;
         Stopwatch sw = Stopwatch.StartNew();
         List<IPAddress>? addresses = VXI11.Vxi11Discoverer.ListCoreDevicesAddresses( IPAddress.Any, Vxi11DiscovererBroadcastTests.DiscoverTimeout, false );
         Assert.IsNotNull( addresses );
 
-        Logger?.LogInformation( $"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints )} found {addresses.Count} Core VXI-11 device(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:\n" );
+        Logger?.LogInformationMessage( $"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.ListCoreDevicesEndpoints )} found {addresses.Count} Core VXI-11 device(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:\n" );
 
         //var s = string.Join( Environment.NewLine, addresses.Select( x => $"{x}" ).ToArray() );
         //Console.WriteLine( s );
 
         foreach ( IPAddress ip in addresses )
         {
-            Logger?.LogInformation( $"{ip}: {Vxi11DiscovererTests.TryQueryIdentity( ip.ToString() )}" );
+            Logger?.LogInformationMessage( $"{ip}: {Vxi11DiscovererTests.TryQueryIdentity( ip.ToString() )}" );
         }
 
 
@@ -285,15 +286,15 @@ public class Vxi11DiscovererBroadcastTests
         int actualCount = 0;
         foreach ( IPEndPoint endpoint in endpoints )
         {
-            Logger?.LogInformation( $"Pinging {endpoint}" );
+            Logger?.LogInformationMessage( $"Pinging {endpoint}" );
             Stopwatch sw = Stopwatch.StartNew();
             Assert.IsTrue( VXI11.Vxi11Discoverer.PingPort( endpoint ) );
-            Logger?.LogInformation( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
+            Logger?.LogInformationMessage( $"{endpoint} port pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
 
             if ( endpoint.Port == OncRpcPortmapConstants.OncRpcPortmapPortNumber ) { actualCount++; }
 
             if ( endpoint.Port != OncRpcPortmapConstants.OncRpcPortmapPortNumber )
-                Logger?.LogInformation( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
+                Logger?.LogInformationMessage( $"{endpoint}: {Vxi11DiscovererTests.TryQueryIdentity( endpoint.Address.ToString() )}" );
         }
 
         int expectedCount = 0;
@@ -351,13 +352,13 @@ public class Vxi11DiscovererBroadcastTests
     [TestCategory( "discover" )]
     public void DeviceExplorerShouldListLocalRegisteredServers()
     {
-        Logger?.LogInformation(
+        Logger?.LogInformationMessage(
             $"{nameof( DeviceExplorerShouldListLocalRegisteredServers )} using timeout of {Vxi11DiscovererBroadcastTests.DiscoverTimeout} ms." );
         Stopwatch sw = Stopwatch.StartNew();
         var endpoints = VXI11.Vxi11Discoverer.EnumerateRegisteredServers( IPAddress.Any, Vxi11DiscovererBroadcastTests.DiscoverTimeout, false );
         Assert.IsNotNull( endpoints );
 
-        Logger?.LogInformation(
+        Logger?.LogInformationMessage(
             $"{nameof( VXI11.Vxi11Discoverer )}.{nameof( VXI11.Vxi11Discoverer.EnumerateRegisteredServers )}( IPAddress.Any ) found {endpoints.Count} VXI-11 registered servers(s) in {sw.Elapsed.TotalMilliseconds:0.0} ms:\n" );
         var s = string.Join( Environment.NewLine, endpoints.Select( x => $"{x}" ).ToArray() );
         Console.WriteLine( s );

@@ -25,7 +25,7 @@ public class Vxi11DeviceTests
             if ( Logger is null )
                 Console.WriteLine( methodFullName );
             else
-                Logger?.LogMemberInfo( methodFullName );
+                Logger?.LogInformationMultiLineMessage( methodFullName );
 
             _vxi11Device = new Vxi11Device( new Vxi11InstrumentFactory(), new Vxi11InterfaceFactory() );
 
@@ -95,7 +95,7 @@ public class Vxi11DeviceTests
 
     /// <summary>   Gets a logger instance for this category. </summary>
     /// <value> The logger. </value>
-    public static ILogger<Vxi11DeviceTests>? Logger { get; } = LoggerProvider.InitLogger<Vxi11DeviceTests>();
+    public static ILogger<Vxi11DeviceTests>? Logger { get; } = LoggerProvider.CreateLogger<Vxi11DeviceTests>();
 
     #endregion
 

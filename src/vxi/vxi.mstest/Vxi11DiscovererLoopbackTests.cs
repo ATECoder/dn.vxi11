@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.ONC.RPC.Server;
+using cc.isr.MSTest.Exceptions;
 
 namespace cc.isr.VXI11.MSTest;
 
@@ -27,14 +28,14 @@ public class Vxi11DiscovererLoopbackTests
             if ( Logger is null )
                 Console.WriteLine( methodFullName );
             else
-                Logger?.LogMemberInfo( methodFullName );
+                Logger?.LogInformationMultiLineMessage( methodFullName );
 
-            Logger?.LogInformation( $"starting the embedded Portmap service" );
+            Logger?.LogInformationMessage( $"starting the embedded Portmap service" );
             Stopwatch sw = Stopwatch.StartNew();
             _embeddedPortMapService = VXI11.Vxi11Discoverer.StartEmbeddedPortmapService();
             _embeddedPortMapService.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;
 
-            Logger?.LogInformation( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
+            Logger?.LogInformationMessage( $"{nameof( OncRpcEmbeddedPortmapServiceStub )} started in {sw.Elapsed.TotalMilliseconds:0.0} ms" );
         }
         catch ( Exception ex )
         {
@@ -115,7 +116,7 @@ public class Vxi11DiscovererLoopbackTests
 
     /// <summary>   Gets a logger instance for this category. </summary>
     /// <value> The logger. </value>
-    public static ILogger<Vxi11DiscovererLoopbackTests>? Logger { get; } = LoggerProvider.InitLogger<Vxi11DiscovererLoopbackTests>();
+    public static ILogger<Vxi11DiscovererLoopbackTests>? Logger { get; } = LoggerProvider.CreateLogger<Vxi11DiscovererLoopbackTests>();
 
     #endregion
 
@@ -200,11 +201,11 @@ public class Vxi11DiscovererLoopbackTests
     [TestMethod]
     public void PortmapServiceShouldPing()
     {
-        Logger?.LogInformation( $"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} pinging Portmap service: " );
+        Logger?.LogInformationMessage( $"{DateTime.Now:yyyy:MM:dd:hh:mm:ss.fff} pinging Portmap service: " );
         Stopwatch sw = Stopwatch.StartNew();
         IPAddress host = IPAddress.Loopback;
         Assert.IsTrue( VXI11.Vxi11Discoverer.PortmapPingHost( host ), $"port map at {IPAddress.Loopback} should reply to a ping" );
-        Logger?.LogInformation( $"{host} portmap pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms." );
+        Logger?.LogInformationMessage( $"{host} portmap pinged in {sw.Elapsed.TotalMilliseconds:0.0} ms." );
     }
 
     #endregion
