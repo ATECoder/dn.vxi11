@@ -32,7 +32,7 @@ public class CircularListTests
             if ( Logger is null )
                 Console.WriteLine( $"Failed initializing the test class: {ex}" );
             else
-                Logger.LogMemberError( "Failed initializing the test class:", ex );
+                Logger.LogExceptionMultiLineMessage( "Failed initializing the test class:", ex );
 
             // cleanup to meet strong guarantees
 
