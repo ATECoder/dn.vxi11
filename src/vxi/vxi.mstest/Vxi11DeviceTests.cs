@@ -139,7 +139,6 @@ public class Vxi11DeviceTests
         return LinkId;
     }
 
-
     /// <summary>   (Unit Test Method) unique Link identifier should be generated. </summary>
     [TestMethod]
     public void UniqueLinkIdShouldBeGenerated()

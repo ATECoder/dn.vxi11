@@ -82,6 +82,7 @@ public enum ServiceRequests
 public static partial class Vxi11EnumExtensions
 {
     private static byte _serviceRequestsAll;
+
     /// <summary>   Device Operation Flags all; a value that consists of all <see cref="ServiceRequests"/>. </summary>
     /// <returns>   An int. </returns>
     public static byte ServiceRequestsAll()

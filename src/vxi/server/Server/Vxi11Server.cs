@@ -118,6 +118,7 @@ public class Vxi11Server : CoreChannelServerBase
     #region " abort server "
 
     private int _abortPortNumber;
+
     /// <summary>   Gets or sets the abort port number. </summary>
     /// <value> The abortPort number. </value>
     public int AbortPortNumber
@@ -1026,7 +1027,6 @@ public class Vxi11Server : CoreChannelServerBase
             return readRes;
         }
     }
-
 
     /// <summary>   Process the device write procedure. </summary>
     /// <remarks>

@@ -35,7 +35,6 @@ public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
         return this.SendCommand( this.CreateSetup( addressList ) );
     }
 
-
     /// <summary>   Find devices. </summary>
     /// <remarks>   2023-01-24. </remarks>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>

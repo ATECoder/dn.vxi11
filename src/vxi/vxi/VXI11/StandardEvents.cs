@@ -92,6 +92,7 @@ public enum StandardEvents
 public static partial class Vxi11EnumExtensions
 {
     private static byte _standardEventsAll;
+
     /// <summary>   Device Operation Flags all; a value that consists of all <see cref="StandardEvents"/>. </summary>
     /// <returns>   An int. </returns>
     public static byte StandardEventsAll()

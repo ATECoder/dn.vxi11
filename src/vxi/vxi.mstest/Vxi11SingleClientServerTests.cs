@@ -289,7 +289,6 @@ public class Vxi11SingleClientServerTests
         AssertIdentityShouldQuery( _ipv4Address!, count );
     }
 
-
     /// <summary>   (Unit Test Method) identity should query multiple device names. </summary>
     /// <remarks>   2023-02-14.
     /// <code>

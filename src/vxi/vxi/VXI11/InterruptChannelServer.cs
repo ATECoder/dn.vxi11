@@ -49,6 +49,7 @@ public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     #region " members "
 
     private int _portNumber;
+
     /// <summary>   Gets or sets the port number. </summary>
     /// <value> The port number. </value>
     public int PortNumber
@@ -58,6 +59,7 @@ public class InterruptChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     }
 
     private IPAddress _ipv4Address;
+
     /// <summary>   Gets or sets the host IPv4 address of this server. </summary>
     /// <value> The IPv4 address. </value>
     public IPAddress IPv4Address

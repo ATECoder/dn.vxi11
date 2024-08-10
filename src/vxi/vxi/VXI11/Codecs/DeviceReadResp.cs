@@ -169,6 +169,7 @@ public enum DeviceReadReasons
 public static partial class Vxi11EnumExtensions
 {
     private static int _allDeviceReasons;
+
     /// <summary>   Device reasons all; a value that consists of all <see cref="DeviceReadReasons"/>. </summary>
     /// <returns>   An int. </returns>
     public static int DeviceReasonsAll()

@@ -337,6 +337,7 @@ public partial class Vxi11Client : ICloseable
     protected CoreChannelClient? CoreClient { get; set; }
 
     private int _clientId;
+
     /// <summary>   Gets or sets the identifier of the client. </summary>
     /// <value> The identifier of the client. </value>
     public int ClientId
@@ -380,6 +381,7 @@ public partial class Vxi11Client : ICloseable
     #region " members "
 
     private string _host;
+
     /// <summary>   Gets or sets the host IPv4 Address. </summary>
     /// <value> The host. </value>
     public string Host
@@ -393,6 +395,7 @@ public partial class Vxi11Client : ICloseable
     public IPAddress IPAddress => IPAddress.Parse( this.Host );
 
     private string _deviceName;
+
     /// <summary>
     /// Gets or sets the device name, .e.g, INST0, gpib0,5, or usb0[...].
     /// </summary>
@@ -423,6 +426,7 @@ public partial class Vxi11Client : ICloseable
     public byte ReadTermination { get; set; }
 
     private int _connectTimeout;
+
     /// <summary>   Gets or sets the connect timeout. </summary>
     /// <remarks>
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
@@ -437,6 +441,7 @@ public partial class Vxi11Client : ICloseable
     }
 
     private int _ioTimeout;
+
     /// <summary>   Gets or sets the I/O timeout. </summary>
     /// <value> The I/O timeout. </value>
     public int IOTimeout
@@ -455,6 +460,7 @@ public partial class Vxi11Client : ICloseable
     }
 
     private int _transmitTimeout;
+
     /// <summary>   
     /// Gets or sets the timeout during the phase where data is sent within RPC calls, or data is
     /// received within RPC replies. The <see cref="TransmitTimeout"/> timeout must be greater than 0.
@@ -478,6 +484,7 @@ public partial class Vxi11Client : ICloseable
     }
 
     private int _lockTimeout;
+
     /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
     /// <remarks>
     /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
@@ -497,6 +504,7 @@ public partial class Vxi11Client : ICloseable
     }
 
     private bool _lockEnabled;
+
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
     /// <value> True if lock enabled, false if not. </value>
     public bool LockEnabled
@@ -506,6 +514,7 @@ public partial class Vxi11Client : ICloseable
     }
 
     private byte[] _writeTermination;
+
     /// <summary>   Gets or sets the write termination. </summary>
     /// <value> The write termination. </value>
     public byte[] WriteTermination
@@ -1034,7 +1043,6 @@ public partial class Vxi11Client : ICloseable
         if ( millisecondsReadDelay > 0 ) Task.Delay( millisecondsReadDelay ).Wait();
         return this.Read( trimEnd );
     }
-
 
     /// <summary>
     /// Sends a query message to the VXI-11 server and returns the replay message or an exception

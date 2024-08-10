@@ -220,7 +220,6 @@ public class CircularListTests
         CircularListTests.AssertCircularListShouldEnumerateAsReadOnlyCollection( ( IReadOnlyCollection<byte> ) list, data );
     }
 
-
     /// <summary>   Assert circular list should enumerate as <see cref="IEnumerable"/>. </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
     /// <param name="bytes">    The bytes. </param>
@@ -274,7 +273,6 @@ public class CircularListTests
         };
         CircularListTests.AssertCircularListShouldEnumerate( data, ( IEnumerable<byte> ) list );
     }
-
 
     /// <summary>
     /// Assert circular list should enumerate as <see cref="IEnumerable{byte}"/>.

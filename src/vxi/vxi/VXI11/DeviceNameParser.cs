@@ -363,7 +363,6 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
               );
     }
 
-
     /// <summary>   Check if we have an equal Generic device name. </summary>
     /// <remarks>   2023-02-20. </remarks>
     /// <param name="other">    An object to compare with this object. </param>
@@ -373,7 +372,6 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
         return string.Equals( this.InterfaceFamily, other.InterfaceFamily, StringComparison.OrdinalIgnoreCase )
             && this.BoardNumber == other.BoardNumber;
     }
-
 
     /// <summary>   Check if we have an equal GPUB device name. </summary>
     /// <remarks>   2023-02-20. </remarks>

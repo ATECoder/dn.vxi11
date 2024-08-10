@@ -40,6 +40,7 @@ public enum DeviceOperationFlags
 public static partial class Vxi11EnumExtensions
 {
     private static int _deviceOperationFlagsAll;
+
     /// <summary>   Device Operation Flags all; a value that consists of all <see cref="DeviceOperationFlags"/>. </summary>
     /// <returns>   An int. </returns>
     public static int DeviceOperationFlagsAll()

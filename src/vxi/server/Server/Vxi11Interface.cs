@@ -46,6 +46,7 @@ public partial class Vxi11Interface : IVxi11Interface
     #region " device name "
 
     private string _deviceName;
+
     /// <summary>
     /// Gets or sets the device name, .e.g, INST0, gpib0,5, or usb0[...].
     /// </summary>
@@ -165,6 +166,7 @@ public partial class Vxi11Interface : IVxi11Interface
     }
 
     private ServerClientInfo? _activeServerClient;
+
     /// <summary>   Gets or sets the <see cref="ServerClientInfo"/> of the active client. </summary>
     /// <value> Information describing the server client. </value>
     public ServerClientInfo? ActiveServerClient
@@ -405,6 +407,7 @@ public partial class Vxi11Interface : IVxi11Interface
     #region " instrument state "
 
     private bool _lockEnabled;
+
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
     /// <value> True if lock enabled, false if not. </value>
     public bool LockEnabled
@@ -414,6 +417,7 @@ public partial class Vxi11Interface : IVxi11Interface
     }
 
     private bool _remoteEnabled;
+
     /// <summary>   Gets or sets a value indicating whether the remote is enabled. </summary>
     /// <value> True if remote enabled, false if not. </value>
     public bool RemoteEnabled
@@ -563,6 +567,7 @@ public partial class Vxi11Interface : IVxi11Interface
     public List<(int ClientId, char IO, DateTimeOffset Timestamp, String Value)> MessageLog { get; }
 
     private int _messageLogCount;
+
     /// <summary>   Gets or sets the number of I/O messages. </summary>
     /// <value> The number of I/O messages, which, in fact, flags the property change flag that can be used to 
     /// indicate the availability of new messages. </value>
@@ -584,6 +589,7 @@ public partial class Vxi11Interface : IVxi11Interface
     }
 
     private DeviceErrorCode _lastDeviceError;
+
     /// <summary>   Gets or sets the last device error. </summary>
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
     public DeviceErrorCode LastDeviceError

@@ -58,6 +58,7 @@ public class CreateLinkResp : IXdrCodec
     public DeviceErrorCode ErrorCode { get; set; }
 
     private DeviceLink _link;
+
     /// <summary>
     /// Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     /// call. This data structure is sent back to the client to identify the device for all

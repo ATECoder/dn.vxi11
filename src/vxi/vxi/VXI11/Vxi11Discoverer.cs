@@ -414,7 +414,6 @@ public class Vxi11Discoverer
         return PingPort( new IPEndPoint( IPAddress.Parse( ipv4Address ), portNumber ), timeoutMilliseconds );
     }
 
-
     /// <summary>   Pings port. </summary>
     /// <param name="endpoint">             The endpoint. </param>
     /// <param name="timeoutMilliseconds">  (Optional) The timeout in milliseconds. </param>
@@ -441,7 +440,6 @@ public class Vxi11Discoverer
         }
         return pinged;
     }
-
 
     /// <summary>   Ping host. </summary>
     /// <param name="nameOrAddress">        The name or address. </param>

@@ -69,6 +69,7 @@ public class DeviceWriteParms : IXdrCodec
     }
 
     private DeviceLink _link;
+
     /// <summary>
     /// Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
     /// call.

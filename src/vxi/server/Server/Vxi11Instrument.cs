@@ -63,6 +63,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     #region " device name "
 
     private string _deviceName;
+
     /// <summary>
     /// Gets or sets the device name, .e.g, INST0, gpib0,5, or usb0[...].
     /// </summary>
@@ -87,6 +88,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     #region " members "
 
     private DeviceErrorCode _lastDeviceError;
+
     /// <summary>   Gets or sets the last device error. </summary>
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
     public DeviceErrorCode LastDeviceError
@@ -96,6 +98,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private byte _readTermination;
+
     /// <summary>   Gets or sets the read termination. </summary>
     /// <value> The read termination. </value>
     public byte ReadTermination
@@ -105,6 +108,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private int _connectTimeout;
+
     /// <summary>   Gets or sets the connect timeout. </summary>
     /// <remarks>
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
@@ -119,6 +123,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private int _ioTimeout;
+
     /// <summary>   Gets or sets the I/O timeout. </summary>
     /// <value> The I/O timeout. </value>
     public int IOTimeout
@@ -128,6 +133,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private int _transmitTimeout;
+
     /// <summary>   
     /// Gets or sets the timeout during the phase where data is sent within RPC calls, or data is
     /// received within RPC replies. The <see cref="TransmitTimeout"/> timeout must be greater than 0.
@@ -140,6 +146,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private int _lockTimeout;
+
     /// <summary>   Gets or sets the lock timeout in milliseconds. </summary>
     /// <remarks>
     /// The <see cref="LockTimeout"/> determines how long a network instrument server will wait for a
@@ -159,6 +166,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private byte[] _writeTermination;
+
     /// <summary>   Gets or sets the write termination. </summary>
     /// <value> The write termination. </value>
     public byte[] WriteTermination
@@ -168,6 +176,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private int _maxReceiveLength;
+
     /// <summary>   Gets or sets the maximum length of the receive. </summary>
     /// <value> The maximum length of the receive. </value>
     public int MaxReceiveLength
@@ -177,6 +186,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private Encoding _characterEncoding;
+
     /// <summary>
     /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
     /// system's default encoding is to be used.
@@ -352,6 +362,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private ServerClientInfo? _activeServerClient;
+
     /// <summary>   Gets or sets the <see cref="ServerClientInfo"/> of the active client. </summary>
     /// <value> Information describing the server client. </value>
     public ServerClientInfo? ActiveServerClient
@@ -449,6 +460,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     protected int ServiceRequestEventMask { get; set; }
 
     private ServiceRequests _serviceRequestStatus;
+
     /// <summary>   Gets or sets the service request status. </summary>
     /// <value> The service request status. </value>
     public ServiceRequests ServiceRequestStatus
@@ -640,6 +652,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private bool _requestingServiceEventRaised;
+
     /// <summary>
     /// Gets or sets a value indicating whether the <see cref="RequestingService"/> event was raised 
     /// awaiting for the client to read the <see cref="ServiceRequestStatus"/> byte at which point
@@ -752,6 +765,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     #region " run long operation in the background "
 
     private bool _longOperationRunning;
+
     /// <summary>   Gets or sets a value indicating whether the long operation running. </summary>
     /// <value> True if long operation running, false if not. </value>
     public virtual bool LongOperationRunning
@@ -782,6 +796,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
 
     private CancellationTokenSource _cancelSource;
+
     /// <summary>
     /// Override this method to execute a long operation.
     /// </summary>
@@ -866,6 +881,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     #region "  " instrument operation members " "
 
     private string _identity;
+
     /// <summary>   Gets or sets the identity. </summary>
     /// <value> The identity. </value>
     public string Identity
@@ -890,6 +906,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     #region " sending interrupts (service requests) to the clients "
 
     private bool _interruptEnabled;
+
     /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
     /// <value> True if interrupt enabled, false if not. </value>
     public virtual bool InterruptEnabled => this._interruptEnabled;
@@ -949,6 +966,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public virtual void Initialize()
     { }
     private bool _lockEnabled;
+
     /// <summary>   Gets or sets a value indicating whether lock is requested on the device. </summary>
     /// <value> True if lock enabled, false if not. </value>
     public virtual bool LockEnabled
@@ -958,6 +976,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     }
 
     private bool _remoteEnabled;
+
     /// <summary>   Gets or sets a value indicating whether the remote is enabled. </summary>
     /// <value> True if remote enabled, false if not. </value>
     public virtual bool RemoteEnabled
@@ -1595,6 +1614,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     public List<(int ClientId, char IO, DateTimeOffset Timestamp, String Value)> MessageLog { get; }
 
     private int _messageLogCount;
+
     /// <summary>   Gets or sets the number of I/O messages. </summary>
     /// <value> The number of I/O messages, which, in fact, flags the property change flag that can be used to 
     /// indicate the availability of new messages. </value>

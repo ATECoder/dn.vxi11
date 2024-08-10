@@ -242,7 +242,6 @@ public class Vxi11DiscovererTests
                               "" };
     }
 
-
     /// <summary>   Gets the pinged hosts. </summary>
     /// <value> The pinged hosts. </value>
     public static List<IPAddress> PingedHosts { get; } = new();

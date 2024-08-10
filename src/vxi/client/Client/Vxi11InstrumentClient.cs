@@ -192,6 +192,7 @@ public class Vxi11InstrumentClient : Vxi11Client
     #region " interrupt server "
 
     private int _interruptPortNumber;
+
     /// <summary>   Gets or sets the Interrupt port number. </summary>
     /// <value> The InterruptPort number. </value>
     public int InterruptPortNumber

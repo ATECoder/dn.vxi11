@@ -129,7 +129,6 @@ public class Vxi11ClientTests
         return clientId;
     }
 
-
     /// <summary>   (Unit Test Method) unique client identifier should be generated. </summary>
     [TestMethod]
     public void UniqueClientIdShouldBeGenerated()

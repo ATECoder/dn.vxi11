@@ -61,6 +61,7 @@ public partial class Vxi11Device : IVxi11Device
     #region " abort server "
 
     private int _abortPortNumber;
+
     /// <summary>   Gets or sets the abort port number. </summary>
     /// <value> The abortPort number. </value>
     public int AbortPortNumber
@@ -83,6 +84,7 @@ public partial class Vxi11Device : IVxi11Device
     #region " interrupt port and client "
 
     private bool _interruptEnabled;
+
     /// <summary>   Gets or sets a value indicating whether the interrupt is enabled. </summary>
     /// <value> True if interrupt enabled, false if not. </value>
     public bool InterruptEnabled => this._interruptEnabled;
@@ -156,7 +158,6 @@ public partial class Vxi11Device : IVxi11Device
             return count;
         }
     }
-
 
     /// <summary>   Query if 'clientId' is client linked. </summary>
     /// <remarks>   2023-02-21. </remarks>
@@ -346,6 +347,7 @@ public partial class Vxi11Device : IVxi11Device
     }
 
     private Encoding _characterEncoding;
+
     /// <summary>
     /// Gets or sets the encoding to use when serializing strings. If <see langcref="null" />, the
     /// system's default encoding is to be used.
@@ -445,6 +447,7 @@ public partial class Vxi11Device : IVxi11Device
     #region " lxi-11 onc/rpc calls "
 
     private DeviceErrorCode _lastDeviceError;
+
     /// <summary>   Gets or sets the last device error. </summary>
     /// <value> The las <see cref="DeviceErrorCode"/> . </value>
     public DeviceErrorCode LastDeviceError

@@ -46,6 +46,7 @@ public class DeviceEnableSrqParms : IXdrCodec
     }
 
     private DeviceLink _link;
+
     /// <summary>   Gets or sets the <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/> call. </summary>
     /// <value> The identifier of the device link. </value>
     public DeviceLink Link { get => this._link; set => this._link = value ?? new(); }

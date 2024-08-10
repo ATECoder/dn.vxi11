@@ -774,7 +774,6 @@ public class CoreChannelClient : OncRpcClientStubBase
         return this.DeviceDoCmd( link, flags, lockTimeout, ioTimeout, cmd, true, dataSize, dataIn );
     }
 
-
     /// <summary>
     /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
     /// Device executes a command.
@@ -814,7 +813,6 @@ public class CoreChannelClient : OncRpcClientStubBase
         request.SetDataIn( dataIn );
         return this.DeviceDoCmd( request );
     }
-
 
     /// <summary>
     /// Calls remote procedure <see cref="Vxi11Message.DeviceDoCommandProcedure"/>;
