@@ -319,7 +319,6 @@ public partial class Vxi11Device : IVxi11Device
 
         if ( this.TryGetInstrument( linkId, out IVxi11Instrument? instrument ) )
         {
-
             // is this the active instrument?
 
             if ( this.ActiveInstrument is not null )
@@ -599,12 +598,10 @@ public partial class Vxi11Device : IVxi11Device
 
                 if ( instrument.RemoveClient( request.LinkId ) )
                 {
-
                     // remove the instrument if it has no clients.
 
                     if ( instrument.LinkedClientsCount == 0 )
                     {
-
                         _ = this.Instruments.TryRemove( client.DeviceName, out _ );
 
                         // remove the active instrument if it was removed not having clients.
@@ -700,7 +697,6 @@ public partial class Vxi11Device : IVxi11Device
             reply = new DeviceDoCmdResp() { ErrorCode = DeviceErrorCode.ChannelNotEstablished };
         else
         {
-
             // Select the client for this link. This maybe the existing client or a 
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link
@@ -882,7 +878,6 @@ public partial class Vxi11Device : IVxi11Device
             reply = new DeviceError( DeviceErrorCode.ChannelNotEstablished );
         else
         {
-
             // Select the client for this link. This maybe the existing client or a 
             // new client. Either was this should return true because we checked that 
             // the link was created so a client exists for this link

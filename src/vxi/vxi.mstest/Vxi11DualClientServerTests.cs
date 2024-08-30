@@ -45,7 +45,6 @@ public class Vxi11DualClientServerTests
             _server.ThreadExceptionOccurred += OnThreadException;
 
             _ = Task.Factory.StartNew( () => {
-
                 Logger?.LogInformationMessage( "starting the embedded port map service; this takes ~3.5 seconds." );
                 using OncRpcEmbeddedPortmapServiceStub epm = OncRpcEmbeddedPortmapServiceStub.StartEmbeddedPortmapService();
                 epm.EmbeddedPortmapService!.ThreadExceptionOccurred += OnThreadException;

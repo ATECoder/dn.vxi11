@@ -11,7 +11,6 @@ public partial class Vxi11Client : ICloseable
     /// <summary>   Default constructor. </summary>
     public Vxi11Client()
     {
-
         // get the next client identifier
         this.ClientId = Vxi11Client.GetNextClientId();
 
@@ -779,7 +778,6 @@ public partial class Vxi11Client : ICloseable
     /// <returns>   A Tuple: received data, error code, error details. </returns>
     public (byte[] Data, DeviceErrorCode ErrorCode, string ErrorDetails) ReadRaw( int byteCount = -1 )
     {
-
         int requestByteCount = (byteCount > 0) ? Math.Min( byteCount, this.MaxReadRawLength ) : this.MaxReadRawLength;
 
         DeviceReadResp reply = new();

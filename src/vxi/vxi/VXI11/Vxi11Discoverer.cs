@@ -339,7 +339,6 @@ public class Vxi11Discoverer
     /// <returns>   The <see cref="List{T}"/> where T:<see cref="IPEndPoint"/> </returns>
     public static List<IPEndPoint> EnumerateRegisteredServers( IEnumerable<IPAddress> addresses, int timeout, bool startEmbeddedPortmapService )
     {
-
         // start the embedded service.
         if ( startEmbeddedPortmapService )
         {

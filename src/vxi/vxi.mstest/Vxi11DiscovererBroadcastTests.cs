@@ -282,7 +282,6 @@ public class Vxi11DiscovererBroadcastTests
     /// <param name="endpoints">    The endpoints. </param>
     public static void AssertRegisteredServersShouldPing( IEnumerable<IPEndPoint> endpoints )
     {
-
         int actualCount = 0;
         foreach ( IPEndPoint endpoint in endpoints )
         {

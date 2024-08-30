@@ -526,7 +526,6 @@ public partial class Vxi11Instrument : IVxi11Instrument
     [Vxi11InstrumentOperation( Vxi11InstrumentCommands.ESERead, Vxi11InstrumentOperationType.Read )]
     public virtual string ESERead()
     {
-
         // TODO: Check Keithley 2400 SCPI summary for the elements that get cleared reading ESE.
 
         this.StandardEventStatus &= ~StandardEvents.OperationComplete;
@@ -1190,7 +1189,6 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <returns>   A DeviceErrorCode. </returns>
     public virtual DeviceErrorCode DeviceWrite( string compoundScpiCommand )
     {
-
         // TODO: Go over the specs in the remarks above to ensure the correct errors are reported.
 
         if ( string.IsNullOrWhiteSpace( compoundScpiCommand ) ) return DeviceErrorCode.IOError;
@@ -1329,7 +1327,6 @@ public partial class Vxi11Instrument : IVxi11Instrument
     private MethodInfo? FindInstrumentOperation( string operationName )
     {
         return this.InstrumentOperations().Find( p => {
-
             var att = p.GetCustomAttribute( typeof( Vxi11InstrumentOperationAttribute ) );
             if ( att == null || att is not Vxi11InstrumentOperationAttribute ) return false;
             Vxi11InstrumentOperationAttribute scpiAtt = ( Vxi11InstrumentOperationAttribute ) att;
@@ -1344,7 +1341,6 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <returns>   A DeviceErrorCode. </returns>
     protected virtual DeviceErrorCode ProcessScpiCommand( string fullScpiCommand )
     {
-
         string[] scpiArgs = Array.Empty<string>(); // Holds the SCPI command arguments
 
         // split the command to the core command and its arguments:

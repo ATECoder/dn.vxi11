@@ -377,7 +377,6 @@ public class Vxi11Server : CoreChannelServerBase
         {
             switch ( propertyName )
             {
-
                 case nameof( IVxi11Device.AbortPortNumber ):
                     this.AbortPortNumber = sender.AbortPortNumber;
                     break;

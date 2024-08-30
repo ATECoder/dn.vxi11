@@ -47,7 +47,6 @@ namespace cc.isr.VXI11.Discover;
 /// </remarks>
 internal static class LxiDiscover
 {
-
     public static string HelpDescription = @$"
 VXI-11 {nameof( LxiDiscover )} 
 
@@ -130,7 +129,6 @@ to discover all the instruments listening on the local IPs of this machine.
     /// <param name="deviceName">       The device name, e.g., INST0 or gpib0,4. </param>
     public static void Discover( string broadcastAddress, int timeout, string deviceName )
     {
-
         Console.WriteLine( $"Discovering {deviceName} devices on {broadcastAddress} with a timeout of {timeout} ms\n" );
 
         // IPAddress does not override '==', which implements reference equality. Must use Equals()
