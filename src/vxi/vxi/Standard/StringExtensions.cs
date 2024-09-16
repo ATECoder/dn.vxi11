@@ -20,8 +20,7 @@ internal static class StringExtensions
     /// <returns>   True if the substring is contained in the String, false if not. </returns>
     public static bool Contains( this string str, string substring, StringComparison comp )
     {
-        if ( substring is null )
-            throw new ArgumentNullException( nameof( substring ), $"{nameof( substring )} cannot be null." );
+        if ( substring is null ) throw new ArgumentNullException( nameof( substring ), $"{nameof( substring )} cannot be null." );
         else if ( !Enum.IsDefined( typeof( StringComparison ), comp ) )
             throw new ArgumentException( $"{nameof( comp )} is not a member of {nameof( StringComparison )}", nameof( comp ) );
         return str.IndexOf( substring, comp ) >= 0;
