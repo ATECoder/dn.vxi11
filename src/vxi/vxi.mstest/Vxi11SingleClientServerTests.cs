@@ -2,7 +2,7 @@ using System.ComponentModel;
 using cc.isr.ONC.RPC.Portmap;
 using cc.isr.ONC.RPC.Server;
 using cc.isr.VXI11.Server;
-using cc.isr.MSTest.Exceptions;
+using cc.isr.Std.MSTest.Exceptions;
 
 namespace cc.isr.VXI11.MSTest;
 
@@ -113,6 +113,7 @@ public class Vxi11SingleClientServerTests
     [TestInitialize()]
     public void InitializeBeforeEachTest()
     {
+        Console.WriteLine( $"{this.TestContext?.FullyQualifiedTestClassName}: {DateTime.Now} {System.TimeZoneInfo.Local}" );
         if ( Logger is not null )
         {
             this._loggerScope = Logger.BeginScope( this.TestContext?.TestName ?? string.Empty );

@@ -60,6 +60,7 @@ public class CircularListTests
     [TestInitialize()]
     public void InitializeBeforeEachTest()
     {
+        Console.WriteLine( $"{this.TestContext?.FullyQualifiedTestClassName}: {DateTime.Now} {System.TimeZoneInfo.Local}" );
         if ( Logger is not null )
         {
             this._loggerScope = Logger.BeginScope( this.TestContext?.TestName ?? string.Empty );
