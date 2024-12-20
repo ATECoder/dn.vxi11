@@ -1,4 +1,4 @@
-### VXI-11
+# VXI-11
 
 A control and communication library for LXI-based instruments. 
 
@@ -29,11 +29,11 @@ A control and communication library for LXI-based instruments.
 * [Security](security.md)
 
 
-#### Description
+## Description
 
 [ISR's VXI-11] is a partial C# implementation of the [VXI Bus Specification].
 
-#### History
+## History
 
 [ISR's VXI-11] is a is a fork of [VXI11.CSharp].
 
@@ -44,27 +44,27 @@ A control and communication library for LXI-based instruments.
 [ISR's ONC RPC] uses [ISR's XDR], which is a C# implementation of the [XDR: External Data Representation Standard (May 2006)] as implemented in [Java ONC RPC] implementation called Remote Tea. [ISR's XDR] was split off from [GB1.RemoteTea.Net].
 
 
-##### On the agenda
+### On the agenda
 The following items has yet to be implemented:
 * Device Clear;
 * read Service Request register;
 * Enable and register service call backs.
 
-#### Issues
+## Issues
 
-#### Supported .NET Releases
+## Supported .NET Releases
 
 
 <a name="Repository-Owner"></a>
-#### Repository Owner
+## Repository Owner
 [ATE Coder]
 
 <a name="Authors"></a>
-#### Authors
+## Authors
 * [ATE Coder]  
 
 <a name="legal-notices"></a>
-#### Legal Notices
+## Legal Notices
 
 Integrated Scientific Resources, Inc., and any contributors grant you a license to the documentation and other content in this repository under the [Creative Commons Attribution 4.0 International Public License], see the [LICENSE](./LICENSE) file, and grant you a license to any code in the repository under the [MIT License], see the [LICENSE-CODE](./LICENSE-CODE) file.
 
