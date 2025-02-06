@@ -14,6 +14,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.1" />
   </ItemGroup>
 
+  <Import Project="..\client\version.build.props" />
+
   <ItemGroup>
     <ProjectReference Include="..\client\cc.isr.VXI11.Client.csproj" />
     <ProjectReference Include="..\server\cc.isr.VXI11.Server.csproj" />
