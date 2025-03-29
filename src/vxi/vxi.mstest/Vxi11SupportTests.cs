@@ -197,7 +197,7 @@ public class Vxi11SupportTests
     }
 
     /// <summary>   (Unit Test Method) IP address should get local broadcast addresses. </summary>
-    /// <remarks> 
+    /// <remarks>
     /// <code>
     /// Standard Output: 
     ///    2023-02-02 17:38:03.191,cc.isr.VXI11.MSTest.Vxi11SupportTests.Vxi11SupportTests
@@ -214,7 +214,7 @@ public class Vxi11SupportTests
     }
 
     /// <summary>   (Unit Test Method) IP address should get local IPv4 addresses. </summary>
-    /// <remarks>   
+    /// <remarks>
     /// <code>
     /// Standard Output: 
     ///    2023-02-02 17:40:42.287,cc.isr.VXI11.MSTest.Vxi11SupportTests.Vxi11SupportTests
@@ -231,7 +231,7 @@ public class Vxi11SupportTests
     }
 
     /// <summary>   (Unit Test Method) IP address should get local addresses. </summary>
-    /// <remarks>   
+    /// <remarks>
     /// <code>
     /// Standard Output: 
     ///    2023-02-02 17:41:13.178,cc.isr.VXI11.MSTest.Vxi11SupportTests.Vxi11SupportTests

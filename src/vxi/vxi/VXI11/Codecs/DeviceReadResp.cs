@@ -3,15 +3,15 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceReadResp"/> class defines the response XDR
 /// codec for the <see cref="Vxi11Message.DeviceReadProcedure"/> RPC message.
 /// </summary>
-/// <remarks> 
+/// <remarks>
 /// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
 /// have different integer representations. <para>
-/// 
+///
 /// All integers defined by the VXI-11 specification are passed over the
 /// network as 32-bit integers, either signed or unsigned as defined. </para><para>
-/// 
+///
 /// Renamed from <c>Device_ReadResp</c>. </para><para>
-///  
+///
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_ReadResp {
@@ -61,12 +61,12 @@ public class DeviceReadResp : IXdrCodec
 
     /// <summary>   Gets the data. </summary>
     /// <remarks>
-    /// In the case of <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> 
-    /// the XDR opaque type is used by the network instrument protocol not because the data being represented is truly opaque, 
+    /// In the case of <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/>
+    /// the XDR opaque type is used by the network instrument protocol not because the data being represented is truly opaque,
     /// but to avoid the overhead associated with character data (8 bits being promoted to 32 bits). Since the data parameters for
-    /// <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> are arrays, 
+    /// <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> are arrays,
     /// a structure is passed which contains a pointer to the data, data.data_val, and the number of elements, data.data_len. <para>
-    /// 
+    ///
     /// A 'RESPONSE MESSAGE TERMINATOR' is send by putting a newline as the last character in data and setting the end flag in reason. </para>
     /// </remarks>
     /// <returns>   An array of byte. </returns>
@@ -77,12 +77,12 @@ public class DeviceReadResp : IXdrCodec
 
     /// <summary>   Sets a data. </summary>
     /// <remarks>
-    /// In the case of <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> 
-    /// the XDR opaque type is used by the network instrument protocol not because the data being represented is truly opaque, 
+    /// In the case of <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/>
+    /// the XDR opaque type is used by the network instrument protocol not because the data being represented is truly opaque,
     /// but to avoid the overhead associated with character data (8 bits being promoted to 32 bits). Since the data parameters for
-    /// <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> are arrays, 
+    /// <see cref="Vxi11Message.DeviceWriteProcedure"/> and <see cref="Vxi11Message.DeviceReadProcedure"/> are arrays,
     /// a structure is passed which contains a pointer to the data, data.data_val, and the number of elements, data.data_len. <para>
-    /// 
+    ///
     /// A 'RESPONSE MESSAGE TERMINATOR' is send by putting a newline as the last character in data and setting the end flag in reason. </para>
     /// </remarks>
     /// <param name="data"> Gets or sets the data. </param>
@@ -116,19 +116,19 @@ public class DeviceReadResp : IXdrCodec
 
 }
 /// <summary>   Values that represent device read reasons. </summary>
-/// <remarks>   
+/// <remarks>
 /// Upon successfully completing a <see cref="Vxi11Message.DeviceReadProcedure"/> RPC, a network instrument server:
 /// <list type="number"><item>
-/// Transfer bytes into the data parameter until one of the following termination conditions are met:  
+/// Transfer bytes into the data parameter until one of the following termination conditions are met:
 /// <list type="number"><item>
 /// a. If an END indicator is read. The END bit in reason is set. </item><item>
-/// b. If <see cref="DeviceReadParms.RequestSize"/> bytes are transferred. The <see cref="DeviceReadReasons.RequestCountIndicator"/>   
+/// b. If <see cref="DeviceReadParms.RequestSize"/> bytes are transferred. The <see cref="DeviceReadReasons.RequestCountIndicator"/>
 /// (<c>REQCNT</c>) bit in reason is set. This termination condition is be used if <see cref="DeviceReadParms.RequestSize"/> is zero. </item><item>
-/// c. If <see cref="DeviceOperationFlags.TerminationCharacterSet"/> is set in <see cref="DeviceReadParms.Flags"/> and a   
-/// character which matches <see cref="DeviceReadParms.TermChar"/> is transferred. 
+/// c. If <see cref="DeviceOperationFlags.TerminationCharacterSet"/> is set in <see cref="DeviceReadParms.Flags"/> and a
+/// character which matches <see cref="DeviceReadParms.TermChar"/> is transferred.
 /// The <see cref="DeviceReadReasons.TermCharIndicator"/> (<c>CHR</c>) bit in reason is set. </item><item>
 /// d. If the buffer used to return the response is full. No bits in reason are set.</item></list></item><item>
-/// Return with error set to 0, no error, to indicate successful completion. 
+/// Return with error set to 0, no error, to indicate successful completion.
 /// If more than one termination condition is valid, reason contains the bitwise inclusive OR of all the
 /// reasons.</item></list>
 /// </remarks>
@@ -140,26 +140,26 @@ public enum DeviceReadReasons
 
     /// <summary>   A binary constant representing the request count indicator flag.
     /// This bit is set if <see cref="DeviceReadParms.RequestSize"/> bytes are transferred </summary>
-    /// <remarks> <para> 
-    /// 
+    /// <remarks> <para>
+    ///
     /// Renamed from <c>RX_REQCNT</c> (1) </para>
     /// </remarks>
     RequestCountIndicator = 1,
 
-    /// <summary>   A binary constant representing the termination Character indicator flag. 
+    /// <summary>   A binary constant representing the termination Character indicator flag.
     /// this bit is set if <see cref="DeviceOperationFlags.TerminationCharacterSet"/> is set in
     /// <see cref="DeviceReadParms.Flags"/> and a character which matches <see cref="DeviceReadParms.TermChar"/> is transferred
     /// </summary>
-    /// <remarks> <para> 
-    /// 
+    /// <remarks> <para>
+    ///
     /// Renamed from <c>RX_CHR</c> (2) </para>
     /// </remarks>
     TermCharIndicator = 2,
 
     /// <summary>   A binary constant representing the end indicator flag.
     /// This bit is set if an END indicator is read. </summary>
-    /// <remarks> <para> 
-    /// 
+    /// <remarks> <para>
+    ///
     /// Renamed from <c>RX_END</c> (3) </para>
     /// </remarks>
     EndIndicator = 4,

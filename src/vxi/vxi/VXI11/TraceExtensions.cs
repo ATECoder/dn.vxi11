@@ -37,7 +37,7 @@ public static class TraceExtensions
     /// <remarks>   2023-03-23. </remarks>
     /// <param name="message">          The message. </param>
     /// <param name="memberName">       (Optional) Name of the member. </param>
-    /// <param name="sourceFilePath">   (Optional) Full pathname of the source file. </param>
+    /// <param name="sourceFilePath">   (Optional) full path name of the source file. </param>
     /// <param name="sourceLineNumber"> (Optional) Source line number. </param>
     public static void TraceMemberInfo( string message,
                                         [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
@@ -53,7 +53,7 @@ public static class TraceExtensions
     /// <remarks>   2023-03-23. </remarks>
     /// <param name="message">          The message. </param>
     /// <param name="memberName">       (Optional) Name of the member. </param>
-    /// <param name="sourceFilePath">   (Optional) Full pathname of the source file. </param>
+    /// <param name="sourceFilePath">   (Optional) full path name of the source file. </param>
     /// <param name="sourceLineNumber"> (Optional) Source line number. </param>
     public static void TraceMemberWarning( string message,
                                            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
@@ -68,7 +68,7 @@ public static class TraceExtensions
     /// <param name="message">          The message. </param>
     /// <param name="ex">               The exception. </param>
     /// <param name="memberName">       (Optional) Name of the member. </param>
-    /// <param name="sourceFilePath">   (Optional) Full pathname of the source file. </param>
+    /// <param name="sourceFilePath">   (Optional) full path name of the source file. </param>
     /// <param name="sourceLineNumber"> (Optional) Source line number. </param>
     public static void TraceMemberError( string message, System.Exception ex,
                                          [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",

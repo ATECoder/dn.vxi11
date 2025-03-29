@@ -54,10 +54,10 @@ public static class Vxi11Support
     /// IP addresses are in network order (big-endian), while <see cref="int"/>s are little-endian on
     /// Windows, so to get a correct value, you must reverse the bytes before converting on a little-
     /// endian system. <para>
-    /// 
+    ///
     /// Also, even for IPv4, an int can't hold addresses bigger than 127.255.255.255, e.g. the
     /// broadcast address (255.255.255.255), so use a uint. </para><para>
-    /// 
+    ///
     /// <see href="https://StackOverflow.com/questions/461742/how-to-convert-an-ipv4-address-into-a-integer-in-c">
     /// stack overflow</see> </para>
     /// </remarks>

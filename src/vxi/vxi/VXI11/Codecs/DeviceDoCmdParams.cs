@@ -3,15 +3,15 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceDoCmdParams"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.DeviceDoCommandProcedure"/> RPC message.
 /// </summary>
-/// <remarks> 
+/// <remarks>
 /// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
 /// have different integer representations. <para>
-/// 
+///
 /// All integers defined by the VXI-11 specification are passed over the
 /// network as 32-bit integers, either signed or unsigned as defined. </para><para>
-/// 
+///
 /// Renamed from <c>Device_DoCmdParams</c>. </para><para>
-/// 
+///
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_DoCmdParams {
@@ -74,7 +74,7 @@ public class DeviceDoCmdParams : IXdrCodec
     /// allows at least <see cref="IOTimeout"/> milliseconds before returning control to the client
     /// with a timeout error. The time it takes for the I/O operation to complete does not include
     /// any time spent waiting for the lock. <para>
-    /// 
+    ///
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
     /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
     /// value. </para>
@@ -88,7 +88,7 @@ public class DeviceDoCmdParams : IXdrCodec
     /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
     /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
     /// milliseconds for a lock to be released. <para>
-    /// 
+    ///
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
     /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
     /// value. </para>
@@ -101,7 +101,7 @@ public class DeviceDoCmdParams : IXdrCodec
     /// The value of <see cref="Cmd"/> is compared against the values supported by the network
     /// instrument server. If the particular value is not supported, the server returns error code
     /// <see cref="DeviceErrorCode.OperationNotSupported"/> (8). <para>
-    /// 
+    ///
     /// </para>
     /// </remarks>
     /// <value> The command. </value>
@@ -111,9 +111,9 @@ public class DeviceDoCmdParams : IXdrCodec
     /// Gets or sets a value indicating whether the network order; client's byte order. Network order
     /// is defined by the Internet Protocol Suite.
     /// </summary>
-    /// <remarks> 
+    /// <remarks>
     /// While the Windows default byte ordering is little-endian, XDR uses big-endian. <para>
-    /// 
+    ///
     /// <see cref="bool"/> types are encoded as <see cref="int"/> with 1 is <see langword="true"/>.
     /// </para>
     /// </remarks>

@@ -209,7 +209,7 @@ public class Vxi11InterfaceClient : Vxi11Client
     /// If the `data_in` parameter is zero, then set the ATN line false. </item></list>
     /// The returned `data_out` is the same as the received `data_in`.
     /// </remarks>
-    /// <param name="value">  The value. Note that a <see cref="bool"/> <see langword="true"/> 
+    /// <param name="value">  The value. Note that a <see cref="bool"/> <see langword="true"/>
     /// is XDR encoded as 1.
     /// </param>
     public virtual bool SetAtnLine( bool value )

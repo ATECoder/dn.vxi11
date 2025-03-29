@@ -5,15 +5,15 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceWriteParms"/> class defines the request XDR codec for the <see cref="Vxi11Message.DeviceWriteProcedure"/>
 /// RPC message.
 /// </summary>
-/// <remarks> 
+/// <remarks>
 /// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
 /// have different integer representations. <para>
-/// 
+///
 /// All integers defined by the VXI-11 specification are passed over the
 /// network as 32-bit integers, either signed or unsigned as defined. </para><para>
-/// 
+///
 /// Renamed from <c>Device_WriteParms</c>. </para><para>
-/// 
+///
 /// VXI-11 Specifications: </para>
 /// <code>
 /// typedef long Device_Flags;
@@ -26,17 +26,17 @@ namespace cc.isr.VXI11.Codecs;
 ///    opaque data;                 /* the data length and the data itself */
 /// };
 /// </code>
-/// 
+///
 /// The network instrument server has indirect control over the maximum size of data through the
 /// value of <see cref="CreateLinkResp.MaxReceiveSize"/> returned in <see cref="Vxi11Message.CreateLinkProcedure"/>.
 /// If a controller needs to send greater than <see cref="CreateLinkResp.MaxReceiveSize"/> bytes
 /// to the device at one time, then the network instrument client makes multiple calls to <see cref="Vxi11Message.DeviceWriteProcedure"/>
 /// to accomplish the complete transaction. A network instrument server accepts at least 1024
 /// bytes in a single <see cref="Vxi11Message.DeviceWriteProcedure"/> call. <para>
-/// 
-/// The variable length data, which is sent to the server is encoded as 
+///
+/// The variable length data, which is sent to the server is encoded as
 /// <see cref="XdrEncodingStreamBase.EncodeDynamicOpaque(byte[])"/> </para><para>
-/// 
+///
 /// DeviceFlagsCodec and DeviceErrorCodeCodec are represented as integers, which simplifies the code
 /// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
 /// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in
@@ -84,7 +84,7 @@ public class DeviceWriteParms : IXdrCodec
     /// allows at least <see cref="IOTimeout"/> milliseconds before returning control to the client
     /// with a timeout error. The time it takes for the I/O operation to complete does not include
     /// any time spent waiting for the lock. <para>
-    /// 
+    ///
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
     /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
     /// value. </para>
@@ -98,7 +98,7 @@ public class DeviceWriteParms : IXdrCodec
     /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
     /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
     /// milliseconds for a lock to be released. <para>
-    /// 
+    ///
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
     /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
     /// value. </para>
@@ -119,7 +119,7 @@ public class DeviceWriteParms : IXdrCodec
     /// <summary>   Sets a data to send. </summary>
     /// <remarks>
     /// Associate an END message (?EOI) with the last byte in data when the end flag in <see cref="Flags"/>
-    /// is set. 
+    /// is set.
     /// </remarks>
     /// <param name="data"> Gets or sets the data. </param>
     public void SetData( byte[] data ) { this._data = data ?? Array.Empty<byte>(); }

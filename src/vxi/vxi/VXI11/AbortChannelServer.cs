@@ -4,7 +4,7 @@ using System.Net;
 
 namespace cc.isr.VXI11;
 /// <summary>
-/// The VXI-11 <see cref="AbortChannelServer"/> class serves the <see cref="Vxi11ProgramConstants.AsyncProgram"/> 
+/// The VXI-11 <see cref="AbortChannelServer"/> class serves the <see cref="Vxi11ProgramConstants.AsyncProgram"/>
 /// for the <see cref="Vxi11Message.DeviceAbortProcedure"/>.
 /// </summary>
 /// <remarks>
@@ -74,7 +74,7 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
 
     #endregion
 
-    #region " action " 
+    #region " action "
 
     /// <summary>   Dispatch (handle) an ONC/RPC request from a client. </summary>
     /// <remarks>
@@ -82,7 +82,7 @@ public class AbortChannelServer : OncRpcServerStubBase, IOncRpcDispatchable
     /// to use it properly. For background information about fairly deep semantics, please also refer
     /// to <i>Gigzales</i>, <i>J</i>.: Semantics considered harmful. Addison-Reilly, 1992, ISBN 0-542-
     /// 10815-X. <para>
-    ///  
+    ///
     /// See the introduction to this class for examples of how to use this interface properly.</para>
     /// </remarks>
     /// <param name="call">         <see cref="cc.isr.ONC.RPC.Server.OncRpcCallInformation" />

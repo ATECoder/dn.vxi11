@@ -44,7 +44,7 @@ public class Vxi11EventCodec : IXdrCodec
     /// <summary>   Encodes an instance of a <see cref="Vxi11EventCodec"/>. </summary>
     /// <remarks>   This is used to add a unique id to the handle in order to allow the server
     /// to identify the sender and to allow the client to filter the replies as these could be
-    /// directed to other clients. 
+    /// directed to other clients.
     ///
     /// The network instrument client should send in the handle parameter a unique link identifier. This will
     /// allow the network instrument client to identify the link associated with subsequent
@@ -62,7 +62,7 @@ public class Vxi11EventCodec : IXdrCodec
         return codec;
     }
 
-    /// <summary>   Gets or sets the identifier that uniquely identifies the 
+    /// <summary>   Gets or sets the identifier that uniquely identifies the
     /// client sending the event. This value is encoded into the <see cref="_handle"/></summary>
     public int ClientId { get; set; }
 
@@ -74,7 +74,7 @@ public class Vxi11EventCodec : IXdrCodec
     /// <remarks> The handle is passed back to the client with <see cref="Vxi11EventCodec.GetHandle()"/>
     /// when a service request occurs. <para>
     /// The network instrument client should send in the handle parameter a unique link identifier. This will
-    /// allow the network instrument client to identify the link associated with subsequent 
+    /// allow the network instrument client to identify the link associated with subsequent
     /// <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPCs. </para>
     /// </remarks>
     /// <value> The handle. </value>

@@ -57,7 +57,7 @@ public class Vxi11Discoverer
         return OncRpcPortmapClient.TryPingPortmapService( host, ioTimeout, transmitTimeout );
     }
 
-    #endregion 
+    #endregion
 
     #region " local inter network "
 
@@ -284,7 +284,7 @@ public class Vxi11Discoverer
         if ( GetLocalInterNetworkAddresses().Contains( host ) ) return 0;
 
         // Create a portmap client object, which can then be used to contact
-        // a local or remote ONC/RPC portmap process. 
+        // a local or remote ONC/RPC portmap process.
         using OncRpcPortmapClient portMapClient = new( host, OncRpcProtocol.OncRpcTcp, ioTimeout );
         portMapClient.OncRpcClient!.IOTimeout = OncRpcTcpClient.IOTimeoutDefault;
 
@@ -292,7 +292,7 @@ public class Vxi11Discoverer
         return portMapClient.GetPort( Vxi11ProgramConstants.CoreProgram, Vxi11ProgramConstants.CoreVersion, OncRpcProtocol.OncRpcTcp );
     }
 
-    #endregion 
+    #endregion
 
     #region " registered servers on the network "
 
@@ -374,7 +374,7 @@ public class Vxi11Discoverer
             return endpoints;
 
         // Create a portmap client object, which can then be used to contact
-        // a local or remote ONC/RPC portmap process. 
+        // a local or remote ONC/RPC portmap process.
 
         using OncRpcPortmapClient tcpPortMapClient = new( host, OncRpcProtocol.OncRpcTcp, ioTimeout );
         tcpPortMapClient.OncRpcClient!.IOTimeout = OncRpcTcpClient.IOTimeoutDefault;

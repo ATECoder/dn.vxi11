@@ -10,15 +10,15 @@ namespace cc.isr.VXI11.Codecs;
 /// <see cref="Vxi11Message.DeviceRemoteProcedure"/>, and
 /// <see cref="Vxi11Message.DeviceLocalProcedure"/>
 /// RPC messages.</summary>
-/// <remarks> 
+/// <remarks>
 /// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
 /// have different integer representations. <para>
-/// 
+///
 /// All integers defined by the VXI-11 specification are passed over the
 /// network as 32-bit integers, either signed or unsigned as defined. </para><para>
-/// 
+///
 /// Renamed from <c>Device_GenericParams</c>. </para><para>
-/// 
+///
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_GenericParams {
@@ -70,7 +70,7 @@ public class DeviceGenericParams : IXdrCodec
     /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
     /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
     /// milliseconds for a lock to be released. <para>
-    /// 
+    ///
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
     /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
     /// value. </para>
@@ -85,7 +85,7 @@ public class DeviceGenericParams : IXdrCodec
     /// allows at least <see cref="IOTimeout"/> milliseconds before returning control to the client
     /// with a timeout error.  The time it takes for the I/O operation to complete does not include
     /// any time spent waiting for the lock. <para>
-    /// 
+    ///
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
     /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
     /// value. </para>

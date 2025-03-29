@@ -13,9 +13,9 @@ namespace cc.isr.VXI11;
 /// but no additional client creations are necessary after subsequent <c>create_link</c>s. These connections may be
 /// torn down by the network instrument client once all links have been closed with <c>destroy_link</c>. The whole
 /// sequence could then start over. <para>
-/// 
+///
 /// Used to transfer the <c>device_abort</c> RPC (optional for client).</para><para>
-/// 
+///
 /// Renamed from <c>vxi11_DEVICE_ASYNC_Client</c> </para>
 /// </remarks>
 public class AbortChannelClient : OncRpcClientStubBase
@@ -44,8 +44,8 @@ public class AbortChannelClient : OncRpcClientStubBase
     { }
 
     /// <summary>
-    /// Constructs a <see cref="AbortChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.AsyncProgram"/> 
-    /// remote program can be accessed. 
+    /// Constructs a <see cref="AbortChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.AsyncProgram"/>
+    /// remote program can be accessed.
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
     /// <param name="host">     The Internet address of host where to contact the remote program. </param>
@@ -79,7 +79,7 @@ public class AbortChannelClient : OncRpcClientStubBase
     /// <summary>   Calls remote procedure <see cref="Vxi11Message.DeviceAbortProcedure"/>. </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>device_abort_1</c> </para>.
     /// </remarks>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>

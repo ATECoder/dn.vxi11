@@ -11,18 +11,18 @@ namespace cc.isr.VXI11.Server;
 /// Virtual Instrument. The remote procedure call initiated at the VXI-11 client side, passes to
 /// the instrument through a <see cref="Vxi11Device"/>, which links the <see cref="Vxi11Server"/>
 /// and the 'physical' <see cref="Vxi11Instrument"/>.
-/// 
+///
 /// Implementations of VXI-11 servers should inherit from the <see cref="Vxi11Instrument"/> and,
 /// perhaps also, from the <see cref="Vxi11Device"/>.
-/// 
+///
 /// Instrument classes inheriting from the <see cref="Vxi11Instrument"/> might override a few
 /// methods as necessary for implementing the designed behavior.
-/// 
+///
 /// The <see cref="Vxi11Server"/> and <see cref="Vxi11Device"/> classes implement the device_xxx
 /// remote procedure calls as specified in the
 /// <see href="https://vxibus.org/specifications.html">VXI-11 TCP/IP Instrument Protocol
 /// Specification</see> VXI-11 Version 1.0 document.
-/// 
+///
 /// The VXI-11 device procedures are from the host perspective, i.e., a device write is writes to
 /// the 'physical' instrument (also called 'Network Instrument') and device read reads from the
 /// instrument.
@@ -134,7 +134,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     private int _transmitTimeout;
 
-    /// <summary>   
+    /// <summary>
     /// Gets or sets the timeout during the phase where data is sent within RPC calls, or data is
     /// received within RPC replies. The <see cref="TransmitTimeout"/> timeout must be greater than 0.
     /// </summary>
@@ -153,7 +153,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
     /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
     /// milliseconds for a lock to be released. <para>
-    /// 
+    ///
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
     /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
     /// value. </para>
@@ -313,7 +313,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <summary>   Attempts to select client. </summary>
     /// <remarks>
     /// 2023-02-09. <para>
-    /// 
+    ///
     /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.WaitLock"/>
     /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
@@ -653,7 +653,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     private bool _requestingServiceEventRaised;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the <see cref="RequestingService"/> event was raised 
+    /// Gets or sets a value indicating whether the <see cref="RequestingService"/> event was raised
     /// awaiting for the client to read the <see cref="ServiceRequestStatus"/> byte at which point
     /// the <see cref="ServiceRequests.RequestingService"/> bit is turned on and this value
     /// is set to <see langword="false"/>.
@@ -910,7 +910,7 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <value> True if interrupt enabled, false if not. </value>
     public virtual bool InterruptEnabled => this._interruptEnabled;
 
-    /// <summary>   the Handle of the interrupt as received when getting 
+    /// <summary>   the Handle of the interrupt as received when getting
     ///             the <see cref="Vxi11Server.DeviceEnableSrq(DeviceEnableSrqParms)"/> RPC. </summary>
     private byte[] _interruptHandle = new byte[40];
 
@@ -991,27 +991,27 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <summary>   Aborts and returns the <see cref="DeviceError"/>. </summary>
     /// <remarks>
     /// To successfully complete a <c>device_abort</c> RPC, a network instrument server SHALL: <para>
-    /// 
+    ///
     /// 1. Initiate termination of any core channel, in-progress RPC associated with the link except
     /// destroy_link, device_enable_srq, and device_unlock. </para><para>
-    /// 
+    ///
     /// 2. Return with error set to 0, no error, to indicate successful completion </para><para>
-    /// 
+    ///
     /// The intent of this rule is to handle the <c>device_abort</c> RPC ahead of the other operations, but
     /// due to operating system specific implementation details the timeliness cannot be guaranteed. </para>
     /// <para>
-    /// 
+    ///
     /// The <c>device_abort</c> RPC only aborts an in-progress RPC, not a queued RPC. </para><para>
-    /// 
+    ///
     /// After replying to the <c>device_abort</c> call, the network instrument server SHALL reply to the
     /// original in-progress call which was aborted with error set to 23, aborted.  </para><para>
-    /// 
+    ///
     /// Receiving 0 on the abort call at the network instrument client only means that the abort was
     /// successfully delivered to the network instrument server. </para><para>
-    /// 
+    ///
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_abort</c> SHALL terminate with error set to 4 invalid link identifier.  </para><para>
-    /// 
+    ///
     /// The operation of <c>device_abort</c> SHALL NOT be affected by locking  </para>
     /// </remarks>
     /// <returns>   A DeviceError. </returns>
@@ -1046,46 +1046,46 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// To successfully complete a <c>device_read</c> RPC, a network instrument server SHALL: <para>
     /// 1. Transfer bytes into the data parameter until one of the following termination conditions
     /// are met: a.An END indicator is read.The END bit in reason SHALL be set. </para><para>
-    /// 
+    ///
     /// b. Request Size bytes are transferred.The REQCNT bit in reason SHALL be set. This termination
     /// condition SHALL be used if requestSize is zero.  </para><para>
-    /// 
+    ///
     /// c. Term Char Set is set in flags and a character which matches termChar is transferred.The CHR
     /// bit in reason SHALL be set. </para><para>
-    /// 
-    /// d. The buffer used to return the response is full.No bits in reason SHALL BE set.  
-    /// 
+    ///
+    /// d. The buffer used to return the response is full.No bits in reason SHALL BE set.
+    ///
     /// 2. Return with error set to 0, no error, to indicate successful completion.  </para><para>
-    /// 
+    ///
     /// If more than one termination condition is valid, reason contains the bitwise inclusive OR of
     /// all the reasons.  </para><para>
-    /// 
+    ///
     /// If reason is not set (value of 0) and error is zero, then the network instrument client could
     /// issue <c>device_read</c> calls until one of the other three termination conditions is
     /// encountered. </para>
-    /// 
+    ///
     /// <list type="bullet">Abort shall cause the following errors: <item>
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// device_read SHALL terminate with error set to 4, invalid link identifier. </item><item>
-    /// 
+    ///
     /// If some other link has the lock, <c>device_read</c> SHALL examine the wait lock flag in <c>
     /// flags</c> . If the flag is set, <c>device_read</c> SHALL block until the lock is free before
     /// transferring data.If the flag is not set, <c>device_read</c> SHALL terminate with error set
     /// to 11, device locked by another link. </item><item>
-    /// 
+    ///
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_read</c>
     /// SHALL terminate with error set to 11, device locked by another device and data.data_len set
     /// to zero. </item><item>
-    /// 
+    ///
     /// If the transfer takes longer than <c>io_timeout</c> milliseconds, <c>device_read</c> SHALL
     /// terminate with error set to 15, I/O timeout, <c>data.data_len</c> set to however many bytes
     /// were transferred, and reason set to zero. </item><item>
     /// If the network instrument server encounters a device specific I/O error while attempting to
     /// read the data, <c>device_read</c> SHALL terminate with error set to 17, I/O error. </item><item>
-    /// 
+    ///
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_read</c>
     /// SHALL terminate with error set to 23, abort. </item><item>
-    /// 
+    ///
     /// The number of bytes transferred from the device into data SHALL be returned in data.data_len
     /// even when <c>device_read</c> terminates due to a timeout or <c>device_abort</c>. </item></list>
     /// </remarks>
@@ -1130,58 +1130,58 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// 1. Transfer the contents of data to the device. </para><para>
     /// 2. Return in size parameter the number of bytes accepted by the device. </para><para>
     /// 3. Return with error set to 0, no error. </para><para>
-    /// 
+    ///
     /// If the end flag in <c>flags</c>  is set, then an END indicator SHALL be associated with the
     /// last byte in data. </para><para>
-    /// 
+    ///
     /// If a controller needs to send greater than <see cref="MaxReceiveLength"/> bytes to the device at one time, then
     /// the network instrument client makes multiple calls to <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  to accomplish the
     /// complete transaction.A network instrument server accepts at least 1,024 bytes in a single
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/> call due to RULE B.6.3.  </para><para>
-    /// 
+    ///
     /// The value of data.data_len may be zero, in which case no device actions are performed.  </para>
     /// <para>
-    /// 
+    ///
     /// The <c>link id</c> parameter is compared to the active link identifiers. If none match, <c>
     /// device_write</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
-    /// 
+    ///
     /// If data.data_len is greater than the value of <see cref="MaxReceiveLength"/> returned in create_link,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring any bytes to the device and SHALL
     /// set error to 5. </para><para>
-    /// 
+    ///
     /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the lock is
-    /// free. If the flag is not set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11, 
+    /// free. If the flag is not set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11,
     /// device already locked by another link. </para><para>
-    /// 
+    ///
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// SHALL terminate with error set to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>(11) . </para><para>
-    /// 
+    ///
     /// If after at least <c>io_timeout</c> milliseconds not all of data has been transferred to the
     /// device,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 15, I/O timeout. This timeout is based
     /// on the entire transaction and not the time required to transfer single bytes. </para><para>
-    /// 
+    ///
     /// The <c>io_timeout</c> value set by the application may need to change based on the size of
     /// data. </para>
     /// <para>
-    /// 
+    ///
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// SHALL terminate with error set to 23, abort. </para><para>
-    /// 
+    ///
     /// The number of bytes transferred to the device SHALL be returned in size, even when the call
     /// terminates due to a timeout or device_abort. </para><para>
-    /// 
+    ///
     /// If the network instrument server encounters a device specific I/O error while attempting to
     /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 17, I/O error. </para>
     ///  <list type="bullet">Abort shall cause the following errors: <item>
-    /// 
+    ///
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// terminate with error set to 23, abort. </item><item>
-    /// 
+    ///
     /// If the network instrument server encounters a device specific I/O error while attempting to
     /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 17, I/O error. </item><item>
-    /// 
+    ///
     /// </item></list>
     /// </remarks>
     /// <param name="compoundScpiCommand">  The compound SCPI command, which might consist of
@@ -1233,10 +1233,10 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// 1. Transfer the contents of data to the device. </para><para>
     /// 2. Return in size parameter the number of bytes accepted by the device. </para><para>
     /// 3. Return with error set to 0, no error. </para><para>
-    /// 
+    ///
     /// If the end flag in <c>flags</c>  is set, then an END indicator SHALL be associated with the
     /// last byte in data. </para><para>
-    /// 
+    ///
     /// If a controller needs to send greater than <see cref="MaxReceiveLength"/> bytes to the device at one time, then
     /// the network instrument client makes multiple calls to <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// to accomplish the complete transaction.A network instrument server accepts at least 1,024
@@ -1245,15 +1245,15 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// call due to RULE B.6.3.  </para><para>
     /// The value of data.data_len may be zero, in which case no device actions are performed.  </para>
     /// <para>
-    /// 
+    ///
     /// The <c>link id</c> parameter is compared to the active link identifiers. If none match, <c>
     /// device_write</c>
     /// SHALL terminate and set error to 4, invalid link identifier. </para><para>
-    /// 
+    ///
     /// If data.data_len is greater than the value of <see cref="MaxReceiveLength"/> returned in create_link,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate without transferring
     /// any bytes to the device and SHALL set error to 5. </para><para>
-    /// 
+    ///
     /// If some other link has the lock, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in <c>flags</c> . If the
     /// flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL block until the
@@ -1261,39 +1261,39 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate and set error to 11,
     /// device already locked by another link. </para>
     /// <para>
-    /// 
+    ///
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// SHALL terminate with error set to <see cref="DeviceErrorCode.DeviceLockedByAnotherLink"/>(11)
     /// . </para><para>
-    /// 
+    ///
     /// If after at least <c>io_timeout</c> milliseconds not all of data has been transferred to the
     /// device,
     /// <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with error set to 15,
     /// I/O timeout. This timeout is based on the entire transaction and not the time required to
     /// transfer single bytes. </para><para>
-    /// 
+    ///
     /// The <c>io_timeout</c> value set by the application may need to change based on the size of
     /// data. </para>
     /// <para>
-    /// 
+    ///
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// SHALL terminate with error set to 23, abort. </para><para>
-    /// 
+    ///
     /// The number of bytes transferred to the device SHALL be returned in size, even when the call
     /// terminates due to a timeout or device_abort. </para><para>
-    /// 
+    ///
     /// If the network instrument server encounters a device specific I/O error while attempting to
     /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with
     /// error set to 17, I/O error. </para>
     ///  <list type="bullet">Abort shall cause the following errors: <item>
-    /// 
+    ///
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// terminate with error set to 23, abort. </item><item>
-    /// 
+    ///
     /// If the network instrument server encounters a device specific I/O error while attempting to
     /// write the data, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>  SHALL terminate with
     /// error set to 17, I/O error. </item><item>
-    /// 
+    ///
     /// </item></list>
     /// </remarks>
     /// <param name="data"> The data. </param>
@@ -1433,27 +1433,27 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <remarks>
     /// If the device does not support a trigger and the network instrument server is able to detect
     /// this, <c>device_trigger</c> SHALL terminate and set error to 8, operation not supported. <para>
-    /// 
+    ///
     /// IEEE 488.1 and similar interfaces may not be able to detect that the device does not support
     /// a trigger. </para><para>
     /// The <c>link id</c> parameter is compared against the link identifiers. If none match,
     /// <c>device_trigger</c> SHALL terminate and set error to 4, invalid link identifier. </para><para>
-    /// 
+    ///
     /// If some other link has the lock, <c>device_trigger</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> .If the flag is set, <c>device_trigger</c> SHALL block until the lock is free
     /// before sending the trigger. If the flag is not set, <c>device_trigger</c> SHALL terminate and
     /// set error to 11, device locked by another link. </para><para>
-    /// 
+    ///
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_trigger</c>
     /// SHALL terminate with error set to 11, device locked by another link. </para><para>
-    /// 
+    ///
     /// If after at least <c>io_timeout</c> milliseconds the operation is not complete, <c>
     /// device_trigger</c>
     /// SHALL terminate with error set to 15, I/O timeout. </para><para>
-    /// 
+    ///
     /// If the network instrument server encounters a device specific I/O error while sending to
     /// trigger , <c>device_trigger</c> SHALL terminate with error set to 17, I/O error. </para><para>
-    /// 
+    ///
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_trigger</c>
     /// SHALL terminate with error set to 23, abort. </para>
     /// </remarks>
@@ -1510,26 +1510,26 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// <remarks>
     /// Since not all devices directly support a remote state, how this operation is executed depends
     /// upon the interface between the network instrument server and the device. <para>
-    /// 
+    ///
     /// If the device does not support a remote state and the network instrument server is able to
     /// detect this,
     /// <c>device_remote</c> SHALL terminate and set error to 8, operation not supported. </para><para>
-    /// 
+    ///
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match, <c>
     /// device_remote</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
-    /// 
+    ///
     /// If some other link has the lock, <c>device_remote</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag
     /// in <c>flags</c> . If the flag is set, <c>device_remote</c> SHALL block until the lock is
     /// free. If the flag is not set, <c>device_remote</c> SHALL terminate with error set to 11,
     /// device locked by another link.  </para><para>
-    /// 
+    ///
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_remote</c>
     /// SHALL terminate with error set to 11, device locked by another link.  </para><para>
-    /// 
+    ///
     /// If after at least <c>io_timeout</c> milliseconds the operation is not complete, <c>
     /// device_remote</c>
     /// SHALL terminate with error set to 15, I/O timeout.  </para><para>
-    /// 
+    ///
     /// If the network instrument server encounters a device specific I/O error while attempting to
     /// place the device in the remote state, <c>device_remote</c> SHALL terminate with error set to
     /// 17, I/O error. </para><para>
@@ -1555,32 +1555,32 @@ public partial class Vxi11Instrument : IVxi11Instrument
     /// To successfully complete a <c>device_local</c> RPC, a network instrument server SHALL: <para>
     /// 1. Place the associated device in a local state. </para><para>
     /// 2. Return with error set to zero, no error, to indicate successful completion. </para><para>
-    /// 
+    ///
     /// Since not all devices directly support a local state, how this operation is executed depends
     /// upon the interface between the network instrument server and the device. </para><para>
     /// If the device does not support a local state and the network instrument server is able to
     /// detect this, <c>device_local</c> SHALL terminate and set error to 8, operation not supported.
     /// </para>
     /// <para>
-    /// 
+    ///
     /// The <c>link id</c> parameter is compared against the active link identifiers. If none match,
     /// <c>device_local</c> SHALL terminate with error set to 4, invalid link identifier. </para><para>
-    /// 
+    ///
     /// If some other link has the lock, <c>device_local</c> SHALL examine the <see cref="DeviceOperationFlags.WaitLock"/> flag in
     /// <c>flags</c>. If the flag is set, <c>device_local</c> SHALL block until the lock is free. If
     /// the flag is not set, <c>device_local</c> SHALL terminate with error set to 11, device locked
     /// by another link. </para><para>
-    /// 
+    ///
     /// If after at least <c>lock_timeout</c> milliseconds the lock is not freed, <c>device_local</c>
     /// SHALL terminate with error set to 11, device locked by another link. </para><para>
-    /// 
+    ///
     /// If after at least <c>io_timeout</c> milliseconds the operation is not complete, <c>
     /// device_local</c> SHALL terminate with error set to 15, I/O timeout. </para><para>
-    /// 
+    ///
     /// If the network instrument server encounters a device specific I/O error while attempting to
     /// place the device in the local state, <c>device_local</c> SHALL terminate with error set to 17,
     /// I/O error. </para><para>
-    /// 
+    ///
     /// If the asynchronous <c>device_abort</c> RPC is called during execution, <c>device_local</c>
     /// SHALL terminate with error set to 23, abort. </para>
     /// </remarks>
@@ -1605,14 +1605,14 @@ public partial class Vxi11Instrument : IVxi11Instrument
 
     /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="string"/> Value)
     /// of the last messages that were sent to and received from the instrument. </summary>
-    /// <value> The list of message tuples consisting of the Client Id, IO (R for read and W for write), 
+    /// <value> The list of message tuples consisting of the Client Id, IO (R for read and W for write),
     /// a timestamp and a value that were sent to or received from the instrument. </value>
     public List<(int ClientId, char IO, DateTimeOffset Timestamp, String Value)> MessageLog { get; }
 
     private int _messageLogCount;
 
     /// <summary>   Gets or sets the number of I/O messages. </summary>
-    /// <value> The number of I/O messages, which, in fact, flags the property change flag that can be used to 
+    /// <value> The number of I/O messages, which, in fact, flags the property change flag that can be used to
     /// indicate the availability of new messages. </value>
     public int MessageLogCount
     {

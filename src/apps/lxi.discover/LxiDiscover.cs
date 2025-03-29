@@ -5,13 +5,13 @@ namespace cc.isr.VXI11.Discover;
 
 /// <summary>   An LXI discover. </summary>
 /// <remarks>
-/// 2450 (152), 6510 (154) and 7510 (144) are on:  
+/// 2450 (152), 6510 (154) and 7510 (144) are on:
 /// <code>
 /// VXI-11 LxiDiscover
 /// Discovering devices on IP = 0.0.0.0 with a timeout of 10 ms
 ///
 /// Discovery is estimated to take 5.08 seconds...
-/// 
+///
 /// Discovering instruments on 192.168.4.255....
 /// 2023-02-04 12:39:58.012,ListCoreDevicesAddresses scanning 254 addresses at 192.168.4.255
 /// 2023-02-04 12:39:58.042,Checking for Portmap service
@@ -48,7 +48,7 @@ namespace cc.isr.VXI11.Discover;
 internal static class LxiDiscover
 {
     public static string HelpDescription = @$"
-VXI-11 {nameof( LxiDiscover )} 
+VXI-11 {nameof( LxiDiscover )}
 
 Description: Finds all the LXI/VXI-11 instruments listening on the network.
 

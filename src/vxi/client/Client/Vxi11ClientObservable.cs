@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace cc.isr.VXI11.Client;
 
-public partial class Vxi11Client : INotifyPropertyChanged
+public partial class Vxi11Client : System.ComponentModel.INotifyPropertyChanged
 {
     /// <summary>   Occurs when a property value changes. </summary>
     public event PropertyChangedEventHandler? PropertyChanged;

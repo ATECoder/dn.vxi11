@@ -8,26 +8,26 @@ namespace cc.isr.VXI11.Server;
 /// </summary>
 /// <remarks>
 /// This interface defines the implementation for a 'physical' interface that is the end point
-/// for a VXI-11 client interface. The remote procedure call initiated at the client side, 
-/// passes to the instrument through a <see cref="Vxi11Device"/>, which links the 
+/// for a VXI-11 client interface. The remote procedure call initiated at the client side,
+/// passes to the instrument through a <see cref="Vxi11Device"/>, which links the
 /// <see cref="Vxi11Server"/> and the 'physical' <see cref="Vxi11Interface"/>.
-/// 
+///
 /// Implementations of VXI-11 servers should inherit from the <see cref="Vxi11Interface"/> and,
 /// perhaps also, from the <see cref="Vxi11Device"/>.
-/// 
+///
 /// Instrument classes inheriting from the <see cref="Vxi11Interface"/> might override a few
 /// methods as necessary for implementing the designed behavior.
-/// 
+///
 /// The <see cref="Vxi11Server"/> and <see cref="Vxi11Device"/> classes implement the device_xxx
 /// remote procedure calls as specified in the
 /// <see href="https://vxibus.org/specifications.html">VXI-11 TCP/IP Instrument Protocol
 /// Specification</see> VXI-11 Version 1.0 document.
-/// 
+///
 /// The VXI-11 device procedures are from the host perspective, i.e., a device write writes to
 /// the 'physical' instrument (also called 'Network Instrument') and device read reads from the
 /// instrument.
 /// </remarks>
-public interface IVxi11Interface : INotifyPropertyChanged
+public interface IVxi11Interface : System.ComponentModel.INotifyPropertyChanged
 {
     #region " device name "
 
@@ -64,7 +64,7 @@ public interface IVxi11Interface : INotifyPropertyChanged
     /// <summary>   Attempts to select client. </summary>
     /// <remarks>
     /// 2023-02-09. <para>
-    /// 
+    ///
     /// If the active client has the lock, examine the <see cref="DeviceOperationFlags.WaitLock"/>
     /// flag in <paramref name="operationFlags"/>. If the flag is set, <see cref="Vxi11Server.DeviceWrite(DeviceWriteParms)"/>
     /// blocks until the lock is released. Otherwise, return <see langword="false"/>, that is
@@ -223,12 +223,12 @@ public interface IVxi11Interface : INotifyPropertyChanged
 
     /// <summary>   Gets a <see cref="CircularList{T}"/> of (<see cref="DateTime"/> Timestamp, <see cref="string"/> Value)
     /// of the last messages that were sent to and received from the instrument. </summary>
-    /// <value> The list of message tuples consisting of the client id, IO (R for read and W for write), 
+    /// <value> The list of message tuples consisting of the client id, IO (R for read and W for write),
     /// a timestamp and a value that were sent to or received from the instrument. </value>
     List<(int ClientId, char IO, DateTimeOffset Timestamp, String Value)> MessageLog { get; }
 
     /// <summary>   Gets or sets the number of I/O messages. </summary>
-    /// <value> The number of I/O messages, which, in fact, flags the property change flag that can be used to 
+    /// <value> The number of I/O messages, which, in fact, flags the property change flag that can be used to
     /// indicate the availability of new messages. </value>
     int MessageLogCount { get; set; }
 

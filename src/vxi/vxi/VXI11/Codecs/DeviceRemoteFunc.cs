@@ -6,15 +6,15 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceRemoteFunc"/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.CreateInterruptChannelProcedure"/> RPC message.
 /// </summary>
-/// <remarks> 
+/// <remarks>
 /// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
 /// have different integer representations. <para>
-/// 
+///
 /// All integers defined by the VXI-11 specification are passed over the
 /// network as 32-bit integers, either signed or unsigned as defined. </para><para>
-/// 
+///
 /// Renamed from <c>Device_RemoteFunc</c>. </para><para>
-/// 
+///
 /// VXI-11 Specifications: </para>
 /// <code>
 /// enum Device_addrFamily {DEVICE_TCP, DEVICE_UDP};/* used by interrupts*
@@ -51,10 +51,10 @@ public class DeviceRemoteFunc : IXdrCodec
     }
 
     /// <summary>   Gets or sets the host address. </summary>
-    /// <remarks> 
+    /// <remarks>
     /// This value is defined as <see cref="IPAddress"/> type in spite of the specifications' call
     /// for using an unsigned integer because the address is encoded as opaque bytes in the XDR
-    /// stream. 
+    /// stream.
     /// </remarks>
     /// <value> The host address. </value>
     public IPAddress HostAddr { get; set; }
@@ -95,7 +95,7 @@ public class DeviceRemoteFunc : IXdrCodec
     /// Using UDP for the interrupt channel generally provides higher performance, but with the risks
     /// that some <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPCs might not arrive at all
     /// or that they might arrive out of order. <para>
-    /// 
+    ///
     /// The VXI specifications defines this value as an Enum called `Device_addrFamily`.
     /// </para>
     /// </remarks>

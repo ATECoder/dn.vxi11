@@ -176,7 +176,7 @@ public class Vxi11DiscovererBroadcastTests
     #region " discover devices "
 
     /// <summary>   (Unit Test Method) device explorer should list devices endpoints. </summary>
-    /// <remarks>   
+    /// <remarks>
     /// <code>
     /// 2450 (152) 6510 (154) and 7510 (144) are on.
     /// Standard Output: 
@@ -192,11 +192,11 @@ public class Vxi11DiscovererBroadcastTests
     ///   2023-02-04 18:52:38.217,ListCoreDevicesEndpoints scanning 254 addresses at 192.168.4.255
     ///   2023-02-04 18:52:43.604,ListCoreDevicesEndpoints scanning 254 addresses at 192.168.0.255
     ///   2023-02-04 18:52:48.881,DeviceExplorer.ListCoreDevicesEndpoints found 3 Core VXI-11 device( s) in 10665.1 ms:
-    ///   
+    ///
     ///   2023-02-04 18:52:48.916,192.168.0.144:1024: KEITHLEY INSTRUMENTS, MODEL DMM7510,04051720,1.7.7b
-    ///   
+    ///
     ///   2023-02-04 18:52:48.928,192.168.0.152:1024: KEITHLEY INSTRUMENTS, MODEL 2450,01419966,1.6.4c
-    ///   
+    ///
     ///   2023-02-04 18:52:48.958,192.168.0.154:1024: KEITHLEY INSTRUMENTS, MODEL DAQ6510,04388991,0.0.03i
     /// </code>
     /// </remarks>
@@ -226,7 +226,7 @@ public class Vxi11DiscovererBroadcastTests
     }
 
     /// <summary>   (Unit Test Method) device explorer should list devices addresses. </summary>
-    /// <remarks>   
+    /// <remarks>
     /// <code>
     /// 2450 (152) 6510 (154) and 7510 (144) are on.
     /// Standard Output: 
@@ -330,7 +330,7 @@ public class Vxi11DiscovererBroadcastTests
     ///   2023-02-04 18:53:47.751,EnumerateRegisteredServers scanning 254 addresses at 192.168.4.255
     ///   2023-02-04 18:53:52.722,EnumerateRegisteredServers scanning 254 addresses at 192.168.0.255
     ///   2023-02-04 18:53:57.974,DeviceExplorer.EnumerateRegisteredServers(IPAddress.Any ) found 4 VXI-11 registered servers( s) in 10224.4 ms:
-    ///   
+    ///
     ///   192.168.0.144:111
     ///   192.168.0.144:1024
     ///   192.168.0.154:111
@@ -340,7 +340,7 @@ public class Vxi11DiscovererBroadcastTests
     ///   2023-02-04 18:53:57.976,Pinging 192.168.0.144:1024
     ///   2023-02-04 18:53:57.976,192.168.0.144:1024 port pinged in 0.7 ms
     ///   2023-02-04 18:53:58.009,192.168.0.144:1024: KEITHLEY INSTRUMENTS, MODEL DMM7510,04051720,1.7.7b
-    ///   
+    ///
     ///   2023-02-04 18:53:58.010,Pinging 192.168.0.154:111
     ///   2023-02-04 18:53:58.010,192.168.0.154:111 port pinged in 0.7 ms
     ///   2023-02-04 18:53:58.010,Pinging 192.168.0.154:1024

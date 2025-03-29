@@ -4,13 +4,13 @@ namespace cc.isr.VXI11;
 public enum InterfaceCommand
 {
     /// <summary>   An enum constant representing the send command option. <para>
-    /// 
+    ///
     /// CMD_SEND_COMMAND
     /// </para></summary>
     SendCommand = 0x020000,
 
     /// <summary>   An enum constant representing the bus status option. <para>
-    /// 
+    ///
     /// CMD_BUS_STATUS
     /// </para></summary>
     BusStatus = 0x020001,
@@ -42,7 +42,7 @@ public enum InterfaceCommand
     BusAddress = 0x02000A,
 
 
-    /// <summary>   An enum constant representing the interface clear control option. 
+    /// <summary>   An enum constant representing the interface clear control option.
     ///
     /// CMD_IFC_CTRL
     /// </summary>

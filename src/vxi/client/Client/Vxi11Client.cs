@@ -14,7 +14,7 @@ public partial class Vxi11Client : ICloseable
         // get the next client identifier
         this.ClientId = Vxi11Client.GetNextClientId();
 
-        // initialize some values 
+        // initialize some values
         this.MaxReadRawLength = CoreChannelClient.MaxReadRawLengthDefault;
         this.MaxReceiveSize = 0;
         this.LastDeviceError = DeviceErrorCode.NoError;
@@ -42,7 +42,7 @@ public partial class Vxi11Client : ICloseable
     /// <returns>   A DeviceErrorCode. </returns>
     protected virtual DeviceErrorCode ConnectDevice( string hostAddress, string deviceName, int connectTimeout )
     {
-        // First destroy the link if not destroyed. 
+        // First destroy the link if not destroyed.
         if ( this.Connected ) { this.Close(); }
 
         // clear previous values.
@@ -158,7 +158,7 @@ public partial class Vxi11Client : ICloseable
     /// include a user-defined finalizer. This is necessary to ensure proper semantics for derived
     /// types that add a user-defined finalizer but only override the protected <see cref="Dispose(bool)"/>
     /// method. </para> <para>
-    /// 
+    ///
     /// To this end, call <see cref="GC.SuppressFinalize(object)"/>, where <see langword="Object"/> = <see langword="this"/> in the <see langword="Finally"/> segment of
     /// the <see langword="try"/>...<see langword="catch"/> clause. </para><para>
     ///
@@ -353,11 +353,11 @@ public partial class Vxi11Client : ICloseable
     /// <remarks>
     /// This is the size of the largest data set the network instrument server can accept in a <see cref="Vxi11Message.DeviceWriteProcedure"/>
     /// RPC. This value is at least 1024. <para>
-    /// 
+    ///
     /// The value is returned from the network instrument is used by the <see cref="CoreChannelClient"/>
     /// for implementing the <see cref="Vxi11Message.DeviceWriteProcedure">Device Write</see>
     /// RPC. </para><para>
-    /// 
+    ///
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
     /// using an unsigned short because XDR encodes <see cref="short"/>s as <see cref="int"/>s. </para>
     /// </remarks>
@@ -412,7 +412,7 @@ public partial class Vxi11Client : ICloseable
     /// The driver must be configured so that when talking on the bus it sends a write termination
     /// string (e.g., a line-feed or line-feed followed by a carriage return) with EOI as the
     /// terminator, and when listening on the bus it expects a read termination (e.g., a line-feed)
-    /// with EOI as the terminator. The IEEE-488.2 EOI (end-or-identify) message is interpreted as a 
+    /// with EOI as the terminator. The IEEE-488.2 EOI (end-or-identify) message is interpreted as a
     /// <c>new line</c> character and can be used to terminate a message in place of a <c>new line</c>
     /// character. A <c>carriage return</c> followed by a <c>new line</c> is also accepted. Message
     /// termination will always reset the current SCPI message path to the root level.
@@ -460,7 +460,7 @@ public partial class Vxi11Client : ICloseable
 
     private int _transmitTimeout;
 
-    /// <summary>   
+    /// <summary>
     /// Gets or sets the timeout during the phase where data is sent within RPC calls, or data is
     /// received within RPC replies. The <see cref="TransmitTimeout"/> timeout must be greater than 0.
     /// </summary>
@@ -490,7 +490,7 @@ public partial class Vxi11Client : ICloseable
     /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
     /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
     /// milliseconds for a lock to be released. <para>
-    /// 
+    ///
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
     /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
     /// value. </para>
@@ -785,7 +785,7 @@ public partial class Vxi11Client : ICloseable
 
         var values = Array.Empty<byte>();
 
-        // Read while read reason does not match the end of stream 
+        // Read while read reason does not match the end of stream
 
         while ( requestByteCount > 0 && ((reply.Reason & endOfStream) == 0) )
         {
@@ -793,7 +793,7 @@ public partial class Vxi11Client : ICloseable
 
             reply = this.Receive( requestByteCount );
 
-            // on error, throw and exception 
+            // on error, throw and exception
 
             if ( reply.ErrorCode != DeviceErrorCode.NoError )
             {

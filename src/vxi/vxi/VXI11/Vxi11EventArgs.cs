@@ -1,6 +1,6 @@
 namespace cc.isr.VXI11;
 /// <summary>
-/// The class <see cref="Vxi11EventArgs"/> defines the event arguments for the 
+/// The class <see cref="Vxi11EventArgs"/> defines the event arguments for the
 /// an event fired by the <see cref="InterruptChannelServer">Interrupt server</see> whenever replies to a
 /// <see cref="InterruptChannelClient.DeviceIntrSrq(cc.isr.VXI11.Codecs.DeviceSrqParams)"/> message
 /// is received.

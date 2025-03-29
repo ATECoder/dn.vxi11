@@ -66,7 +66,7 @@ public class CircularList<T> : List<T>
 
     /// <summary>
     /// Adds an item to the end of the
-    /// <see cref="Collections.Generic.List`1" />. Extra items are removed 
+    /// <see cref="Collections.Generic.List`1" />. Extra items are removed
     /// upon adding items beyond the fixed <see cref="List{T}.Capacity"/>.
     /// </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
@@ -86,7 +86,7 @@ public class CircularList<T> : List<T>
 
     /// <summary>
     /// Adds items to the end of the
-    /// <see cref="Collections.Generic.List`1" />. Extra items are removed 
+    /// <see cref="Collections.Generic.List`1" />. Extra items are removed
     /// upon adding items beyond the fixed <see cref="List{T}.Capacity"/>.
     /// </summary>
     /// <remarks>   David, 2020-09-10. </remarks>
@@ -159,7 +159,7 @@ public class CircularList<T> : List<T>
     /// <param name="collection">   The collection whose elements should be inserted into the
     ///                             <see cref="Collections.Generic.List`1" />. The
     ///                             collection itself cannot be <see langword="null" />, but it can
-    ///                             contain elements that are <see langword="null" />, if 
+    ///                             contain elements that are <see langword="null" />, if
     ///                             <typeparamref name="T"/> is a reference type. </param>
     public new void InsertRange( int index, IEnumerable<T> collection )
     {

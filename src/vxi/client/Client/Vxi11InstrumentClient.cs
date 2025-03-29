@@ -221,27 +221,27 @@ public class Vxi11InstrumentClient : Vxi11Client
     /// <summary>   Device Interrupt. </summary>
     /// <remarks>
     /// To successfully complete a <c>device_Interrupt</c> RPC, a network instrument server SHALL: <para>
-    /// 
+    ///
     /// 1. Initiate termination of any core channel, in-progress RPC associated with the link except
     /// destroy_link, device_enable_srq, and device_unlock. </para><para>
-    /// 
+    ///
     /// 2. Return with error set to 0, no error, to indicate successful completion </para><para>
-    /// 
+    ///
     /// The intent of this rule is to handle the <c>device_Interrupt</c> RPC ahead of the other operations, but
     /// due to operating system specific implementation details the timeliness cannot be guaranteed. </para>
     /// <para>
-    /// 
+    ///
     /// The <c>device_Interrupt</c> RPC only Interrupts an in-progress RPC, not a queued RPC. </para><para>
-    /// 
+    ///
     /// After replying to the <c>device_Interrupt</c> call, the network instrument server SHALL reply to the
     /// original in-progress call which was Interrupted with error set to 23, Interrupted.  </para><para>
-    /// 
+    ///
     /// Receiving 0 on the Interrupt call at the network instrument client only means that the Interrupt was
     /// successfully delivered to the network instrument server. </para><para>
-    /// 
+    ///
     /// The <c>link id</c> parameter is compared against the active link identifiers . If none match,
     /// <c>device_Interrupt</c> SHALL terminate with error set to 4 invalid link identifier.  </para><para>
-    /// 
+    ///
     /// The operation of <c>device_Interrupt</c> SHALL NOT be affected by locking  </para>
     /// </remarks>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>

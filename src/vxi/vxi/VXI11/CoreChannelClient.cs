@@ -10,7 +10,7 @@ namespace cc.isr.VXI11;
 /// </summary>
 /// <remarks>
 /// <para>
-///  
+///
 /// Renamed from <c>vxi11_DEVICE_CORE_Client</c> </para>
 /// </remarks>
 public class CoreChannelClient : OncRpcClientStubBase
@@ -39,8 +39,8 @@ public class CoreChannelClient : OncRpcClientStubBase
     { }
 
     /// <summary>
-    /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/> 
-    /// remote program can be accessed. 
+    /// Constructs a <see cref="CoreChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.CoreProgram"/>
+    /// remote program can be accessed.
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
     /// <param name="host">     The Internet address of host where to contact the remote program. </param>
@@ -142,7 +142,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>create_link_1</c> </para>
     /// </remarks>
     /// <param name="clientId">     Identifier for the client. </param>
@@ -211,8 +211,8 @@ public class CoreChannelClient : OncRpcClientStubBase
         return this.DeviceWrite( request );
     }
 
-    /// <summary>  
-    /// Calls remote procedure <see cref="Vxi11Message.DeviceWriteProcedure"/>; 
+    /// <summary>
+    /// Calls remote procedure <see cref="Vxi11Message.DeviceWriteProcedure"/>;
     /// Device receives a message. </summary>
     /// <remarks> Renamed from <c>device_write_1</c> </remarks>
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>
@@ -503,7 +503,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>device_local_1</c> </para>
     /// </remarks>
     /// <param name="request">  The request of type <see cref="Codecs.DeviceGenericParams"/> to send
@@ -552,7 +552,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>device_lock_1</c> </para>
     /// </remarks>
     /// <param name="request">  The request of type <see cref="Codecs.DeviceLockParms"/> to send to
@@ -575,7 +575,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>device_unlock_1</c> </para>
     /// </remarks>
     /// <param name="link"> The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
@@ -598,20 +598,20 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// The <c>CREATE_INTR_CHAN</c> RPC is used to identify the host or port that can service the
     /// interrupt. The
     /// <c>device_enable_srq</c> RPC is used to enable or disable an interrupt. The <c>
     /// DESTROY_INTR_CHAN</c> RPC is used to close the interrupt channel. </para><para>
-    /// 
+    ///
     /// The <c>device_enable_srq</c> RPC contains a handle parameter. The same data contained in
     /// handle is passed back in the handle parameter of the <c>DEVICE_INTR_SRQ</c> RPC. Since the
     /// same data is passed back, the network instrument client can identify the link associated with
     /// the <c>DEVICE_INTR_SRQ</c>. </para><para>
-    /// 
+    ///
     /// The network instrument protocol recognizes one type of interrupt, service request. Note that
     /// the return type to the interrupt RPC is void, denoting a one-way RPC. </para><para>
-    /// 
+    ///
     /// A network instrument host uses the following RPCL definition for interrupt messages.
     /// <code>
     /// struct Device_SrqParams
@@ -627,7 +627,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </code>
     /// The program number <c>0x0607B1</c> is the registered program number for the network
     /// instrument protocol's interrupt channel. </para> <para>
-    /// 
+    ///
     /// Renamed from <c>device_enable_srq_1</c> </para>
     /// </remarks>
     /// <param name="link">     The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
@@ -673,7 +673,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>DEVICE_DOCMD_1</c> </para>
     /// </remarks>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
@@ -712,7 +712,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>DEVICE_DOCMD_1</c> </para>
     /// </remarks>
     /// <exception cref="DeviceException">  Thrown when a Device error condition occurs. </exception>
@@ -751,7 +751,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>DEVICE_DOCMD_1</c> </para>
     /// </remarks>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
@@ -780,7 +780,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>DEVICE_DOCMD_1</c> </para>
     /// </remarks>
     /// <param name="link">         The <see cref="DeviceLink"/> link received from the <see cref="Vxi11Message.CreateLinkProcedure"/>
@@ -820,7 +820,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>DEVICE_DOCMD_1</c> </para>
     /// </remarks>
     /// <param name="request">  The request of type <see cref="Codecs.DeviceDoCmdParams"/> to send to
@@ -862,11 +862,11 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// The <c>CREATE_INTR_CHAN</c> RPC is used to identify the host or port that can service the
     /// interrupt. The <c>device_enable_srq</c> RPC is used to enable or disable an interrupt. The <c>
     /// DESTROY_INTR_CHAN</c> RPC is used to close the interrupt channel. </para><para>
-    /// 
+    ///
     /// Renamed from <c>CREATE_INTR_CHAN_1</c>  </para>
     /// </remarks>
     /// <param name="hostAddress">          The host address. </param>
@@ -889,7 +889,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// If a protocol other than UDP or TCP is specified, <c>CREATE_INTR_CHAN</c> terminates and set
     /// error to <see cref="DeviceErrorCode.OperationNotSupported"/> (8), operation not
     /// supported. </para><para>
-    /// 
+    ///
     /// Renamed from <c>CREATE_INTR_CHAN_1</c> </para>
     /// </remarks>
     /// <param name="hostAddress">          The host address. </param>
@@ -918,7 +918,7 @@ public class CoreChannelClient : OncRpcClientStubBase
     /// Device creates interrupt channel.
     /// </summary>
     /// <remarks> <para>
-    /// 
+    ///
     ///
     /// Renamed from <c>CREATE_INTR_CHAN_1</c> </para></remarks>
     /// <exception cref="OncRpcException">  Thrown when an ONC/RPC error condition occurs. </exception>

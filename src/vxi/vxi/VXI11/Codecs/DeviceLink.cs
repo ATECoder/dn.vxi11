@@ -3,26 +3,26 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceLink"/> class defines the request XDR
 /// codec used with all device core XDR codecs such as <see cref="CreateLinkResp"/>.
 /// </summary>
-/// <remarks> 
+/// <remarks>
 /// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
 /// have different integer representations. <para>
-/// 
+///
 /// All integers defined by the VXI-11 specification are passed over the
 /// network as 32-bit integers, either signed or unsigned as defined. </para><para>
-/// 
+///
 /// Renamed from <c>Device_Link</c>. </para><para>
-///  
+///
 /// VXI-11 Specifications: </para>
 /// <code>
 /// typedef long Device_Link;
 /// </code>
-/// 
+///
 /// The network instrument server returns an identifier of type <see cref="DeviceLink"/> as a
 /// result of the <see cref="Vxi11Message.CreateLinkProcedure"/> call. This identifier
 /// is handed back to the network instrument server by the network instrument client on each
 /// subsequent call. The network instrument server verifies the validity of the identifier on
 /// each call. The <see cref="DeviceLink"/> data is not modified by the controller. <para>
-/// 
+///
 /// DeviceFlagsCodec and DeviceErrorCodeCodec are represented as integers, which simplifies the code
 /// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
 /// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in

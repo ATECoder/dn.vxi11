@@ -11,8 +11,8 @@ public enum InterfaceCommandOption
 
     /// <summary>   An enum constant representing the service request status option. <para>
     ///
-    /// 
-    /// CMD_BUS_STATUS_SRQ 
+    ///
+    /// CMD_BUS_STATUS_SRQ
     /// </para></summary>
     ServiceRequestStatus = 2,
 
@@ -42,7 +42,7 @@ public enum InterfaceCommandOption
 
     /// <summary>   An enum constant representing the listener status option. <para>
     ///
-    /// 
+    ///
     /// CMD_BUS_STATUS_LISTENER
     /// </para></summary>
     ListenerStatus = 7,

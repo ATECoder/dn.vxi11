@@ -38,7 +38,7 @@ if ( ipv4Address == "127.0.0.1" )
     SendCommand( command );
 
     // closing client throws an exception when using the local mock server.
-    // 
+    //
 }
 else
 {

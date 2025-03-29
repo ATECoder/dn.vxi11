@@ -102,11 +102,11 @@ public enum GpibCommandArgument
     Untalk = 0x5F,
 
     /// <summary>   An enum constant representing the secondary address argument (base). <para>
-    /// If you are using an IEEE 488.2 function, such as Send or Receive, and you need to use a 
-    /// secondary address, you can use the create a packed address for you. The packed address 
-    /// consists of two bytes of information: a high byte (secondary address) and a low byte 
-    /// (primary address). You can express this packed address in hexadecimal, where the SAD 
-    /// is a value from 60 hex (96 decimal) to 7E hex (126 decimal) and the PAD is a value from 
+    /// If you are using an IEEE 488.2 function, such as Send or Receive, and you need to use a
+    /// secondary address, you can use the create a packed address for you. The packed address
+    /// consists of two bytes of information: a high byte (secondary address) and a low byte
+    /// (primary address). You can express this packed address in hexadecimal, where the SAD
+    /// is a value from 60 hex (96 decimal) to 7E hex (126 decimal) and the PAD is a value from
     /// 0 hex (0 decimal) to 1E hex (30 decimal).
     ///
     /// GPIB_CMD_SAD

@@ -75,11 +75,11 @@ public class IdentityParser : IEquatable<IdentityParser>
 
     /// <summary>   Parse firmware. </summary>
     /// <remarks>   2023-02-11. <para>
-    /// 
+    ///
     /// The firmware element often has additional manufacturer specific information that
     /// is capture in the <see cref="FirmwareDetails"/> dictionary. Classes overriding this
-    /// basic class are expected to had key value pairs to this dictionary with keys 
-    /// that are exposed using constant members of the custom identity subclass.  
+    /// basic class are expected to had key value pairs to this dictionary with keys
+    /// that are exposed using constant members of the custom identity subclass.
     /// </para></remarks>
     public virtual void ParseFirmware()
     {

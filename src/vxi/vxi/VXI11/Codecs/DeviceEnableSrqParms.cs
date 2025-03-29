@@ -3,15 +3,15 @@ namespace cc.isr.VXI11.Codecs;
 /// The <see cref="DeviceEnableSrqParms "/> class defines the request XDR
 /// codec for the <see cref="Vxi11Message.DeviceEnableSrqProcedure"/> RPC message.
 /// </summary>
-/// <remarks> 
+/// <remarks>
 /// The XDR encoding and decoding allows for integers to be passed between hosts, even when those hosts
 /// have different integer representations. <para>
-/// 
+///
 /// All integers defined by the VXI-11 specification are passed over the
 /// network as 32-bit integers, either signed or unsigned as defined. </para><para>
-/// 
+///
 /// Renamed from <c>Device_EnableSrqParms </c>. </para><para>
-/// 
+///
 /// VXI-11 Specifications: </para>
 /// <code>
 /// struct Device_EnableSrqParms {
@@ -59,18 +59,18 @@ public class DeviceEnableSrqParms : IXdrCodec
     public bool Enable { get; set; }
 
     /// <summary>   Gets or sets the handle. Host specific data for handling the service request. </summary>
-    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParams.GetHandle()"/> 
+    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParams.GetHandle()"/>
     /// when a service request occurs. <para>
-    /// 
+    ///
     /// The network instrument client should send in the handle parameter a unique link identifier. This will
-    /// allow the network instrument client to identify the link associated with subsequent 
+    /// allow the network instrument client to identify the link associated with subsequent
     /// <see cref="Vxi11Message.DeviceInterruptSrqProcedure"/> RPCs. </para>
     /// </remarks>
     /// <value> The handle. </value>
     private byte[] _handle;
 
     /// <summary>   Gets the handle. </summary>
-    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParams.GetHandle()"/> 
+    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParams.GetHandle()"/>
     /// when a service request occurs. </remarks>
     /// <returns>   An array of byte. </returns>
     public byte[] GetHandle()
@@ -79,7 +79,7 @@ public class DeviceEnableSrqParms : IXdrCodec
     }
 
     /// <summary>   Sets a handle. </summary>
-    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParams.GetHandle()"/> 
+    /// <remarks> The handle is passed back to the client with <see cref="DeviceSrqParams.GetHandle()"/>
     /// when a service request occurs. </remarks>
     /// <param name="handle">   The handle. </param>
     public void SetHandle( byte[] handle )

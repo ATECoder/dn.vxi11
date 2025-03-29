@@ -8,12 +8,12 @@ namespace cc.isr.VXI11.Codecs;
 /// <remarks>
 /// The XDR encoding and decoding allows for integers to be passed between hosts, even when those
 /// hosts have different integer representations. <para>
-/// 
+///
 /// All integers defined by the VXI-11 specification are passed over the network as 32-bit
 /// integers, either signed or unsigned as defined. </para><para>
-/// 
+///
 /// Renamed from <c>Device_WriteResp</c>. </para> <para>
-/// 
+///
 /// VXI-11 Specifications: </para>
 /// <code>
 /// typedef long Device_ErrorCode;
@@ -22,7 +22,7 @@ namespace cc.isr.VXI11.Codecs;
 ///    unsigned long size; /* Number of bytes written */
 /// };
 /// </code>
-/// 
+///
 /// DeviceFlagsCodec and DeviceErrorCodeCodec are represented as integers, which simplifies the code
 /// quite a bit and matches the VXI-11 specifications. <see cref="DeviceLink"/> codec is kept
 /// even though it also is defined as a <c>typedef long</c> because Device Link is an argument in

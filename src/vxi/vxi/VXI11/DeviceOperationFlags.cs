@@ -16,7 +16,7 @@ public enum DeviceOperationFlags
     None = 0,
 
     /// <summary>   An enum constant representing the wait lock option. <para>
-    /// 
+    ///
     /// <b>Wait Lock (bit 0):</b> If the flag is set to one (1), then the network instrument server suspends (blocks) the
     /// requested operation if it cannot be performed due to a lock held by another link for at least
     /// <c>lock_timeout</c> milliseconds. If the flag is reset to zero (0), then the network instrument server sets the
@@ -24,14 +24,14 @@ public enum DeviceOperationFlags
     /// </summary>
     WaitLock = 1,
 
-    /// <summary>   An enum constant representing the end indicator option. 
+    /// <summary>   An enum constant representing the end indicator option.
     /// <b>EOI Enabled (bit 3)</b> If the flag is set to one (1) then the last byte in the buffer is sent with an END indicator.
     /// This flag is only valid for <see cref="Vxi11Message.DeviceWriteProcedure"/>. </summary>
     EndIndicator = 8,
 
-    /// <summary>   An enum constant representing the termination character set option. 
+    /// <summary>   An enum constant representing the termination character set option.
     /// <b>Term Char Set ( bit 7):</b> This flag is set to one (1) if a termination character is specified on a read.
-    /// The actual termination character itself is passed in the <see cref="DeviceReadParms.TermChar"/> parameter. 
+    /// The actual termination character itself is passed in the <see cref="DeviceReadParms.TermChar"/> parameter.
     /// This flag is only valid for <see cref="Vxi11Message.DeviceReadProcedure"/>.
     /// </summary>
     TerminationCharacterSet = 80

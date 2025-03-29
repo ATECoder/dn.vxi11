@@ -31,7 +31,7 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
     }
 
     /// <summary>   Gets or sets a value indicating whether the link created. </summary>
-    /// <remarks> This is used by the server device to enumerate all the clients which 
+    /// <remarks> This is used by the server device to enumerate all the clients which
     /// are awaiting a reply to their create link query. </remarks>
     /// <value> True if link created, false if not. </value>
     public bool LinkCreated { get; set; }
@@ -57,7 +57,7 @@ public class ServerClientInfo : IEquatable<ServerClientInfo>
     /// lock to be released. If the device is locked by another link and the <see cref="LockTimeout"/>
     /// is non-zero, the network instrument server allows at least <see cref="LockTimeout"/>
     /// milliseconds for a lock to be released. <para>
-    /// 
+    ///
     /// This value is defined as <see cref="int"/> type in spite of the specifications' call for
     /// using an unsigned integer because the timeout value is unlikely to exceed the maximum integer
     /// value.

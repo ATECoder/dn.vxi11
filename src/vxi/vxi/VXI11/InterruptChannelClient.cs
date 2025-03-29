@@ -9,18 +9,18 @@ namespace cc.isr.VXI11;
 /// stubs which, when called, in turn call the appropriate remote method (procedure).
 /// </summary>
 /// <remarks> <para>
-/// 
+///
 /// The <c>create_intr_chan</c> RPC is used to identify the host or port that can service the interrupt. The
 /// <c>device_enable_srq</c> RPC is used to enable or disable an interrupt. The <c>destroy_intr_chan</c> RPC is used to
 /// close the interrupt channel. </para><para>
-/// 
+///
 /// The <c>device_enable_srq</c> RPC contains a handle parameter. The same data contained in handle is passed
 /// back in the handle parameter of the <c>device_intr_srq</c> RPC. Since the same data is passed back, the
 /// network instrument client can identify the link associated with the <c>device_intr_srq</c>. </para><para>
-/// 
+///
 /// The network instrument protocol recognizes one type of interrupt, service request. Note that the return
 /// type to the interrupt RPC is void, denoting a one-way RPC. </para><para>
-/// 
+///
 /// A network instrument host uses the following RPCL definition for interrupt messages.
 /// <code>
 /// struct Device_SrqParms
@@ -36,7 +36,7 @@ namespace cc.isr.VXI11;
 /// </code>
 /// The program number <c>0x0607B1</c> is the registered program number for the network instrument protocol's
 /// interrupt channel. </para> <para>
-/// 
+///
 /// Renamed from <c>vxi11_DEVICE_INTR_Client</c> </para>.
 /// </remarks>
 public class InterruptChannelClient : OncRpcClientStubBase
@@ -65,8 +65,8 @@ public class InterruptChannelClient : OncRpcClientStubBase
     { }
 
     /// <summary>
-    /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptProgram"/> 
-    /// remote program can be accessed. 
+    /// Constructs a <see cref="InterruptChannelClient"/> client stub proxy object from which the <see cref="Vxi11ProgramConstants.InterruptProgram"/>
+    /// remote program can be accessed.
     /// </summary>
     /// <exception cref="DeviceException">  Thrown when an VXI-11 error condition occurs. </exception>
     /// <param name="host">     The Internet address of host where to contact the remote program. </param>
@@ -106,7 +106,7 @@ public class InterruptChannelClient : OncRpcClientStubBase
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>device_intr_srq_1</c> </para>.
     /// </remarks>
     /// <param name="handle">   The handle as it was received from the Core device. </param>
@@ -126,17 +126,17 @@ public class InterruptChannelClient : OncRpcClientStubBase
     /// necessary to avoid deadlock situations in a single-threaded environment where if a response
     /// were expected to an interrupt both the network instrument client and network instrument
     /// server could be waiting for a response from the other, with neither proceeding. <para>
-    /// 
+    ///
     /// The network instrument server may issue interrupts in the middle of an active call. In
     /// general, this implementation gives more timely responses, and can be easier than delaying the
     /// interrupt until an in-progress action has finished. </para> <para>
-    /// 
+    ///
     /// Network instrument clients can implement interrupts by using either a separate interrupt process, threads,
     /// or by emulating threads using a signal handling routine that is invoked on incoming messages to the
     /// interrupt port.
     /// </para>
     /// <para>
-    /// 
+    ///
     /// Renamed from <c>device_intr_srq_1</c> </para>.
     /// </remarks>
     /// <param name="request">  The request of type <see cref="Codecs.DeviceSrqParams"/> to send to

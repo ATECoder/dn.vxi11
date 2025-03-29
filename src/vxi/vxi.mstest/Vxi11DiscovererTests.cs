@@ -302,15 +302,15 @@ public class Vxi11DiscovererTests
     ///   2023-02-04 19:23:15.264,Portmap service started; checked 32.5 ms.
     ///   2023-02-04 19:23:15.265,OncRpcEmbeddedPortmapServiceStub started in 244.9 ms
     ///   2023-02-04 19:23:15.269,pinging Portmap service:
-    ///   
+    ///
     ///   2023-02-04 19:23:15.270,Pinging 192.168.0.144
     ///   2023-02-04 19:23:15.273,192.168.0.144 portmap pinged in 2.4 ms.
     ///   2023-02-04 19:23:15.315,192.168.0.144: KEITHLEY INSTRUMENTS, MODEL DMM7510,04051720,1.7.7b
-    ///   
+    ///
     ///   2023-02-04 19:23:15.315,Pinging 192.168.0.152
     ///   2023-02-04 19:23:15.316,192.168.0.152 portmap pinged in 0.5 ms.
     ///   2023-02-04 19:23:15.326,192.168.0.152: KEITHLEY INSTRUMENTS, MODEL 2450,01419966,1.6.4c
-    ///   
+    ///
     ///   2023-02-04 19:23:15.327,Pinging 192.168.0.154
     ///   2023-02-04 19:23:15.327,192.168.0.154 portmap pinged in 0.5 ms.
     ///   2023-02-04 19:23:15.356,192.168.0.154: KEITHLEY INSTRUMENTS, MODEL DAQ6510,04388991,0.0.03i
@@ -343,7 +343,7 @@ public class Vxi11DiscovererTests
     #region " list devices "
 
     /// <summary>    (Unit Test Method) device explorer should list the endpoints of all pinged device addresses. </summary>
-    /// <remarks>    
+    /// <remarks>
     /// <code>
     /// 2450 (152) 6510 (154) and 7510 (144) are on.
     /// Standard Output: 
@@ -356,15 +356,15 @@ public class Vxi11DiscovererTests
     ///   2023-02-04 19:20:04.278, Portmap service started; checked 33.0 ms.
     ///   2023-02-04 19:20:04.278,OncRpcEmbeddedPortmapServiceStub started in 260.6 ms
     ///   2023-02-04 19:20:04.292,DeviceExplorer.ListCoreDevicesEndpoints found 3 Core VXI-11 device( s) in 9.7 ms:
-    ///   
+    ///
     ///   2023-02-04 19:20:04.292,Pinging 192.168.0.144:1024
     ///   2023-02-04 19:20:04.294,192.168.0.144:1024 port pinged in 1.6 ms
     ///   2023-02-04 19:20:04.328,192.168.0.144:1024: KEITHLEY INSTRUMENTS, MODEL DMM7510,04051720,1.7.7b
-    ///   
+    ///
     ///   2023-02-04 19:20:04.328,Pinging 192.168.0.152:1024
     ///   2023-02-04 19:20:04.329,192.168.0.152:1024 port pinged in 0.8 ms
     ///   2023-02-04 19:20:04.339,192.168.0.152:1024: KEITHLEY INSTRUMENTS, MODEL 2450,01419966,1.6.4c
-    ///   
+    ///
     ///   2023-02-04 19:20:04.339,Pinging 192.168.0.154:1024
     ///   2023-02-04 19:20:04.340,192.168.0.154:1024 port pinged in 0.6 ms
     ///   2023-02-04 19:20:04.368,192.168.0.154:1024: KEITHLEY INSTRUMENTS, MODEL DAQ6510,04388991,0.0.03i
@@ -429,7 +429,7 @@ public class Vxi11DiscovererTests
     }
 
     /// <summary>   (Unit Test Method) device explorer should list pinged registered servers. </summary>
-    /// <remarks> 
+    /// <remarks>
     /// Note that the 2450 is not registered.
     /// <code>
     /// 2459=0 (152) 6510 (154) and 7510 (144) are on.
@@ -443,13 +443,13 @@ public class Vxi11DiscovererTests
     ///   2023-02-04 19:21:59.264, Portmap service started; checked 32.1 ms.
     ///   2023-02-04 19:21:59.265,OncRpcEmbeddedPortmapServiceStub started in 259.1 ms
     ///   2023-02-04 19:21:59.281,DeviceExplorer.EnumerateRegisteredServers(addresses ) found 4 VXI-11 registered servers( s) in 12.1 ms
-    ///   
+    ///
     ///   2023-02-04 19:21:59.282,Pinging 192.168.0.144:111
     ///   2023-02-04 19:21:59.282,192.168.0.144:111 port pinged in 0.7 ms
     ///   2023-02-04 19:21:59.282,Pinging 192.168.0.144:1024
     ///   2023-02-04 19:21:59.283,192.168.0.144:1024 port pinged in 0.6 ms
     ///   2023-02-04 19:21:59.300,192.168.0.144:1024: KEITHLEY INSTRUMENTS, MODEL DMM7510,04051720,1.7.7b
-    ///   
+    ///
     ///   2023-02-04 19:21:59.300,Pinging 192.168.0.154:111
     ///   2023-02-04 19:21:59.301,192.168.0.154:111 port pinged in 0.7 ms
     ///   2023-02-04 19:21:59.301,Pinging 192.168.0.154:1024
