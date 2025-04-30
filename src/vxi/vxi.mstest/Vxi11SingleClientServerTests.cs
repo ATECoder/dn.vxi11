@@ -29,13 +29,9 @@ public class Vxi11SingleClientServerTests
     [ClassInitialize()]
     public static void InitializeTestClass( TestContext testContext )
     {
+        string methodFullName = $"{testContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}";
         try
         {
-            string methodFullName = $"{testContext.FullyQualifiedTestClassName}.{System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType?.Name}";
-            if ( Logger is null )
-                Console.WriteLine( methodFullName );
-            else
-                Logger?.LogInformationMultiLineMessage( methodFullName );
 
             _server = new();
 
@@ -64,7 +60,7 @@ public class Vxi11SingleClientServerTests
         catch ( Exception ex )
         {
             if ( Logger is null )
-                Console.WriteLine( $"Failed initializing the test class: {ex}" );
+                Console.WriteLine( $"{methodFullName} failed initializing:\r\n\t{ex}" );
             else
                 Logger.LogExceptionMultiLineMessage( "Failed initializing the test class:", ex );
 
