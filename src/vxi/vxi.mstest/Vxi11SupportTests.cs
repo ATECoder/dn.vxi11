@@ -289,7 +289,7 @@ public class Vxi11SupportTests
             maxValue = value > maxValue ? value : maxValue;
             AssertIntShouldCastToDeviceErrorCodeValue( value );
         }
-        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceErrorCodeValue( maxValue + 1 ); } );
+        _ = Assert.ThrowsExactly<ArgumentException>( () => { AssertIntShouldCastToDeviceErrorCodeValue( maxValue + 1 ); } );
     }
 
     /// <summary>   Assert <see cref="int"/> should cast to <see cref="TransportProtocol"/>. </summary>
@@ -312,7 +312,7 @@ public class Vxi11SupportTests
             maxValue = value > maxValue ? value : maxValue;
             AssertIntShouldCastToDeviceAddressFamily( value );
         }
-        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceAddressFamily( maxValue + 1 ); } );
+        _ = Assert.ThrowsExactly<ArgumentException>( () => { AssertIntShouldCastToDeviceAddressFamily( maxValue + 1 ); } );
     }
 
     /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceOperationFlags"/>. </summary>
@@ -336,7 +336,7 @@ public class Vxi11SupportTests
             orValue |= value;
             AssertIntShouldCastToDeviceOperationFlags( orValue );
         }
-        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceOperationFlags( orValue + 1 ); } );
+        _ = Assert.ThrowsExactly<ArgumentException>( () => { AssertIntShouldCastToDeviceOperationFlags( orValue + 1 ); } );
     }
 
     /// <summary>   Assert <see cref="int"/> should cast to <see cref="DeviceReadReasons"/>. </summary>
@@ -360,7 +360,7 @@ public class Vxi11SupportTests
             orValue |= value;
             AssertIntShouldCastToDeviceReadReasons( orValue );
         }
-        _ = Assert.ThrowsException<ArgumentException>( () => { AssertIntShouldCastToDeviceReadReasons( orValue + 1 ); } );
+        _ = Assert.ThrowsExactly<ArgumentException>( () => { AssertIntShouldCastToDeviceReadReasons( orValue + 1 ); } );
     }
 
     #endregion
