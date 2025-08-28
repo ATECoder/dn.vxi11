@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <OutputType>Library</OutputType>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
 
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -15,7 +14,6 @@
     <ApplicationTitle>cc.isr.VXI11</ApplicationTitle>
     <ApplicationId>cc.isr.vxi11</ApplicationId>
 
-    <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- Coding -->
