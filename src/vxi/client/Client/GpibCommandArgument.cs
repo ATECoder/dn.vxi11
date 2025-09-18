@@ -1,6 +1,6 @@
 namespace cc.isr.VXI11.Client;
 
-/// <summary>   Values that represent gpib command arguments. </summary>
+/// <summary>   Values that represent GPIB command arguments. </summary>
 /// <remarks>
 /// Quite often, a SAD is expressed as the secondary address plus 96, so (from the previous
 /// example) SAD 4 would be equivalent to SAD 100 (4 plus 96). Why the difference in notation?

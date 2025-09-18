@@ -1,10 +1,10 @@
 namespace cc.isr.VXI11.Client;
 
-/// <summary>   A VXI 11 gpib interface client. </summary>
+/// <summary>   A VXI 11 GPIB interface client. </summary>
 /// <remarks>   2023-06-02. </remarks>
 public class Vxi11GpibInterfaceClient : Vxi11InterfaceClient
 {
-    #region " gpib interface commands "
+    #region " GPIB interface commands "
 
     /// <summary>   Creates a setup. </summary>
     /// <remarks>   2023-01-24. </remarks>

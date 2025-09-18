@@ -7,14 +7,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- Assembly Info -->
     <RootNamespace>cc.isr.VXI11</RootNamespace>
     <AssemblyName>cc.isr.VXI11.Client</AssemblyName>
     <ApplicationTitle>cc.isr.VXI11.Client</ApplicationTitle>
     <ApplicationId>cc.isr.vxi11.client</ApplicationId>
-
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- Coding -->
     <OptionExplicit>On</OptionExplicit>

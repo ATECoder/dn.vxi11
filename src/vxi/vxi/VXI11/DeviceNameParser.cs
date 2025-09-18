@@ -25,7 +25,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <summary>   (Immutable) the generic interface family. </summary>
     public const string GenericInterfaceFamily = "INST";
 
-    /// <summary>   (Immutable) the gpib interface family. </summary>
+    /// <summary>   (Immutable) the GPIB interface family. </summary>
     public const string GpibInterfaceFamily = "gpib";
 
     /// <summary>   (Immutable) the USB interface family. </summary>
@@ -43,10 +43,10 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <summary>   (Immutable) the maximum interface number. </summary>
     public const int MaximumInterfaceNumber = 127;
 
-    /// <summary>   (Immutable) the minimum gpib address. </summary>
+    /// <summary>   (Immutable) the minimum GPIB address. </summary>
     public const int MinimumGpibAddress = 1;
 
-    /// <summary>   (Immutable) the maximum gpib address. </summary>
+    /// <summary>   (Immutable) the maximum GPIB address. </summary>
     public const int MaximumGpibAddress = 31;
 
     private readonly string[] _interfaceFamilies;
@@ -82,11 +82,11 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <value> The board number. </value>
     public int? BoardNumber { get; set; }
 
-    /// <summary>   Gets or sets the primary address of the <see cref="GpibInterfaceFamily"/> gpib interface. </summary>
+    /// <summary>   Gets or sets the primary address of the <see cref="GpibInterfaceFamily"/> GPIB interface. </summary>
     /// <value> The primary address. </value>
     public int? PrimaryAddress { get; set; }
 
-    /// <summary>   Gets or sets the secondary address of the <see cref="GpibInterfaceFamily"/> gpib interface. </summary>
+    /// <summary>   Gets or sets the secondary address of the <see cref="GpibInterfaceFamily"/> GPIB interface. </summary>
     /// <value> The secondary address. </value>
     public int? SecondaryAddress { get; set; }
 
@@ -376,7 +376,7 @@ public class DeviceNameParser : IEquatable<DeviceNameParser>
     /// <summary>   Check if we have an equal GPUB device name. </summary>
     /// <remarks>   2023-02-20. </remarks>
     /// <param name="other">    An object to compare with this object. </param>
-    /// <returns>   True if equals gpib device name, false if not. </returns>
+    /// <returns>   True if equals GPIB device name, false if not. </returns>
     private bool EqualsGpibDeviceName( DeviceNameParser other )
     {
         return string.Equals( this.InterfaceFamily, other.InterfaceFamily, StringComparison.OrdinalIgnoreCase )

@@ -7,13 +7,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
     <!-- Assembly Info -->
     <RootNamespace>cc.isr.VXI11</RootNamespace>
     <AssemblyName>cc.isr.VXI11.Server</AssemblyName>
     <ApplicationTitle>cc.isr.VXI11.Server</ApplicationTitle>
     <ApplicationId>cc.isr.vxi11.server</ApplicationId>
-
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- Coding -->
     <OptionExplicit>On</OptionExplicit>
@@ -39,6 +39,16 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 
   </PropertyGroup>
+
+  <!-- Assembly attributes -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.CLSCompliantAttribute">
+      <_Parameter1>true</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.InteropServices.ComVisibleAttribute">
+      <_Parameter1>false</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\vxi\cc.isr.VXI11.csproj" />
