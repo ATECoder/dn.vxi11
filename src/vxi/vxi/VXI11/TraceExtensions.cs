@@ -9,11 +9,11 @@ public static class TraceExtensions
 {
     /// <summary>   (Immutable) the multi line member message format. </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage( "Naming", "CA1707:Identifiers should not contain underscores", Justification = "<Pending>" )]
-    public const string MULTI_LINE_MEMBER_MESSAGE_FORMAT = "{message}\n  at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
+    public const string MULTI_LINE_MEMBER_MESSAGE_FORMAT = "{message}\n  at '{sourceFilePath}' {memberName} line {lineNumber})";
 
     /// <summary>   (Immutable) the single line member message format. </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage( "Naming", "CA1707:Identifiers should not contain underscores", Justification = "<Pending>" )]
-    public const string SINGLE_LINE_MEMBER_MESSAGE_FORMAT = "{message} at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
+    public const string SINGLE_LINE_MEMBER_MESSAGE_FORMAT = "{message} at '{sourceFilePath}' {memberName} line {lineNumber})";
 
     /// <summary>   Gets or sets the member message format. </summary>
     /// <value> The member message format. </value>
@@ -21,11 +21,11 @@ public static class TraceExtensions
 
     /// <summary>   (Immutable) the multi line member exception message format. </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage( "Naming", "CA1707:Identifiers should not contain underscores", Justification = "<Pending>" )]
-    public const string MULTI_LINE_MEMBER_EXCEPTION_MESSAGE_FORMAT = "{message}\n  {ex}\n  at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
+    public const string MULTI_LINE_MEMBER_EXCEPTION_MESSAGE_FORMAT = "{message}\n  {ex}\n  at '{sourceFilePath}' {memberName} line {lineNumber})";
 
     /// <summary>   (Immutable) the single line member exception message format. </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage( "Naming", "CA1707:Identifiers should not contain underscores", Justification = "<Pending>" )]
-    public const string SINGLE_LINE_MEMBER_EXCEPTION_MESSAGE_FORMAT = "{message} {ex} at '{sourceFilePath}' {memberName} line {sourceLineNumber})";
+    public const string SINGLE_LINE_MEMBER_EXCEPTION_MESSAGE_FORMAT = "{message} {ex} at '{sourceFilePath}' {memberName} line {lineNumber})";
 
     /// <summary>   Gets or sets the member exception message format. </summary>
     /// <value> The member exception message format. </value>
@@ -38,13 +38,13 @@ public static class TraceExtensions
     /// <param name="message">          The message. </param>
     /// <param name="memberName">       (Optional) Name of the member. </param>
     /// <param name="sourceFilePath">   (Optional) full path name of the source file. </param>
-    /// <param name="sourceLineNumber"> (Optional) Source line number. </param>
+    /// <param name="lineNumber"> (Optional) Source line number. </param>
     public static void TraceMemberInfo( string message,
                                         [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
                                         [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
-                                        [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0 )
+                                        [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0 )
     {
-        Trace.TraceInformation( MemberMessageFormat, message, sourceFilePath, memberName, sourceLineNumber );
+        Trace.TraceInformation( MemberMessageFormat, message, sourceFilePath, memberName, lineNumber );
     }
 
     /// <summary>
@@ -54,13 +54,13 @@ public static class TraceExtensions
     /// <param name="message">          The message. </param>
     /// <param name="memberName">       (Optional) Name of the member. </param>
     /// <param name="sourceFilePath">   (Optional) full path name of the source file. </param>
-    /// <param name="sourceLineNumber"> (Optional) Source line number. </param>
+    /// <param name="lineNumber"> (Optional) Source line number. </param>
     public static void TraceMemberWarning( string message,
                                            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
                                            [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
-                                           [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0 )
+                                           [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0 )
     {
-        Trace.TraceWarning( MemberMessageFormat, message, sourceFilePath, memberName, sourceLineNumber );
+        Trace.TraceWarning( MemberMessageFormat, message, sourceFilePath, memberName, lineNumber );
     }
 
     /// <summary>   Console write exception. </summary>
@@ -69,13 +69,13 @@ public static class TraceExtensions
     /// <param name="ex">               The exception. </param>
     /// <param name="memberName">       (Optional) Name of the member. </param>
     /// <param name="sourceFilePath">   (Optional) full path name of the source file. </param>
-    /// <param name="sourceLineNumber"> (Optional) Source line number. </param>
+    /// <param name="lineNumber"> (Optional) Source line number. </param>
     public static void TraceMemberError( string message, System.Exception ex,
                                          [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
                                          [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
-                                         [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0 )
+                                         [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0 )
     {
-            Trace.TraceError( MemberExceptionMessageFormat, message, ex, sourceFilePath, memberName, sourceLineNumber );
+            Trace.TraceError( MemberExceptionMessageFormat, message, ex, sourceFilePath, memberName, lineNumber );
     }
 
 }
